@@ -15,6 +15,7 @@ from django.conf import settings
 from core.utils import utils_modeles_documents, utils_fichiers
 import json
 from uuid import uuid4
+from django.urls import reverse as reverse_url
 from django.db.models import Q
 from copy import deepcopy
 
@@ -87,6 +88,7 @@ class Page(crud.Page):
         context['liste_categories'] = CHOIX_CATEGORIE_MODELE_DOCUMENT
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'categorie': self.Get_categorie()}), "icone": "fa fa-plus"},
+            {"label": "Importer/Exporter", "classe": "btn btn-default", "href": reverse_lazy("modeles_documents_import_export"), "icone": "fa fa-exchange"},
         ]
         return context
 
@@ -117,10 +119,19 @@ class Liste(Page, crud.Liste):
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['afficher_menu_brothers'] = True
+        # Sélection multiple par cases à cocher
+        context['active_checkbox'] = True
+        context['url_supprimer_plusieurs'] = reverse_url("modeles_documents_supprimer_plusieurs", kwargs={"categorie": self.Get_categorie(), "listepk": "xxx"})
+        url_export = reverse_url("modeles_documents_import_export")
+        context['boutons_coches'] = json.dumps([
+            {"id": "bouton_exporter_selection", "action": 'window.location.href = "%s?selection=" + get_coches().join("-");' % url_export,
+             "title": "Exporter les modèles sélectionnés dans un fichier NWD", "label": "<i class='fa fa-download margin-r-5'></i>Exporter"},
+        ])
         return context
 
     class datatable_class(MyDatatable):
         filtres = ["idmodele", "nom", 'defaut']
+        check = columns.CheckBoxSelectColumn(label="")
 
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         categorie = columns.TextColumn("Catégorie", sources="categorie", processor='Get_categorie')
@@ -129,7 +140,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idmodele", "nom", "categorie", "dimensions", 'defaut']
+            columns = ["check", "idmodele", "nom", "categorie", "dimensions", 'defaut']
             ordering = ["nom"]
 
         def Get_categorie(self, instance, **kwargs):
@@ -203,6 +214,23 @@ class Supprimer(Page, crud.Supprimer):
                     objet.defaut = True
                     objet.save()
         return reponse
+
+
+class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
+
+    def get_objets(self):
+        """ Limite la suppression aux modèles de la catégorie affichée et accessibles à l'utilisateur """
+        listepk = [int(id) for id in self.kwargs.get("listepk").split(";") if id.isdigit()]
+        return ModeleDocument.objects.filter(self.Get_condition_structure(), pk__in=listepk, categorie=self.Get_categorie())
+
+    def Apres_suppression(self, objets=[]):
+        # Si le modèle par défaut a été supprimé, on le réattribue à un autre modèle de la catégorie
+        categorie = self.Get_categorie()
+        if not ModeleDocument.objects.filter(categorie=categorie, defaut=True).exists():
+            objet = ModeleDocument.objects.filter(categorie=categorie).first()
+            if objet:
+                objet.defaut = True
+                objet.save()
 
 
 class Creer(Page, crud.Ajouter):

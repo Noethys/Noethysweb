@@ -1054,15 +1054,18 @@ class ObjetPDF():
                     organisateur = cache.get('organisateur')
                     if not organisateur:
                         organisateur = Organisateur.objects.filter(pk=1).first()
-                    self.src = organisateur.logo.url
+                    # Si l'organisateur n'a pas de logo, l'objet logo est simplement ignoré
+                    self.src = organisateur.logo.url if organisateur and organisateur.logo else ""
 
                 # Image standard
-                if "data:" in self.src:
+                src = getattr(self, "src", None) or ""
+                url = None
+                if "data:" in src:
                     # Si c'est une image au format base64
-                    url = self.src
-                else:
+                    url = src
+                elif src:
                     # Si c'est une URL vers image
-                    url = settings.MEDIA_ROOT + self.src.replace("media/", "")
+                    url = settings.MEDIA_ROOT + src.replace("media/", "")
 
                 # Si c'est une photo
                 if self.categorie == "photo":
@@ -1073,6 +1076,8 @@ class ObjetPDF():
 
                 # Chargement de l'image
                 try:
+                    if not url:
+                        raise ValueError("Aucune image à dessiner")
                     img = ImageReader(url)
                     self.canvas.translate(0, self.top * 2)
                     self.canvas.scale(1, -1)

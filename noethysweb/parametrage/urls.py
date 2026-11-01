@@ -27,7 +27,7 @@ from parametrage.views import organisateur, structures, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
     modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes, \
-    activites_evenements_categories, activites_import_export, api_particulier, activites_controle_ia, activites_tarifs_formule, activites_evenements_import
+    activites_evenements_categories, activites_import_export, api_particulier, activites_controle_ia, activites_tarifs_formule, activites_evenements_import, modeles_documents_import_export
 
 
 urlpatterns = [
@@ -445,8 +445,10 @@ urlpatterns = [
     path('parametrage/modeles_documents/ajouter/<str:nom>/<str:categorie>', modeles_documents.Ajouter.as_view(), name='modeles_documents_ajouter'),
     path('parametrage/modeles_documents/modifier/<str:categorie>/<int:pk>', modeles_documents.Modifier.as_view(), name='modeles_documents_modifier'),
     path('parametrage/modeles_documents/supprimer/<str:categorie>/<int:pk>', modeles_documents.Supprimer.as_view(), name='modeles_documents_supprimer'),
+    path('parametrage/modeles_documents/supprimer_plusieurs/<str:categorie>/<str:listepk>', modeles_documents.Supprimer_plusieurs.as_view(), name='modeles_documents_supprimer_plusieurs'),
     path('parametrage/modeles_documents/dupliquer/<str:categorie>/<int:pk>', modeles_documents.Dupliquer.as_view(), name='modeles_documents_dupliquer'),
     path('parametrage/modeles_documents/creer/<str:categorie>', modeles_documents.Creer.as_view(), name='modeles_documents_creer'),
+    path('parametrage/modeles_documents/import_export', modeles_documents_import_export.View.as_view(), name='modeles_documents_import_export'),
 
     # Modèles d'impressions
     path('parametrage/modeles_impressions/liste', modeles_impressions.Liste.as_view(), name='modeles_impressions_liste'),
@@ -706,6 +708,7 @@ urlpatterns = [
     path('parametrage/valider_calendrier_ouvertures', secure_ajax(activites_ouvertures.Valider_calendrier_ouvertures), name='ajax_valider_calendrier_ouvertures'),
     path('parametrage/get_fond_modele', secure_ajax(modeles_documents.Get_fond_modele), name='ajax_get_fond_modele'),
     path('parametrage/export_svg', secure_ajax(modeles_documents.Export_svg), name='ajax_export_svg'),
+    path('parametrage/modeles_documents/import_export/executer', secure_ajax(modeles_documents_import_export.Executer), name='ajax_modeles_documents_import_export_executer'),
     path('parametrage/questions/deplacer_lignes', secure_ajax(questionnaires.Deplacer.as_view()), name='ajax_deplacer_lignes_questionnaires'),
     path('parametrage/questionnaires_groupes/deplacer_lignes', secure_ajax(questionnaires_groupes.Deplacer.as_view()), name='ajax_deplacer_lignes_questionnaires_groupes'),
     path('parametrage/adresses_mail/envoyer_mail_test', secure_ajax(adresses_mail.Envoyer_mail_test), name='ajax_envoyer_mail_test'),

@@ -1,0 +1,85 @@
+{% extends "core/box_in_page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block contenu_page %}
+
+    {% embed 'core/box.html' %}
+        {% block box_theme %}card-outline card-lightblue{% endblock %}
+        {% block box_titre %}{{ box_titre }}{% endblock %}
+        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+        {% block box_contenu %}
+            {% crispy form %}
+        {% endblock %}
+    {% endembed %}
+
+    {# Lien de téléchargement du fichier d'export #}
+    <a id="download" download aria-hidden="true"></a>
+
+    <script>
+
+        // Générer l'export ou l'import
+        function executer() {
+            bootbox.dialog({
+                message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Opération en cours</b><br><br>Veuillez patienter...</p>",
+                closeButton: false
+            });
+            var formData = new FormData($("#form_parametres")[0]);
+            formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_modeles_documents_import_export_executer' %}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                datatype: "json",
+                success: function(data) {
+                    bootbox.hideAll();
+                    if (data.action === "EXPORTER") {
+                        $("#download").attr("href", data.url_fichier).attr("download", data.nom_fichier);
+                        document.getElementById("download").click();
+                        $.each(data.avertissements || [], function(index, message) {
+                            toastr.warning(message);
+                        });
+                    }
+                    if (data.action === "SELECTION_MODELES") {
+                        selectionner_modeles(JSON.parse(data.liste_modeles));
+                    }
+                    if (data.action === "IMPORTER") {
+                        $("#id_selection_modeles_importables").val("");
+                        toastr.success(data.nbre_modeles > 1 ? data.nbre_modeles + " modèles ont été importés avec succès" : "Le modèle a été importé avec succès");
+                    }
+                },
+                error: function(data) {
+                    bootbox.hideAll();
+                    $("#id_selection_modeles_importables").val("");
+                    toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue");
+                }
+            })
+        };
+
+        // Sélectionner les modèles à importer
+        function selectionner_modeles(liste_modeles) {
+            bootbox.prompt({
+                title: "Sélectionnez le ou les modèles à importer",
+                inputType: "checkbox",
+                inputOptions: liste_modeles,
+                value: liste_modeles.map(function(item) { return item.value; }),
+                callback: function (resultats) {
+                    if (resultats === null) {
+                        return;
+                    }
+                    if (resultats.length === 0) {
+                        toastr.error("Vous devez sélectionner au moins un modèle");
+                        return false;
+                    }
+                    $("#id_selection_modeles_importables").val(JSON.stringify(resultats));
+                    executer();
+                }
+            });
+        };
+    </script>
+
+{% endblock contenu_page %}

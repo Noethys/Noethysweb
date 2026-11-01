@@ -456,7 +456,7 @@
                             fabric.util.enlivenObjects(objets_modele_fond, function (objets) {
                                 objets.forEach(function (objet) {
                                     if(objet.categorie === "logo") {
-                                        objet.setSrc("{% if organisateur.logo %}{{ organisateur.logo.url }}{% endif %}");
+                                        charger_logo(objet);
                                     };
                                     group.addWithUpdate(objet);
                                     canvas.requestRenderAll();
@@ -467,6 +467,22 @@
                         }
                         draw_fond();
                         updatePanelProprietes();
+
+                        // Remplace l'image d'un objet logo par le logo de l'organisateur en conservant la hauteur définie dans le modèle
+                        function charger_logo(objet) {
+                            var url_logo = "{% if organisateur.logo %}{{ organisateur.logo.url }}{% endif %}";
+                            if (!url_logo) {
+                                return;
+                            };
+                            var hauteur = objet.height * objet.scaleY;
+                            objet.setSrc(url_logo, function(img) {
+                                if (img.height) {
+                                    img.scaleX = img.scaleY = hauteur / img.height;
+                                    img.setCoords();
+                                };
+                                canvas.requestRenderAll();
+                            });
+                        };
 
                         fabric.Object.prototype.toObject = (function (toObject) {
                             return function (propertiesToInclude) {
@@ -481,7 +497,7 @@
                         fabric.util.enlivenObjects(objets_json, function (objets) {
                             objets.forEach(function (objet) {
                                 if(objet.categorie === "logo") {
-                                    objet.setSrc("{% if organisateur.logo %}{{ organisateur.logo.url }}{% endif %}");
+                                    charger_logo(objet);
                                 };
                                 canvas.add(objet);
                             });
@@ -682,6 +698,10 @@
                         }
 
                         function ajouter_logo() {
+                            {% if not organisateur.logo %}
+                                toastr.warning("Aucun logo n'est défini pour l'organisateur. Vous pouvez l'ajouter dans Paramétrage > Organisateur.");
+                                return;
+                            {% endif %}
                             // /media/organisateur/logo.png
                             fabric.Image.fromURL("{% if organisateur.logo %}{{ organisateur.logo.url }}{% endif %}", function(objet) {
                                 objet.set({
