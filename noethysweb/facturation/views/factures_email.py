@@ -127,7 +127,8 @@ class Liste(Page, crud.Liste):
     model = Facture
 
     def get_queryset(self):
-        return Facture.objects.select_related('famille', 'lot', 'prefixe').filter(self.Get_filtres("Q"))
+        # distinct() : une famille avec plusieurs mandats actifs ne doit pas dupliquer ses factures
+        return Facture.objects.select_related('famille', 'lot', 'prefixe').filter(self.Get_filtres("Q")).distinct()
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -149,7 +150,7 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["fgenerique:famille", 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'etat', 'lot__nom', 'famille__email_factures']
+        filtres = ["fgenerique:famille", 'fprelevement_actif:famille__mandats__actif', 'idfacture', 'date_edition', 'prefixe', 'numero', 'date_debut', 'date_fin', 'total', 'solde', 'solde_actuel', 'etat', 'lot__nom', 'famille__email_factures']
 
         check = columns.CheckBoxSelectColumn(label="")
         famille = columns.TextColumn("Famille", sources=['famille__nom'])
