@@ -64,6 +64,20 @@
         function selectionner_modeles(liste_modeles) {
             bootbox.prompt({
                 title: "Sélectionnez le ou les modèles à importer",
+                // Liste défilante pour que les boutons restent visibles quand le fichier contient beaucoup de modèles
+                scrollable: true,
+                // Bouton Importer à gauche du bouton Annuler
+                swapButtonOrder: true,
+                buttons: {
+                    confirm: {
+                        label: "<i class='fa fa-check'></i> Importer",
+                        className: "btn-primary",
+                    },
+                    cancel: {
+                        label: "<i class='fa fa-ban'></i> Annuler",
+                        className: "btn-danger",
+                    },
+                },
                 inputType: "checkbox",
                 inputOptions: liste_modeles,
                 value: liste_modeles.map(function(item) { return item.value; }),
