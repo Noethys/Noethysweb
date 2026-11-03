@@ -1,0 +1,136 @@
+<div class="card card-outline card-primary tableau-activites-card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fa fa-table margin-r-5"></i>
+            Enfants / activités — {{ tableau_activites_date|date:"d/m/Y" }}
+        </h3>
+        <div class="card-tools">
+            <a href="{% url 'pointeuse_conso' %}" class="btn btn-tool" title="Ouvrir l'émargement">
+                <i class="fa fa-check-square-o"></i>
+            </a>
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fa fa-minus"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        {% if tableau_activites_activites %}
+            <div class="table-responsive tableau-activites-scroll">
+                <table class="table table-sm table-bordered table-hover mb-0 tableau-activites-table">
+                    <thead>
+                        <tr>
+                            <th class="tableau-activites-enfant">Enfant</th>
+                            {% for activite in tableau_activites_activites %}
+                                <th class="text-center tableau-activites-col" title="{{ activite.nom }}">
+                                    {{ activite.abrege|default:activite.nom }}
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ligne in tableau_activites_lignes %}
+                            <tr>
+                                <td class="tableau-activites-enfant">
+                                    <strong>{{ ligne.individu.nom }}</strong>
+                                    {{ ligne.individu.prenom|default:"" }}
+                                </td>
+                                {% for cellule in ligne.cellules %}
+                                    <td class="text-center tableau-activites-cell tableau-activites-{{ cellule.classe }}"
+                                        title="{{ cellule.activite.nom }} — {{ cellule.libelle }}">
+                                        <span>{{ cellule.symbole }}</span>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="99" class="text-muted text-center py-3">
+                                    Aucun enfant inscrit aux activités ouvertes aujourd'hui.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="px-2 py-1 small text-muted tableau-activites-legende">
+                <span><strong>✓</strong> présent</span>
+                <span><strong>•</strong> réservé / à pointer</span>
+                <span><strong>AJ</strong> absent justifié</span>
+                <span><strong>A</strong> absent</span>
+                <span><strong>○</strong> inscrit sans réservation</span>
+                <span><strong>—</strong> non inscrit</span>
+            </div>
+        {% else %}
+            <div class="text-muted text-center py-3">
+                Aucune activité ouverte aujourd'hui.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .tableau-activites-scroll {
+        max-height: 520px;
+        overflow: auto;
+    }
+
+    .tableau-activites-table {
+        font-size: 12px;
+        width: max-content;
+        min-width: 100%;
+    }
+
+    .tableau-activites-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: #f4f6f9;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .tableau-activites-enfant {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        min-width: 180px;
+        white-space: nowrap;
+        background: #fff;
+    }
+
+    thead .tableau-activites-enfant {
+        z-index: 4;
+        background: #f4f6f9;
+    }
+
+    .tableau-activites-col {
+        min-width: 80px;
+        max-width: 160px;
+    }
+
+    .tableau-activites-cell {
+        min-width: 80px;
+        font-weight: 700;
+        font-size: 14px;
+        vertical-align: middle !important;
+    }
+
+    .tableau-activites-present { background: #d4edda; color: #155724; }
+    .tableau-activites-reservation { background: #fff3cd; color: #856404; }
+    .tableau-activites-absentj { background: #d1ecf1; color: #0c5460; }
+    .tableau-activites-absenti { background: #f8d7da; color: #721c24; }
+    .tableau-activites-inscrit { background: #f8f9fa; color: #6c757d; }
+    .tableau-activites-hors-activite { background: #eceff1; color: #adb5bd; }
+    .tableau-activites-attente,
+    .tableau-activites-demande,
+    .tableau-activites-autre { background: #e2e3e5; color: #383d41; }
+    .tableau-activites-refus { background: #f5c6cb; color: #721c24; }
+
+    .tableau-activites-legende {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 14px;
+        border-top: 1px solid rgba(0, 0, 0, .125);
+    }
+</style>
