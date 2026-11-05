@@ -658,7 +658,7 @@ class Facturation():
                 dictCompte["{PES_LOT_MOIS}"] = piece_pes.lot.mois if piece_pes else ""
                 # dictCompte["{PES_LOT_OBJET}"] = dictPes[IDfacture]["pes_lot_objet"]
                 dictCompte["{PES_LOT_ID_BORDEREAU}"] = piece_pes.lot.id_bordereau if piece_pes else ""
-                # dictCompte["{PES_LOT_CODE_PRODUIT}"] = dictPes[IDfacture]["pes_lot_code_produit"]
+                dictCompte["{PES_LOT_CODE_PRODUIT}"] = (piece_pes.lot.modele.code_prodloc or "") if piece_pes else ""
 
                 # Datamatrix
                 dictCompte["{PES_DATAMATRIX}"] = ""
