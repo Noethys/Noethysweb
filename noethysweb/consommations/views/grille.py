@@ -724,6 +724,26 @@ def Save_grille(request=None, donnees={}):
             liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s)" % (label_conso, utils_dates.ConvertDateToFR(conso.date), conso.get_etat_display()), "date": conso.date, "activite_id": conso.activite_id,
                                      "utilisateur": request.user if request else None, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation"})
 
+    # MAJ de l'IDprestation des consommations masquées (non affichées dans la grille du portail)
+    if donnees.get("conso_masquees"):
+        conditions = Q(pk__in=[int(idconso) for idconso in donnees["conso_masquees"].keys()])
+        if request and getattr(request.user, "categorie", None) == "famille":
+            conditions &= Q(inscription__famille=request.user.famille)
+        liste_modifications = []
+        for conso in Consommation.objects.filter(conditions):
+            idprestation = donnees["conso_masquees"].get(str(conso.pk))
+            idprestation = dict_idprestation.get(idprestation, idprestation)
+            if idprestation and "-" in str(idprestation):
+                logger.debug("Prestation introuvable pour la consommation masquée ID%d : %s" % (conso.pk, idprestation))
+                continue
+            idprestation = int(idprestation) if idprestation else None
+            if conso.prestation_id != idprestation:
+                conso.prestation_id = idprestation
+                liste_modifications.append(conso)
+        if liste_modifications:
+            logger.debug("MAJ de la prestation des consommations masquées : " + str([conso.pk for conso in liste_modifications]))
+            Consommation.objects.bulk_update(liste_modifications, ["prestation"])
+
     # Notification d'enregistrement des consommations
     # if texte_notification and request:
     #     messages.add_message(request, messages.SUCCESS, "Consommations enregistrées : %s" % utils_texte.Convert_liste_to_texte_virgules(texte_notification))
@@ -737,8 +757,15 @@ def Save_grille(request=None, donnees={}):
         qs = Deduction.objects.filter(prestation_id__in=donnees["suppressions"]["prestations"])
         qs._raw_delete(qs.db)
 
-        # Pour supprimer les consommations fantômes
-        Consommation.objects.filter(prestation_id__in=donnees["suppressions"]["prestations"]).delete()
+        # Pour supprimer les consommations fantômes (désormais tracées dans l'historique)
+        liste_conso_fantomes = list(Consommation.objects.select_related("unite", "inscription", "evenement").filter(prestation_id__in=donnees["suppressions"]["prestations"]))
+        if liste_conso_fantomes:
+            logger.warning("Suppression de consommations fantômes : " + str([conso.pk for conso in liste_conso_fantomes]))
+            Consommation.objects.filter(pk__in=[conso.pk for conso in liste_conso_fantomes]).delete()
+            for conso in liste_conso_fantomes:
+                label_conso = conso.evenement.nom if conso.evenement else conso.unite.nom
+                liste_historique.append({"titre": "Suppression d'une consommation", "detail": "%s du %s (%s) [fantôme]" % (label_conso, utils_dates.ConvertDateToFR(conso.date), conso.get_etat_display()), "date": conso.date, "activite_id": conso.activite_id,
+                                         "utilisateur": request.user if request else None, "famille_id": conso.inscription.famille_id, "individu_id": conso.individu_id, "objet": "Consommation", "idobjet": conso.pk, "classe": "Consommation"})
 
         Ventilation.objects.filter(prestation_id__in=donnees["suppressions"]["prestations"]).delete()
         qs = Prestation.objects.filter(pk__in=donnees["suppressions"]["prestations"])
@@ -888,6 +915,7 @@ class Facturation():
     def Facturer(self):
         messages = []
         tout_recalculer = False
+        self.Ajouter_conso_masquees()
         for key_case, case_tableau in self.donnees["cases_touchees"].items():
             #logger.debug("Case étudiée : " + str(key_case))
 
@@ -1272,14 +1300,50 @@ class Facturation():
         for texte in self.messages_formules:
             messages.append(("erreur", texte))
 
+        # Les conso masquées n'ont pas de case dans la grille : leur IDprestation est renvoyé à part
+        modifications_conso_masquees = {}
+        for key_case, idconso in self.conso_masquees.items():
+            if key_case in self.dict_modif_cases:
+                modifications_conso_masquees[idconso] = self.dict_modif_cases.pop(key_case)
+
         donnees_retour = {
             "anciennes_prestations": self.liste_anciennes_prestations,
             "nouvelles_prestations": self.dict_nouvelles_prestations,
             "modifications_idprestation": self.dict_modif_cases,
+            "modifications_conso_masquees": modifications_conso_masquees,
             "messages": messages,
             "tout_recalculer": tout_recalculer,
         }
         return donnees_retour
+
+    def Ajouter_conso_masquees(self):
+        """ Portail : ajoute aux lignes recalculées les consommations existantes qui ne sont pas affichées dans la grille
+        (unité non visible sur le portail ou absente des unités de la période de réservation).
+        Sans cela, leur prestation est jugée inutilisée puis supprimée avec les consommations. """
+        self.conso_masquees = {}
+        if self.donnees.get("mode") != "portail" or not self.donnees.get("cases_touchees"):
+            return
+
+        lignes = {(str(case["date"]), int(case["inscription"])) for case in self.donnees["cases_touchees"].values()}
+        pk_connus = {str(conso["pk"]) for liste_conso in self.donnees["consommations"].values() for conso in liste_conso}
+        pk_connus.update(str(pk) for pk in self.donnees.get("dict_suppressions", {}).get("consommations", []))
+
+        conditions = Q(date__in={date for date, idinscription in lignes}) & Q(inscription_id__in={idinscription for date, idinscription in lignes})
+        for conso in Consommation.objects.select_related("inscription").filter(conditions):
+            if (str(conso.date), conso.inscription_id) not in lignes or str(conso.pk) in pk_connus:
+                continue
+            key_case = "masquee_%d" % conso.pk
+            self.conso_masquees[key_case] = conso.pk
+            self.donnees["consommations"].setdefault("%s_%s" % (conso.date, conso.inscription_id), []).append({
+                "pk": conso.pk, "key_case": key_case, "date": str(conso.date), "inscription": conso.inscription_id, "individu": conso.individu_id,
+                "activite": conso.activite_id, "famille": conso.inscription.famille_id, "unite": conso.unite_id, "groupe": conso.groupe_id,
+                "etat": conso.etat, "quantite": conso.quantite, "forfait": conso.forfait, "evenement": conso.evenement_id, "prestation": conso.prestation_id,
+                "categorie_tarif": conso.categorie_tarif_id, "options": conso.options, "extra": conso.extra,
+                "heure_debut": conso.heure_debut.strftime("%H:%M") if conso.heure_debut else None,
+                "heure_fin": conso.heure_fin.strftime("%H:%M") if conso.heure_fin else None,
+            })
+        if self.conso_masquees:
+            logger.debug("Consommations masquées prises en compte dans la facturation : " + str(list(self.conso_masquees.values())))
 
     def Get_prestations_autres_lignes(self, case_tableau=None):
         """ Renvoie les IDprestation utilisés par les consommations des autres inscriptions de l'individu à la même date """

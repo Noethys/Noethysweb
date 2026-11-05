@@ -107,6 +107,7 @@ var dict_places_prises = {};
 var dict_places_presents = {};
 var dict_places_temp = {};
 var cases_touchees = [];
+var dict_conso_masquees = {}; // IDconso -> IDprestation des conso non affichées (portail)
 var chrono;
 var touche_clavier = null;
 var aides_visuelles = false;
@@ -1750,6 +1751,7 @@ function validation_form(event) {
         "options": Get_options(),
         "suppressions": dict_suppressions,
         "prestations": dict_prestations,
+        "conso_masquees": dict_conso_masquees,
     });
     $('#donnees').val(donnees);
     return true;
@@ -1908,6 +1910,11 @@ function ajax_facturer(cases_touchees_temp) {
                 }
                 delete dict_prestations[idprestation];
             }
+
+            // Mémorise l'IDprestation des conso masquées (unités non affichées sur le portail)
+            if (data.modifications_conso_masquees) {
+                Object.assign(dict_conso_masquees, data.modifications_conso_masquees);
+            };
 
             // Met à jour les conso
             $.each(data.modifications_idprestation, function (key, idprestation) {

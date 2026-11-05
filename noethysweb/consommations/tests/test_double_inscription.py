@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-# Tests de non-régression : enregistrement de la grille du portail avec plusieurs inscriptions
-# du même individu sur la même activité (groupes différents).
+# Tests de non-régression : disparition de consommations à l'enregistrement de la grille du portail
+# - plusieurs inscriptions du même individu sur la même activité (groupes différents)
+# - unités masquées sur le portail (non visibles ou absentes des unités de la période)
 # Le simulateur reproduit le parcours JS du portail : chargement -> tout_recalculer() -> ajax_facturer() -> submit -> Save_grille()
 
 import datetime, json, uuid
@@ -14,11 +15,12 @@ D1, D2, D3 = "2026-11-04", "2026-11-12", "2026-11-18"
 
 class Grille:
     """ Simule la grille JS (dict_cases, dict_prestations, dict_suppressions) """
-    def __init__(self, famille, individu, activite, inscriptions):
+    def __init__(self, famille, individu, activite, inscriptions, unites_masquees=[]):
         self.famille, self.individu, self.activite, self.inscriptions = famille, individu, activite, inscriptions
+        self.conso_masquees = {}
         self.suppressions = {"consommations": [], "prestations": [], "memos": []}
         self.cases = {}
-        for conso in Consommation.objects.filter(inscription__in=inscriptions):
+        for conso in Consommation.objects.filter(inscription__in=inscriptions).exclude(unite__in=unites_masquees):
             key = "%s_%s_%s" % (conso.date, conso.inscription_id, conso.unite_id)
             self.cases.setdefault(key, []).append(self._dict_conso(conso.inscription, str(conso.date), conso.unite_id, conso.pk, conso.prestation_id))
         self.prestations = {}
@@ -75,13 +77,15 @@ class Grille:
             if "-" not in str(idprestation):
                 self.suppressions["prestations"].append(int(idprestation))
             self.prestations.pop(str(idprestation), None)
+        self.conso_masquees.update(retour.get("modifications_conso_masquees", {}))
         for key, idprestation in retour["modifications_idprestation"].items():
             if self.cases.get(key):
                 self.cases[key][0].update({"prestation": idprestation, "dirty": True})
 
         # Submit (validation_form + Save_grille)
         donnees = json.loads(json.dumps({"activite": self.activite.pk, "ancienne_activite": self.activite.pk, "consommations": self.cases,
-                                         "memos": {}, "suppressions": self.suppressions, "prestations": self.prestations}))
+                                         "memos": {}, "suppressions": self.suppressions, "prestations": self.prestations,
+                                         "conso_masquees": self.conso_masquees}))
         Save_grille(request=None, donnees=donnees)
 
 
@@ -113,8 +117,8 @@ class DoubleInscription(TestCase):
         TarifLigne.objects.create(activite=self.activite, tarif=tarif, code="montant_unique", num_ligne=0, montant_unique=montant)
         return tarif
 
-    def grille(self, inscriptions=None):
-        return Grille(self.famille, self.enfant, self.activite, inscriptions or [self.ins1, self.ins2])
+    def grille(self, inscriptions=None, unites_masquees=[]):
+        return Grille(self.famille, self.enfant, self.activite, inscriptions or [self.ins1, self.ins2], unites_masquees=unites_masquees)
 
     def etat(self):
         consos = sorted((str(c.date), c.inscription_id, c.unite.nom) for c in Consommation.objects.all())
@@ -247,3 +251,73 @@ class DoubleInscription(TestCase):
         self.assertEqual(prestations, [(D1, "Journée", 10.0), (D1, "Journée", 10.0)])
         self.assertEqual(Consommation.objects.values("prestation").distinct().count(), 2)
         self.assertEqual((orph, ml), (0, 0))
+
+    # ---------------- Unités masquées sur le portail ----------------
+
+    def test_11_unite_masquee_combinaison(self):
+        """ Journée + repas saisis par le personnel (tarif combiné), repas masqué sur le portail, la famille enregistre sans rien changer """
+        g = self.grille([self.ins1]); g.ajouter(self.ins1, D1, self.journee); g.ajouter(self.ins1, D1, self.repas); g.enregistrer()
+        avant = self.etat()
+        self.grille([self.ins1], unites_masquees=[self.repas]).enregistrer()
+        print("\nTEST 11", self.etat())
+        self.assertEqual(self.etat(), avant)
+        self.assertEqual(avant[1], [(D1, "Journée + repas", 13.0)])
+
+    def test_12_unite_masquee_sans_combinaison(self):
+        self.tarif_journee_repas.delete()
+        g = self.grille([self.ins1]); g.ajouter(self.ins1, D1, self.journee); g.ajouter(self.ins1, D1, self.repas); g.enregistrer()
+        avant = self.etat()
+        self.grille([self.ins1], unites_masquees=[self.repas]).enregistrer()
+        print("\nTEST 12", self.etat())
+        self.assertEqual(self.etat(), avant)
+        self.assertEqual(sorted(p[2] for p in avant[1]), [4.0, 10.0])
+
+    def test_13_unite_masquee_modifications(self):
+        """ La famille ajoute une journée à une autre date puis supprime la journée du D1 : le repas masqué reste, facturé seul """
+        g = self.grille([self.ins1]); g.ajouter(self.ins1, D1, self.journee); g.ajouter(self.ins1, D1, self.repas); g.enregistrer()
+        g = self.grille([self.ins1], unites_masquees=[self.repas]); g.ajouter(self.ins1, D2, self.journee); g.enregistrer()
+        g = self.grille([self.ins1], unites_masquees=[self.repas]); g.supprimer(self.ins1, D1, self.journee); g.enregistrer()
+        consos, prestations, orph, ml = self.etat()
+        print("\nTEST 13", consos, prestations, orph, ml)
+        self.assertEqual(consos, [(D1, self.ins1.pk, "Repas"), (D2, self.ins1.pk, "Journée")])
+        self.assertEqual(prestations, [(D1, "Repas", 4.0), (D2, "Journée", 10.0)])
+        self.assertEqual((orph, ml), (0, 0))
+
+    def test_14_unite_masquee_ajout_combinaison(self):
+        """ Repas masqué saisi seul par le personnel, la famille ajoute la journée : bascule sur le tarif combiné """
+        g = self.grille([self.ins1]); g.ajouter(self.ins1, D1, self.repas); g.enregistrer()
+        g = self.grille([self.ins1], unites_masquees=[self.repas]); g.ajouter(self.ins1, D1, self.journee); g.enregistrer()
+        consos, prestations, orph, ml = self.etat()
+        print("\nTEST 14", consos, prestations, orph, ml)
+        self.assertEqual(len(consos), 2)
+        self.assertEqual(prestations, [(D1, "Journée + repas", 13.0)])
+        self.assertEqual(Consommation.objects.values("prestation").distinct().count(), 1)
+        self.assertEqual((orph, ml), (0, 0))
+
+    def test_15_unite_masquee_et_double_inscription(self):
+        """ Groupe 1 : journée + repas masqué, groupe 2 : journée. La famille ajoute une journée ailleurs. """
+        g = self.grille(); g.ajouter(self.ins1, D1, self.journee); g.ajouter(self.ins1, D1, self.repas); g.ajouter(self.ins2, D1, self.journee); g.enregistrer()
+        avant = self.etat()
+        g = self.grille(unites_masquees=[self.repas]); g.ajouter(self.ins2, D2, self.journee); g.enregistrer()
+        consos, prestations, orph, ml = self.etat()
+        print("\nTEST 15", consos, prestations, orph, ml)
+        self.assertEqual(len(consos), 4)
+        self.assertEqual(sorted(p[2] for p in prestations), [10.0, 10.0, 13.0])
+        self.assertEqual((orph, ml), (0, 0))
+
+    def test_16_unite_masquee_prestation_facturee(self):
+        """ Prestation Journée + repas facturée : rien ne doit bouger """
+        g = self.grille([self.ins1]); g.ajouter(self.ins1, D1, self.journee); g.ajouter(self.ins1, D1, self.repas); g.enregistrer()
+        facture = Facture.objects.create(famille=self.famille, numero=1, date_edition=datetime.date(2026, 11, 30), date_debut=datetime.date(2026, 11, 1), date_fin=datetime.date(2026, 11, 30))
+        Prestation.objects.update(facture=facture)
+        avant = self.etat()
+        self.grille([self.ins1], unites_masquees=[self.repas]).enregistrer()
+        print("\nTEST 16", self.etat())
+        self.assertEqual(self.etat(), avant)
+
+    def test_17_mode_gestion_inchange(self):
+        """ Hors portail, aucune conso masquée n'est ajoutée """
+        from consommations.views.grille import Facturation
+        f = Facturation(donnees={"mode": "individu", "cases_touchees": {"x": {"date": D1, "inscription": self.ins1.pk}}, "consommations": {}})
+        f.Ajouter_conso_masquees()
+        self.assertEqual(f.conso_masquees, {})
