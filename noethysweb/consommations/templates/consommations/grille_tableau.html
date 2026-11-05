@@ -1,4 +1,4 @@
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags %}{% load l10n %}
 {% load static %}
 {% load embed %}
 
@@ -131,8 +131,8 @@
                     {% endif %}
                 </tr>
             </thead>
-            <tbody>
-                {% for date in data.liste_dates %}
+            <tbody>{# Optimisation : pas de localisation des nombres (identifiants) dans les cases #}{% localize off %}
+                {% for date in data.liste_dates %}{# Optimisation : dates formatées une seule fois par date #}{% with date_longue=date|date:"l j F Y"|title date_iso=date|date:'Y-m-d' %}
 
                     {# Vérifie si la date est modifiable #}
                     {% with date|is_ajout_allowed:data as ajout_allowed %}
@@ -141,7 +141,7 @@
                     {# Regroupement par date #}
                     {% if data.liste_inscriptions|length > 1 and data.mode|is_in_list:"individu;portail" %}
                         <tr>
-                            <th scope="row" class="date_regroupement">{{ date|date:"l j F Y"|title }}</th>
+                            <th scope="row" class="date_regroupement">{{ date_longue }}</th>
                                 {% for unite in data.liste_unites_visibles %}
                                     <td class="date_regroupement"></td>
                                 {% endfor %}
@@ -172,7 +172,7 @@
                                     {% if data.liste_inscriptions|length > 1 %}
                                         <div>{{ inscription.individu.prenom|default:inscription.individu.nom }}</div><div class='infos_inscription'>{% if inscription.infos %}{{ inscription.infos }}{% endif %}</div>
                                     {% else %}
-                                        <span class="texte_entete_ligne_large">{{ date|date:"l j F Y"|title }}</span>
+                                        <span class="texte_entete_ligne_large">{{ date_longue }}</span>
                                         <span class="texte_entete_ligne_court" hidden>{{ date|date:"D. d/m/y"|title }}</span>
                                     {% endif %}
                                 {% endif %}
@@ -191,7 +191,7 @@
 
                                     {# Création de la case #}
                                     {% if unite in data.liste_unites_visibles %}
-                                        <td {% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}tabindex="0" aria-label="{{ date|date:"l j F Y"|title }} - {{ unite.nom }}"{% endif %}
+                                        <td {% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}tabindex="0" aria-label="{{ date_longue }} - {{ unite.nom }}"{% endif %}
                                             class="case {{ unite.type|lower }} {% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %} {% if not ajout_allowed %}blocked{% endif %}"
                                             id="{{ key_case }}"
                                         ></td>
@@ -203,7 +203,7 @@
                                             key: "{{ key_case }}",
                                             individu: {{ inscription.individu_id }},
                                             famille: {{ inscription.famille_id }},
-                                            date: "{{ date|date:'Y-m-d' }}",
+                                            date: "{{ date_iso }}",
                                             unite: {{ unite.pk }},
                                             activite: {{ inscription.activite_id }},
                                             inscription: {{ inscription.pk }},
@@ -225,12 +225,12 @@
                             {# Création de la case mémo #}
                             {% if data.mode != "portail" %}
                                 {% creation_string_key date inscription.pk as key_memo %}
-                                <td class="memo" id="{{ key_memo }}" tabindex="0" aria-label="Mémo du {{ date|date:"l j F Y"|title }}"></td>
+                                <td class="memo" id="{{ key_memo }}" tabindex="0" aria-label="Mémo du {{ date_longue }}"></td>
                                 <script>
                                     var case_memo = new Case_memo({
                                         key: "{{ key_memo }}",
                                         inscription: {{ inscription.pk }},
-                                        date: "{{ date|date:'Y-m-d' }}",
+                                        date: "{{ date_iso }}",
                                     });
                                     dict_cases_memos["{{ key_memo }}"] = case_memo;
                                 </script>
@@ -247,8 +247,8 @@
                     {% endfor %}
                     {% endwith %}
                     {% endwith %}
-                {% endfor %}
-            </tbody>
+                {% endwith %}{% endfor %}
+            {% endlocalize %}</tbody>
         </table>
     </div>
 

@@ -10,7 +10,8 @@ from colorhash import ColorHash
 from django.http import JsonResponse
 from django.utils.safestring import mark_safe
 from django.template.context_processors import csrf
-from django.db.models import Q, Count
+from django.db.models import Q, Count, prefetch_related_objects
+from django.db import connection
 from django.core import serializers
 from django.conf import settings
 from django.templatetags.static import static
@@ -96,57 +97,92 @@ def Get_periode(data):
 
 
 def Maj_tarifs_fratries(activite=None, prestations=[], liste_IDprestation_existants=[]):
-    liste_tarifs_speciaux = Tarif.objects.filter(activite=activite, methode__contains="nbre_ind")
-    if liste_tarifs_speciaux:
-        prestations += list(Prestation.objects.filter(pk__in=liste_IDprestation_existants, facture__isnull=True))
+    """ Recalcule les prestations dont le tarif dépend du nombre d'individus de la fratrie.
+    Optimisation : les prestations des fratries et les inscriptions sont chargées en quelques requêtes groupées
+    au lieu d'une requête par famille et par date. Le résultat est identique à l'ancienne version. """
+    liste_id_tarif = list(Tarif.objects.filter(activite=activite, methode__contains="nbre_ind").values_list("pk", flat=True))
+    if not liste_id_tarif:
+        return
 
-        # Recherche les individus à modifier
-        liste_modifications = []
-        liste_id_tarif = [tarif.pk for tarif in liste_tarifs_speciaux]
-        for prestation in prestations:
-            if prestation.tarif_id in liste_id_tarif:
-                key = (prestation.famille_id, prestation.tarif_id, str(prestation.date))
-                if key not in liste_modifications:
-                    liste_modifications.append(key)
+    taille_lot = 500
 
-        # Recherche les fratries
-        dict_inscrits_famille = {}
+    # Recherche les clés (famille, tarif, date) à recalculer
+    liste_modifications = {}
+    for prestation in prestations:
+        if prestation.tarif_id in liste_id_tarif:
+            liste_modifications[(prestation.famille_id, prestation.tarif_id, str(prestation.date))] = None
+    liste_IDprestation_existants = list(liste_IDprestation_existants)
+    for index in range(0, len(liste_IDprestation_existants), taille_lot):
+        for famille_id, tarif_id, date in Prestation.objects.filter(pk__in=liste_IDprestation_existants[index:index + taille_lot], facture__isnull=True, tarif_id__in=liste_id_tarif).values_list("famille_id", "tarif_id", "date"):
+            liste_modifications[(famille_id, tarif_id, str(date))] = None
+    if not liste_modifications:
+        return
 
-        def Get_num_enfant_inscrit(idfamille=None, idindividu=None, date=None):
-            if famille_id not in dict_inscrits_famille:
-                dict_inscrits_famille[famille_id] = Inscription.objects.filter(famille_id=famille_id, activite=activite).order_by("individu__date_naiss")
-            liste_enfants = []
-            for inscription in dict_inscrits_famille.get(idfamille, []):
-                if str(inscription.date_debut) <= date and (not inscription.date_fin or str(inscription.date_fin) >= date):
-                    if inscription.individu_id not in liste_enfants:
-                        liste_enfants.append(inscription.individu_id)
-                    if inscription.individu_id == idindividu:
-                        return liste_enfants.index(inscription.individu_id) + 1
-            return 1
+    # Regroupement des clés selon le mode d'attribution
+    if settings.ATTRIBUTION_TARIF_FRATERIE_TARIF_IDENTIQUE:
+        # Prestations ayant le même IDtarif sur la même date
+        get_key_groupe = lambda famille_id, tarif_id, date: (famille_id, tarif_id, date)
+    else:
+        # Prestations de la même activité sur la même date
+        get_key_groupe = lambda famille_id, tarif_id, date: (famille_id, date)
+    groupes = {}
+    for famille_id, tarif_id, date in liste_modifications.keys():
+        groupes[get_key_groupe(famille_id, tarif_id, date)] = []
 
-        if liste_modifications:
-            for famille_id, tarif_id, date in liste_modifications:
-                if settings.ATTRIBUTION_TARIF_FRATERIE_TARIF_IDENTIQUE:
-                    # Recherche s'il existe des prestations ayant le même IDtarif sur la même date
-                    condition = Q(famille_id=famille_id, tarif_id=tarif_id, date=date)
-                else:
-                    # Recherche s'il existe des prestations de la même activité sur la même date
-                    condition = Q(famille_id=famille_id, activite=activite, date=date, tarif__methode__contains="nbre_ind")
-                liste_prestations_fratrie = Prestation.objects.select_related("tarif", "tarif_ligne", "individu").filter(condition).order_by("individu_id")
-                liste_prestations_fratrie = sorted(list(liste_prestations_fratrie), key=lambda prestation: (prestation.individu.date_naiss or datetime.date(1950, 1, 1), prestation.individu.pk), reverse=not settings.ATTRIBUTION_TARIF_FRATERIE_AINES)
-                for index, prestation in enumerate(liste_prestations_fratrie):
-                    if "inscrits" in prestation.tarif.methode:
-                        num_enfant = Get_num_enfant_inscrit(idfamille=famille_id, idindividu=prestation.individu_id, date=date)
-                    else:
-                        num_enfant = (index + 1) if "degr" in prestation.tarif.methode else len(liste_prestations_fratrie)
-                    montant_deductions = prestation.montant_initial - prestation.montant
-                    nouveau_montant = getattr(prestation.tarif_ligne, "montant_enfant_%d" % min(num_enfant, 6), decimal.Decimal(0))
-                    if prestation.montant_initial != nouveau_montant:
-                        prestation.montant_initial = nouveau_montant
-                        logger.debug("tarif selon le nbre d'individus : Prestation %d modifiée : montant=%s num_enfant=%d" % (prestation.pk, prestation.montant_initial, num_enfant))
-                        prestation.montant = prestation.montant_initial - montant_deductions
-                        prestation.save()
-                        Ventilation.objects.filter(prestation=prestation).delete()
+    # Chargement groupé des prestations des fratries concernées
+    liste_familles = sorted({key[0] for key in liste_modifications.keys() if key[0] is not None})
+    liste_dates = sorted({key[2] for key in liste_modifications.keys()})
+    for index in range(0, len(liste_familles), taille_lot):
+        conditions = Q(famille_id__in=liste_familles[index:index + taille_lot], date__in=liste_dates)
+        if settings.ATTRIBUTION_TARIF_FRATERIE_TARIF_IDENTIQUE:
+            conditions &= Q(tarif_id__in=liste_id_tarif)
+        else:
+            conditions &= Q(activite=activite, tarif__methode__contains="nbre_ind")
+        for prestation in Prestation.objects.select_related("tarif", "tarif_ligne", "individu").filter(conditions).order_by("individu_id", "pk"):
+            key = get_key_groupe(prestation.famille_id, prestation.tarif_id, str(prestation.date))
+            if key in groupes:
+                groupes[key].append(prestation)
+
+    # Recherche les fratries (chargement groupé des inscriptions, uniquement si nécessaire)
+    dict_inscrits_famille = {}
+
+    def Get_num_enfant_inscrit(idfamille=None, idindividu=None, date=None):
+        if not dict_inscrits_famille:
+            for idfamille_temp in liste_familles:
+                dict_inscrits_famille[idfamille_temp] = []
+            for index in range(0, len(liste_familles), taille_lot):
+                for inscription in Inscription.objects.filter(famille_id__in=liste_familles[index:index + taille_lot], activite=activite).order_by("individu__date_naiss", "pk"):
+                    dict_inscrits_famille[inscription.famille_id].append(inscription)
+        liste_enfants = []
+        for inscription in dict_inscrits_famille.get(idfamille, []):
+            if str(inscription.date_debut) <= date and (not inscription.date_fin or str(inscription.date_fin) >= date):
+                if inscription.individu_id not in liste_enfants:
+                    liste_enfants.append(inscription.individu_id)
+                if inscription.individu_id == idindividu:
+                    return liste_enfants.index(inscription.individu_id) + 1
+        return 1
+
+    liste_idprestation_modifiees = []
+    for key, liste_prestations_fratrie in groupes.items():
+        famille_id, date = key[0], key[-1]
+        liste_prestations_fratrie = sorted(liste_prestations_fratrie, key=lambda prestation: (prestation.individu.date_naiss or datetime.date(1950, 1, 1), prestation.individu.pk), reverse=not settings.ATTRIBUTION_TARIF_FRATERIE_AINES)
+        for index, prestation in enumerate(liste_prestations_fratrie):
+            if "inscrits" in prestation.tarif.methode:
+                num_enfant = Get_num_enfant_inscrit(idfamille=famille_id, idindividu=prestation.individu_id, date=date)
+            else:
+                num_enfant = (index + 1) if "degr" in prestation.tarif.methode else len(liste_prestations_fratrie)
+            montant_deductions = prestation.montant_initial - prestation.montant
+            nouveau_montant = getattr(prestation.tarif_ligne, "montant_enfant_%d" % min(num_enfant, 6), decimal.Decimal(0))
+            if prestation.montant_initial != nouveau_montant:
+                prestation.montant_initial = nouveau_montant
+                logger.debug("tarif selon le nbre d'individus : Prestation %d modifiée : montant=%s num_enfant=%d" % (prestation.pk, prestation.montant_initial, num_enfant))
+                prestation.montant = prestation.montant_initial - montant_deductions
+                prestation.save()
+                liste_idprestation_modifiees.append(prestation.pk)
+
+    # Suppression des ventilations des prestations modifiées
+    for index in range(0, len(liste_idprestation_modifiees), taille_lot):
+        Ventilation.objects.filter(prestation_id__in=liste_idprestation_modifiees[index:index + taille_lot]).delete()
 
 
 ICONES_INFORMATIONS = {
@@ -193,6 +229,9 @@ def Get_informations_individus(data):
     conditions = Q(individu_id__in=liste_idindividu) & Q(diffusion_listing_conso=True) & (Q(date_debut__lte=date_min) | Q(date_debut__isnull=True)) & (Q(date_fin__gte=date_max) | Q(date_fin__isnull=True))
     for info in Information.objects.select_related("individu", "categorie").filter(conditions):
         dict_infos_perso.setdefault(info.individu_id, []).append(info)
+
+    # Optimisation : chargement groupé des siestes et régimes alimentaires (évite 2 requêtes par individu)
+    prefetch_related_objects(data["liste_individus"], "type_sieste", "regimes_alimentaires")
 
     for individu in data["liste_individus"]:
         badges = dict_informations[individu.pk]
@@ -247,11 +286,18 @@ def Get_generic_data(data={}):
     data["liste_individus"] = []
     data["liste_familles"] = []
     data["liste_key_individus"] = []
+    individus_vus, familles_vues, keys_vues = set(), set(), set()
     for inscription in data["liste_inscriptions"]:
-        if inscription.individu not in data["liste_individus"]: data["liste_individus"].append(inscription.individu)
-        if inscription.famille not in data["liste_familles"]: data["liste_familles"].append(inscription.famille)
+        if inscription.individu_id not in individus_vus:
+            individus_vus.add(inscription.individu_id)
+            data["liste_individus"].append(inscription.individu)
+        if inscription.famille_id not in familles_vues:
+            familles_vues.add(inscription.famille_id)
+            data["liste_familles"].append(inscription.famille)
         key = (inscription.individu_id, inscription.famille_id)
-        if key not in data["liste_key_individus"]: data["liste_key_individus"].append(key)
+        if key not in keys_vues:
+            keys_vues.add(key)
+            data["liste_key_individus"].append(key)
 
     # Permet de trouver les différences entre les inscriptions multiples d'un seul individu
     # Pour afficher le texte d'informations complémentaires des inscriptions
@@ -353,20 +399,20 @@ def Get_generic_data(data={}):
     #-------------------------- Importation des données du calendrier ------------------------------
 
     # Importation des ouvertures
-    list_groupes_inscriptions = list({inscription.groupe_id: None for inscription in data["liste_inscriptions"]}.keys())
-    liste_ouvertures = []
-    liste_dates = []
-    liste_unites_ouvertes = []
-    for ouverture in Ouverture.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite'])):
-        liste_ouvertures.append("%s_%s_%s" % (ouverture.date, ouverture.groupe_id, ouverture.unite_id))
-        if ouverture.date not in liste_dates and ouverture.groupe_id in list_groupes_inscriptions:
-            liste_dates.append(ouverture.date)
-        if ouverture.unite_id not in liste_unites_ouvertes:
-            liste_unites_ouvertes.append(ouverture.unite_id)
+    # Optimisation : ensembles (set) pour des tests d'appartenance rapides, notamment dans le template (une recherche par case)
+    groupes_inscriptions = {inscription.groupe_id for inscription in data["liste_inscriptions"]}
+    liste_ouvertures = set()
+    dates = set()
+    liste_unites_ouvertes = set()
+    for date, groupe_id, unite_id in Ouverture.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite'])).values_list("date", "groupe_id", "unite_id"):
+        liste_ouvertures.add("%s_%s_%s" % (date, groupe_id, unite_id))
+        if groupe_id in groupes_inscriptions:
+            dates.add(date)
+        liste_unites_ouvertes.add(unite_id)
     data['liste_ouvertures'] = liste_ouvertures
 
     # Récupération des dates
-    liste_dates.sort()
+    liste_dates = sorted(dates)
     data['liste_dates'] = liste_dates
 
     # Importation des vacances
@@ -403,16 +449,22 @@ def Get_generic_data(data={}):
     data['dict_unites_remplissage_json'] = mark_safe(json.dumps(dict_unites_remplissage_json))
 
     # Importation des places prises
-    liste_places = list(Consommation.objects.values('pk', 'date', 'unite', 'groupe', 'quantite', 'evenement').annotate(nbre=Count('pk')).filter(data["conditions_periodes"] & Q(activite=data['selection_activite']) & Q(etat__in=("reservation", "present", "attente"))).exclude(inscription__in=data["liste_inscriptions"]))
+    # Optimisation : comptage regroupé directement dans la base (une ligne par date/unité/groupe/quantité/événement
+    # au lieu d'une ligne par consommation des autres individus)
+    qs_places = Consommation.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite']) & Q(etat__in=("reservation", "present", "attente"))).exclude(inscription__in=data["liste_inscriptions"])
+    liste_places = list(qs_places.order_by().values('date', 'unite', 'groupe', 'quantite', 'evenement').annotate(nbre=Count('pk')))
     dict_places = {}
 
     if data.get("consommations", []):
         # Ajout des places prises masquées (notamment si fraterie masquée)
-        inscriptions_affichees = [inscription.pk for inscription in data["liste_inscriptions"]]
-        consommations_temp = [conso["pk"] for conso in liste_places]
-        for key, liste_conso_temp in data.get("consommations", {}).items():
-            for conso_temp in liste_conso_temp:
-                if conso_temp["inscription"] not in inscriptions_affichees and conso_temp["pk"] not in consommations_temp:
+        inscriptions_affichees = {inscription.pk for inscription in data["liste_inscriptions"]}
+        consommations_masquees = [conso_temp for liste_conso_temp in data.get("consommations", {}).values() for conso_temp in liste_conso_temp if conso_temp["inscription"] not in inscriptions_affichees]
+        if consommations_masquees:
+            # Recherche celles qui sont déjà comptabilisées par la requête ci-dessus
+            idconso_masquees = [conso_temp["pk"] for conso_temp in consommations_masquees if isinstance(conso_temp["pk"], int)]
+            consommations_temp = set(qs_places.filter(pk__in=idconso_masquees).values_list("pk", flat=True)) if idconso_masquees else set()
+            for conso_temp in consommations_masquees:
+                if conso_temp["pk"] not in consommations_temp:
                     conso_temp["nbre"] = 1
                     liste_places.append(conso_temp)
 
@@ -518,6 +570,8 @@ def Save_grille(request=None, donnees={}):
     dict_idprestation = {}
     liste_nouvelles_prestations = []
     liste_IDprestation_existants = []
+    liste_prestations_modifiees = []
+    liste_prestations_ajoutees = []
     for IDprestation, dict_prestation in donnees["prestations"].items():
 
         prestation_temp = {
@@ -531,7 +585,27 @@ def Save_grille(request=None, donnees={}):
         # Enregistrement des nouvelles prestations
         if "-" in IDprestation:
             logger.debug("Prestation à ajouter : ID" + str(IDprestation) + " > " + str(dict_prestation))
-            prestation = Prestation.objects.create(**prestation_temp)
+            liste_prestations_ajoutees.append((IDprestation, dict_prestation, Prestation(**prestation_temp)))
+
+        # Modification de prestations
+        if "-" not in IDprestation:
+            liste_IDprestation_existants.append(IDprestation)
+
+            if dict_prestation.get("dirty", False):
+                liste_prestations_modifiees.append(Prestation(pk=int(IDprestation), **prestation_temp))
+
+    # Optimisation : insertion groupée des nouvelles prestations et de leurs déductions si la base de données
+    # renvoie les ID créés (MariaDB 10.5+, PostgreSQL, SQLite 3.35+), sinon insertion une par une comme auparavant
+    insertion_groupee = connection.features.can_return_rows_from_bulk_insert
+    if liste_prestations_ajoutees:
+        if insertion_groupee:
+            Prestation.objects.bulk_create([prestation for IDprestation, dict_prestation, prestation in liste_prestations_ajoutees], batch_size=200)
+        else:
+            for IDprestation, dict_prestation, prestation in liste_prestations_ajoutees:
+                prestation.save()
+
+        liste_deductions = []
+        for IDprestation, dict_prestation, prestation in liste_prestations_ajoutees:
             liste_nouvelles_prestations.append(prestation)
 
             liste_historique.append({"titre": "Ajout d'une prestation", "detail": "%s du %s" % (dict_prestation["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user if request else None,
@@ -542,16 +616,24 @@ def Save_grille(request=None, donnees={}):
 
             # Enregistrement des aides
             for dict_aide in dict_prestation["aides"]:
-                deduction = Deduction.objects.create(date=dict_prestation["date"], label=dict_aide["label"], aide_id=dict_aide["aide"], famille_id=dict_prestation["famille"], prestation=prestation, montant=dict_aide["montant"])
+                deduction = Deduction(date=dict_prestation["date"], label=dict_aide["label"], aide_id=dict_aide["aide"], famille_id=dict_prestation["famille"], prestation=prestation, montant=dict_aide["montant"])
+                if not insertion_groupee:
+                    deduction.save()
+                liste_deductions.append(deduction)
                 liste_historique.append({"titre": "Ajout d'une déduction", "detail": "%s du %s" % (dict_aide["label"], utils_dates.ConvertDateToFR(dict_prestation["date"])), "utilisateur": request.user if request else None,
-                                         "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Déduction", "idobjet": deduction.pk, "classe": "Deduction", "activite_id": dict_prestation["activite"]})
+                                         "famille_id": dict_prestation["famille"], "individu_id": dict_prestation["individu"], "objet": "Déduction", "idobjet": deduction, "classe": "Deduction", "activite_id": dict_prestation["activite"]})
 
-        # Modification de prestations
-        if "-" not in IDprestation:
-            liste_IDprestation_existants.append(IDprestation)
+        if insertion_groupee and liste_deductions:
+            Deduction.objects.bulk_create(liste_deductions, batch_size=200)
 
-            if dict_prestation.get("dirty", False):
-                Prestation.objects.filter(pk=int(IDprestation)).update(**prestation_temp)
+        # Remplace les objets déductions par leur ID dans l'historique
+        for action in liste_historique:
+            if isinstance(action["idobjet"], Deduction):
+                action["idobjet"] = action["idobjet"].pk
+
+    # Optimisation : enregistrement groupé des prestations modifiées (au lieu d'une requête par prestation)
+    if liste_prestations_modifiees:
+        Prestation.objects.bulk_update(liste_prestations_modifiees, list(prestation_temp.keys()), batch_size=100)
 
     # ---------------------------------- CONSOMMATIONS -------------------------------------
 
@@ -594,8 +676,16 @@ def Save_grille(request=None, donnees={}):
                                          "famille_id": dict_conso["famille"], "individu_id": dict_conso["individu"], "objet": "Consommation", "idobjet": dict_conso["pk"], "classe": "Consommation", "activite_id": dict_conso["activite"], "date": dict_conso["date"]})
 
     # Récupère la liste des conso à modifier
+    # Optimisation : seules les consommations réellement modifiées sont enregistrées, et uniquement sur les champs
+    # qui ont changé (la grille virtuelle marque toutes les consommations comme modifiées lors d'un recalcul)
+    champs_conso = [("groupe", "groupe_id"), ("heure_debut", "heure_debut"), ("heure_fin", "heure_fin"), ("etat", "etat"), ("categorie_tarif", "categorie_tarif_id"),
+                    ("prestation", "prestation_id"), ("quantite", "quantite"), ("options", "options"), ("extra", "extra")]
+    champs_modifies = set()
+    nbre_modifications = 0
     liste_modifications = []
     for conso in Consommation.objects.filter(pk__in=dict_modifications.keys()):
+        nbre_modifications += 1
+        valeurs_avant = [getattr(conso, attname) for champ, attname in champs_conso]
         conso.groupe_id = dict_modifications[conso.pk]["groupe"]
         conso.heure_debut = dict_modifications[conso.pk]["heure_debut"]
         conso.heure_fin = dict_modifications[conso.pk]["heure_fin"]
@@ -609,7 +699,10 @@ def Save_grille(request=None, donnees={}):
         if conso.prestation_id in dict_idprestation:
             conso.prestation_id = dict_idprestation[conso.prestation_id]
 
-        liste_modifications.append(conso)
+        modifies = [champ for (champ, attname), valeur_avant in zip(champs_conso, valeurs_avant) if getattr(conso, attname) != valeur_avant or type(getattr(conso, attname)) != type(valeur_avant)]
+        if modifies:
+            champs_modifies.update(modifies)
+            liste_modifications.append(conso)
 
     # Traitement dans la base
     texte_notification = []
@@ -617,8 +710,9 @@ def Save_grille(request=None, donnees={}):
         Consommation.objects.bulk_create(liste_ajouts)
         texte_notification.append("%s ajout%s" % (len(liste_ajouts), "s" if len(liste_ajouts) > 1 else ""))
     if liste_modifications:
-        Consommation.objects.bulk_update(liste_modifications, ["groupe", "heure_debut", "heure_fin", "etat", "categorie_tarif", "prestation", "quantite", "options", "extra"], batch_size=50)
-        texte_notification.append("%s modification%s" % (len(liste_modifications), "s" if len(liste_modifications) > 1 else ""))
+        Consommation.objects.bulk_update(liste_modifications, [champ for champ, attname in champs_conso if champ in champs_modifies], batch_size=50)
+    if nbre_modifications:
+        texte_notification.append("%s modification%s" % (nbre_modifications, "s" if nbre_modifications > 1 else ""))
     if donnees["suppressions"]["consommations"]:
         logger.debug("Consommations à supprimer : " + str(donnees["suppressions"]["consommations"]))
         liste_conso_suppr = list(Consommation.objects.select_related("unite", "inscription", "evenement").filter(pk__in=donnees["suppressions"]["consommations"]))
@@ -780,6 +874,17 @@ class Facturation():
         self.dict_inscrits_formules = {}
         self.messages_formules = []
 
+        # Optimisation : caches valables le temps d'un calcul (la base de données n'est pas modifiée pendant le calcul
+        # et les données de la grille transmises ne sont pas modifiées par le calcul)
+        self.cache_tarifs_valides = {}
+        self.cache_combis_aides = {}
+        self.cache_deductions = {}
+        self.cache_tarifs = {}
+        self.cache_conso_forfaits = {}
+        self.cache_conso_grille_forfaits = {}
+        self.cache_infos_tarifs = {}
+        self.cache_caisses_familles = {}
+
     def Facturer(self):
         messages = []
         tout_recalculer = False
@@ -939,7 +1044,9 @@ class Facturation():
 
 
                     # Mémorise le tarif initial pour les évènements
-                    tarif_base = copy.deepcopy(tarif)
+                    # Optimisation : la copie n'est utile que pour les tarifs par événement (où la variable tarif est remplacée).
+                    # Sinon, le tarif n'est pas modifié pendant le calcul : on évite une copie profonde coûteuse.
+                    tarif_base = copy.deepcopy(tarif) if "evenement" in tarif.methode else tarif
                     for evenement in liste_evenements:
                         # Recherche un tarif spécial évènement
                         if evenement:
@@ -1023,8 +1130,11 @@ class Facturation():
                                     liste_combi_valides = []
 
                                     # On recherche si des combinaisons sont présentes sur cette ligne
-                                    for combi in CombiAide.objects.prefetch_related('unites').filter(aide=aide):
-                                        if tarif_base.combi_retenue == [unite.pk for unite in combi.unites.all().order_by("pk")]:
+                                    # Optimisation : combinaisons de l'aide chargées une seule fois par calcul
+                                    if aide.pk not in self.cache_combis_aides:
+                                        self.cache_combis_aides[aide.pk] = [(combi, [unite.pk for unite in combi.unites.all().order_by("pk")]) for combi in CombiAide.objects.prefetch_related('unites').filter(aide=aide)]
+                                    for combi, unites_combi_aide in self.cache_combis_aides[aide.pk]:
+                                        if tarif_base.combi_retenue == unites_combi_aide:
                                             combi.nbre_max_unites = len(tarif_base.combi_retenue)
                                             liste_combi_valides.append(combi)
 
@@ -1051,15 +1161,19 @@ class Facturation():
 
                                             # Recherche dans les aides affichées
                                             liste_id_temp = []
-                                            for dict_aide in self.donnees["dict_aides"]:
+                                            for dict_aide in self.donnees.get("dict_aides", []):
                                                 if dict_aide["famille"] == case_tableau["famille"] and dict_aide["aide"] == combi_retenue.aide_id:
                                                     Ajoute_aide(dict_aide["idprestation"], dict_aide["date"], dict_aide["individu"], dict_aide["montant"])
                                                     liste_id_temp.append(dict_aide["idprestation"])
 
                                             # Recherche dans la base de données
-                                            for deduction in Deduction.objects.filter(famille_id=case_tableau["famille"], aide=combi_retenue.aide).prefetch_related('prestation'):
-                                                if deduction.prestation_id not in self.donnees["dict_suppressions"]["prestations"] and deduction.prestation_id not in liste_id_temp:
-                                                    Ajoute_aide(deduction.prestation_id, str(deduction.date), deduction.prestation.individu_id, float(deduction.montant))
+                                            # Optimisation : déductions existantes chargées une seule fois par famille et par aide
+                                            key_deductions = (case_tableau["famille"], combi_retenue.aide_id)
+                                            if key_deductions not in self.cache_deductions:
+                                                self.cache_deductions[key_deductions] = [(deduction.prestation_id, str(deduction.date), deduction.prestation.individu_id, float(deduction.montant)) for deduction in Deduction.objects.filter(famille_id=case_tableau["famille"], aide_id=combi_retenue.aide_id).prefetch_related('prestation')]
+                                            for deduction_prestation_id, deduction_date, deduction_individu_id, deduction_montant in self.cache_deductions[key_deductions]:
+                                                if deduction_prestation_id not in self.donnees.get("dict_suppressions", {}).get("prestations", []) and deduction_prestation_id not in liste_id_temp:
+                                                    Ajoute_aide(deduction_prestation_id, deduction_date, deduction_individu_id, deduction_montant)
 
                                             logger.debug("%d déductions utilisent déjà cette aide : %s" % (len(liste_aides_utilisees), liste_aides_utilisees))
 
@@ -1135,8 +1249,12 @@ class Facturation():
                         self.dict_modif_cases[conso["key_case"]] = IDprestation
 
                 # 8 - Supprime des prestations qui ne sont plus utilisées sur la ligne
+                prestations_autres_lignes = self.Get_prestations_autres_lignes(case_tableau)
                 for idprestation, dict_prestation in self.donnees["prestations"].items():
                     if dict_prestation["famille"] == case_tableau["famille"] and dict_prestation["individu"] == case_tableau["individu"] and dict_prestation["activite"] == case_tableau["activite"]:
+                        # Ne pas toucher aux prestations utilisées par une autre inscription du même individu (ex : 2 groupes sur la même activité)
+                        if str(idprestation) in prestations_autres_lignes:
+                            continue
                         if idprestation not in dictUnitesPrestations.values() and idprestation not in self.liste_anciennes_prestations:
                             # Suppression d'une prestation standard
                             if dict_prestation["date"] == case_tableau["date"] and not dict_prestation["forfait_date_debut"] and not dict_prestation["forfait"]:
@@ -1163,6 +1281,28 @@ class Facturation():
         }
         return donnees_retour
 
+    def Get_prestations_autres_lignes(self, case_tableau=None):
+        """ Renvoie les IDprestation utilisés par les consommations des autres inscriptions de l'individu à la même date """
+        # Index des consommations par (date, individu, activité), construit une seule fois
+        if not hasattr(self, "index_lignes"):
+            self.index_lignes = {}
+            for liste_conso in self.donnees.get("consommations", {}).values():
+                for conso in liste_conso:
+                    self.index_lignes.setdefault((str(conso["date"]), conso["individu"], conso["activite"]), []).append(conso)
+
+        resultats = set()
+        for conso in self.index_lignes.get((str(case_tableau["date"]), case_tableau["individu"], case_tableau["activite"]), []):
+            if conso["inscription"] == case_tableau["inscription"]:
+                continue
+            # Si l'autre ligne a déjà été recalculée, seule sa nouvelle prestation compte
+            if conso.get("key_case") in self.dict_modif_cases:
+                idprestation = self.dict_modif_cases[conso["key_case"]]
+            else:
+                idprestation = conso.get("prestation")
+            if idprestation:
+                resultats.add(str(idprestation))
+        return resultats
+
     def Recherche_forfait_credit(self, tarif=None, case_tableau=None):
         """ Recherche un forfait dans la liste des forfaits disponibles pour une consommation donnée """
         for dict_temp in (self.donnees["prestations"].items(), self.dict_nouvelles_prestations.items()):
@@ -1173,9 +1313,11 @@ class Facturation():
         return None
 
     def Recherche_forfait_applicable(self, tarif=None, case_tableau=None, dict_prestation=None):
-        dict_quantites_dates = {}
         if isinstance(tarif, int):
-            tarif = Tarif.objects.get(pk=tarif)
+            # Optimisation : un seul chargement du tarif par calcul
+            if tarif not in self.cache_tarifs:
+                self.cache_tarifs[tarif] = Tarif.objects.get(pk=tarif)
+            tarif = self.cache_tarifs[tarif]
 
         if not tarif.forfait_auto:
             return None
@@ -1192,25 +1334,36 @@ class Facturation():
         # print("consommations=", len(self.donnees["consommations"]), self.donnees["consommations"])
 
         # Recherche la quantité de conso dans la grille affichée
-        for categorie_donnees in ("dict_conso", "consommations"):
-            for key, liste_conso_temp in self.donnees.get(categorie_donnees, {}).items():
-                for conso in liste_conso_temp:
-                    if str(forfait_date_debut) <= conso["date"] <= str(forfait_date_fin):
-                        if (tarif.forfait_beneficiaire == "individu" and conso["inscription"] == case_tableau["inscription"]) or (
-                                tarif.forfait_beneficiaire == "famille" and conso["famille"] == case_tableau["famille"]):
-                            key = "%s_%s" % (key.split("_")[0], key.split("_")[1])
-                            dict_quantites_dates.setdefault(key, [])
-                            if conso["unite"] not in dict_quantites_dates[key]:
-                                dict_quantites_dates[key].append(conso["unite"])
-                                dict_quantites_dates[key].sort()
+        # Optimisation : le résultat est mémorisé pour une même période, un même bénéficiaire et une même inscription/famille
+        key_grille = (str(forfait_date_debut), str(forfait_date_fin), tarif.forfait_beneficiaire, case_tableau["inscription"], case_tableau["famille"])
+        if key_grille not in self.cache_conso_grille_forfaits:
+            dict_quantites_dates = {}
+            for categorie_donnees in ("dict_conso", "consommations"):
+                for key, liste_conso_temp in self.donnees.get(categorie_donnees, {}).items():
+                    for conso in liste_conso_temp:
+                        if str(forfait_date_debut) <= str(conso["date"]) <= str(forfait_date_fin):
+                            if (tarif.forfait_beneficiaire == "individu" and conso["inscription"] == case_tableau["inscription"]) or (
+                                    tarif.forfait_beneficiaire == "famille" and conso["famille"] == case_tableau["famille"]):
+                                key = "%s_%s" % (key.split("_")[0], key.split("_")[1])
+                                dict_quantites_dates.setdefault(key, [])
+                                if conso["unite"] not in dict_quantites_dates[key]:
+                                    dict_quantites_dates[key].append(conso["unite"])
+                                    dict_quantites_dates[key].sort()
+            self.cache_conso_grille_forfaits[key_grille] = dict_quantites_dates
+        # Copie pour ne pas modifier le résultat mémorisé
+        dict_quantites_dates = {key: list(unites) for key, unites in self.cache_conso_grille_forfaits[key_grille].items()}
         key_affichees = list(dict_quantites_dates.items())
 
         # Recherche la quantité de conso déjà enregistrées dans la DB
-        for conso in Consommation.objects.filter(date__gte=forfait_date_debut, date__lte=forfait_date_fin, inscription=case_tableau["inscription"]):
-            key = "%s_%d" % (conso.date, conso.inscription_id)
-            if key not in key_affichees and conso.unite_id not in dict_quantites_dates.get(key, []):
+        # Optimisation : consommations de la période chargées une seule fois par période et par inscription
+        key_db = (str(forfait_date_debut), str(forfait_date_fin), case_tableau["inscription"])
+        if key_db not in self.cache_conso_forfaits:
+            self.cache_conso_forfaits[key_db] = list(Consommation.objects.filter(date__gte=forfait_date_debut, date__lte=forfait_date_fin, inscription=case_tableau["inscription"]).values_list("date", "inscription_id", "unite_id"))
+        for conso_date, conso_inscription_id, conso_unite_id in self.cache_conso_forfaits[key_db]:
+            key = "%s_%d" % (conso_date, conso_inscription_id)
+            if key not in key_affichees and conso_unite_id not in dict_quantites_dates.get(key, []):
                 dict_quantites_dates.setdefault(key, [])
-                dict_quantites_dates[key].append(conso.unite_id)
+                dict_quantites_dates[key].append(conso_unite_id)
                 dict_quantites_dates[key].sort()
         # print("dict_quantites_dates=", dict_quantites_dates)
 
@@ -1243,8 +1396,12 @@ class Facturation():
         }
 
         # Recherche si une prestation identique existe déjà en mémoire
+        prestations_autres_lignes = self.Get_prestations_autres_lignes(case_tableau) if not forfait_date_debut else set()
         for dict_temp in (self.donnees["prestations"].items(), self.dict_nouvelles_prestations.items()):
             for IDprestation, dict_prestation_1 in dict_temp:
+                # Ne pas réutiliser la prestation d'une autre inscription du même individu, ni une prestation en cours de suppression
+                if str(IDprestation) in prestations_autres_lignes or IDprestation in self.liste_anciennes_prestations:
+                    continue
                 dict_prestation_2 = dict_prestation_1.copy()
 
                 # Renvoie prestation existante si la prestation apparaît déjà sur une facture même si le montant est différent
@@ -1307,15 +1464,30 @@ class Facturation():
 
 
     def Recherche_tarif_valide(self, tarif=None, case_tableau=None):
+        # Optimisation : le résultat ne dépend que du tarif, de la date, du groupe et de la famille
+        key = (tarif.pk, case_tableau["date"], case_tableau["groupe"], case_tableau["famille"])
+        if key not in self.cache_tarifs_valides:
+            self.cache_tarifs_valides[key] = self.Recherche_tarif_valide_calcul(tarif, case_tableau)
+        return self.cache_tarifs_valides[key]
+
+    def Recherche_tarif_valide_calcul(self, tarif=None, case_tableau=None):
         # Vérifie si dates validité ok
         date_fin = tarif.date_fin
         if not date_fin: date_fin = datetime.date(2999, 1, 1)
         if case_tableau["date"] < str(tarif.date_debut) or case_tableau["date"] > str(date_fin):
             return False
 
+        # Optimisation : groupes et caisses du tarif mémorisés une seule fois par calcul
+        if tarif.pk not in self.cache_infos_tarifs:
+            self.cache_infos_tarifs[tarif.pk] = {
+                "groupes": [groupe.pk for groupe in tarif.groupes.all()] if tarif.groupes.exists() else None,
+                "caisses": [caisse.pk for caisse in tarif.caisses.all()] if tarif.caisses.exists() else None,
+            }
+        infos_tarif = self.cache_infos_tarifs[tarif.pk]
+
         # Vérifie si groupe ok
-        if tarif.groupes.exists():
-            if case_tableau["groupe"] not in [groupe.pk for groupe in tarif.groupes.all()]:
+        if infos_tarif["groupes"] is not None:
+            if case_tableau["groupe"] not in infos_tarif["groupes"]:
                 return False
 
         # Vérifie si étiquette ok
@@ -1335,9 +1507,10 @@ class Facturation():
         #         return False
 
         # Vérifie si caisse ok
-        if tarif.caisses.exists():
-            famille = Famille.objects.prefetch_related("caisse").get(pk=case_tableau["famille"])
-            if famille.caisse_id not in [caisse.pk for caisse in tarif.caisses.all()]:
+        if infos_tarif["caisses"] is not None:
+            if case_tableau["famille"] not in self.cache_caisses_familles:
+                self.cache_caisses_familles[case_tableau["famille"]] = Famille.objects.prefetch_related("caisse").get(pk=case_tableau["famille"]).caisse_id
+            if self.cache_caisses_familles[case_tableau["famille"]] not in infos_tarif["caisses"]:
                 return False
 
         # Vérifie si période ok
@@ -1424,6 +1597,9 @@ class Facturation():
             if tarif in self.dict_lignes_tarifs:
                 return self.dict_lignes_tarifs[tarif]
             self.dict_lignes_tarifs[tarif] = TarifLigne.objects.filter(tarif=tarif).order_by("num_ligne").all()
+            # Optimisation : évaluation immédiate du queryset pour que les appels suivants (.first(), boucles, len())
+            # utilisent le cache au lieu de relancer une requête à chaque case
+            len(self.dict_lignes_tarifs[tarif])
             return self.dict_lignes_tarifs[tarif]
 
 
@@ -1730,7 +1906,7 @@ class Facturation():
                             conditions = False
 
                 if methode_calcul == "taux_date":
-                    if ligne_calcul.date != case_tableau["date"]:
+                    if str(ligne_calcul.date) != str(case_tableau["date"]):
                         conditions = False
 
                 if conditions == True:
