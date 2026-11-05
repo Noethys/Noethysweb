@@ -6,7 +6,7 @@
 import logging, decimal
 logger = logging.getLogger(__name__)
 logging.getLogger("PIL").setLevel(logging.WARNING)
-from django.db.models import Q, Count
+from django.db.models import Q
 from reportlab.platypus import Spacer, Paragraph, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
@@ -27,11 +27,12 @@ class Impression(utils_impression.Impression):
             liste_activites = self.dict_donnees["activites"]["ids"]
         conditions &= Q(activite_id__in=liste_activites)
 
-        # Optimisation : pré-regroupement des prestations identiques directement dans la base de données.
-        # Seuls les champs utiles sont lus (aucun champ chiffré n'est chargé, donc aucun déchiffrement ici).
-        prestations = Prestation.objects.filter(conditions).order_by().values(
+        # Optimisation : seuls les champs utiles sont lus (aucun champ chiffré n'est chargé, donc aucun déchiffrement ici).
+        # Le regroupement reste fait en Python (et non par la base de données) car MySQL/MariaDB regroupent les textes
+        # sans tenir compte des majuscules ni des accents, ce qui fusionnerait des libellés différents.
+        prestations = Prestation.objects.filter(conditions).order_by("individu__prenom").values(
             "famille_id", "individu_id", "individu__prenom", "individu__nom", "label", "montant", "quantite"
-        ).annotate(nbre=Count("pk"))
+        )
 
         # Chargement des familles concernées : une seule fois par famille et uniquement les champs nécessaires
         familles = Famille.objects.filter(pk__in=Prestation.objects.filter(conditions).values("famille_id")).only("nom", "rue_resid", "cp_resid", "ville_resid")
@@ -50,17 +51,15 @@ class Impression(utils_impression.Impression):
             famille = dict_familles.get(prestation["famille_id"])
             if not famille:
                 continue
-            quantite = prestation["quantite"] or 0
-            montant = prestation["montant"] or decimal.Decimal(0)
-            prix_unitaire = (montant / quantite) if detail_prix_unitaire else 0
+            prix_unitaire = (prestation["montant"] / prestation["quantite"]) if detail_prix_unitaire else 0
             if prestation["individu_id"]:
                 libelle = "%s - %s" % (prestation["individu__prenom"] or prestation["individu__nom"], prestation["label"])
             else:
                 libelle = prestation["label"]
             dict_prestations_temp = dict_temp.setdefault(famille, {})
             dict_prestation = dict_prestations_temp.setdefault((libelle, prix_unitaire), {"quantite": 0, "montant": decimal.Decimal(0), "label": prestation["label"], "individus": {}})
-            dict_prestation["quantite"] += quantite * prestation["nbre"]
-            dict_prestation["montant"] += montant * prestation["nbre"]
+            dict_prestation["quantite"] += prestation["quantite"]
+            dict_prestation["montant"] += prestation["montant"]
             if prestation["individu_id"]:
                 dict_prestation["individus"][prestation["individu_id"]] = True
 
@@ -88,7 +87,7 @@ class Impression(utils_impression.Impression):
         if self.dict_donnees["detail_prix_unitaire"]:
             dataTableau[0].insert(4, "Prix")
 
-        keys = sorted(dict_prestations_famille.keys(), key=lambda x: (x.nom or "", x.pk))
+        keys = sorted(dict_prestations_famille.keys(), key=lambda x: x.nom or "")
         for famille in keys:
 
             ligne = []
