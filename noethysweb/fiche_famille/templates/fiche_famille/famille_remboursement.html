@@ -1,0 +1,84 @@
+{% extends "fiche_famille/famille.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load embed %}
+
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .remb-situation .info-box { min-height: 70px; margin-bottom: 0; box-shadow: none; border: 1px solid rgba(0,0,0,.125); }
+        .remb-situation .info-box-icon { width: 50px; font-size: 1.4rem; }
+        .remb-situation .info-box-number { font-size: 1.25rem; }
+        #div_id_choix_montant .form-check { margin-bottom: 4px; }
+    </style>
+{% endblock %}
+
+
+{% block detail_famille %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+
+            {% block box_contenu %}
+
+                {% include 'core/erreurs_form.html' %}
+                {% crispy form %}
+            {% endblock %}
+
+        {% endembed %}
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(function () {
+            var credit = {{ situation.credit|stringformat:".2f" }};
+            var symbole = "{{ symbole_monnaie|default:'€' }}";
+
+            function formate(valeur) {
+                return valeur.toLocaleString("fr-FR", {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + symbole;
+            }
+
+            function maj() {
+                var choix = $("input[name='choix_montant']:checked").val();
+                var $montant = $("#id_montant");
+                if (choix === "total" && credit > 0) {
+                    $montant.val(credit.toFixed(2)).prop("readonly", true);
+                } else {
+                    $montant.prop("readonly", false);
+                }
+                var montant = Math.round(parseFloat(String($montant.val()).replace(",", ".")) * 100) / 100;
+                if (isNaN(montant) || montant <= 0) {
+                    $("#remb_recap_montant, #remb_recap_reste").text("-");
+                    $("#bloc_depassement").hide();
+                    $("#id_confirmation_depassement").prop("required", false);
+                    return;
+                }
+                var reste = Math.round((credit - montant) * 100) / 100;
+                $("#remb_recap_montant").text(formate(-montant));
+                if (reste >= 0) {
+                    $("#remb_recap_solde").html("Crédit restant après remboursement : <b id='remb_recap_reste'>" + formate(reste) + "</b>");
+                    $("#bloc_depassement").hide();
+                    $("#id_confirmation_depassement").prop("checked", false).prop("required", false);
+                } else {
+                    $("#remb_recap_solde").html("<span class='text-danger'>La famille sera débitrice de <b id='remb_recap_reste'>" + formate(-reste) + "</b> après ce remboursement.</span>");
+                    $("#remb_depassement").text(formate(-reste));
+                    $("#bloc_depassement").show();
+                    $("#id_confirmation_depassement").prop("required", true);
+                }
+            }
+
+            $("input[name='choix_montant']").on("change", function () {
+                maj();
+                if ($(this).val() === "partiel") { $("#id_montant").focus().select(); }
+            });
+            $("#id_montant").on("input change", maj);
+            maj();
+        });
+    </script>
+{% endblock %}

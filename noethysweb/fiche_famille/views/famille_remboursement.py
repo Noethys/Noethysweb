@@ -10,17 +10,20 @@ from fiche_famille.forms.famille_remboursement import Formulaire
 from fiche_famille.views.famille import Onglet
 from facturation.utils import utils_factures
 from reglements.utils import utils_ventilation
+from core.utils import utils_preferences
 
 
 class Ajouter(Onglet, crud.Ajouter):
     form_class = Formulaire
-    template_name = "fiche_famille/famille_edit.html"
+    template_name = "fiche_famille/famille_remboursement.html"
 
     def get_context_data(self, **kwargs):
         context = super(Ajouter, self).get_context_data(**kwargs)
-        context['box_titre'] = "Créer un remboursement"
-        context['box_introduction'] = "Vous pouvez créer ici un remboursement si le compte de la famille est créditeur. Deux prestations et un règlement fictif seront générés automatiquement afin de régulariser le compte."
+        context['box_titre'] = "Rembourser le crédit de la famille"
+        context['box_introduction'] = "Utilisez cette fonction lorsque la famille a payé plus que ce qui lui a été facturé et que vous lui rendez la différence (chèque, virement, espèces...)."
         context['onglet_actif'] = "reglements"
+        context['situation'] = context["form"].situation
+        context['symbole_monnaie'] = utils_preferences.Get_symbole_monnaie()
         return context
 
     def get_success_url(self):
@@ -32,21 +35,18 @@ class Ajouter(Onglet, crud.Ajouter):
         return form_kwargs
 
     def form_valid(self, form):
-        # Enregistrement du règlement
+        # Enregistrement du règlement négatif
         reglement = form.save(commit=True)
+        label = "Remboursement du %s" % reglement.date.strftime("%d/%m/%Y")
 
-        # Création de la ventilation positive
-        prestation_positive = Prestation.objects.create(date=reglement.date, categorie="autre", label="Remboursement", famille=reglement.famille,
-                                                        montant_initial=-reglement.montant, montant=-reglement.montant)
-
-        # Ventilation de la ventilation positive
+        # Création de la prestation positive, ventilée automatiquement avec le crédit de la famille
+        Prestation.objects.create(date=reglement.date, categorie="autre", label=label, famille=reglement.famille,
+                                  montant_initial=-reglement.montant, montant=-reglement.montant)
         utils_ventilation.Ventilation_auto(IDfamille=reglement.famille_id)
 
-        # Création de la prestation négative
-        prestation_negative = Prestation.objects.create(date=reglement.date, categorie="autre", label="Remboursement", famille=reglement.famille,
-                                               montant_initial=reglement.montant, montant=reglement.montant)
-
-        # Ventilation de la prestation négative
+        # Création de la prestation négative, ventilée avec le règlement négatif
+        prestation_negative = Prestation.objects.create(date=reglement.date, categorie="autre", label=label, famille=reglement.famille,
+                                                        montant_initial=reglement.montant, montant=reglement.montant)
         Ventilation.objects.create(famille=reglement.famille, reglement=reglement, prestation=prestation_negative, montant=reglement.montant)
 
         # Recalcule le solde des factures de la famille

@@ -61,9 +61,18 @@
                         {% endif %}
                     </a>
 
-                    <a class="btn btn-default {% if not perms.core.famille_reglements_modifier %}disabled{% endif %}" href="{% url 'famille_remboursement_ajouter' idfamille=idfamille %}"
-                        title="Créer un remboursement"><i class="fa fa fa-money margin-r-5"></i>Remboursement
-                    </a>
+                    {% if credit_remboursable > 0 %}
+                        <a class="btn btn-default {% if not perms.core.famille_reglements_modifier %}disabled{% endif %}" href="{% url 'famille_remboursement_ajouter' idfamille=idfamille %}"
+                            title="La famille a payé {{ credit_remboursable|floatformat:2 }} € de plus que ce qui lui a été facturé. Cliquez ici pour lui rembourser ce crédit.">
+                            <i class="fa fa-undo margin-r-5"></i>Rembourser le crédit
+                            <span class="badge bg-warning">{{ credit_remboursable|floatformat:2 }} €</span>
+                        </a>
+                    {% else %}
+                        <a class="btn btn-default disabled" role="button" aria-disabled="true" style="pointer-events: auto; cursor: not-allowed;"
+                            title="Aucun crédit à rembourser : le compte de la famille n'est pas créditeur.">
+                            <i class="fa fa-undo margin-r-5"></i>Rembourser le crédit
+                        </a>
+                    {% endif %}
 
                     <a class="btn btn-default {% if not perms.core.famille_reglements_modifier %}disabled{% endif %}" href="{% url 'famille_recus_liste' idfamille=idfamille %}"
                         title="Liste des reçus de règlements"><i class="fa fa fa-file-text-o margin-r-5"></i>Liste des reçus

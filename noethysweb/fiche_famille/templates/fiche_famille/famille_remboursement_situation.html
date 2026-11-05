@@ -1,0 +1,33 @@
+<div class="row remb-situation mt-3 mb-3">
+    <div class="col-md-4">
+        <div class="info-box">
+            <span class="info-box-icon bg-light"><i class="fa fa-file-text-o"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total facturé</span>
+                <span class="info-box-number">{{ situation.total_du|floatformat:2 }} {{ symbole_monnaie|default:"€" }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="info-box">
+            <span class="info-box-icon bg-light"><i class="fa fa-money"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total réglé</span>
+                <span class="info-box-number">{{ situation.total_regle|floatformat:2 }} {{ symbole_monnaie|default:"€" }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="info-box {% if situation.credit > 0 %}bg-warning{% endif %}">
+            <span class="info-box-icon {% if not situation.credit > 0 %}bg-light{% endif %}"><i class="fa fa-undo"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Crédit à rembourser</span>
+                <span class="info-box-number">{{ situation.credit|floatformat:2 }} {{ symbole_monnaie|default:"€" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% if not situation.credit > 0 %}
+    <div class="alert alert-light border"><i class="fa fa-info-circle margin-r-5"></i>Le compte de cette famille n'est pas créditeur : il n'y a rien à rembourser. Vous pouvez tout de même saisir un montant, une confirmation vous sera demandée.</div>
+{% endif %}
+

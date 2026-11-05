@@ -13,6 +13,7 @@ from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Famille, Reglement, Payeur, Emetteur, ModeReglement, Prestation, Ventilation, Mandat, Facture
 from core.utils import utils_dates, utils_texte
+from fiche_famille.forms.famille_remboursement import Get_situation_famille
 from facturation.utils import utils_factures
 from fiche_famille.forms.famille_reglements import Formulaire
 from fiche_famille.views.famille import Onglet
@@ -170,6 +171,7 @@ class Liste(Page, crud.Liste):
         context['impression_conclusion'] = ""
         context['active_checkbox'] = True
         context['totaux'] = json.dumps(["montant", "ventile"])
+        context['credit_remboursable'] = Get_situation_famille(self.Get_idfamille())["credit"]
         return context
 
     class datatable_class(MyDatatable):
