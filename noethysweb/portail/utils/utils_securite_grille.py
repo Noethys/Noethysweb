@@ -147,11 +147,36 @@ def Securiser_donnees_save(request, donnees, data):
     dates_modifiables = {str(date) for date in data.get("dates_modifiables", [])}
     rejets = []
 
+    # ------------------ Suppressions de consommations ------------------
+    # De la famille, non pointées, hors forfait, dans le délai de suppression (ou demande en attente de validation)
+    suppressions = donnees.get("suppressions") or {}
+    liste_conso_suppr = []
+    for conso in Consommation.objects.filter(pk__in=[_int(pk) for pk in suppressions.get("consommations", []) if _int(pk)], inscription__in=inscriptions.keys()):
+        if conso.etat not in ETATS_POINTES and not conso.forfait and (conso.etat == "demande" or is_suppression_allowed(conso.date, data)):
+            liste_conso_suppr.append(conso)
+        else:
+            rejets.append("suppression conso %d" % conso.pk)
+    suppressions_conso = [conso.pk for conso in liste_conso_suppr]
+
     # ------------------ Consommations ------------------
     liste_conso = [(key_case, conso) for key_case, liste in (donnees.get("consommations") or {}).items() for conso in (liste or []) if isinstance(conso, dict)]
     dict_db = {conso.pk: conso for conso in Consommation.objects.select_related("inscription").filter(
         pk__in=[_int(conso.get("pk")) for key_case, conso in liste_conso if _int(conso.get("pk"))], inscription__in=inscriptions.keys())}
-    evenements_valides = set(Evenement.objects.filter(activite=activite).values_list("pk", flat=True))
+    dict_evenements = {evenement.pk: evenement for evenement in Evenement.objects.filter(activite=activite, visible_portail=True)}
+
+    def Evenement_valide(idevenement, date, idunite, inscription):
+        evenement = dict_evenements.get(idevenement)
+        return evenement and evenement.date == date and evenement.unite_id == idunite and evenement.groupe_id == inscription.groupe_id
+
+    # Doublons : une seule conso par ligne, unité et événement (sauf multihoraires)
+    unites_multihoraires = {unite.pk for unite in data["liste_unites_visibles"] if unite.type == "Multihoraires"}
+    cases_occupees = set()
+
+    # Conso existantes en premier (pour la détection des doublons), y compris celles de la base absentes de la grille
+    liste_conso.sort(key=lambda item: 0 if _int(item[1].get("pk")) else 1)
+    for conso in Consommation.objects.filter(inscription__in=inscriptions.keys(), date__in={str(_date(c.get("date"))) for k, c in liste_conso if _date(c.get("date"))}).exclude(
+            pk__in=suppressions_conso).values("date", "inscription_id", "unite_id", "evenement_id"):
+        cases_occupees.add((str(conso["date"]), conso["inscription_id"], conso["unite_id"], conso["evenement_id"]))
 
     consommations = {}
     for key_case, conso in liste_conso:
@@ -179,8 +204,12 @@ def Securiser_donnees_save(request, donnees, data):
             idevenement = _int(conso.get("evenement"))
             etat = conso.get("etat")
             if not inscription or not date or str(date) not in dates_modifiables or idunite not in unites_visibles \
-                    or (idevenement and idevenement not in evenements_valides) or etat not in ETATS_PORTAIL or not inscription.Is_inscription_in_periode(date, date):
+                    or (idevenement and not Evenement_valide(idevenement, date, idunite, inscription)) or etat not in ETATS_PORTAIL or not inscription.Is_inscription_in_periode(date, date):
                 rejets.append("ajout conso %s %s %s" % (conso.get("date"), conso.get("unite"), etat))
+                continue
+            key_occupation = (str(date), inscription.pk, idunite, idevenement)
+            if idunite not in unites_multihoraires and key_occupation in cases_occupees:
+                rejets.append("doublon conso %s %s" % (conso.get("date"), conso.get("unite")))
                 continue
             if activite.validation_type == "MANUELLE":
                 etat = "demande"
@@ -197,18 +226,8 @@ def Securiser_donnees_save(request, donnees, data):
                     dict_conso[cle] = str(conso[cle])
 
         dict_conso["key_case"] = key_case
+        cases_occupees.add((dict_conso["date"], dict_conso["inscription"], dict_conso["unite"], dict_conso["evenement"]))
         consommations.setdefault(key_case, []).append(dict_conso)
-
-    # ------------------ Suppressions de consommations ------------------
-    # De la famille, non pointées, hors forfait, dans le délai de suppression (ou demande en attente de validation)
-    suppressions = donnees.get("suppressions") or {}
-    liste_conso_suppr = []
-    for conso in Consommation.objects.filter(pk__in=[_int(pk) for pk in suppressions.get("consommations", []) if _int(pk)], inscription__in=inscriptions.keys()):
-        if conso.etat not in ETATS_POINTES and not conso.forfait and (conso.etat == "demande" or is_suppression_allowed(conso.date, data)):
-            liste_conso_suppr.append(conso)
-        else:
-            rejets.append("suppression conso %d" % conso.pk)
-    suppressions_conso = [conso.pk for conso in liste_conso_suppr]
 
     # Une conso supprimée ne peut pas être aussi dans la grille
     for key_case in list(consommations.keys()):
@@ -251,29 +270,37 @@ def Securiser_donnees_save(request, donnees, data):
     conditions |= Q(famille=famille, pk__in=[dict_conso["prestation"] for liste in consommations.values() for dict_conso in liste if dict_conso["prestation"]])
     prestations = Get_prestations(conditions)
 
-    donnees_facturation = {
-        "mode": "portail", "cases_touchees": cases_touchees, "consommations": consommations_facturation,
-        "prestations": json.loads(json.dumps(prestations)), "dict_aides": Get_dict_aides(prestations),
-        "liste_vacances": [(str(vacance.date_debut), str(vacance.date_fin)) for vacance in data.get("liste_vacances", [])],
-        "dict_suppressions": {"consommations": suppressions_conso, "prestations": [], "memos": []},
-    }
-    retour = Facturation(donnees=donnees_facturation).Facturer()
-
-    # Application du résultat
-    prestations.update(retour["nouvelles_prestations"])
     suppressions_prestations = []
-    for idprestation in retour["anciennes_prestations"]:
-        prestations.pop(str(idprestation), None)
-        if _int(idprestation):
-            suppressions_prestations.append(_int(idprestation))
+    conso_masquees = {}
+    for iteration in range(5):
+        donnees_facturation = {
+            "mode": "portail", "cases_touchees": cases_touchees, "consommations": json.loads(json.dumps(consommations_facturation)),
+            "prestations": json.loads(json.dumps(prestations)), "dict_aides": Get_dict_aides(prestations),
+            "liste_vacances": [(str(vacance.date_debut), str(vacance.date_fin)) for vacance in data.get("liste_vacances", [])],
+            "dict_suppressions": {"consommations": suppressions_conso, "prestations": suppressions_prestations, "memos": []},
+        }
+        retour = Facturation(donnees=donnees_facturation).Facturer()
+
+        # Application du résultat
+        prestations.update(retour["nouvelles_prestations"])
+        for idprestation in retour["anciennes_prestations"]:
+            prestations.pop(str(idprestation), None)
+            if _int(idprestation) and _int(idprestation) not in suppressions_prestations:
+                suppressions_prestations.append(_int(idprestation))
+        for liste in list(consommations.values()) + list(consommations_facturation.values()):
+            for dict_conso in liste:
+                if dict_conso["key_case"] in retour["modifications_idprestation"]:
+                    idprestation = retour["modifications_idprestation"][dict_conso["key_case"]]
+                    if str(idprestation) != str(dict_conso["prestation"]):
+                        dict_conso["prestation"] = idprestation
+                        dict_conso["dirty"] = True
+        conso_masquees.update({str(idconso): idprestation for idconso, idprestation in retour.get("modifications_conso_masquees", {}).items()})
+
+        # Relance si la facturation le demande (création ou retrait d'un forfait-crédit), comme tout_recalculer() de grille.js
+        if not retour.get("tout_recalculer"):
+            break
+
     suppressions_prestations = list(Prestation.objects.filter(pk__in=suppressions_prestations, famille=famille, facture__isnull=True).values_list("pk", flat=True))
-    for liste in consommations.values():
-        for dict_conso in liste:
-            if dict_conso["key_case"] in retour["modifications_idprestation"]:
-                idprestation = retour["modifications_idprestation"][dict_conso["key_case"]]
-                if str(idprestation) != str(dict_conso["prestation"]):
-                    dict_conso["prestation"] = idprestation
-                    dict_conso["dirty"] = True
 
     # ------------------ Mémos : uniquement ceux des inscriptions de la page ------------------
     memos = {}
@@ -292,6 +319,6 @@ def Securiser_donnees_save(request, donnees, data):
         "consommations": consommations,
         "prestations": prestations,
         "memos": memos,
-        "conso_masquees": {str(idconso): idprestation for idconso, idprestation in retour.get("modifications_conso_masquees", {}).items()},
+        "conso_masquees": conso_masquees,
         "suppressions": {"consommations": suppressions_conso, "prestations": suppressions_prestations, "memos": suppressions_memos},
     }

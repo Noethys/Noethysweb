@@ -1775,6 +1775,7 @@ function search_unites_liees(case_tableau) {
                 if (dependances_unite.length > 0) {
                     // Recherche les états des unités dépendantes
                     var conso_trouvees = [];
+                    var dependance_non_affichee = false;
                     for (var idunite_dependance of dependances_unite) {
                         let key_unite_dependance = conso.date + "_" + conso.inscription + "_" + idunite_dependance;
                         if (key_unite_dependance in dict_cases) {
@@ -1783,10 +1784,13 @@ function search_unites_liees(case_tableau) {
                                 dict_cases[key].modifier_conso({etat: conso_unite_dependance.etat}, false);
                                 conso_trouvees.push(conso_unite_dependance);
                             }
+                        } else {
+                            // Unité non affichée (ex : masquée sur le portail) : son contenu est inconnu ici
+                            dependance_non_affichee = true;
                         }
                     }
-                    // Si aucune conso dépendante, on supprime la conso
-                    if (conso_trouvees.length === 0) {
+                    // Si aucune conso dépendante (et toutes les unités dépendantes sont affichées), on supprime la conso
+                    if ((conso_trouvees.length === 0) && (dependance_non_affichee === false)) {
                         dict_cases[key].supprimer();
                     }
                 }
@@ -1796,7 +1800,8 @@ function search_unites_liees(case_tableau) {
                     // Recherche les états des unités solidaires
                     for (var idunite_solidaire of solidaires_unite) {
                         let key_unite_solidaire = conso.date + "_" + conso.inscription + "_" + idunite_solidaire;
-                        if (key_unite_solidaire in dict_cases) {
+                        // On ne crée la conso que si la case solidaire est vide (sinon doublon à chaque clic sur la ligne)
+                        if ((key_unite_solidaire in dict_cases) && (dict_cases[key_unite_solidaire].consommations.length === 0)) {
                             var case_solidaire = dict_cases[key_unite_solidaire]
                             case_solidaire.creer_conso({etat: conso.etat}, false);
                         }

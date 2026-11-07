@@ -1446,13 +1446,14 @@ class Facturation():
             self.cache_conso_grille_forfaits[key_grille] = dict_quantites_dates
         # Copie pour ne pas modifier le résultat mémorisé
         dict_quantites_dates = {key: list(unites) for key, unites in self.cache_conso_grille_forfaits[key_grille].items()}
-        key_affichees = list(dict_quantites_dates.items())
+        key_affichees = list(dict_quantites_dates.keys())
 
-        # Recherche la quantité de conso déjà enregistrées dans la DB
+        # Recherche la quantité de conso déjà enregistrées dans la DB (hors lignes affichées et hors conso en cours de suppression)
         # Optimisation : consommations de la période chargées une seule fois par période et par inscription
         key_db = (str(forfait_date_debut), str(forfait_date_fin), case_tableau["inscription"])
         if key_db not in self.cache_conso_forfaits:
-            self.cache_conso_forfaits[key_db] = list(Consommation.objects.filter(date__gte=forfait_date_debut, date__lte=forfait_date_fin, inscription=case_tableau["inscription"]).values_list("date", "inscription_id", "unite_id"))
+            conso_supprimees = [int(pk) for pk in (self.donnees.get("dict_suppressions") or {}).get("consommations", []) if "-" not in str(pk)]
+            self.cache_conso_forfaits[key_db] = list(Consommation.objects.filter(date__gte=forfait_date_debut, date__lte=forfait_date_fin, inscription=case_tableau["inscription"]).exclude(pk__in=conso_supprimees).values_list("date", "inscription_id", "unite_id"))
         for conso_date, conso_inscription_id, conso_unite_id in self.cache_conso_forfaits[key_db]:
             key = "%s_%d" % (conso_date, conso_inscription_id)
             if key not in key_affichees and conso_unite_id not in dict_quantites_dates.get(key, []):
@@ -1508,6 +1509,10 @@ class Facturation():
 
                 # Renvoie prestation existante si la prestation semble identique avec montants identiques
                 keys = ["date", "individu", "tarif", "montant_initial", "montant", "categorie_tarif", "famille", "label", "quantite", "tarif_ligne"]#, "tva"]
+
+                # Tarif selon le nombre d'individus : le montant est corrigé après l'enregistrement (Maj_tarifs_fratries), on ne le compare pas
+                if "nbre_ind" in tarif.methode and not liste_aides:
+                    keys = [key for key in keys if key not in ("montant_initial", "montant")]
 
                 if dictPrestation["temps_facture"]: dictPrestation["temps_facture"] = dictPrestation["temps_facture"].lstrip("0")
                 if dict_prestation_2["temps_facture"]: dict_prestation_2["temps_facture"] = dict_prestation_2["temps_facture"].lstrip("0")
