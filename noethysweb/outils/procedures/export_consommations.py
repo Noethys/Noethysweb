@@ -2,13 +2,27 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, datetime
+import logging, datetime, re, operator
 logger = logging.getLogger(__name__)
 from django.db.models import Q
 from core.models import Consommation
 from core.utils import utils_dates
 from outils.views.procedures import BaseProcedure
 from facturation.utils.utils_export_ecritures import BaseExporter
+
+
+# Filtre sur l'âge (remplace eval()) : un opérateur suivi d'un nombre entier. Ex : >6, <=6, =10
+REGEX_CRITERE_AGE = re.compile(r"^\s*(<=|>=|==|!=|<>|<|>|=)\s*(\d{1,3})\s*$")
+OPERATEURS_AGE = {"<=": operator.le, ">=": operator.ge, "==": operator.eq, "=": operator.eq, "!=": operator.ne, "<>": operator.ne, "<": operator.lt, ">": operator.gt}
+
+
+def Get_filtre_age(critere=""):
+    """ Renvoie une fonction de test de l'âge ou None si le critère n'est pas valide """
+    resultat = REGEX_CRITERE_AGE.match(critere or "")
+    if not resultat:
+        return None
+    operateur, valeur = OPERATEURS_AGE[resultat.group(1)], int(resultat.group(2))
+    return lambda age: operateur(age, valeur)
 
 
 class Exporter(BaseExporter):
@@ -31,13 +45,21 @@ class Exporter(BaseExporter):
             conditions &= Q(groupe_id=self.options.idgroupe)
         consommations = Consommation.objects.select_related("individu", "activite").filter(conditions).order_by("date")
 
+        # Filtre sur l'âge
+        filtre_age = None
+        if self.options.age:
+            filtre_age = Get_filtre_age(self.options.age)
+            if not filtre_age:
+                self.erreurs.append("Le critère d'âge '%s' n'est pas valide. Exemples : >6, <=6, =10" % self.options.age)
+                return False
+
         lignes = [{"date": "Date", "individu": "Individu", "age": "Age", "heure_debut": "Début", "heure_fin": "Fin", "duree": "Durée"}]
         for conso in consommations:
             duree = utils_dates.SoustractionHeures(conso.heure_fin, conso.heure_debut) if conso.heure_fin else None
             age = (conso.date.year - conso.individu.date_naiss.year) - int((conso.date.month, conso.date.day) < (conso.individu.date_naiss.month, conso.individu.date_naiss.day)) if conso.individu.date_naiss else None
 
             # Filtre sur l'âge
-            if self.options.age and (not age or not eval("%s%s" % (age, self.options.age))):
+            if filtre_age and (not age or not filtre_age(age)):
                 continue
 
             lignes.append({

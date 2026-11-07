@@ -12,7 +12,7 @@ from reportlab.lib import colors
 from core.models import Evenement, Regime, Vacance, Activite, Quotient, TarifLigne, Consommation, Famille, Individu, LISTE_ETATS_CONSO, JOURS_COMPLETS_SEMAINE
 from core.utils import utils_dates, utils_impression, utils_infos_individus, utils_dictionnaires, utils_polices
 from core.data.data_departements import Get_departement
-from core.utils.utils_dates import HeureStrEnDelta as HEURE # Ne pas supprimer : est utilisé pour la formule
+from consommations.utils import utils_frequentation_caf
 
 
 # Regex pour formule
@@ -753,27 +753,29 @@ class Impression(utils_impression.Impression):
             self.story.append(Spacer(0, 20))
 
     def Calcule_formule(self, formule="", date=None, idinscription=None, debut=None, fin=None):
+        """ Calcul d'une formule sans eval() : la formule est analysée et vérifiée par l'évaluateur sécurisé de l'assistant
+        de fréquentation CAF (liste blanche : uniteN.attribut, debut, fin, duree, date, SI, HEURE, MIN, MAX, ET, OU, opérateurs) """
         debut = utils_dates.TimeEnDelta(debut)
         fin = utils_dates.TimeEnDelta(fin)
-        duree = fin - debut
 
-        def SI(condition=None, alors=None, sinon=datetime.timedelta(minutes=0)):
-            return alors if condition else sinon
+        # Formule analysée une seule fois (mêmes remplacements que l'ancienne version)
+        if not hasattr(self, "cache_formules"):
+            self.cache_formules = {}
+        if formule not in self.cache_formules:
+            texte = formule
+            for expression, remplacement in [("\n", " "), ("ET", " and "), ("OU", " or ")]:
+                texte = texte.replace(expression, remplacement)
+            self.cache_formules[formule] = utils_frequentation_caf.Formule(texte)
+        formule_compilee = self.cache_formules[formule]
 
-        # Remplacements
-        remplacements = [("\n", ""), ("ET", "and"), ("OU", "or")]
-        for expression, remplacement in remplacements:
-            formule = formule.replace(expression, remplacement)
-
-        # Unités (après avoir enlevé les doublons d'unités)
-        for code_unite in list({item: True for item in REGEX_UNITES.findall(formule)}.keys()):
-            unite = self.dict_unites.get((date, idinscription, int(code_unite.replace("unite", ""))), Unite_conso())
-            setattr(self, code_unite, unite)
-            formule = formule.replace(code_unite, "self.%s" % code_unite)
+        # Variables
+        variables = {"debut": debut, "fin": fin, "duree": fin - debut, "date": date}
+        for idunite in formule_compilee.unites:
+            variables["unite%d" % idunite] = self.dict_unites.get((date, idinscription, idunite), Unite_conso())
 
         # Calcul de la formule
-        resultat = eval(formule)
-        if resultat == None :
+        resultat = formule_compilee._Evaluer(formule_compilee.arbre.body, variables)
+        if resultat == None:
             resultat = datetime.timedelta(minutes=0)
         if type(resultat) == int:
             resultat = datetime.timedelta(hours=resultat)

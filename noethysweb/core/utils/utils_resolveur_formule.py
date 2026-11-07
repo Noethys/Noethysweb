@@ -3,8 +3,38 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import re
+import re, ast, operator
 from core.utils import utils_preferences
+
+
+# Calcul arithmétique sécurisé (remplace eval()) : nombres, + - * / // %, parenthèses et signe uniquement
+OPERATEURS_CALCUL = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv,
+                     ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod}
+OPERATEURS_SIGNE = {ast.USub: operator.neg, ast.UAdd: operator.pos}
+LONGUEUR_MAX_CALCUL = 500
+
+
+def Calculer(texte=""):
+    """ Évalue une expression arithmétique simple sans eval(). Lève ValueError si l'expression n'est pas autorisée. """
+    if len(texte) > LONGUEUR_MAX_CALCUL:
+        raise ValueError("Calcul trop long")
+    try:
+        arbre = ast.parse(texte.strip(), mode="eval")
+    except SyntaxError:
+        raise ValueError("Calcul non valide")
+
+    def Evaluer(noeud):
+        if isinstance(noeud, ast.Expression):
+            return Evaluer(noeud.body)
+        if isinstance(noeud, ast.Constant) and type(noeud.value) in (int, float):
+            return noeud.value
+        if isinstance(noeud, ast.BinOp) and type(noeud.op) in OPERATEURS_CALCUL:
+            return OPERATEURS_CALCUL[type(noeud.op)](Evaluer(noeud.left), Evaluer(noeud.right))
+        if isinstance(noeud, ast.UnaryOp) and type(noeud.op) in OPERATEURS_SIGNE:
+            return OPERATEURS_SIGNE[type(noeud.op)](Evaluer(noeud.operand))
+        raise ValueError("Élément non autorisé dans le calcul : %s" % type(noeud).__name__)
+
+    return Evaluer(arbre)
 
 def ResolveurCalcul(texte="", dictValeurs={}):
     """ Pour résoudre les calculs """
@@ -27,7 +57,7 @@ def ResolveurCalcul(texte="", dictValeurs={}):
 
     # Réalisation du calcul
     try:
-        resultat = eval(texte)
+        resultat = Calculer(texte)
         if resultat_monetaire == True:
             resultat = "%.02f %s" % (resultat, symbole_monnaie)
         else:
