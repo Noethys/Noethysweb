@@ -555,7 +555,9 @@ def Get_generic_data(data={}):
     return data
 
 
-def Save_grille(request=None, donnees={}):
+def Save_grille(request=None, donnees={}, proteger_conso_fantomes=False):
+    """ proteger_conso_fantomes : si True (portail), une prestation encore utilisée par une consommation
+    ni supprimée ni réaffectée n'est pas supprimée (au lieu de supprimer la consommation) """
     logger.debug("Sauvegarde de la grille...")
     #logger.debug("prestations : " + str(donnees["prestations"]))
     #logger.debug("suppressions : " + str(donnees["suppressions"]))
@@ -749,6 +751,11 @@ def Save_grille(request=None, donnees={}):
     #     messages.add_message(request, messages.SUCCESS, "Consommations enregistrées : %s" % utils_texte.Convert_liste_to_texte_virgules(texte_notification))
 
     # Suppression des prestations obsolètes (après la suppression des consommations associées)
+    if proteger_conso_fantomes and donnees["suppressions"]["prestations"]:
+        prestations_utilisees = set(Consommation.objects.filter(prestation_id__in=donnees["suppressions"]["prestations"]).values_list("prestation_id", flat=True))
+        if prestations_utilisees:
+            logger.warning("Prestations conservées car encore utilisées par des consommations : " + str(prestations_utilisees))
+            donnees["suppressions"]["prestations"] = [idprestation for idprestation in donnees["suppressions"]["prestations"] if int(idprestation) not in prestations_utilisees]
     logger.debug("Prestations à supprimer : " + str(donnees["suppressions"]["prestations"]))
     liste_prestations_suppr = []
     if donnees["suppressions"]["prestations"]:
@@ -835,12 +842,20 @@ def Facturer(request=None):
     donnees_aller = json.loads(request.POST.get("donnees", "{}"))
     logger.debug("============== Facturation ================")
     logger.debug("données aller : " + str(donnees_aller))
+
+    # Portail : les données du navigateur sont filtrées (famille connectée uniquement, mode pointeuse interdit).
+    # Ce calcul ne sert qu'à l'affichage : l'enregistrement du portail recalcule la facturation côté serveur.
+    is_portail = getattr(request.user, "categorie", None) == "famille"
+    if is_portail:
+        from portail.utils import utils_securite_grille
+        donnees_aller = utils_securite_grille.Filtrer_donnees_facturation(request, donnees_aller)
+
     facturation = Facturation(donnees=donnees_aller)
     donnees_retour = facturation.Facturer()
     #logger.debug("données retour : " + str(donnees_retour))
 
     # Si mode pointage, sauvegarde les données
-    if donnees_aller.get("mode", None) == "pointeuse":
+    if donnees_aller.get("mode", None) == "pointeuse" and not is_portail:
 
         # Attribue les nouvelles prestations aux consommations
         for key_case, idprestation in donnees_retour["modifications_idprestation"].items():
@@ -1346,7 +1361,8 @@ class Facturation():
             logger.debug("Consommations masquées prises en compte dans la facturation : " + str(list(self.conso_masquees.values())))
 
     def Get_prestations_autres_lignes(self, case_tableau=None):
-        """ Renvoie les IDprestation utilisés par les consommations des autres inscriptions de l'individu à la même date """
+        """ Renvoie les IDprestation de l'individu à la même date qui ne doivent être ni supprimés ni réutilisés pour cette ligne :
+        ceux des consommations des autres inscriptions de la grille et ceux des consommations existantes absentes de la grille """
         # Index des consommations par (date, individu, activité), construit une seule fois
         if not hasattr(self, "index_lignes"):
             self.index_lignes = {}
@@ -1354,8 +1370,22 @@ class Facturation():
                 for conso in liste_conso:
                     self.index_lignes.setdefault((str(conso["date"]), conso["individu"], conso["activite"]), []).append(conso)
 
-        resultats = set()
-        for conso in self.index_lignes.get((str(case_tableau["date"]), case_tableau["individu"], case_tableau["activite"]), []):
+        # Index des prestations utilisées par des consommations existantes absentes de la grille (autre groupe filtré, unité non affichée...)
+        if not hasattr(self, "index_hors_grille"):
+            self.index_hors_grille = {}
+            cases = list((self.donnees.get("cases_touchees") or {}).values())
+            if cases:
+                pk_grille = {str(conso.get("pk")) for liste_conso in self.donnees.get("consommations", {}).values() for conso in liste_conso}
+                pk_grille.update(str(pk) for pk in (self.donnees.get("dict_suppressions") or {}).get("consommations", []))
+                conditions = Q(date__in={str(case["date"]) for case in cases}, individu_id__in={case["individu"] for case in cases},
+                               activite_id__in={case["activite"] for case in cases}, prestation__isnull=False)
+                for conso in Consommation.objects.filter(conditions).values("pk", "date", "individu_id", "activite_id", "prestation_id"):
+                    if str(conso["pk"]) not in pk_grille:
+                        self.index_hors_grille.setdefault((str(conso["date"]), conso["individu_id"], conso["activite_id"]), set()).add(str(conso["prestation_id"]))
+
+        key_ligne = (str(case_tableau["date"]), case_tableau["individu"], case_tableau["activite"])
+        resultats = set(self.index_hors_grille.get(key_ligne, set()))
+        for conso in self.index_lignes.get(key_ligne, []):
             if conso["inscription"] == case_tableau["inscription"]:
                 continue
             # Si l'autre ligne a déjà été recalculée, seule sa nouvelle prestation compte

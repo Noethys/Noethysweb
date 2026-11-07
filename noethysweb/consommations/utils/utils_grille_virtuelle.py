@@ -228,6 +228,9 @@ class Grille_virtuelle():
             self.data_initial["consommations"][key_conso] = liste_conso_finale
 
     def Enregistrer(self):
+        # Les consommations supprimées sont signalées à la facturation (sinon elles seraient vues comme absentes de la grille)
+        self.data_initial["dict_suppressions"] = {"consommations": list(self.conso_supprimees), "prestations": [], "memos": []}
+
         # Calcul de la facturation
         facturation = Facturation(donnees=self.data_initial)
         donnees_retour = facturation.Facturer()

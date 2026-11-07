@@ -19,6 +19,7 @@ from consommations.forms.grille_forfaits import Formulaire as form_forfaits
 from portail.forms.appliquer_semaine_type import Formulaire as form_appliquer_semaine_type
 from portail.templatetags.planning import is_ajout_allowed
 from portail.utils import utils_approbations
+from portail.utils import utils_securite_grille
 from portail.views.base import CustomView
 from reglements.utils import utils_ventilation
 
@@ -41,7 +42,9 @@ class View(CustomView, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ Sauvegarde de la grille """
-        resultat = Save_grille(request=request, donnees=json.loads(self.request.POST.get("donnees")))
+        # Contrôle des données envoyées par le navigateur et recalcul de la facturation côté serveur
+        donnees = utils_securite_grille.Securiser_donnees_save(request, json.loads(self.request.POST.get("donnees", "{}")), self.Get_data_planning())
+        resultat = Save_grille(request=request, donnees=donnees, proteger_conso_fantomes=True)
 
         # Ventilation auto si besoin
         if utils_portail.Get_parametre(code="reservations_ventilation_auto") and utils_ventilation.GetAnomaliesVentilation(idfamille=self.request.user.famille.pk):
