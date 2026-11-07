@@ -3,49 +3,163 @@
 {% load static %}
 {% load embed %}
 
-{% block styles %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'css/alerte.css' %}">
-{% endblock styles %}
-
 {% block detail_collaborateur %}
     <div class="col-md-9">
 
         {# Caractéristiques #}
-        {% embed 'core/box.html' %}
-            {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Caractéristiques{% endblock %}
-            {% block box_contenu %}
-                <dl class="row caracteristiques">
-                    <dt class="col-sm-4">Nom</dt><dd class="col-sm-8">{{ collaborateur.nom }}</dd>
-                    {% if collaborateur.prenom %}<dt class="col-sm-4">Prénom</dt><dd class="col-sm-8">{{ collaborateur.prenom|default:"" }}</dd>{% endif %}
-                    {% if collaborateur.date_naiss %}<dt class="col-sm-4">Date de naissance</dt><dd class="col-sm-8">{{ collaborateur.date_naiss }} ({{ collaborateur.Get_age }} ans)</dd>{% endif %}
-                    {% if collaborateur.Get_adresse_complete %}<dt class="col-sm-4">Adresse</dt><dd class="col-sm-8">{{ collaborateur.Get_adresse_complete }}</dd>{% endif %}
-                    <dt class="col-sm-4">Date de création</dt><dd class="col-sm-8">{{ collaborateur.date_creation|date:"j F Y" }}</dd>
-                    <dt class="col-sm-4">ID collaborateur</dt><dd class="col-sm-8">{{ collaborateur.pk }}</dd>
-                    {% if collaborateur.deces %}
-                        <dt class="col-sm-4">Décès</dt><dd class="col-sm-8 text-bold text-red">{% if collaborateur.annee_deces %}collaborateur décédé en {{ collaborateur.annee_deces }}{% else %}collaborateur décédé{% endif %}</dd>
-                    {% endif %}
-                    {% if inscriptions %}
-                        <dt class="col-sm-4">Inscriptions actuelles</dt><dd class="col-sm-8">{{ inscriptions }}</dd>
-                    {% endif %}
-                </dl>
-            {% endblock %}
-        {% endembed %}
+        <style>
+            @font-face {
+                font-family: "Caveat";
+                src: url("{% static 'polices/caveat/caveat-latin-600-normal.woff2' %}") format("woff2");
+                font-weight: 600;
+                font-display: swap;
+            }
+            .caracteristiques_papier {
+                padding: 26px 20px 20px;
+                background-color: #fdfdfa;
+                background-image: linear-gradient(rgba(70,130,190,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(70,130,190,0.18) 1px, transparent 1px);
+                background-size: 20px 20px;
+                box-shadow: inset 0 0 0 1px #e3e3dc;
+                border-radius: .25rem;
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+                gap: 26px 20px;
+            }
+            .dark-mode .caracteristiques_papier {
+                background-color: #2b2f33;
+                background-image: linear-gradient(rgba(120,170,220,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(120,170,220,0.16) 1px, transparent 1px);
+                box-shadow: inset 0 0 0 1px #3d4247;
+            }
 
-        {# Alertes #}
-        {% if nbre_alertes %}
-            {% embed 'core/box.html' %}
-                {% block box_theme %}box-warning{% endblock %}
-                {% block box_titre %}Alertes{% endblock %}
-                {% block box_contenu %}
-                    {# Pièces à fournir #}
+            .etiquette-carac {
+                position: relative;
+                background: #fffdf8;
+                border-radius: 6px;
+                padding: 12px 14px 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                min-width: 0;
+                margin: 0;
+                box-shadow: 0 5px 10px rgba(50,25,5,0.34);
+                transform: rotate(var(--inclinaison, 0deg));
+            }
+            .etiquette-carac.large { grid-column: span 2; }
+            .etiquette-carac .libelle {
+                display: block;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                color: #4f7fae;
+            }
+            .etiquette-carac .valeur {
+                font-size: 15px;
+                overflow-wrap: anywhere;
+            }
+            .dark-mode .etiquette-carac { background: #3a3f44; color: #f1f1f1; }
+            .dark-mode .etiquette-carac .libelle { color: #9cc3e8; }
+
+            .etiquette-carac .scotch {
+                position: absolute;
+                top: -6px;
+                left: 50%;
+                z-index: 2;
+                pointer-events: none;
+                transform: translateX(-50%) rotate(var(--angle-scotch, 0deg));
+                filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+            }
+            .etiquette-carac .scotch::before {
+                content: "";
+                display: block;
+                width: 36px;
+                height: 12px;
+                background: linear-gradient(180deg, rgba(240,236,220,0.40), rgba(226,219,196,0.30));
+                clip-path: polygon(3% 0,97% 0,100% 14%,96% 30%,100% 48%,97% 66%,100% 84%,97% 100%,3% 100%,0 84%,4% 66%,0 48%,3% 30%,0 14%);
+            }
+            .dark-mode .etiquette-carac .scotch::before {
+                background: linear-gradient(180deg, rgba(255,255,250,0.30), rgba(240,234,212,0.22));
+            }
+
+            /* Inclinaisons pseudo-aléatoires */
+            .etiquette-carac:nth-child(7n+1) { --inclinaison: -0.7deg; --angle-scotch:  3deg; }
+            .etiquette-carac:nth-child(7n+2) { --inclinaison:  0.5deg; --angle-scotch: -4deg; }
+            .etiquette-carac:nth-child(7n+3) { --inclinaison:  0.8deg; --angle-scotch: -2deg; }
+            .etiquette-carac:nth-child(7n+4) { --inclinaison: -0.4deg; --angle-scotch:  5deg; }
+            .etiquette-carac:nth-child(7n+5) { --inclinaison:  0.6deg; --angle-scotch: -3deg; }
+            .etiquette-carac:nth-child(7n+6) { --inclinaison: -0.8deg; --angle-scotch:  2deg; }
+            .etiquette-carac:nth-child(7n+7) { --inclinaison:  0.3deg; --angle-scotch: -5deg; }
+
+            /* Post-it des pièces à fournir */
+            .etiquette-carac.postit {
+                --inclinaison: 1.5deg;
+                background: linear-gradient(170deg, #fff6a8, #fbe77c);
+                border-radius: 2px;
+                box-shadow: 2px 8px 12px rgba(50,25,5,0.32);
+            }
+            .etiquette-carac.postit .libelle { color: #7a6205; }
+            .etiquette-carac.postit ul { margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+            .etiquette-carac.postit li { font-family: "Caveat", "Segoe Print", "Bradley Hand", cursive; font-weight: 600; font-size: 20px; line-height: 1.1; }
+            .etiquette-carac.postit li a { color: #4a3a05; }
+            .etiquette-carac.postit li a:hover { color: #4a3a05; text-decoration: underline; }
+            .dark-mode .etiquette-carac.postit { background: linear-gradient(170deg, #6b6230, #5c5428); color: #fff6c4; }
+            .dark-mode .etiquette-carac.postit .libelle { color: #f3e08a; }
+            .dark-mode .etiquette-carac.postit li a { color: #fff6c4; }
+
+            /* Pastilles (qualifications, groupes) */
+            .etiquette-carac .pictos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+            .etiquette-carac .picto { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 16px; font-size: 13px; font-weight: 600; background: #e8f0fb; color: #1f4f8a; }
+            .etiquette-carac .picto.gris { background: #eef0f2; color: #3e4a56; }
+
+            @media (max-width: 575px) {
+                .etiquette-carac.large { grid-column: auto; }
+            }
+        </style>
+        <div class="card card-outline card-lightblue">
+            <div class="card-body p-0" style="min-height: 0">
+                <div class="caracteristiques caracteristiques_papier">
                     {% if pieces_fournir %}
-                        {% embed "individus/alerte.html" with items=pieces_fournir titre="Pièces à fournir" icone="fa-file-text-o" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-6deg"%}{% endembed %}
+                        <div class="etiquette-carac postit large"><span class="scotch" aria-hidden="true"></span>
+                            <span class="libelle">À régulariser</span>
+                            <ul>
+                                {% for item in pieces_fournir %}
+                                    <li>{% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>• {{ item.label }}</a>{% else %}• {{ item.label }}{% endif %}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     {% endif %}
-                {% endblock %}
-            {% endembed %}
-        {% endif %}
+                    <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Nom</dt><dd class="valeur mb-0">{{ collaborateur.nom }}</dd></dl>
+                    {% if collaborateur.prenom %}<dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Prénom</dt><dd class="valeur mb-0">{{ collaborateur.prenom }}</dd></dl>{% endif %}
+                    {% if collaborateur.tel_mobile or collaborateur.tel_domicile or collaborateur.travail_tel %}
+                        <dl class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Téléphones</dt><dd class="valeur mb-0">{% if collaborateur.tel_mobile %}{{ collaborateur.tel_mobile }}{% endif %}{% if collaborateur.tel_domicile %}{% if collaborateur.tel_mobile %} · {% endif %}{{ collaborateur.tel_domicile }}{% endif %}{% if collaborateur.travail_tel %}{% if collaborateur.tel_mobile or collaborateur.tel_domicile %} · {% endif %}{{ collaborateur.travail_tel }} (pro.){% endif %}</dd></dl>
+                    {% endif %}
+                    {% if collaborateur.rue_resid or collaborateur.ville_resid %}
+                        <dl class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Adresse</dt><dd class="valeur mb-0">{{ collaborateur.rue_resid|default:"" }} {{ collaborateur.cp_resid|default:"" }} {{ collaborateur.ville_resid|default:"" }}</dd></dl>
+                    {% endif %}
+                    {% if collaborateur.mail or collaborateur.travail_mail %}
+                        <dl class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Email</dt><dd class="valeur mb-0">{% if collaborateur.mail %}{{ collaborateur.mail }}{% endif %}{% if collaborateur.travail_mail %}{% if collaborateur.mail %} · {% endif %}{{ collaborateur.travail_mail }} (pro.){% endif %}</dd></dl>
+                    {% endif %}
+                    <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Date de création</dt><dd class="valeur mb-0">{{ collaborateur.date_creation|date:"j F Y" }}</dd></dl>
+                    <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">ID collaborateur</dt><dd class="valeur mb-0">{{ collaborateur.pk }}</dd></dl>
+                    {% with qualifications=collaborateur.qualifications.all %}
+                        {% if qualifications %}
+                            <div class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span>
+                                <span class="libelle">Qualifications</span>
+                                <div class="pictos">{% for qualification in qualifications %}<span class="picto">{{ qualification.nom }}</span>{% endfor %}</div>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    {% with groupes=collaborateur.groupes.all %}
+                        {% if groupes %}
+                            <div class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span>
+                                <span class="libelle">Groupes</span>
+                                <div class="pictos">{% for groupe in groupes %}<span class="picto gris">{{ groupe.nom }}</span>{% endfor %}</div>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
 
         {# Notes #}
         <style>
@@ -59,7 +173,7 @@
             {% block box_theme %}card-outline card-lightblue{% endblock %}
             {% block box_titre %}Notes{% endblock %}
             {% block box_outils %}
-                <a type="button" class="btn btn-success btn-xs" title="Ajouter une note" style="margin-right: 10px;" href="{% url 'collaborateur_notes_ajouter' idcollaborateur=idcollaborateur %}"><i class="fa fa-plus"></i> Ajouter</a>
+                <a class="bouton-rond-ajouter" style="margin-right: 10px;" href="{% url 'collaborateur_notes_ajouter' idcollaborateur=idcollaborateur %}" title="Ajouter une note" aria-label="Ajouter une note"><i class="fa fa-plus" aria-hidden="true"></i></a>
             {% endblock %}
             {% block card_body_classe %}p-0{% endblock %}
             {% block box_contenu %}

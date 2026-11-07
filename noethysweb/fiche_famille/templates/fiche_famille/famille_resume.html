@@ -18,148 +18,20 @@
 {% block detail_famille %}
     <div class="col-md-9">
 
-        {# Caractéristiques #}
-        {% embed 'core/box.html' %}
-            {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Composition de la famille{% endblock %}
-            {% block box_outils %}
-                <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter un individu" href="{% url 'individu_ajouter' idfamille=idfamille %}"><i class="fa fa-plus"></i> Ajouter</a>
-            {% endblock %}
-            {% block card_body_classe %}
-                p-0
-            {% endblock %}
-            {% block box_contenu %}
+        {# Composition de la famille et état du dossier #}
+        <div class="card card-outline card-lightblue">
+            <div class="card-body p-0" style="min-height: 0">
                 {% embed 'fiche_famille/famille_composition.html' %}
                 {% endembed %}
-            {% endblock %}
-        {% endembed %}
-
-        {# Widgets informations #}
-        <div class="row">
-
-            <div class="col-md-3">
-                <div class="info-box" title="Ce solde prend en compte toutes les prestations et règlements passés ou futurs">
-                    <span class="info-box-icon bg-{% if solde_global < 0 %}red{% else %}gray-light{% endif %}"><i class="fa fa-euro"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Solde global</span>
-                        <span class="info-box-number {% if solde_global < 0 %}text-red{% endif %}{% if solde_global > 0 %}text-blue{% endif %}">{% if solde_global > 0 %}+{% endif %}{{ solde_global|montant }}</span>
-                        {% if soldes_activites %}
-                            <div class="dropdown solde-detail">
-                                <a href="#" class="small" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Afficher le détail du solde par activité">Détail <i class="fa fa-caret-down"></i></a>
-                                <div class="dropdown-menu p-2">
-                                    <table class="table table-sm table-borderless small mb-0">
-                                        <tr class="text-muted"><td>Activité</td><td>Période</td><td class="text-right">Solde</td></tr>
-                                        {% for ligne in soldes_activites %}
-                                            <tr>
-                                                <td class="{% if ligne.complement %}text-muted{% endif %}">{{ ligne.nom }}</td>
-                                                <td class="text-nowrap text-muted">{% if ligne.periode_debut %}{{ ligne.periode_debut|date:"m/Y" }}{% if ligne.periode_debut|date:"m/Y" != ligne.periode_fin|date:"m/Y" %} - {{ ligne.periode_fin|date:"m/Y" }}{% endif %}{% endif %}</td>
-                                                <td class="text-right text-nowrap {% if ligne.solde < 0 %}text-red{% else %}text-blue{% endif %}">{% if ligne.solde > 0 %}+{% endif %}{{ ligne.solde|montant }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                        <tr class="border-top">
-                                            <th colspan="2">Total</th>
-                                            <th class="text-right text-nowrap {% if solde_global < 0 %}text-red{% endif %}{% if solde_global > 0 %}text-blue{% endif %}">{% if solde_global > 0 %}+{% endif %}{{ solde_global|montant }}</th>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
             </div>
-
-            <div class="col-md-3">
-                <div class="info-box" title="Ce solde prend en compte uniquement les prestations facturées et les règlements associés">
-                    <span class="info-box-icon bg-{% if solde_facture < 0 %}red{% else %}gray-light{% endif %}"><i class="fa fa-euro"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Solde facturé</span>
-                        <span class="info-box-number {% if solde_facture < 0 %}text-red{% endif %}">{{ solde_facture|montant }}</span>
-                        {% if factures_impayees %}
-                            <div class="dropdown solde-detail">
-                                <a href="#" class="small" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Afficher les factures non soldées">{{ factures_impayees|length }} facture{{ factures_impayees|length|pluralize }} <i class="fa fa-caret-down"></i></a>
-                                <div class="dropdown-menu p-2">
-                                    <table class="table table-sm table-borderless small mb-0">
-                                        <tr class="text-muted"><td>N°</td><td>Date</td><td>Période</td><td class="text-right">Reste dû</td></tr>
-                                        {% for facture in factures_impayees %}
-                                            <tr>
-                                                <td class="text-nowrap"><a href="{% url 'famille_factures_modifier' idfamille=idfamille pk=facture.pk %}" class="text-primary" title="Ouvrir la facture">{{ facture.prefixe.prefixe|default:"" }}{{ facture.numero }}</a></td>
-                                                <td class="text-nowrap">{{ facture.date_edition|date:"d/m/Y" }}</td>
-                                                <td class="text-nowrap text-muted">{{ facture.date_debut|date:"m/Y" }}{% if facture.date_debut|date:"m/Y" != facture.date_fin|date:"m/Y" %} - {{ facture.date_fin|date:"m/Y" }}{% endif %}</td>
-                                                <td class="text-right text-nowrap {% if facture.solde_actuel > 0 %}text-red{% else %}text-blue{% endif %}">{{ facture.solde_actuel|montant }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </table>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="info-box" title="Le détail des alertes se trouve dans le cadre ci-dessous">
-                    <span class="info-box-icon bg-{% if nbre_alertes %}orange{% else %}gray-light{% endif %}"><i class="fa fa-warning"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Alertes</span>
-                        <span class="info-box-number">{{ nbre_alertes }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="info-box" title="Messages envoyés par la famille via le portail">
-                    <span class="info-box-icon bg-{% if nbre_messages_non_lus %}orange{% else %}gray-light{% endif %}"><i class="fa fa-comments-o"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Messages</span>
-                        <span class="info-box-number">{{ nbre_messages_non_lus }}</span>
-                    </div>
-                </div>
-            </div>
-
         </div>
-
-        {# Alertes #}
-        {% if nbre_alertes %}
-            {% embed 'core/box.html' %}
-                {% block box_theme %}card-outline card-lightblue{% endblock %}
-                {% block box_titre %}Alertes{% endblock %}
-                {% block box_contenu %}
-
-                    {# Pièces à fournir #}
-                    {% if pieces_fournir %}
-                        {% embed "individus/alerte.html" with items=pieces_fournir titre="Pièces à fournir" icone="fa-file-text-o" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-6deg"%}{% endembed %}
-                    {% endif %}
-
-                    {# Cotisations manquantes #}
-                    {% if cotisations_manquantes %}
-                        {% embed "individus/alerte.html" with items=cotisations_manquantes titre="Adhésions manquantes" icone="fa-id-card-o" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="5deg" %}{% endembed %}
-                    {% endif %}
-
-                    {# Informations manquantes #}
-                    {% if informations_manquantes %}
-                        {% embed "individus/alerte.html" with items=informations_manquantes titre="Informations manquantes" icone="fa-info-circle" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-3deg" %}{% endembed %}
-                    {% endif %}
-
-                    {# Vaccinations manquantes #}
-                    {% if vaccinations_manquantes %}
-                        {% embed "individus/alerte.html" with items=vaccinations_manquantes titre="Vaccinations manquantes" icone="fa-medkit" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="4deg" %}{% endembed %}
-                    {% endif %}
-
-                    {# Assurances manquantes #}
-                    {% if assurances_manquantes %}
-                        {% embed "individus/alerte.html" with items=assurances_manquantes titre="Assurances manquantes" icone="fa-shield" couleur_fond="#FAEEDA" couleur="#A9843F" rotation="-4deg" %}{% endembed %}
-                    {% endif %}
-
-                {% endblock %}
-            {% endembed %}
-        {% endif %}
 
         {# Notes #}
         {% embed 'core/box.html' %}
             {% block box_theme %}card-outline card-lightblue{% endblock %}
             {% block box_titre %}Notes{% endblock %}
             {% block box_outils %}
-                <a type="button" class="btn btn-success btn-xs" style="margin-right: 10px;" title="Ajouter une note" href="{% url 'famille_notes_ajouter' idfamille=famille.idfamille %}"><i class="fa fa-plus"></i> Ajouter</a>
+                <a class="bouton-rond-ajouter" style="margin-right: 10px;" href="{% url 'famille_notes_ajouter' idfamille=famille.idfamille %}" title="Ajouter une note" aria-label="Ajouter une note"><i class="fa fa-plus" aria-hidden="true"></i></a>
             {% endblock %}
             {% block card_body_classe %}p-0{% endblock %}
             {% block box_contenu %}

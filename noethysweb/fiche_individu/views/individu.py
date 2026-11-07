@@ -10,9 +10,11 @@ from django.views.generic.detail import DetailView
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.views.base import CustomView
-from core.models import Individu, Famille, Note, Rattachement, Inscription
+from core.models import Individu, Famille, Note, Rattachement, Inscription, ContactUrgence, Information
 from core.utils import utils_texte, utils_dates
 from fiche_individu.utils.utils_individu import LISTE_ONGLETS
+from individus.utils import utils_pieces_manquantes, utils_vaccinations, utils_assurances
+from cotisations.utils import utils_cotisations_manquantes
 
 
 class Page(crud.Page):
@@ -173,7 +175,46 @@ class Resume(Onglet, DetailView):
         liste_activites = {inscription.activite.nom: True for inscription in Inscription.objects.select_related("activite").filter(conditions).order_by("date_debut")}
         context['inscriptions'] = utils_texte.Convert_liste_to_texte_virgules(list(liste_activites.keys()))
 
+        # Etiquettes complémentaires du cadre Caractéristiques
+        context['alertes_individu'] = self.Get_alertes_individu()
+        context['contacts_urgence'] = ContactUrgence.objects.filter(individu_id=self.Get_idindividu(), famille_id=self.Get_idfamille()).order_by("nom", "prenom")
+        context['regimes_alimentaires'] = self.object.regimes_alimentaires.all().order_by("nom")
+        conditions = Q(individu_id=self.Get_idindividu()) & Q(diffusion_listing_enfants=True)
+        conditions &= (Q(date_debut__isnull=True) | Q(date_debut__lte=datetime.date.today())) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        context['informations_sante'] = Information.objects.select_related("categorie").filter(conditions).order_by("categorie__nom", "intitule")
+
         return context
+
+    def Get_alertes_individu(self):
+        """ Pièces, cotisations, vaccinations et assurances manquantes de l'individu """
+        idindividu = self.Get_idindividu()
+        alertes = []
+        if not self.Get_idfamille():
+            return alertes
+        famille = Famille.objects.get(pk=self.Get_idfamille())
+
+        # Pièces et cotisations (uniquement celles propres à l'individu)
+        for item in utils_pieces_manquantes.Get_pieces_manquantes(famille=famille, only_invalides=True, utilisateur=self.request.user):
+            if item["individu"] and item["individu"].pk == idindividu:
+                alertes.append({"label": item["label"], "href": item["href"], "titre": item["titre"]})
+        for item in utils_cotisations_manquantes.Get_cotisations_manquantes(famille=famille, utilisateur=self.request.user):
+            if item["individu"] and item["individu"].pk == idindividu:
+                alertes.append({"label": item["label"], "href": item["href"], "titre": item["titre"]})
+
+        # Vaccinations et assurances obligatoires
+        conditions = Q(famille=famille) & Q(individu_id=idindividu) & Q(individu__deces=False) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
+        conditions &= (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=datetime.date.today()))
+        inscriptions = Inscription.objects.select_related("activite", "individu", "famille").filter(conditions)
+        if inscriptions:
+            href_medical = reverse("individu_medical_liste", kwargs={"idfamille": famille.pk, "idindividu": idindividu})
+            for liste_vaccinations in utils_vaccinations.Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).values():
+                for vaccination in liste_vaccinations:
+                    alertes.append({"label": "Vaccination %s" % vaccination["label"], "href": href_medical, "titre": "Cliquez ici pour accéder à la page médicale de l'individu"})
+            if utils_assurances.Get_assurances_manquantes_by_inscriptions(famille=famille, inscriptions=inscriptions):
+                alertes.append({"label": "Assurance", "href": reverse("individu_assurances_liste", kwargs={"idfamille": famille.pk, "idindividu": idindividu}),
+                                "titre": "Cliquez ici pour accéder à la page des assurances de l'individu"})
+
+        return alertes
 
     def get_object(self):
         return Individu.objects.get(pk=self.kwargs['idindividu'])

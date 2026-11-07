@@ -7,24 +7,84 @@
 <style>
 
     .composition_famille {
+        position: relative;
         padding-top: 10px;
-        padding-bottom: 10px;
         padding-left: 20px;
         padding-right: 20px;
-        background-color: #e4e4e4;
-        box-shadow: inset 0 2px 6px rgba(0,0,0,0.12);
+        background-color: #fdfdfa;
+        background-image: linear-gradient(rgba(70,130,190,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(70,130,190,0.18) 1px, transparent 1px);
+        background-size: 20px 20px;
+        box-shadow: inset 0 0 0 1px #e3e3dc;
+        border-radius: .25rem;
+        padding-bottom: 20px;
     }
     .dark-mode .composition_famille {
-        background-color: #727272;
-        box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
+        background-color: #2b2f33;
+        background-image: linear-gradient(rgba(120,170,220,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(120,170,220,0.16) 1px, transparent 1px);
+        background-size: 20px 20px;
+        box-shadow: inset 0 0 0 1px #3d4247;
     }
 
     .nom_categorie {
         text-align: center;
-        color: #ffffff;
         font-size: 12px;
         display: block;
     }
+    .nom_categorie > span {
+        display: inline-block;
+        color: #ffffff;
+        font-weight: 600;
+        background: #4f7fae;
+        padding: 1px 10px;
+        border-radius: 10px;
+    }
+
+    /* ============== Vignette scotchée sur le liège ============== */
+
+    .vignette-epinglee {
+        position: relative;
+        max-width: 480px;
+        margin: 14px auto;
+        transform: rotate(var(--inclinaison, 0deg));
+    }
+    /* Menu contextuel ouvert : la vignette passe au premier plan */
+    .vignette-epinglee.menu-ouvert {
+        z-index: 1000;
+    }
+    .vignette-epinglee .vignette2 {
+        margin-bottom: 0;
+        box-shadow: 0 5px 10px rgba(50,25,5,0.34);
+    }
+    .vignette-epinglee .scotch {
+        position: absolute;
+        top: -6px;
+        left: 50%;
+        z-index: 2;
+        pointer-events: none;
+        transform: translateX(-50%) rotate(var(--angle-scotch, 0deg));
+        filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+    }
+    .vignette-epinglee .scotch::before {
+        content: "";
+        display: block;
+        width: 36px;
+        height: 12px;
+        background: linear-gradient(180deg, rgba(240,236,220,0.40), rgba(226,219,196,0.30));
+        clip-path: polygon(3% 0,97% 0,100% 14%,96% 30%,100% 48%,97% 66%,100% 84%,97% 100%,3% 100%,0 84%,4% 66%,0 48%,3% 30%,0 14%);
+    }
+    .dark-mode .vignette-epinglee .scotch::before {
+        background: linear-gradient(180deg, rgba(255,255,250,0.30), rgba(240,234,212,0.22));
+    }
+
+    /* Inclinaisons pseudo-aléatoires */
+    .incl-1 { --inclinaison: -0.7deg; --angle-scotch:  3deg; }
+    .incl-2 { --inclinaison:  0.5deg; --angle-scotch: -4deg; }
+    .incl-3 { --inclinaison:  0.8deg; --angle-scotch: -2deg; }
+    .incl-4 { --inclinaison: -0.4deg; --angle-scotch:  5deg; }
+    .incl-5 { --inclinaison:  0.6deg; --angle-scotch: -3deg; }
+    .incl-6 { --inclinaison: -0.8deg; --angle-scotch:  2deg; }
+    .incl-7 { --inclinaison:  0.3deg; --angle-scotch: -5deg; }
+
 
     .vertical-align-vertical {
         display: block;
@@ -184,14 +244,164 @@
     .vignette2.deces .image_titulaire   { color: #444441; }
     .vignette2.deces .vignette-image .initiales { background: #5f5e5a; }
 
+
+    /* ============== Bouton Ajouter et séparation ============== */
+
+    .bouton-ajouter-individu {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        z-index: 6;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #3c8dbc;
+        color: #ffffff !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+    }
+    .bouton-ajouter-individu:hover,
+    .bouton-ajouter-individu:focus {
+        background: #357ca5;
+        color: #ffffff !important;
+        text-decoration: none;
+    }
+    .separation-dossier {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 18px 0 24px;
+    }
+    .separation-dossier .trait {
+        flex: 1;
+        border-top: 2px dashed rgba(70,130,190,0.5);
+    }
+    .dark-mode .separation-dossier .trait {
+        border-top-color: rgba(255,255,255,0.35);
+    }
+    .separation-dossier .titre {
+        display: inline-block;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 600;
+        background: #4f7fae;
+        padding: 1px 10px;
+        border-radius: 10px;
+    }
+
+    /* ============== Etat du dossier ============== */
+
+    @font-face {
+        font-family: "Caveat";
+        src: url("{% static 'polices/caveat/caveat-latin-600-normal.woff2' %}") format("woff2");
+        font-weight: 600;
+        font-display: swap;
+    }
+    .etat_dossier {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 28px;
+        align-items: flex-start;
+        padding: 0 0 10px;
+    }
+
+    /* Scotch */
+    .etat_dossier .scotch {
+        position: absolute;
+        top: -6px;
+        left: 50%;
+        z-index: 2;
+        pointer-events: none;
+        transform: translateX(-50%) rotate(var(--angle-scotch, 0deg));
+        filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+    }
+    .etat_dossier .scotch::before {
+        content: "";
+        display: block;
+        width: 36px;
+        height: 12px;
+        background: linear-gradient(180deg, rgba(240,236,220,0.40), rgba(226,219,196,0.30));
+        clip-path: polygon(3% 0,97% 0,100% 14%,96% 30%,100% 48%,97% 66%,100% 84%,97% 100%,3% 100%,0 84%,4% 66%,0 48%,3% 30%,0 14%);
+    }
+
+    /* Ticket de caisse (le papier est dessiné en ::before pour ne pas couper les menus déroulants) */
+    .ticket-dossier {
+        position: relative;
+        z-index: 5;
+        flex: 0 0 250px;
+        max-width: 100%;
+        transform: rotate(-1deg);
+        --angle-scotch: 2deg;
+        filter: drop-shadow(0 5px 6px rgba(50,25,5,0.32));
+    }
+    .ticket-dossier .ticket-papier {
+        position: relative;
+        padding: 18px 18px 26px;
+        font-family: "Courier New", Courier, monospace;
+        color: #2b2b2b;
+    }
+    .ticket-dossier .ticket-papier::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: #fbfbf7;
+        clip-path: polygon(0 0,100% 0,100% calc(100% - 8px),95% 100%,90% calc(100% - 8px),85% 100%,80% calc(100% - 8px),75% 100%,70% calc(100% - 8px),65% 100%,60% calc(100% - 8px),55% 100%,50% calc(100% - 8px),45% 100%,40% calc(100% - 8px),35% 100%,30% calc(100% - 8px),25% 100%,20% calc(100% - 8px),15% 100%,10% calc(100% - 8px),5% 100%,0 calc(100% - 8px));
+    }
+    .ticket-dossier .ticket-entete { text-align: center; font-size: 12px; letter-spacing: .12em; border-bottom: 1px dashed #9a9a9a; padding-bottom: 8px; margin-bottom: 10px; }
+    .ticket-dossier .ticket-ligne { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; padding: 4px 0; }
+    .ticket-dossier .ticket-ligne b { font-size: 18px; white-space: nowrap; }
+    .ticket-dossier .ticket-sep { border-top: 1px dashed #9a9a9a; margin: 8px 0; }
+    .ticket-dossier .solde-detail { font-family: "Source Sans Pro", sans-serif; }
+
+    /* Post-it */
+    .postits-dossier {
+        flex: 1 1 380px;
+        min-width: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+        gap: 24px 20px;
+    }
+    .postit-dossier {
+        position: relative;
+        background: linear-gradient(170deg, #fff6a8, #fbe77c);
+        padding: 14px 14px 12px;
+        box-shadow: 2px 8px 12px rgba(50,25,5,0.32);
+        transform: rotate(var(--inclinaison, 0deg));
+        color: #3f3104;
+    }
+    .postit-dossier .postit-titre { display: block; font-size: 13px; font-weight: 700; color: #6b5404; margin-bottom: 4px; }
+    .postit-dossier ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+    .postit-dossier li { display: flex; align-items: baseline; gap: 6px; font-family: "Caveat", "Segoe Print", "Bradley Hand", cursive; font-weight: 600; font-size: 19px; line-height: 1.1; }
+    .postit-dossier li .fa { font-size: 11px; color: #c0392b; }
+    .postit-dossier li a { color: #3f3104; }
+    .postit-dossier li a:hover { color: #3f3104; text-decoration: underline; }
+    .postit-dossier.vert { background: linear-gradient(170deg, #d9f2c9, #bfe6a8); color: #24521a; }
+    .postit-dossier.vert .postit-titre { color: #24521a; }
+    .postit-dossier.bleu { background: linear-gradient(170deg, #d6e9fb, #bcd8f4); }
+    .postit-dossier.bleu .postit-titre, .postit-dossier.bleu li a { color: #1d4a7a; }
+    .dark-mode .postit-dossier { filter: brightness(0.82); }
+
+    .pd-1 { --inclinaison:  1.2deg; --angle-scotch: -4deg; }
+    .pd-2 { --inclinaison: -1.0deg; --angle-scotch:  3deg; }
+    .pd-3 { --inclinaison:  0.8deg; --angle-scotch: -2deg; }
+    .pd-4 { --inclinaison: -1.4deg; --angle-scotch:  5deg; }
+    .pd-5 { --inclinaison:  1.0deg; --angle-scotch: -3deg; }
+    .pd-6 { --inclinaison: -0.8deg; --angle-scotch:  2deg; }
+
 </style>
 
 <div class="composition_famille">
 
+    {# Ajouter un individu #}
+    <a class="bouton-ajouter-individu" href="{% url 'individu_ajouter' idfamille=idfamille %}" title="Ajouter un individu" aria-label="Ajouter un individu"><i class="fa fa-plus" aria-hidden="true"></i></a>
+
     <div class="row categories_horizontales">
         {% for num_categorie, nom_categorie in categories_utilisees %}
             <div class="col-sm-{% if categories_utilisees|length == 3 %}4{% elif categories_utilisees|length == 2 %}6{% else %}12{% endif %}" style="{% if num_categorie == 1 %}padding-left: 0px{% elif num_categorie == 3 %}padding-right: 0px{% endif %}">
-                <p class="nom_categorie">{{ nom_categorie }}s</p>
+                <p class="nom_categorie"><span>{{ nom_categorie }}s</span></p>
             </div>
         {% endfor %}
     </div>
@@ -202,12 +412,14 @@
             <div class="colonne col-sm-{% if categories_utilisees|length == 3 %}4{% elif categories_utilisees|length == 2 %}6{% else %}12{% endif %}">
 
                 <div class="categories_verticales">
-                    <p class="nom_categorie">{{ nom_categorie }}s</p>
+                    <p class="nom_categorie"><span>{{ nom_categorie }}s</span></p>
                 </div>
 
                 <div>
                     {% for rattachement in rattachements %}
                         {% if rattachement.categorie == num_categorie %}
+                        <div class="vignette-epinglee {% cycle 'incl-1' 'incl-2' 'incl-3' 'incl-4' 'incl-5' 'incl-6' 'incl-7' %}">
+                        <span class="scotch" aria-hidden="true"></span>
                         <div class="vignette2 {% if rattachement.individu.deces %}deces{% elif rattachement.individu.Get_sexe == "F" %}femme{% else %}homme{% endif %}" id="individu_{{ rattachement.individu_id }}">
 
                             <div class="bandeau">
@@ -297,6 +509,7 @@
                             </ul>
 
                         </div>
+                        </div>
 
                         {% if rattachement.individu.Get_photo %}
                         <div class="modal fade" id="modal_photo_{{ rattachement.pk }}" role="dialog" aria-labelledby="modal_photo_{{ rattachement.pk }}_label">
@@ -323,6 +536,136 @@
             </div>
         {% endfor %}
     </div>
+
+    {# Séparation #}
+    <div class="separation-dossier"><span class="trait"></span><span class="titre">État du dossier</span><span class="trait"></span></div>
+
+    {# Etat du dossier #}
+    <div class="etat_dossier">
+            {# Ticket de caisse : soldes #}
+            <div class="ticket-dossier"><span class="scotch" aria-hidden="true"></span>
+                <div class="ticket-papier">
+                    <div class="ticket-entete">SITUATION FINANCIÈRE</div>
+                    <div class="ticket-ligne" title="Ce solde prend en compte toutes les prestations et règlements passés ou futurs">
+                        <span>Solde global</span>
+                        <b class="{% if solde_global < 0 %}text-red{% endif %}{% if solde_global > 0 %}text-blue{% endif %}">{% if solde_global > 0 %}+{% endif %}{{ solde_global|montant }}</b>
+                    </div>
+                    {% if soldes_activites %}
+                    <div class="dropdown solde-detail">
+                        <a href="#" class="small" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Afficher le détail du solde par activité">Détail par activité <i class="fa fa-caret-down"></i></a>
+                        <div class="dropdown-menu p-2">
+                            <table class="table table-sm table-borderless small mb-0">
+                                <tr class="text-muted"><td>Activité</td><td>Période</td><td class="text-right">Solde</td></tr>
+                                {% for ligne in soldes_activites %}
+                                    <tr>
+                                        <td class="{% if ligne.complement %}text-muted{% endif %}">{{ ligne.nom }}</td>
+                                        <td class="text-nowrap text-muted">{% if ligne.periode_debut %}{{ ligne.periode_debut|date:"m/Y" }}{% if ligne.periode_debut|date:"m/Y" != ligne.periode_fin|date:"m/Y" %} - {{ ligne.periode_fin|date:"m/Y" }}{% endif %}{% endif %}</td>
+                                        <td class="text-right text-nowrap {% if ligne.solde < 0 %}text-red{% else %}text-blue{% endif %}">{% if ligne.solde > 0 %}+{% endif %}{{ ligne.solde|montant }}</td>
+                                    </tr>
+                                {% endfor %}
+                                <tr class="border-top">
+                                    <th colspan="2">Total</th>
+                                    <th class="text-right text-nowrap {% if solde_global < 0 %}text-red{% endif %}{% if solde_global > 0 %}text-blue{% endif %}">{% if solde_global > 0 %}+{% endif %}{{ solde_global|montant }}</th>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="ticket-sep"></div>
+                    <div class="ticket-ligne" title="Ce solde prend en compte uniquement les prestations facturées et les règlements associés">
+                        <span>Solde facturé</span>
+                        <b class="{% if solde_facture < 0 %}text-red{% endif %}">{{ solde_facture|montant }}</b>
+                    </div>
+                    {% if factures_impayees %}
+                    <div class="dropdown solde-detail">
+                        <a href="#" class="small" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Afficher les factures non soldées">{{ factures_impayees|length }} facture{{ factures_impayees|length|pluralize }} non soldée{{ factures_impayees|length|pluralize }} <i class="fa fa-caret-down"></i></a>
+                        <div class="dropdown-menu p-2">
+                            <table class="table table-sm table-borderless small mb-0">
+                                <tr class="text-muted"><td>N°</td><td>Date</td><td>Période</td><td class="text-right">Reste dû</td></tr>
+                                {% for facture in factures_impayees %}
+                                    <tr>
+                                        <td class="text-nowrap"><a href="{% url 'famille_factures_modifier' idfamille=idfamille pk=facture.pk %}" class="text-primary" title="Ouvrir la facture">{{ facture.prefixe.prefixe|default:"" }}{{ facture.numero }}</a></td>
+                                        <td class="text-nowrap">{{ facture.date_edition|date:"d/m/Y" }}</td>
+                                        <td class="text-nowrap text-muted">{{ facture.date_debut|date:"m/Y" }}{% if facture.date_debut|date:"m/Y" != facture.date_fin|date:"m/Y" %} - {{ facture.date_fin|date:"m/Y" }}{% endif %}</td>
+                                        <td class="text-right text-nowrap {% if facture.solde_actuel > 0 %}text-red{% else %}text-blue{% endif %}">{{ facture.solde_actuel|montant }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Post-it : alertes et messages #}
+            <div class="postits-dossier">
+                {% if pieces_fournir %}
+                    <div class="postit-dossier pd-1"><span class="scotch" aria-hidden="true"></span>
+                        <span class="postit-titre"><i class="fa fa-file-text-o" aria-hidden="true"></i> Pièces à fournir</span>
+                        <ul>
+                            {% for item in pieces_fournir %}
+                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if cotisations_manquantes %}
+                    <div class="postit-dossier pd-2"><span class="scotch" aria-hidden="true"></span>
+                        <span class="postit-titre"><i class="fa fa-id-card-o" aria-hidden="true"></i> Adhésions manquantes</span>
+                        <ul>
+                            {% for item in cotisations_manquantes %}
+                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if informations_manquantes %}
+                    <div class="postit-dossier pd-3"><span class="scotch" aria-hidden="true"></span>
+                        <span class="postit-titre"><i class="fa fa-info-circle" aria-hidden="true"></i> Informations manquantes</span>
+                        <ul>
+                            {% for item in informations_manquantes %}
+                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if vaccinations_manquantes %}
+                    <div class="postit-dossier pd-4"><span class="scotch" aria-hidden="true"></span>
+                        <span class="postit-titre"><i class="fa fa-medkit" aria-hidden="true"></i> Vaccinations manquantes</span>
+                        <ul>
+                            {% for item in vaccinations_manquantes %}
+                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if assurances_manquantes %}
+                    <div class="postit-dossier pd-5"><span class="scotch" aria-hidden="true"></span>
+                        <span class="postit-titre"><i class="fa fa-shield" aria-hidden="true"></i> Assurances manquantes</span>
+                        <ul>
+                            {% for item in assurances_manquantes %}
+                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if nbre_messages_non_lus %}
+                    <div class="postit-dossier bleu pd-6"><span class="scotch" aria-hidden="true"></span>
+                        <span class="postit-titre"><i class="fa fa-comments-o" aria-hidden="true"></i> Messagerie</span>
+                        <ul>
+                            <li><a href="{% url 'famille_messagerie_portail' idfamille=idfamille %}" title="Messages envoyés par la famille via le portail">{{ nbre_messages_non_lus }} message{{ nbre_messages_non_lus|pluralize }} non lu{{ nbre_messages_non_lus|pluralize }}</a></li>
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if not nbre_alertes %}
+                    <div class="postit-dossier vert pd-1"><span class="scotch" aria-hidden="true"></span>
+                        <span class="postit-titre"><i class="fa fa-check" aria-hidden="true"></i> Dossier complet</span>
+                        <ul><li>Aucune alerte</li></ul>
+                    </div>
+                {% endif %}
+            </div>
+    </div>
+
 </div>
 
 
@@ -346,6 +689,14 @@
              $('.categories_verticales').removeClass("cacher");
         }
     });
+
+{# Passe la vignette au premier plan quand son menu contextuel est ouvert #}
+$(document).on('show.bs.dropdown', '.vignette-epinglee', function(){
+    $(this).addClass('menu-ouvert');
+});
+$(document).on('hidden.bs.dropdown', '.vignette-epinglee', function(){
+    $(this).removeClass('menu-ouvert');
+});
 
 $(document).ready(function(){
     $('.definir_titulaire').on('click', function(){
