@@ -25,6 +25,11 @@
         .param-mois button {padding: 4px 0; font-size: 12px; border: 1px solid #dee2e6; border-radius: 4px; background: transparent; color: #495057; cursor: pointer;}
         .param-mois button:hover {background: rgba(0, 0, 0, .04);}
         .param-mois button[aria-pressed=true] {background: #007bff; border-color: #007bff; color: #fff;}
+        .param-mois {user-select: none;}
+        .param-mois.glisser button {cursor: grabbing;}
+        .param-vacances {grid-template-columns: repeat(2, 1fr);}
+        .param-vacances button {padding: 4px 6px; line-height: 1.2;}
+        .param-vacances .text-muted {grid-column: 1 / -1;}
         .param-aide {margin-top: 6px; font-size: 11.5px; color: #6c757d;}
 
         /* Individus */
@@ -116,23 +121,49 @@
     // ---------- Présentation améliorée du sélecteur de période (les champs d'origine restent la source des valeurs) ----------
     function Maj_boutons_mois() {
         var selection = $("#selection_mois").val() || [];
-        $(".param-mois button").each(function() {
+        $(".param-mois:not(.param-vacances) button").each(function() {
             $(this).attr("aria-pressed", selection.indexOf(String($(this).data("mois"))) !== -1 ? "true" : "false");
         });
     }
-    function Maj_cases_vacances() {
-        var liste = $("#param_liste_vacances").empty();
+    var glisser_vacances = null;
+    function Maj_boutons_vacances() {
+        var grille = $("#param_liste_vacances").empty();
         var options = $("#selection_vacances option");
         if (!options.length) {
-            liste.append($("<span class='text-muted' style='font-size: 13px;'></span>").text("Aucune période de vacances pour cette année"));
+            grille.append($("<span class='text-muted' style='font-size: 13px;'></span>").text("Aucune période de vacances pour cette année"));
         }
-        options.each(function() {
-            var option = this;
-            var case_a_cocher = $("<input type='checkbox'>").prop("checked", option.selected).on("change", function() {
-                option.selected = this.checked;
-                $("#selection_vacances").trigger("change");
+        function Appliquer_glisser(index_courant) {
+            var debut = Math.min(glisser_vacances.depart, index_courant);
+            var fin = Math.max(glisser_vacances.depart, index_courant);
+            options.each(function(index) {
+                this.selected = (index >= debut && index <= fin) ? glisser_vacances.etat : glisser_vacances.selection_initiale[index];
             });
-            liste.append($("<label></label>").append(case_a_cocher).append(document.createTextNode(option.text)));
+            $("#selection_vacances").trigger("change");
+        }
+        options.each(function(index) {
+            var option = this;
+            $("<button type='button'></button>").text(option.text).attr("title", option.text).attr("aria-pressed", option.selected ? "true" : "false")
+                .on("mousedown", function(event) {
+                    if (event.button !== 0) {return}
+                    event.preventDefault();
+                    this.focus();
+                    glisser_vacances = {
+                        depart: index,
+                        etat: !option.selected,
+                        selection_initiale: options.map(function() {return this.selected}).get()
+                    };
+                    grille.addClass("glisser");
+                    Appliquer_glisser(index);
+                })
+                .on("mouseenter", function() {
+                    if (glisser_vacances) {Appliquer_glisser(index)}
+                })
+                .on("click", function(event) {
+                    // Les clics souris sont déjà traités au mousedown : seul le clavier (Entrée, Espace) passe ici
+                    if (event.detail !== 0) {return}
+                    option.selected = !option.selected;
+                    $("#selection_vacances").trigger("change");
+                }).appendTo(grille);
         });
     }
     $(function() {
@@ -142,32 +173,74 @@
         annee.before($("<button type='button' class='btn btn-default' aria-label='Année précédente'><i class='fa fa-chevron-left'></i></button>").on("click", function() {annee.val(parseInt(annee.val() || 0) - 1).trigger("change");}));
         annee.after($("<button type='button' class='btn btn-default' aria-label='Année suivante'><i class='fa fa-chevron-right'></i></button>").on("click", function() {annee.val(parseInt(annee.val() || 0) + 1).trigger("change");}));
 
-        // Mois en boutons
+        // Mois en boutons (clic pour cocher/décocher, ou glisser avec le bouton gauche enfoncé pour une plage de mois)
         var grille_mois = $("<div class='param-mois' role='group' aria-label='Mois'></div>");
-        $("#selection_mois option").each(function() {
+        var options_mois = $("#selection_mois option");
+        var glisser_mois = null;
+
+        function Appliquer_glisser_mois(index_courant) {
+            var debut = Math.min(glisser_mois.depart, index_courant);
+            var fin = Math.max(glisser_mois.depart, index_courant);
+            options_mois.each(function(index) {
+                this.selected = (index >= debut && index <= fin) ? glisser_mois.etat : glisser_mois.selection_initiale[index];
+            });
+            $("#selection_mois").trigger("change");
+        }
+
+        options_mois.each(function(index) {
             var option = this;
             $("<button type='button' aria-pressed='false'></button>").text(MOIS_PARAMETRES_COURTS[parseInt(option.value) - 1]).attr("title", option.text).data("mois", option.value)
-                .on("click", function() {
+                .on("mousedown", function(event) {
+                    if (event.button !== 0) {return}
+                    event.preventDefault();
+                    this.focus();
+                    glisser_mois = {
+                        depart: index,
+                        etat: !option.selected,
+                        selection_initiale: options_mois.map(function() {return this.selected}).get()
+                    };
+                    grille_mois.addClass("glisser");
+                    Appliquer_glisser_mois(index);
+                })
+                .on("mouseenter", function() {
+                    if (glisser_mois) {Appliquer_glisser_mois(index)}
+                })
+                .on("click", function(event) {
+                    // Les clics souris sont déjà traités au mousedown : seul le clavier (Entrée, Espace) passe ici
+                    if (event.detail !== 0) {return}
                     option.selected = !option.selected;
                     $("#selection_mois").trigger("change");
                 }).appendTo(grille_mois);
         });
+        $(document).on("mouseup", function() {
+            if (glisser_mois) {
+                glisser_mois = null;
+                grille_mois.removeClass("glisser");
+            }
+        });
         $("#selection_mois").addClass("d-none").after(grille_mois);
-        grille_mois.after("<div class='param-aide'>Cliquez sur plusieurs mois pour les combiner.</div>");
+        grille_mois.after("<div class='param-aide'>Cliquez sur plusieurs mois pour les combiner, ou glissez dessus pour sélectionner une plage.</div>");
         $("#selection_mois").on("change", Maj_boutons_mois);
         Maj_boutons_mois();
 
-        // Vacances en cases à cocher (la liste est rechargée par le sélecteur à chaque changement d'année)
-        $("#selection_vacances").addClass("d-none").after("<div class='param-liste' id='param_liste_vacances'></div>");
-        new MutationObserver(Maj_cases_vacances).observe(document.getElementById("selection_vacances"), {childList: true});
+        // Vacances en boutons (la liste est rechargée par le sélecteur à chaque changement d'année)
+        $("#selection_vacances").addClass("d-none").after("<div class='param-mois param-vacances' role='group' aria-label='Vacances' id='param_liste_vacances'></div>");
+        $("#param_liste_vacances").after("<div class='param-aide'>Cliquez sur plusieurs périodes pour les combiner, ou glissez dessus pour sélectionner une plage.</div>");
+        new MutationObserver(Maj_boutons_vacances).observe(document.getElementById("selection_vacances"), {childList: true});
         $("#selection_vacances").on("change", function() {
             var selection = $(this).val() || [];
-            $("#param_liste_vacances input").each(function(index) {
-                this.checked = selection.indexOf($("#selection_vacances option").eq(index).val()) !== -1;
+            $("#param_liste_vacances button").each(function(index) {
+                $(this).attr("aria-pressed", selection.indexOf($("#selection_vacances option").eq(index).val()) !== -1 ? "true" : "false");
             });
             Maj_valeurs_parametres();
         });
-        Maj_cases_vacances();
+        $(document).on("mouseup", function() {
+            if (glisser_vacances) {
+                glisser_vacances = null;
+                $("#param_liste_vacances").removeClass("glisser");
+            }
+        });
+        Maj_boutons_vacances();
 
         $("#selection_mois, #selection_annee").on("change", Maj_valeurs_parametres);
         $("#selection_dates").on("apply.daterangepicker", Maj_valeurs_parametres);
