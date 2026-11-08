@@ -1,3 +1,18 @@
+Version 1.3.6.2 (08/11/2026) :
+
+Nouveautés
+- Interface : ajout des options d'affichage dans le panneau latéral (thème clair ou sombre, couleur principale, taille du texte, menu clair, menu réduit par défaut, ouverture du menu au survol, tableaux compacts, contraste renforcé)
+- Interface : ajout de 12 couleurs principales au choix, appliquées à la barre supérieure, au menu, aux boutons et aux listes
+Améliorations
+- Interface : déplacement du bouton de déconnexion dans la barre supérieure
+- Interface : la grille des consommations et les tableaux de suivi des inscriptions et des consommations restent clairs en mode sombre
+- Interface : amélioration du mode sombre sur les barres de commandes des formulaires, la ventilation des règlements et les en-têtes figés des tableaux
+- Page Profil de l'utilisateur : relooking de la page
+- Paramétrage des activités > Résumé : relooking du cadre des caractéristiques
+- Fiches famille et individuelle : amélioration des textes d'introduction et des aides des champs des formulaires
+Corrections
+- Interface : correction du texte "Dernière connexion le None" pour un utilisateur qui ne s'est jamais connecté
+
 Version 1.3.6.1 (08/11/2026) :
 
 Nouveautés
