@@ -1,51 +1,122 @@
 {% extends "core/page.html" %}
-{% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+    <style>
+        /* Papier et étiquettes (même présentation que les pages Résumé) */
+        .caracteristiques_papier {
+            padding: 26px 20px 20px;
+            background-color: #fdfdfa;
+            background-image: linear-gradient(rgba(70,130,190,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(70,130,190,0.18) 1px, transparent 1px);
+            background-size: 20px 20px;
+            box-shadow: inset 0 0 0 1px #e3e3dc;
+            border-radius: .25rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 26px 20px;
+        }
+        .dark-mode .caracteristiques_papier {
+            background-color: #2b2f33;
+            background-image: linear-gradient(rgba(120,170,220,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(120,170,220,0.16) 1px, transparent 1px);
+            box-shadow: inset 0 0 0 1px #3d4247;
+        }
+        .etiquette-carac {
+            position: relative; background: #fffdf8; border-radius: 6px; padding: 12px 14px 10px;
+            display: flex; flex-direction: column; gap: 2px; min-width: 0; margin: 0;
+            box-shadow: 0 5px 10px rgba(50,25,5,0.34);
+            transform: rotate(var(--inclinaison, 0deg));
+        }
+        .etiquette-carac.large { grid-column: span 2; }
+        .etiquette-carac .libelle { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #4f7fae; }
+        .etiquette-carac .valeur { font-size: 15px; overflow-wrap: anywhere; }
+        .dark-mode .etiquette-carac { background: #3a3f44; color: #f1f1f1; }
+        .dark-mode .etiquette-carac .libelle { color: #9cc3e8; }
+        .etiquette-carac .scotch {
+            position: absolute; top: -6px; left: 50%; z-index: 2; pointer-events: none;
+            transform: translateX(-50%) rotate(var(--angle-scotch, 0deg));
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+        }
+        .etiquette-carac .scotch::before {
+            content: ""; display: block; width: 36px; height: 12px;
+            background: linear-gradient(180deg, rgba(240,236,220,0.40), rgba(226,219,196,0.30));
+            clip-path: polygon(3% 0,97% 0,100% 14%,96% 30%,100% 48%,97% 66%,100% 84%,97% 100%,3% 100%,0 84%,4% 66%,0 48%,3% 30%,0 14%);
+        }
+        .dark-mode .etiquette-carac .scotch::before { background: linear-gradient(180deg, rgba(255,255,250,0.30), rgba(240,234,212,0.22)); }
+        .etiquette-carac:nth-child(7n+1) { --inclinaison: -0.7deg; --angle-scotch:  3deg; }
+        .etiquette-carac:nth-child(7n+2) { --inclinaison:  0.5deg; --angle-scotch: -4deg; }
+        .etiquette-carac:nth-child(7n+3) { --inclinaison:  0.8deg; --angle-scotch: -2deg; }
+        .etiquette-carac:nth-child(7n+4) { --inclinaison: -0.4deg; --angle-scotch:  5deg; }
+        .etiquette-carac:nth-child(7n+5) { --inclinaison:  0.6deg; --angle-scotch: -3deg; }
+        .etiquette-carac:nth-child(7n+6) { --inclinaison: -0.8deg; --angle-scotch:  2deg; }
+        .etiquette-carac:nth-child(7n+7) { --inclinaison:  0.3deg; --angle-scotch: -5deg; }
+        .etiquette-carac .pictos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+        .etiquette-carac .picto { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 16px; font-size: 13px; font-weight: 600; background: #e8f0fb; color: #1f4f8a; }
+        .dark-mode .etiquette-carac .picto { background: #2f4a66; color: #dbe9f7; }
+        @media (max-width: 575px) { .etiquette-carac.large { grid-column: auto; } }
+
+        /* Boutons de paramètres en tuiles */
+        .tuile-action {
+            display: inline-flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px; margin: 0 10px 10px 0; vertical-align: top;
+            border: 1px solid #e3e6ea; background: #ffffff; color: inherit !important; text-align: left;
+            transition: border-color .15s, box-shadow .15s, transform .15s; cursor: pointer;
+        }
+        .tuile-action:hover { border-color: var(--teinte); box-shadow: 0 4px 12px rgba(0,0,0,.08); transform: translateY(-1px); text-decoration: none; }
+        .tuile-action .icone { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 19px; background: var(--teinte-fond); color: var(--teinte); }
+        .tuile-action .titre { font-weight: 600; font-size: 15px; display: block; }
+        .tuile-action .desc { font-size: 12.5px; color: #6c757d; display: block; margin-top: 2px; }
+        .tuile-action.bleu { --teinte: var(--couleur-principale, #3c8dbc); --teinte-fond: rgba(var(--couleur-principale-rgb, 60, 141, 188), .12); }
+        .tuile-action.orange { --teinte: #c26a00; --teinte-fond: #fdf0dc; }
+        .dark-mode .tuile-action { background: #3a3f44; border-color: #4b5258; }
+        .dark-mode .tuile-action .desc { color: #adb5bd; }
+        .dark-mode .tuile-action.orange { --teinte: #f0a640; --teinte-fond: rgba(240,166,64,.15); }
+
+    </style>
+{% endblock styles %}
+
 {% block contenu_page %}
-    {% embed 'core/box.html' %}
-        {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}{{ box_titre }}{% endblock %}
-        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
-        {% block box_contenu %}
+    {% with u=request.user %}
+    <div class="row">
 
-            <dt>Nom d'utilisateur</dt>
-            <dd>{% firstof request.user request.user.get_full_name request.user.get_short_name %}</dd>
+        <div class="col-12">
+            <div class="card card-outline card-lightblue">
+                <div class="card-body p-0" style="min-height: 0">
+                    <div class="caracteristiques_papier">
+                        <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Nom d'utilisateur</dt><dd class="valeur mb-0">{{ u.username }}</dd></dl>
+                        {% if u.last_name %}<dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Nom</dt><dd class="valeur mb-0">{{ u.last_name }}</dd></dl>{% endif %}
+                        {% if u.first_name %}<dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Prénom</dt><dd class="valeur mb-0">{{ u.first_name }}</dd></dl>{% endif %}
+                        {% if u.email %}<dl class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Email</dt><dd class="valeur mb-0">{{ u.email }}</dd></dl>{% endif %}
+                        <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Dernière connexion</dt><dd class="valeur mb-0">{% if u.last_login %}{{ u.last_login|date:"j F Y à H:i" }}{% else %}Première connexion{% endif %}</dd></dl>
+                        <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Utilisateur depuis</dt><dd class="valeur mb-0">{{ u.date_joined|date:"j F Y" }}</dd></dl>
+                        <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">ID utilisateur</dt><dd class="valeur mb-0">{{ u.pk }}</dd></dl>
+                        <div class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span>
+                            <span class="libelle">Structures associées</span>
+                            {% with structures=u.structures.all %}
+                                {% if structures %}
+                                    <div class="pictos">{% for structure in structures %}<span class="picto">{{ structure }}</span>{% endfor %}</div>
+                                {% else %}
+                                    <span class="valeur">Aucune structure associée</span>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <dt>ID utilisateur</dt>
-            <dd>{{ request.user.pk }}</dd>
+            {# Paramètres #}
+            <a class="tuile-action bleu" href="{% url 'change_password_utilisateur' %}">
+                <span class="icone"><i class="fa fa-key" aria-hidden="true"></i></span>
+                <span><span class="titre">Modifier le mot de passe</span><span class="desc">Choisir un nouveau mot de passe de connexion</span></span>
+            </a>
+            <button type="button" class="tuile-action orange" onclick="purger_filtres_listes()">
+                <span class="icone"><i class="fa fa-filter" aria-hidden="true"></i></span>
+                <span><span class="titre">Purger les filtres de listes</span><span class="desc">Supprimer tous les filtres mémorisés dans les listes</span></span>
+            </button>
+        </div>
 
-            <dt>Dernière connexion</dt>
-            <dd>{{ request.user.last_login }}</dd>
-
-            <dt>Utilisateur depuis</dt>
-            <dd>{{ request.user.date_joined|date:"j F Y" }}</dd>
-
-            <dt>Structures associées</dt>
-            <dd>
-                {% if request.user.structures.all %}
-                    <ul>
-                        {% for structure in request.user.structures.all %}
-                            <li>{{ structure }}</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    Aucune structure associée
-                {% endif %}
-            </dd>
-
-        {% endblock %}
-    {% endembed %}
-
-    {% embed 'core/box.html' %}
-        {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}Paramètres{% endblock %}
-        {% block box_contenu %}
-            <dd><a type='button' class='btn btn-primary' href="{% url 'change_password_utilisateur' %}"><i class="fa fa-pencil margin-r-5"></i>Modifier le mot de passe</a></dd>
-            <dd><button class="btn btn-warning" onclick="purger_filtres_listes()" title="Supprimer les filtres de listes"><i class="fa fa-trash-o margin-r-5"></i>Purger les filtres de listes</button></dd>
-        {% endblock %}
-    {% endembed %}
+    </div>
+    {% endwith %}
 
     {# Dialogbox Purger les filtres de listes #}
     {% embed "core/dialogbox_confirm.html" with id="purger_filtres_listes" titre="Supprimer les filtres de listes" message="Confirmez-vous la suppression des filtres de listes de cet utilisateur ?" label_bouton="Purger les filtres de listes" url_exec="ajax_purger_filtres_listes" %}{% endembed %}
