@@ -147,8 +147,9 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
         # Couleurs principales proposées dans les options d'affichage (code, nom, couleur)
         context['couleurs_principales'] = [
             ("bleu", "Bleu", "#3c8dbc"), ("marine", "Bleu marine", "#1f4e79"), ("petrole", "Pétrole", "#155e75"),
-            ("vert", "Vert", "#2a7d4f"), ("violet", "Violet", "#6f42c1"), ("prune", "Prune", "#86198f"),
-            ("framboise", "Framboise", "#be185d"), ("orange", "Orange", "#b45309"), ("gris", "Gris", "#5a6570"),
+            ("vert", "Vert", "#2a7d4f"), ("olive", "Olive", "#5c6b1f"), ("indigo", "Indigo", "#4338ca"),
+            ("violet", "Violet", "#6f42c1"), ("prune", "Prune", "#86198f"), ("framboise", "Framboise", "#be185d"),
+            ("brique", "Brique", "#b42318"), ("orange", "Orange", "#b45309"), ("gris", "Gris", "#5a6570"),
         ]
 
         # Mémorise le menu principal
