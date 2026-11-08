@@ -132,7 +132,7 @@ class Resume(Onglet, DetailView):
 
         # Notes du collaborateur
         conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
-        context['notes'] = Note.objects.filter(conditions, collaborateur_id=self.kwargs['idcollaborateur']).order_by("date_saisie")
+        context['notes'] = Note.objects.select_related("categorie").filter(conditions, collaborateur_id=self.kwargs['idcollaborateur']).order_by("date_saisie")
 
         return context
 

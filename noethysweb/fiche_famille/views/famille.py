@@ -251,7 +251,7 @@ class Resume(Onglet, DetailView):
 
         # Notes
         conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
-        context['notes'] = Note.objects.filter(conditions, famille_id=idfamille).order_by("date_saisie")
+        context['notes'] = Note.objects.select_related("categorie").filter(conditions, famille_id=idfamille).order_by("date_saisie")
 
         # Recherche les notes qui doivent affichées dans le popup à l'ouverture de la fiche famille
         key_note_rappel = "notes_rappel_famille_%d" % idfamille

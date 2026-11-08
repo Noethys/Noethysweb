@@ -1,0 +1,109 @@
+{% load static %}
+{# Notes affichées sous forme de post-it (fiches famille, individu et collaborateur) #}
+{# Paramètre : mode_notes = 'famille', 'individu' ou 'collaborateur' #}
+<style>
+    @font-face {
+        font-family: "Caveat";
+        src: url("{% static 'polices/caveat/caveat-latin-600-normal.woff2' %}") format("woff2");
+        font-weight: 600;
+        font-display: swap;
+    }
+    /* Occupe toute la largeur si la zone est placée dans une grille d'étiquettes */
+    .notes-postit-zone { grid-column: 1 / -1; min-width: 0; }
+    .notes-postit-separation { display: flex; align-items: center; gap: 14px; margin: 18px 0 24px; }
+    .notes-postit-separation .trait { flex: 1; border-top: 2px dashed rgba(70,130,190,0.5); }
+    .dark-mode .notes-postit-separation .trait { border-top-color: rgba(255,255,255,0.35); }
+    .notes-postit-separation .titre { display: inline-block; color: #ffffff; font-size: 13px; font-weight: 600; background: #4f7fae; padding: 1px 10px; border-radius: 10px; }
+    .notes-postit-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 24px 20px; align-items: start; padding: 0 0 14px; }
+
+    /* Post-it orange (rose si priorité haute) */
+    .notes-postit {
+        position: relative;
+        padding: 14px 14px 12px;
+        background: linear-gradient(170deg, #ffe2c4, #fcc995);
+        color: #5a2e06;
+        box-shadow: 2px 8px 12px rgba(50,25,5,0.32);
+        transform: rotate(var(--inclinaison, 0deg));
+    }
+    .notes-postit.haute { background: linear-gradient(170deg, #ffd3dc, #f7b3c2); color: #6b1a2c; }
+    .dark-mode .notes-postit { filter: brightness(0.82); }
+    .notes-postit .scotch {
+        position: absolute; top: -6px; left: 50%; z-index: 2; pointer-events: none;
+        transform: translateX(-50%) rotate(var(--angle-scotch, 0deg));
+        filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+    }
+    .notes-postit .scotch::before {
+        content: ""; display: block; width: 36px; height: 12px;
+        background: linear-gradient(180deg, rgba(240,236,220,0.40), rgba(226,219,196,0.30));
+        clip-path: polygon(3% 0,97% 0,100% 14%,96% 30%,100% 48%,97% 66%,100% 84%,97% 100%,3% 100%,0 84%,4% 66%,0 48%,3% 30%,0 14%);
+    }
+    .notes-postit .note-texte {
+        font-family: "Caveat", "Segoe Print", "Bradley Hand", cursive; font-weight: 600; font-size: 19px; line-height: 1.15;
+        overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .notes-postit .note-texte .fa { font-size: 13px; color: #c0392b; }
+    .notes-postit .note-meta { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 8px; font-size: 11px; opacity: .8; }
+    .notes-postit .note-categorie { padding: 0 6px; border-radius: 8px; background: rgba(255,255,255,.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Boutons modifier et supprimer : apparaissent au survol, sans faire pivoter l'étiquette */
+    .notes-postit .note-actions { position: absolute; top: -11px; right: -9px; z-index: 3; display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
+    .notes-postit:hover .note-actions, .notes-postit:focus-within .note-actions { opacity: 1; }
+    @media (hover: none) { .notes-postit .note-actions { opacity: 1; } }
+    .notes-postit .note-actions a {
+        display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%;
+        background: rgba(255,255,255,.92); color: #555; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    }
+    .notes-postit .note-actions a.modifier:hover, .notes-postit .note-actions a.modifier:focus { background: #3c8dbc; color: #ffffff; }
+    .notes-postit .note-actions a.supprimer:hover, .notes-postit .note-actions a.supprimer:focus { background: #dc3545; color: #ffffff; }
+
+    /* Post-it vierge pour ajouter une note */
+    .notes-postit-ajouter {
+        display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 90px;
+        border: 2px dashed rgba(70,130,190,0.45); background: rgba(255,255,255,0.6); color: #3c8dbc !important; font-size: 13px;
+        transform: rotate(var(--inclinaison, 0deg));
+    }
+    .notes-postit-ajouter:hover, .notes-postit-ajouter:focus { background: rgba(255,255,255,0.9); text-decoration: none; }
+    .dark-mode .notes-postit-ajouter { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.35); color: #9fc6e4 !important; }
+
+    .np-1 { --inclinaison:  1.2deg; --angle-scotch: -4deg; }
+    .np-2 { --inclinaison: -1.0deg; --angle-scotch:  3deg; }
+    .np-3 { --inclinaison:  0.8deg; --angle-scotch: -2deg; }
+    .np-4 { --inclinaison: -1.4deg; --angle-scotch:  5deg; }
+    .np-5 { --inclinaison:  1.0deg; --angle-scotch: -3deg; }
+    .np-6 { --inclinaison: -0.8deg; --angle-scotch:  2deg; }
+</style>
+
+<div class="notes-postit-zone">
+    <div class="notes-postit-separation"><span class="trait"></span><span class="titre">Notes</span><span class="trait"></span></div>
+    <div class="notes-postit-grille">
+        {% for note in notes %}
+            <div class="notes-postit{% if note.priorite == 'HAUTE' %} haute{% endif %} {% cycle 'np-2' 'np-5' 'np-3' 'np-6' 'np-1' 'np-4' %}" title="{{ note.texte }}">
+                <span class="scotch" aria-hidden="true"></span>
+                <div class="note-actions">
+                    {% if mode_notes == "famille" %}
+                        <a class="modifier" href="{% url 'famille_notes_modifier' idfamille=note.famille_id pk=note.pk %}" title="Modifier la note" aria-label="Modifier la note du {{ note.date_saisie|date:'d/m/Y' }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                        <a class="supprimer" href="{% url 'famille_notes_supprimer' idfamille=note.famille_id pk=note.pk %}" title="Supprimer la note" aria-label="Supprimer la note du {{ note.date_saisie|date:'d/m/Y' }}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                    {% elif mode_notes == "individu" %}
+                        <a class="modifier" href="{% url 'individu_notes_modifier' idfamille=idfamille idindividu=note.individu_id pk=note.pk %}" title="Modifier la note" aria-label="Modifier la note du {{ note.date_saisie|date:'d/m/Y' }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                        <a class="supprimer" href="{% url 'individu_notes_supprimer' idfamille=idfamille idindividu=note.individu_id pk=note.pk %}" title="Supprimer la note" aria-label="Supprimer la note du {{ note.date_saisie|date:'d/m/Y' }}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                    {% elif mode_notes == "collaborateur" %}
+                        <a class="modifier" href="{% url 'collaborateur_notes_modifier' idcollaborateur=note.collaborateur_id pk=note.pk %}" title="Modifier la note" aria-label="Modifier la note du {{ note.date_saisie|date:'d/m/Y' }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                        <a class="supprimer" href="{% url 'collaborateur_notes_supprimer' idcollaborateur=note.collaborateur_id pk=note.pk %}" title="Supprimer la note" aria-label="Supprimer la note du {{ note.date_saisie|date:'d/m/Y' }}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                    {% endif %}
+                </div>
+                <div class="note-texte">{% if note.priorite == "HAUTE" %}<i class="fa fa-exclamation-triangle" aria-hidden="true" title="Priorité haute"></i> <span class="sr-only">Priorité haute :</span>{% endif %}{{ note.texte|linebreaksbr }}</div>
+                <div class="note-meta">
+                    <span>{{ note.date_saisie|date:"d/m/Y" }}</span>
+                    {% if note.categorie %}<span class="note-categorie" title="{{ note.categorie.nom }}">{{ note.categorie.nom }}</span>{% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        {% if mode_notes == "famille" %}
+            <a class="notes-postit-ajouter np-1" href="{% url 'famille_notes_ajouter' idfamille=idfamille %}" title="Ajouter une note"><i class="fa fa-plus" aria-hidden="true"></i> Ajouter une note</a>
+        {% elif mode_notes == "individu" %}
+            <a class="notes-postit-ajouter np-1" href="{% url 'individu_notes_ajouter' idfamille=idfamille idindividu=idindividu %}" title="Ajouter une note"><i class="fa fa-plus" aria-hidden="true"></i> Ajouter une note</a>
+        {% elif mode_notes == "collaborateur" %}
+            <a class="notes-postit-ajouter np-1" href="{% url 'collaborateur_notes_ajouter' idcollaborateur=idcollaborateur %}" title="Ajouter une note"><i class="fa fa-plus" aria-hidden="true"></i> Ajouter une note</a>
+        {% endif %}
+    </div>
+</div>

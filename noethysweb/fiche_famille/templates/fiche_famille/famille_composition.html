@@ -252,19 +252,21 @@
         top: 10px;
         right: 12px;
         z-index: 6;
-        width: 20px;
-        height: 20px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
-        background: #3c8dbc;
-        color: #ffffff !important;
+        background: #ffffff;
+        color: #3c8dbc !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 10px;
+        font-size: 14px;
+        transition: background .15s, color .15s;
     }
     .bouton-ajouter-individu:hover,
     .bouton-ajouter-individu:focus {
-        background: #357ca5;
+        background: #3c8dbc;
         color: #ffffff !important;
         text-decoration: none;
     }
@@ -396,7 +398,7 @@
 <div class="composition_famille">
 
     {# Ajouter un individu #}
-    <a class="bouton-ajouter-individu" href="{% url 'individu_ajouter' idfamille=idfamille %}" title="Ajouter un individu" aria-label="Ajouter un individu"><i class="fa fa-plus" aria-hidden="true"></i></a>
+    <a class="bouton-ajouter-individu" href="{% url 'individu_ajouter' idfamille=idfamille %}" title="Ajouter un individu" aria-label="Ajouter un individu">{# Icône « user-plus » de Tabler Icons (licence MIT) #}<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M16 19h6"/><path d="M19 16v6"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4"/></svg></a>
 
     <div class="row categories_horizontales">
         {% for num_categorie, nom_categorie in categories_utilisees %}
@@ -665,6 +667,9 @@
                 {% endif %}
             </div>
     </div>
+
+    {# Notes #}
+    {% include 'outils/notes_postit.html' with mode_notes='famille' %}
 
 </div>
 

@@ -167,7 +167,7 @@ class Resume(Onglet, DetailView):
 
         # Notes de l'individu
         conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
-        context['notes'] = Note.objects.filter(conditions, individu_id=self.kwargs['idindividu']).order_by("date_saisie")
+        context['notes'] = Note.objects.select_related("categorie").filter(conditions, individu_id=self.kwargs['idindividu']).order_by("date_saisie")
 
         # Activités actuelles
         conditions = Q(individu_id=self.Get_idindividu()) & Q(date_debut__lte=datetime.date.today()) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))

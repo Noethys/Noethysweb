@@ -26,20 +26,6 @@
             </div>
         </div>
 
-        {# Notes #}
-        {% embed 'core/box.html' %}
-            {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Notes{% endblock %}
-            {% block box_outils %}
-                <a class="bouton-rond-ajouter" style="margin-right: 10px;" href="{% url 'famille_notes_ajouter' idfamille=famille.idfamille %}" title="Ajouter une note" aria-label="Ajouter une note"><i class="fa fa-plus" aria-hidden="true"></i></a>
-            {% endblock %}
-            {% block card_body_classe %}p-0{% endblock %}
-            {% block box_contenu %}
-                    {% embed "outils/notes.html" with mode_notes='famille' %}
-                    {% endembed %}
-            {% endblock %}
-        {% endembed %}
-
     </div>
 
     {# Modal Rappel notes #}
