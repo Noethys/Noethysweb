@@ -59,7 +59,11 @@ def Get_motscles_defaut(request=None):
 
 def Template(canvas, doc):
     """ Première page """
-    doc.modele_doc.DessineFond(canvas, doc.dict_donnees)
+    # Le fond ne reçoit que les valeurs communes (mots-clés par défaut...), sans les dictionnaires de chaque document
+    # (clés numériques) : ceux-ci n'étaient jamais utilisés mais étaient parcourus à chaque page.
+    if not hasattr(doc, "dict_donnees_fond"):
+        doc.dict_donnees_fond = {key: valeur for key, valeur in doc.dict_donnees.items() if not isinstance(key, int)}
+    doc.modele_doc.DessineFond(canvas, doc.dict_donnees_fond)
     doc.modele_doc.DessineFormes(canvas)
 
 

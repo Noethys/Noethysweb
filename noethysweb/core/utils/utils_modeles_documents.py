@@ -20,6 +20,20 @@ from core.utils import utils_infos_individus, utils_dates, utils_resolveur_formu
 from core.models import ModeleDocument, Organisateur
 
 
+# Mots-clés de la forme {XXX} présents dans un texte, et mots-clés à effacer s'ils n'ont pas été remplacés
+REGEX_MOTS_CLES_PRESENTS = re.compile(r"\{[^{}]*?\}")
+REGEX_MOTS_CLES_NON_UTILISES = re.compile(r"\{[A-Za-z0-9_-]*?\}")
+
+
+def Formater_valeur_mot_cle(valeur):
+    """ Conversion d'une valeur de mot-clé en texte (mêmes règles que l'ancien remplacement champ par champ) """
+    if not valeur: return ""
+    if type(valeur) == int: return str(valeur)
+    if type(valeur) == float: return u"%.02f €" % valeur
+    if type(valeur) == datetime.date: return utils_dates.ConvertDateToFR(valeur)
+    return valeur if isinstance(valeur, str) else str(valeur)
+
+
 class Categorie():
     nom = ""
     code = ""
@@ -830,8 +844,10 @@ class Modele_doc():
     def DessineFond(self, canvas, dict_valeurs={}, options={}):
         """ Dessine les objets du fond """
         if self.modele.fond:
-            # fond = ModeleDocument.objects.get(pk=self.modele.fond_id)
-            for objet in json.loads(self.modele.fond.objets):
+            # Les objets du fond sont analysés une seule fois (et non plus à chaque page)
+            if not hasattr(self, "objets_fond"):
+                self.objets_fond = json.loads(self.modele.fond.objets)
+            for objet in self.objets_fond:
                 valeur = self.GetValeur(objet, dict_valeurs)
                 if valeur is not False:
                     ObjetPDF(objet, canvas, valeur=valeur, options=options)
@@ -857,20 +873,19 @@ class Modele_doc():
         # -------- TEXTE ----------
         if "texte" in objet.get("categorie", ""):
             texte = objet.get("text")
-            for nomChamp, valeur in dict_valeurs.items():
-                # Traitement d'une formule
+            if dict_valeurs:
+                # Traitement des formules (une seule fois, et non plus une fois par champ)
                 texte = utils_resolveur_formule.ResolveurTexte(texte=texte, listeChamps=list(dict_valeurs.keys()), dictValeurs=dict_valeurs)
 
-                # Remplacement des mos-clés par les valeurs
-                if type(nomChamp) == str and nomChamp.startswith("{"):
-                    if not valeur: valeur = ""
-                    if type(valeur) == int: valeur = str(valeur)
-                    if type(valeur) == float: valeur = u"%.02f €" % valeur
-                    if type(valeur) == datetime.date: valeur = utils_dates.ConvertDateToFR(valeur)
-                    if nomChamp in texte:
-                        texte = texte.replace(nomChamp, valeur)
+                # Remplacement des mots-clés par les valeurs : on ne traite que les mots-clés présents dans le texte
+                def Remplacer(match):
+                    nomChamp = match.group(0)
+                    if nomChamp not in dict_valeurs:
+                        return nomChamp
+                    return Formater_valeur_mot_cle(dict_valeurs[nomChamp])
+                texte = REGEX_MOTS_CLES_PRESENTS.sub(Remplacer, texte)
             # Remplace également les mots-clés non utilisés par des chaînes vides
-            texte = re.sub(r"\{[A-Za-z0-9_-]*?\}", "", texte)
+            texte = REGEX_MOTS_CLES_NON_UTILISES.sub("", texte)
 
             valeur = texte
 

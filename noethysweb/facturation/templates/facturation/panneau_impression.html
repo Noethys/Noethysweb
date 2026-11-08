@@ -151,7 +151,74 @@
             });
             $("#resume_montants").text(montants.join(" · "));
         }
-        $("#bouton_action_panneau").prop("disabled", nbre === 0);
+        $("#bouton_action_panneau").prop("disabled", nbre === 0 || panneau_attente.en_cours);
+    }
+
+    // Indicateur d'attente pendant la génération (bouton en chargement + fenêtre d'attente avec chronomètre)
+    var panneau_attente = {en_cours: false, dialogue: null, chrono: null, contenu_bouton: null};
+
+    function panneau_attente_debut(titre, detail) {
+        if (panneau_attente.en_cours) { return false; }
+        panneau_attente.en_cours = true;
+        var nbre = get_coches().length;
+        var texte_nbre = nbre + " " + (nbre > 1 ? "{{ panneau.pluriel|escapejs }}" : "{{ panneau.singulier|escapejs }}");
+
+        // A : bouton désactivé avec une roue (évite les doubles clics)
+        var bouton = $("#bouton_action_panneau");
+        panneau_attente.contenu_bouton = bouton.html();
+        bouton.prop("disabled", true).attr("aria-busy", "true")
+            .html("<i class='fa fa-spin fa-spinner margin-r-5'></i>" + titre + "...");
+
+        // B : fenêtre d'attente avec le nombre de documents et le temps écoulé
+        panneau_attente.dialogue = bootbox.dialog({
+            message: "<div class='text-center' role='status' aria-live='polite'>" +
+                     "<p class='mb-1'><i class='fa fa-spin fa-cog margin-r-5'></i><b id='panneau_attente_titre'>" + titre + "</b></p>" +
+                     "<p class='mb-1 text-muted'>" + texte_nbre + " · <span id='panneau_attente_chrono'>0 s</span></p>" +
+                     "<p class='mb-0 small text-muted'>" + (detail || "Veuillez patienter, l'opération peut durer plusieurs minutes.") + "</p></div>",
+            closeButton: false,
+        });
+        // Mémorise la fin de l'animation d'ouverture : Bootstrap ignore une fermeture demandée pendant l'ouverture
+        var dialogue = panneau_attente.dialogue;
+        dialogue.data("affiche", false).one("shown.bs.modal", function() { dialogue.data("affiche", true); });
+        var debut = Date.now();
+        panneau_attente.chrono = setInterval(function() {
+            var secondes = Math.floor((Date.now() - debut) / 1000);
+            $("#panneau_attente_chrono").text(secondes < 60 ? secondes + " s" : Math.floor(secondes / 60) + " min " + (secondes % 60) + " s");
+        }, 1000);
+        return true;
+    }
+
+    // Change le titre de la fenêtre d'attente (ex : étape suivante)
+    function panneau_attente_titre(titre) {
+        $("#panneau_attente_titre").text(titre);
+    }
+
+    // Fin de l'attente : la fonction "suite" est appelée une fois la fenêtre fermée (ex : ouverture de l'aperçu PDF)
+    function panneau_attente_fin(suite) {
+        clearInterval(panneau_attente.chrono);
+        var bouton = $("#bouton_action_panneau");
+        bouton.removeAttr("aria-busy").html(panneau_attente.contenu_bouton);
+        panneau_attente.en_cours = false;
+        bouton.prop("disabled", get_coches().length === 0);
+        var dialogue = panneau_attente.dialogue;
+        panneau_attente.dialogue = null;
+        if (dialogue) {
+            var fermer = function() {
+                if (suite) { dialogue.one("hidden.bs.modal", suite); }
+                dialogue.modal("hide");
+            };
+            // Si le serveur a répondu avant la fin de l'ouverture de la fenêtre, on attend qu'elle soit affichée pour la fermer
+            if (dialogue.data("affiche")) { fermer(); } else { dialogue.one("shown.bs.modal", fermer); }
+        } else if (suite) {
+            suite();
+        }
+    }
+
+    // Message d'erreur renvoyé par le serveur (ou message générique si le serveur n'a pas répondu)
+    function panneau_message_erreur(data) {
+        if (data && data.responseJSON && data.responseJSON.erreur) { return data.responseJSON.erreur; }
+        if (data && data.status === 0) { return "Le serveur ne répond pas. Vérifiez votre connexion puis réessayez."; }
+        return "Une erreur est survenue pendant la génération. Réessayez ou contactez votre administrateur.";
     }
 
     // Affichage selon le modèle d'impression choisi

@@ -98,7 +98,9 @@ class Facturation():
                 conditions &= liste_conditions
 
         logger.debug("Recherche des prestations des factures...")
-        prestations = Prestation.objects.select_related('famille', 'activite', 'individu', 'tarif', 'categorie_tarif', "tarif__nom_tarif").filter(conditions).order_by("date")
+        # prefetch_related plutôt que select_related : les familles, activités, tarifs... sont chargés une seule fois chacun
+        # au lieu d'être recopiés (et reconstruits) sur chaque ligne de prestation
+        prestations = Prestation.objects.prefetch_related('famille', 'activite', 'individu', 'tarif', 'categorie_tarif', "tarif__nom_tarif").filter(conditions).order_by("date")
 
         # Créé la liste des familles concernées
         liste_familles = []
@@ -150,10 +152,11 @@ class Facturation():
             if liste_dates:
                 date_min = min(liste_dates)
                 date_max = max(liste_dates)
+        dict_qfdates_familles = {}
         if date_min and date_max:
-            listeQfdates = Quotient.objects.filter(date_fin__gte=date_min, date_debut__lte=date_max, famille_id__in=liste_familles)
-        else:
-            listeQfdates = []
+            # QF regroupés par famille (évite de parcourir les QF de toutes les familles pour chaque prestation)
+            for quotient in Quotient.objects.filter(date_fin__gte=date_min, date_debut__lte=date_max, famille_id__in=liste_familles):
+                dict_qfdates_familles.setdefault(quotient.famille_id, []).append(quotient)
 
         # Recherche des anciennes prestations impayées (=le report antérieur)
         logger.debug("Recherche des prestations reportées...")
@@ -162,7 +165,7 @@ class Facturation():
             conditions &= (Q(activite__in=liste_activites) | Q(activite=None)) & Q(date__lte=date_debut)
         if impayes_factures:
             conditions &= Q(facture__isnull=False)
-        prestations_reports = Prestation.objects.filter(conditions, famille_id__in=liste_familles)
+        prestations_reports = Prestation.objects.filter(conditions, famille_id__in=liste_familles).values_list("pk", "famille_id", "date", "montant")
 
         # Recherche de la ventilation des reports
         if not liste_factures:
@@ -192,14 +195,15 @@ class Facturation():
         if not liste_factures:
             conditions = Q(prestation__activite__in=liste_activites) & Q(date__gte=date_debut_temp) & Q(date__lte=date_fin)
         else:
-            conditions = Q()
+            # Seules les consommations rattachées aux prestations des factures sont utilisées
+            conditions = Q(prestation__facture_id__in=liste_factures)
         logger.debug("Recherche des consommations...")
-        consommations = Consommation.objects.filter(conditions, inscription__famille_id__in=liste_familles)
+        consommations = Consommation.objects.filter(conditions, inscription__famille_id__in=liste_familles).values_list("prestation_id", "date", "etat")
 
         dictConsommations = {}
-        for consommation in consommations:
-            dictConsommations.setdefault(consommation.prestation_id, [])
-            dictConsommations[consommation.prestation_id].append({"date": consommation.date, "etat": consommation.etat})
+        for prestation_id, date_conso, etat_conso in consommations:
+            dictConsommations.setdefault(prestation_id, [])
+            dictConsommations[prestation_id].append({"date": date_conso, "etat": etat_conso})
 
         # Recherche du solde du compte
         logger.debug("Recherche du total des prestations pour chaque facture...")
@@ -358,7 +362,7 @@ class Facturation():
                     dictComptes[ID]["{TEXTE_ECHEANCE}"] = ""
 
                 # Ajoute les réponses des questionnaires
-                for dictReponse in questionnaires.GetDonnees(IDfamille) :
+                for dictReponse in questionnaires.GetDonnees(prestation.famille_id) :
                     dictComptes[ID][dictReponse["champ"]] = dictReponse["reponse"]
                     if dictReponse["controle"] == "codebarres":
                         dictComptes[ID]["{CODEBARRES_QUESTION_%d}" % dictReponse["IDquestion"]] = dictReponse["reponse"]
@@ -484,8 +488,8 @@ class Facturation():
                 dictComptes[ID]["liste_idactivite"].append(IDactivite)
 
             # Intégration des qf aux dates concernées
-            for quotient in listeQfdates:
-                if quotient.famille_id == prestation.famille_id and quotient.date_debut <= date_fin and quotient.date_fin >= date_debut:
+            for quotient in dict_qfdates_familles.get(prestation.famille_id, []):
+                if quotient.date_debut <= date_fin and quotient.date_fin >= date_debut:
                     if quotient.date_debut < date_debut:
                         plage = "du %s " % utils_dates.ConvertDateToFR(date_debut)
                     else:
@@ -512,26 +516,28 @@ class Facturation():
 
         # Intégration du REPORT des anciennes prestations NON PAYEES
         logger.debug("Intégration du REPORT des anciennes prestations NON PAYEES...")
-        for prestation in prestations_reports:
-            montant_ventilation = Decimal(dictVentilationReports.get(prestation.pk, 0))
-            montant_impaye = prestation.montant - montant_ventilation
-            periode = (prestation.date.year, prestation.date.month)
-            if montant_ventilation != prestation.montant:
+        # Ensembles d'IDprestation de chaque compte (test d'appartenance instantané au lieu de parcourir une liste)
+        dict_set_idprestations = {ID: set(valeurs["listeIDprestations"]) for ID, valeurs in dictComptes.items()}
+        for prestation_id, prestation_famille_id, prestation_date, prestation_montant in prestations_reports:
+            montant_ventilation = Decimal(dictVentilationReports.get(prestation_id, 0))
+            montant_impaye = prestation_montant - montant_ventilation
+            periode = (prestation_date.year, prestation_date.month)
+            if montant_ventilation != prestation_montant:
 
                 if len(liste_factures) == 0:
 
-                    if prestation.famille_id in dictComptes and prestation.pk not in dictComptes[prestation.famille_id]["listeIDprestations"]:
-                        if periode not in dictComptes[prestation.famille_id]["reports"]:
-                            dictComptes[prestation.famille_id]["reports"][periode] = Decimal(0)
-                        dictComptes[prestation.famille_id]["reports"][periode] += montant_impaye
-                        dictComptes[prestation.famille_id]["total_reports"] += montant_impaye
-                        dictComptes[prestation.famille_id]["{TOTAL_REPORTS}"] = "%.02f %s" % (dictComptes[prestation.famille_id]["total_reports"], utils_preferences.Get_symbole_monnaie())
+                    if prestation_famille_id in dictComptes and prestation_id not in dict_set_idprestations[prestation_famille_id]:
+                        if periode not in dictComptes[prestation_famille_id]["reports"]:
+                            dictComptes[prestation_famille_id]["reports"][periode] = Decimal(0)
+                        dictComptes[prestation_famille_id]["reports"][periode] += montant_impaye
+                        dictComptes[prestation_famille_id]["total_reports"] += montant_impaye
+                        dictComptes[prestation_famille_id]["{TOTAL_REPORTS}"] = "%.02f %s" % (dictComptes[prestation_famille_id]["total_reports"], utils_preferences.Get_symbole_monnaie())
 
                 else:
 
-                    if prestation.famille_id in dictComptesPayeursFactures:
-                        for IDfacture in dictComptesPayeursFactures[prestation.famille_id]:
-                            if prestation.date < dictComptes[IDfacture]["date_debut"] and prestation.pk not in dictComptes[IDfacture]["listeIDprestations"]:
+                    if prestation_famille_id in dictComptesPayeursFactures:
+                        for IDfacture in dictComptesPayeursFactures[prestation_famille_id]:
+                            if prestation_date < dictComptes[IDfacture]["date_debut"] and prestation_id not in dict_set_idprestations[IDfacture]:
                                 if periode not in dictComptes[IDfacture]["reports"]:
                                     dictComptes[IDfacture]["reports"][periode] = Decimal(0)
                                 dictComptes[IDfacture]["reports"][periode] += montant_impaye
@@ -553,7 +559,7 @@ class Facturation():
     def GetDonneesImpression(self, liste_factures=[], dict_options=None):
         """ Impression des factures """
         logger.debug("Recherche toutes les factures...")
-        factures = Facture.objects.select_related("lot").filter(idfacture__in=liste_factures)
+        factures = Facture.objects.select_related("lot", "prefixe").filter(idfacture__in=liste_factures)
         if not factures:
             return False
 

@@ -5,6 +5,7 @@
 
             // Impression du PDF
             function impression_pdf() {
+                if (!panneau_attente_debut("Génération du PDF")) { return; }
                 $.ajax({
                     type: "POST",
                     url: "{% url 'ajax_factures_impression_pdf' %}",
@@ -17,10 +18,11 @@
                     },
                     datatype: "json",
                     success: function(data){
-                        charge_pdf(data);
+                        panneau_attente_fin(function() { charge_pdf(data); });
                     },
                     error: function(data) {
-                        toastr.error(data.responseJSON.erreur);
+                        panneau_attente_fin();
+                        toastr.error(panneau_message_erreur(data));
                     }
                 })
             };

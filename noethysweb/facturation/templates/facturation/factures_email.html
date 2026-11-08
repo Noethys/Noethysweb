@@ -12,11 +12,8 @@
                             label: "<i class='fa fa-check'></i> Transférer",
                             className: 'btn-primary',
                             callback: function(){
-                                bootbox.dialog({
-                                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> L'opération peut durer plusieurs minutes. Veuillez patienter...</p>",
-                                    closeButton: false
-                                });
-                                impression_pdf(box);
+                                // Attend la fermeture de la confirmation avant d'ouvrir la fenêtre d'attente
+                                box.one("hidden.bs.modal", function() { impression_pdf(); });
                             }
                         },
                         cancel: {
@@ -29,7 +26,8 @@
             };
 
             // Impression du PDF
-            function impression_pdf(dialogbox) {
+            function impression_pdf() {
+                if (!panneau_attente_debut("Préparation des emails", "Création d'un PDF par facture. Veuillez patienter, l'opération peut durer plusieurs minutes.")) { return; }
                 $.ajax({
                     type: "POST",
                     url: "{% url 'ajax_factures_email_pdf' %}",
@@ -42,11 +40,13 @@
                     },
                     datatype: "json",
                     success: function(data){
+                        // La fenêtre d'attente reste affichée pendant l'ouverture de l'éditeur d'emails
+                        panneau_attente_titre("Ouverture de l'éditeur d'emails");
                         window.location.href = data.url;
                     },
                     error: function(data) {
-                        toastr.error(data.responseJSON.erreur);
-                        bootbox.hideAll();
+                        panneau_attente_fin();
+                        toastr.error(panneau_message_erreur(data));
                     }
                 })
             };
