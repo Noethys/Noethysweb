@@ -1,3 +1,17 @@
+Version 1.3.6.1 (08/11/2026) :
+
+Nouveautés
+- Menu Locations > Statistiques des locations : nouveau tableau de bord (locations, familles, taux d'occupation des produits, montants facturés, graphiques, détail par produit et exports Excel et PDF)
+- Fiches famille, individu et collaborateur > Résumé : affichage des notes sous forme de post-it avec boutons de modification et de suppression au survol
+Améliorations
+- Impression et envoi par email des factures : génération des PDF nettement plus rapide
+- Impression et envoi par email des factures et des lettres de rappel : affichage d'une fenêtre d'attente avec chronomètre et blocage du bouton pendant la génération
+- Fiche famille > Résumé : nouveau bouton d'ajout d'un individu plus explicite
+- Fiche famille > Résumé : ajustement de l'espacement vertical des vignettes
+Corrections
+- Modèles de documents : correction d'une erreur d'impression avec certains mots-clés numériques
+- Facturation : correction de la récupération des réponses aux questionnaires familiaux lors de la génération des factures
+
 Version 1.3.6.0 (08/11/2026) :
 
 Nouveautés
