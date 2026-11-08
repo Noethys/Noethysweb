@@ -1,3 +1,23 @@
+Version 1.3.6.0 (08/11/2026) :
+
+Nouveautés
+- Paramétrage > Modèles de documents : ajout de l'import et export des modèles de documents
+- Paramétrage > Modèles de documents : ajout de l'aperçu des modèles dans la liste
+- Envoi des factures par email : ajout du filtre Prélèvement actif
+- Détail des ventilations des dépôts : ajout du choix Les prestations ventilées sur une période
+Améliorations
+- Grille des consommations : optimisation du chargement et de l'enregistrement
+- Grille des consommations : amélioration de la sélection des mois et des vacances dans les paramètres
+- Fiches famille, individu et collaborateur : relooking des pages Résumé
+- Fiche famille > Règlements : relooking du remboursement
+- Impressions et envois par email des factures, rappels et attestations fiscales : relooking du panneau des paramètres
+- Synthèse des impayés : optimisation des calculs
+- Edition des prestations : optimisation de la vitesse d'affichage du PDF
+Corrections
+- Grille des consommations : correction de la mise à jour des consommations masquées et suppression des consommations fantômes
+- Grille des consommations : correctifs divers
+- Factures : correction de l'affichage du mot-clé code produit local
+
 Version 1.3.5.9 (27/10/2026) :
 
 Nouveautés
