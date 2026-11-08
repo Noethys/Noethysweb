@@ -6,7 +6,7 @@
 from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
-from locations.views import liste_locations, locations_impression, locations_email, planning_locations, synthese_locations
+from locations.views import liste_locations, locations_impression, locations_email, planning_locations, synthese_locations, statistiques_locations
 
 urlpatterns = [
 
@@ -24,6 +24,7 @@ urlpatterns = [
 
     # Analyse
     path('locations/synthese_locations', synthese_locations.View.as_view(), name='synthese_locations'),
+    path('locations/statistiques_locations', statistiques_locations.View.as_view(), name='statistiques_locations'),
 
     # AJAX
     path('locations/locations_impression_pdf', secure_ajax(locations_impression.Impression_pdf), name='ajax_locations_impression_pdf'),
@@ -37,4 +38,8 @@ urlpatterns = [
     path('locations/planning/supprimer_occurences', secure_ajax(planning_locations.Supprimer_occurences), name='ajax_planning_locations_supprimer_occurences'),
     path('locations/planning/get_form_parametres', secure_ajax(planning_locations.Get_form_parametres), name='ajax_planning_locations_get_form_parametres'),
     path('locations/planning/valid_form_parametres', secure_ajax(planning_locations.Valid_form_parametres), name='ajax_planning_locations_valid_form_parametres'),
+
+    # AJAX statistiques des locations
+    path('locations/statistiques_locations/exporter_excel', secure_ajax(statistiques_locations.Exporter_excel), name='ajax_statistiques_locations_exporter_excel'),
+    path('locations/statistiques_locations/generer_pdf', secure_ajax(statistiques_locations.Generer_pdf), name='ajax_statistiques_locations_generer_pdf'),
 ]

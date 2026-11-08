@@ -385,6 +385,7 @@ COMMANDES = {
     "locations_email": ("envelope-o", "e", "Envoyer des confirmations de location."),
     "planning_locations": ("calendar", "a", "Voir et saisir les locations sur un planning."),
     "synthese_locations": ("pie-chart", "s", "Totaliser les locations par produit et période."),
+    "statistiques_locations": ("bar-chart", "s", "Tableau de bord des locations, du taux d'occupation des produits et de leur facturation."),
 
     # ------------------------------------ Adhésions ------------------------------------
 
@@ -540,6 +541,7 @@ NOUVEAUTES = {
     "rapport_activite": "2026-10-10",
     "inscriptions_assistant_lot": "2026-10-13",
     "assistant_traitement_lot": "2026-10-13",
+    "statistiques_locations": "2026-11-08",
 }
 
 

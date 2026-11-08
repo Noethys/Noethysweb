@@ -311,6 +311,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     # Analyse
     menu_analyse_locations = menu_locations.Add(titre="Analyse")
     menu_analyse_locations.Add(code="synthese_locations", titre="Synthèse des locations", icone="file-text-o")
+    menu_analyse_locations.Add(code="statistiques_locations", titre="Statistiques des locations", icone="file-text-o")
 
 
     # ------------------------------------ Cotisations ------------------------------------
