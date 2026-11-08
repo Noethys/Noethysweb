@@ -203,6 +203,9 @@
 
         </ul>
 
+        <style>
+            .bouton-deconnexion { width: 30px; height: 30px; padding: 0; margin-left: 6px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        </style>
         <ul class="navbar-nav ml-auto">
 
 {% comment %}
@@ -218,7 +221,6 @@
             {# Utilisateur en cours #}
             <li class="dropdown user user-menu">
                 <a href="#" class="nav-link" data-toggle="dropdown">
-                    <img src="{% static "images/user.png" %}" class="user-image" alt="User Image">
                     <span class="d-none d-sm-inline">{% firstof request.user.get_full_name request.user request.user.get_short_name %}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right">
@@ -226,22 +228,14 @@
                         <img src="{% static "images/user.png" %}" class="rounded-circle" alt="User Image">
                         <p>
                             {% firstof request.user.get_full_name request.user request.user.get_short_name %}
-                            <small>Dernière connexion le {{ request.user.last_login }}</small>
+                            <small>{% if request.user.last_login %}Dernière connexion le {{ request.user.last_login|date:"j F Y à H:i" }}{% else %}Première connexion{% endif %}</small>
                             <small>Utilisateur depuis {{ request.user.date_joined|date:"j F Y" }}</small>
                         </p>
                     </li>
 
                     <!-- Menu Footer-->
                     <li class="user-footer">
-                        <div class="pull-left">
-                            <a href="{% url 'profil_utilisateur' %}" class="btn btn-default">Profil</a>
-                        </div>
-                        <div class="pull-right">
-                            <form action="{% url 'deconnexion' %}" method="post">
-                                {% csrf_token %}
-                                <button class="btn btn-danger" type="submit"><i class="fa fa-power-off margin-r-5"></i>Déconnexion</button>
-                            </form>
-                        </div>
+                        <a href="{% url 'profil_utilisateur' %}" class="btn btn-default btn-block"><i class="fa fa-user margin-r-5" aria-hidden="true"></i>Mon profil</a>
                     </li>
 
                 </ul>
@@ -258,9 +252,20 @@
 
             {# Panneau latéral #}
             <li class="nav-item">
-                <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button" title="Options">
-                    <i class="fa fa-gears"></i>
+                <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button" title="Options d'affichage" aria-label="Options d'affichage">
+                    <i class="fa fa-sliders" aria-hidden="true"></i>
                 </a>
+            </li>
+
+            {# Bouton de déconnexion #}
+            <li class="nav-item d-flex align-items-center">
+                <form action="{% url 'deconnexion' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <button class="btn btn-danger bouton-deconnexion" type="submit" title="Se déconnecter">
+                        <i class="fa fa-power-off" aria-hidden="true"></i>
+                        <span class="sr-only">Se déconnecter</span>
+                    </button>
+                </form>
             </li>
 
 

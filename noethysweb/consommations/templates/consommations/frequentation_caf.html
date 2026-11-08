@@ -10,8 +10,8 @@
         .fcaf_etapes {display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none}
         .fcaf_etapes button {display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #dee2e6; border-radius: 999px; background: #ffffff; color: #495057; font-size: 13.5px}
         .fcaf_etapes button .numero {display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #e9ecef; font-size: 12px; font-weight: 700}
-        .fcaf_etapes button.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80; font-weight: 600}
-        .fcaf_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .fcaf_etapes button.active {border-color: var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000); font-weight: 600}
+        .fcaf_etapes button.active .numero {background: var(--couleur-principale, #3c8dbc); color: #ffffff}
         .fcaf_etapes button.valide .numero {background: #28a745; color: #ffffff}
         .fcaf_etape {display: none}
         .fcaf_etape.active {display: block}
@@ -20,7 +20,7 @@
         .fcaf_section {margin-top: 22px; padding-top: 16px; border-top: 1px solid #f1f3f5}
         .fcaf_section h5 {font-size: 15px; font-weight: 600}
         .fcaf_raccourcis {display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px}
-        .fcaf_raccourcis .btn.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80}
+        .fcaf_raccourcis .btn.active {border-color: var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000)}
 
         /* Mise en page commune des champs */
         .fcaf_grille {display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px 32px; align-items: start}
@@ -41,7 +41,7 @@
         .fcaf_table_etats {max-width: 560px}
         .fcaf_table_etats td, .fcaf_table_etats th {vertical-align: middle}
         .fcaf_table_etats .centre {width: 120px; text-align: center}
-        .fcaf_table_etats input[type=checkbox] {width: 17px; height: 17px; accent-color: #3c8dbc}
+        .fcaf_table_etats input[type=checkbox] {width: 17px; height: 17px; accent-color: var(--couleur-principale, #3c8dbc)}
         .fcaf_jours {display: grid; grid-template-columns: 170px repeat(7, 42px); align-items: center; gap: 4px; margin-top: 8px}
         .fcaf_jours label {margin: 0; font-weight: normal; text-align: center}
 
@@ -49,7 +49,7 @@
         .fcaf_filtre {display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.4fr) minmax(0, 1.8fr) minmax(0, 1.5fr) 38px; gap: 8px; align-items: start; margin-bottom: 8px}
         .fcaf_filtre select[multiple] {min-height: 38px}
         .fcaf_filtre .valeurs:empty {display: none}
-        .fcaf_compteur {display: inline-block; padding: 4px 12px; border-radius: 999px; background: #e8f1f8; color: #1d5a80; font-size: 13.5px}
+        .fcaf_compteur {display: inline-block; padding: 4px 12px; border-radius: 999px; background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000); font-size: 13.5px}
         @media (max-width: 991px) {.fcaf_filtre {grid-template-columns: 1fr 1fr} .fcaf_filtre > :last-child {justify-self: end}}
 
         /* Unités */
@@ -61,20 +61,20 @@
         .fcaf_unites select {min-width: 210px}
         .fcaf_unites tr.detail > td {padding: 0; background: #fbfcfd}
         .fcaf_detail {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; padding: 14px 16px}
-        .fcaf_detail h6 {font-size: 13px; font-weight: 700; color: #1d5a80; text-transform: uppercase; letter-spacing: .02em}
+        .fcaf_detail h6 {font-size: 13px; font-weight: 700; color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000); text-transform: uppercase; letter-spacing: .02em}
         .fcaf_detail .form-row label {font-size: 12.5px; margin-bottom: 2px; color: #495057}
         .fcaf_exemple {margin-top: 8px; padding: 6px 10px; border-radius: 4px; background: #f1f3f5; font-size: 12.5px; color: #495057}
         .fcaf_exemple.erreur {background: #fdecee; color: #a8323e}
-        .fcaf_lien {padding: 0; border: 0; background: none; color: #3c8dbc; font-size: 13px; white-space: nowrap}
+        .fcaf_lien {padding: 0; border: 0; background: none; color: var(--couleur-principale, #3c8dbc); font-size: 13px; white-space: nowrap}
         .fcaf_lien:hover, .fcaf_lien:focus {text-decoration: underline}
 
         /* Résultats */
         .fcaf_kpi {height: 100%; padding: 14px 16px; border-radius: .25rem; background: #ffffff; box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2)}
         .fcaf_kpi .libelle {display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #6c757d}
-        .fcaf_kpi .libelle i {color: #3c8dbc}
+        .fcaf_kpi .libelle i {color: var(--couleur-principale, #3c8dbc)}
         .fcaf_kpi .valeur {margin-top: 4px; font-size: clamp(20px, 1.9vw, 28px); font-weight: 700; line-height: 1.2; color: #1f2d3d; white-space: nowrap; font-variant-numeric: tabular-nums}
         .fcaf_kpi .detail {margin-top: 2px; font-size: 12px; color: #6c757d}
-        .fcaf_dont {padding: 8px 12px; border-left: 3px solid #3c8dbc; background: #f4f8fb}
+        .fcaf_dont {padding: 8px 12px; border-left: 3px solid var(--couleur-principale, #3c8dbc); background: #f4f8fb}
         .fcaf_controles {margin: 0; padding: 0; list-style: none}
         .fcaf_controles > li {padding: 10px 16px; border-bottom: 1px solid #f1f3f5; font-size: 13.5px}
         .fcaf_controles > li:last-child {border-bottom: 0}
@@ -88,18 +88,18 @@
         .fcaf_tableau tr.ligne_sous_total th, .fcaf_tableau tr.ligne_sous_total td {background: #f8f9fa; font-weight: 600}
         .fcaf_tableau tr.ligne_total th, .fcaf_tableau tr.ligne_total td {background: #e8eef3; font-weight: 700}
         .fcaf_tableau tr.ligne_dont th, .fcaf_tableau tr.ligne_dont td {font-style: italic; color: #495057}
-        .fcaf_titre_regroupement {padding: 6px 10px; border-radius: 3px; background: #3c8dbc; color: #ffffff; font-size: 14.5px}
+        .fcaf_titre_regroupement {padding: 6px 10px; border-radius: 3px; background: var(--couleur-principale, #3c8dbc); color: #ffffff; font-size: 14.5px}
         .fcaf_rappel {font-size: 12px; color: #6c757d}
 
         /* Mode sombre */
         .dark-mode .fcaf_etapes button {border-color: #6c757d; background: #343a40; color: #ced4da}
         .dark-mode .fcaf_etapes button .numero {background: #4b545c}
-        .dark-mode .fcaf_etapes button.active, .dark-mode .fcaf_raccourcis .btn.active, .dark-mode .fcaf_compteur {border-color: #3f8fc5; background: #24435a; color: #d7e9f6}
+        .dark-mode .fcaf_etapes button.active, .dark-mode .fcaf_raccourcis .btn.active, .dark-mode .fcaf_compteur {border-color: #3f8fc5; background: #24435a; color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 18%, #fff)}
         .dark-mode .fcaf_section, .dark-mode .fcaf_controles > li {border-color: rgba(255, 255, 255, .07)}
         .dark-mode .fcaf_unites tr.activite td, .dark-mode .fcaf_tableau thead th, .dark-mode .fcaf_tableau tr.ligne_age th {background: #3f474e}
         .dark-mode .fcaf_unites tr.detail > td, .dark-mode .fcaf_tableau tr.ligne_sous_total th, .dark-mode .fcaf_tableau tr.ligne_sous_total td {background: #3a4047}
         .dark-mode .fcaf_detail .form-row label, .dark-mode .fcaf_tableau tr.ligne_dont th, .dark-mode .fcaf_tableau tr.ligne_dont td {color: #ced4da}
-        .dark-mode .fcaf_detail h6 {color: #8fc1e3}
+        .dark-mode .fcaf_detail h6 {color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 55%, #fff)}
         .dark-mode .fcaf_exemple {background: #454d55; color: #e9ecef}
         .dark-mode .fcaf_kpi {background: #343a40}
         .dark-mode .fcaf_kpi .valeur {color: #ffffff}
@@ -973,7 +973,7 @@
                 var canvas = document.getElementById("fcaf_graphique_mois");
                 if (!canvas || typeof Chart === "undefined") {return}
                 var sombre = $("body").hasClass("dark-mode");
-                var couleurs = {realise: "#3c8dbc", facture: sombre ? "#7a8a99" : "#b8c7d3"};
+                var couleurs = {realise: Couleur_principale(), facture: sombre ? "#7a8a99" : "#b8c7d3"};
                 var texte = sombre ? "#ced4da" : "#495057", grille = sombre ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.06)";
                 var format = new Intl.NumberFormat("fr-FR", {maximumFractionDigits: 2});
                 graphique = new Chart(canvas, {

@@ -10,8 +10,8 @@
         .atl_etapes button {display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #dee2e6; border-radius: 999px; background: #ffffff; color: #495057; font-size: 13.5px}
         .atl_etapes button:disabled {cursor: default; opacity: .75}
         .atl_etapes button .numero {display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #e9ecef; font-size: 12px; font-weight: 700}
-        .atl_etapes button.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80; font-weight: 600}
-        .atl_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .atl_etapes button.active {border-color: var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000); font-weight: 600}
+        .atl_etapes button.active .numero {background: var(--couleur-principale, #3c8dbc); color: #ffffff}
         .atl_etapes button.valide .numero {background: #28a745; color: #ffffff}
         .atl_etape {display: none}
         .atl_etape.active {display: block}
@@ -34,13 +34,13 @@
         .atl_cartes button {text-align: left; border: 2px solid #dee2e6; background: #ffffff; border-radius: 6px; padding: 12px 14px; color: #212529; min-height: 72px}
         .atl_cartes button .titre {display: block; font-weight: 600; font-size: 15.5px}
         .atl_cartes button .description {display: block; font-size: 13.5px; color: #6c757d; margin-top: 2px}
-        .atl_cartes button[aria-checked=true], .atl_cartes button[aria-selected=true] {border-color: #3c8dbc; background: #f0f7fc}
+        .atl_cartes button[aria-checked=true], .atl_cartes button[aria-selected=true] {border-color: var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 6%, #fff)}
         .atl_aide {background: #f8f9fa; border-radius: 4px; padding: 10px 14px; color: #495057; font-size: 14px}
-        .atl_compteur {display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 4px; background: #e8f1f8; color: #1d5a80}
+        .atl_compteur {display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 4px; background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000)}
         .atl_compteur .valeur {font-size: 22px; font-weight: 700}
         .atl_compteur.erreur {background: #fdecea; color: #8a1c13}
         .atl_raccourcis {display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px}
-        .atl_raccourcis .btn.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80}
+        .atl_raccourcis .btn.active {border-color: var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000)}
 
         /* Jours et calendrier */
         .atl_table_jours th, .atl_table_jours td {padding: 4px 7px; text-align: center}
@@ -50,7 +50,7 @@
         .atl_periode .atl_ligne_champs .atl_champ {width: 170px}
         .atl_apercu_dates {border: 1px solid #dee2e6; border-radius: 6px; background: #fcfdfe; padding: 14px 16px}
         .atl_apercu_dates .entete_apercu {display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid #eef0f2}
-        .atl_apercu_dates .entete_apercu .valeur {font-size: 26px; font-weight: 700; color: #1d5a80; line-height: 1}
+        .atl_apercu_dates .entete_apercu .valeur {font-size: 26px; font-weight: 700; color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000); line-height: 1}
         .atl_apercu_dates .entete_apercu .titre {font-weight: 600}
         .atl_apercu_dates .entete_apercu .texte {color: #495057; font-size: 14px; flex-basis: 100%}
         .atl_apercu_dates.erreur .entete_apercu .valeur, .atl_apercu_dates.erreur .entete_apercu .texte {color: #a52714}
@@ -63,7 +63,7 @@
         .atl_jour {display: flex; align-items: center; justify-content: center; height: 30px; border-radius: 4px; font-size: 13px; color: #212529}
         .atl_jour.hors {color: #9aa0a6}
         .atl_jour.vacances {background: #fff3cd; color: #5c4300}
-        .atl_jour.retenu {background: #3c8dbc; color: #ffffff; font-weight: 700}
+        .atl_jour.retenu {background: var(--couleur-principale, #3c8dbc); color: #ffffff; font-weight: 700}
         .atl_jour.ferie {border: 1px dashed #c0392b; color: #a52714; text-decoration: line-through}
         .atl_jour.ferme {border: 1px dashed #6c757d; color: #6c757d; text-decoration: line-through}
         .atl_legende {display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #495057; margin-top: 14px; padding-top: 10px; border-top: 1px solid #eef0f2}
@@ -81,11 +81,11 @@
         .atl_etats_cibles legend {font-size: 15px; font-weight: 600; width: auto; padding: 0 6px; margin: 0}
 
         /* Recherche */
-        .atl_etiquette {display: inline-flex; align-items: center; gap: 4px; background: #e8f1f8; color: #1d5a80; border-radius: 3px; padding: 2px 4px 2px 8px; font-size: 14px}
+        .atl_etiquette {display: inline-flex; align-items: center; gap: 4px; background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000); border-radius: 3px; padding: 2px 4px 2px 8px; font-size: 14px}
         .atl_etiquette button {border: 0; background: transparent; color: inherit; padding: 0 3px; font-size: 16px; line-height: 1}
         .atl_resultats_recherche {max-width: 620px; border: 1px solid #dee2e6; border-radius: 4px; margin-top: 4px; max-height: 240px; overflow-y: auto}
         .atl_resultats_recherche button {display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid #f1f3f5; background: #ffffff; padding: 6px 10px}
-        .atl_resultats_recherche button:hover, .atl_resultats_recherche button:focus {background: #f0f7fc}
+        .atl_resultats_recherche button:hover, .atl_resultats_recherche button:focus {background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 6%, #fff)}
 
         /* Simulation */
         .atl_kpis {display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px}
@@ -106,7 +106,7 @@
 
         /* Traitement */
         .atl_progression {height: 14px; background: #e9ecef; border-radius: 7px; overflow: hidden; margin: 14px 0}
-        .atl_progression div {height: 14px; width: 0; background: #3c8dbc; transition: width .3s}
+        .atl_progression div {height: 14px; width: 0; background: var(--couleur-principale, #3c8dbc); transition: width .3s}
         .atl_journal {list-style: none; padding: 0; margin: 0; font-size: 14px; color: #495057; max-height: 140px; overflow-y: auto}
         .atl_succes {display: flex; gap: 16px; align-items: center; margin-bottom: 18px}
         .atl_succes i {font-size: 40px; color: #28a745}
@@ -117,11 +117,11 @@
 
         .dark-mode .atl_etapes button, .dark-mode .atl_cartes button, .dark-mode .atl_barre_bas, .dark-mode .atl_resultats_recherche button {background: #343a40; color: #e9ecef; border-color: #6c757d}
         .dark-mode .atl_etapes button .numero {background: #495057; color: #e9ecef}
-        .dark-mode .atl_etapes button.active, .dark-mode .atl_cartes button[aria-checked=true], .dark-mode .atl_cartes button[aria-selected=true] {background: #2f3a43; color: #8fc1e3; border-color: #3c8dbc}
-        .dark-mode .atl_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .dark-mode .atl_etapes button.active, .dark-mode .atl_cartes button[aria-checked=true], .dark-mode .atl_cartes button[aria-selected=true] {background: #2f3a43; color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 55%, #fff); border-color: var(--couleur-principale, #3c8dbc)}
+        .dark-mode .atl_etapes button.active .numero {background: var(--couleur-principale, #3c8dbc); color: #ffffff}
         .dark-mode .atl_etapes button.valide .numero {background: #28a745; color: #ffffff}
         .dark-mode .atl_cartes button .description, .dark-mode .atl_kpi .libelle {color: #adb5bd}
-        .dark-mode .atl_compteur, .dark-mode .atl_etiquette {background: #2f3a43; color: #8fc1e3}
+        .dark-mode .atl_compteur, .dark-mode .atl_etiquette {background: #2f3a43; color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 55%, #fff)}
         .dark-mode .atl_aide, .dark-mode .atl_pastille, .dark-mode .atl_kpi, .dark-mode .atl_badge.neutre {background: #3a4047; color: #ced4da}
         .dark-mode .atl_kpi.succes {background: #1f3a28}
         .dark-mode .atl_avertissement, .dark-mode .atl_badge.alerte, .dark-mode .atl_kpi.attention, .dark-mode .atl_jour.vacances {background: #4d3d12; color: #ffe08a; border-color: #6b5518}
@@ -129,7 +129,7 @@
         .dark-mode .atl_jour.hors {color: #7d858c}
         .dark-mode .atl_apercu_dates {background: #343a40; border-color: #4b545c}
         .dark-mode .atl_apercu_dates .entete_apercu, .dark-mode .atl_legende {border-color: #4b545c}
-        .dark-mode .atl_apercu_dates .entete_apercu .valeur {color: #8fc1e3}
+        .dark-mode .atl_apercu_dates .entete_apercu .valeur {color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 55%, #fff)}
         .dark-mode .atl_apercu_dates .entete_apercu .texte, .dark-mode .atl_legende {color: #ced4da}
         .dark-mode .atl_section {border-top-color: #454d55}
     </style>
@@ -219,7 +219,7 @@
                         </div>
                         <div class="atl_calendrier" id="atl_calendrier" aria-hidden="true"></div>
                         <div class="atl_legende" aria-hidden="true">
-                            <span><i style="background: #3c8dbc;"></i>Date retenue</span>
+                            <span><i style="background: var(--couleur-principale, #3c8dbc);"></i>Date retenue</span>
                             <span><i style="background: #fff3cd; border: 1px solid #e0c36b;"></i>Vacances</span>
                             <span><i style="border: 1px dashed #c0392b;"></i>Férié exclu</span>
                             <span><i style="border: 1px dashed #6c757d;"></i>Activité fermée</span>

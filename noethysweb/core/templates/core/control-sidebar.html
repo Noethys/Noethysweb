@@ -1,29 +1,146 @@
-<aside class="control-sidebar control-sidebar-dark">
-    <div class="p-3 control-sidebar-content">
+<aside class="control-sidebar control-sidebar-light panneau-options" aria-label="Options d'affichage">
+    <style>
+        .panneau-options { background: #ffffff; color: #343a40; border-left: 1px solid #dee2e6; }
+        .panneau-options .options-entete { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid #eef0f2; font-size: 15px; font-weight: 600; }
+        .panneau-options a.options-fermer { color: #6c757d !important; padding: 2px 6px; border-radius: 4px; }
+        .panneau-options a.options-fermer:hover, .panneau-options a.options-fermer:focus { color: #343a40 !important; background: #f1f3f5; }
+        .panneau-options .options-section { padding: 14px 14px 4px; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #6c757d; }
+        .panneau-options fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+        .panneau-options legend.options-section { float: none; width: 100%; margin: 0; border: 0; background: none; line-height: inherit; }
+        .panneau-options .sr-only-focusable:focus + label { outline: 2px solid var(--couleur-principale, #3c8dbc); }
 
-        <h5>Options</h5>
-        <hr class="mb-2">
+        /* Thème : vignettes */
+        .panneau-options .options-themes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 4px 14px 6px; }
+        .panneau-options .options-theme { display: block; margin: 0; padding: 5px; border: 2px solid #e3e6ea; border-radius: 8px; text-align: center; font-size: 12.5px; font-weight: 400; cursor: pointer; }
+        .panneau-options .options-theme .miniature { display: flex; height: 44px; margin-bottom: 4px; overflow: hidden; border-radius: 4px; }
+        .panneau-options .options-theme .miniature .menu { width: 28%; }
+        .panneau-options .options-theme .miniature .contenu { flex: 1; padding: 6px 5px; }
+        .panneau-options .options-theme .miniature .contenu::before { content: ""; display: block; height: 6px; margin-bottom: 5px; border-radius: 2px; background: currentColor; opacity: .35; }
+        .panneau-options .options-theme .miniature .contenu::after { content: ""; display: block; height: 12px; border-radius: 2px; background: currentColor; opacity: .15; }
+        .panneau-options .options-theme.clair .miniature { color: #343a40; background: #f4f6f9; }
+        .panneau-options .options-theme.clair .miniature .menu { background: #343a40; }
+        .panneau-options .options-theme.sombre .miniature { color: #ffffff; background: #454d55; }
+        .panneau-options .options-theme.sombre .miniature .menu { background: #2b3035; }
 
-{#        <h6>Affichage</h6>#}
+        /* Taille du texte : boutons segmentés */
+        .panneau-options .options-segments { display: flex; margin: 4px 14px 6px; overflow: hidden; border: 1px solid #d5dbe1; border-radius: 8px; }
+        .panneau-options .options-segments label { flex: 1; margin: 0; padding: 7px 0; text-align: center; font-weight: 400; cursor: pointer; border-right: 1px solid #d5dbe1; }
+        .panneau-options .options-segments label:first-of-type { font-size: 15px; }
+        .panneau-options .options-segments label:last-of-type { border-right: 0; }
 
-        {# Case Dark-mode #}
-        <div class="mb-4">
-            <input id="check_dark_mode" type="checkbox" value="1" class="mr-1">
-            <span>Dark mode</span>
+        /* Choix sélectionné */
+        .panneau-options input:checked + .options-theme { border-color: var(--couleur-principale, #3c8dbc); color: var(--couleur-principale, #3c8dbc); font-weight: 600; }
+        .panneau-options input:checked + label.options-segment { background: var(--couleur-principale, #3c8dbc); color: #ffffff; }
+        .panneau-options input:focus-visible + label { box-shadow: 0 0 0 3px rgba(var(--couleur-principale-rgb, 60, 141, 188), .35); }
+
+        /* Couleur principale : pastilles */
+        .panneau-options .options-couleurs { display: flex; flex-wrap: wrap; gap: 10px 12px; padding: 6px 14px 8px; }
+        .panneau-options .options-couleur { display: block; width: 26px; height: 26px; margin: 0; border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px transparent; }
+        .panneau-options input:checked + .options-couleur { box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #343a40; }
+        .panneau-options input:focus-visible + .options-couleur { outline: 2px dashed #343a40; outline-offset: 5px; }
+        .dark-mode .panneau-options .options-couleur { box-shadow: 0 0 0 2px #343a40, 0 0 0 3px transparent; }
+        .dark-mode .panneau-options input:checked + .options-couleur { box-shadow: 0 0 0 2px #343a40, 0 0 0 4px #ffffff; }
+
+        /* Interrupteur */
+        .panneau-options .options-ligne { display: flex; align-items: center; gap: 10px; margin: 0; padding: 8px 14px; font-weight: 400; cursor: pointer; }
+        .panneau-options .options-ligne .texte { flex: 1; min-width: 0; }
+        .panneau-options .options-ligne .texte b { display: block; font-weight: 600; }
+        .panneau-options .options-ligne .texte small { display: block; font-size: 11.5px; line-height: 1.3; color: #6c757d; }
+        .panneau-options .interrupteur { position: relative; flex: none; width: 36px; height: 20px; border-radius: 10px; background: #ced4da; transition: background .15s; }
+        .panneau-options .interrupteur::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: left .15s; }
+        .panneau-options input:checked + .options-ligne .interrupteur { background: var(--couleur-principale, #3c8dbc); }
+        .panneau-options input:checked + .options-ligne .interrupteur::after { left: 18px; }
+        .panneau-options .options-pied { padding: 14px; font-size: 11.5px; color: #8a96a3; }
+
+        /* Mode sombre */
+        .dark-mode .panneau-options { background: #343a40; color: #e9ecef; border-left-color: #4b545c; }
+        .dark-mode .panneau-options .options-entete { border-bottom-color: #4b545c; }
+        .dark-mode .panneau-options a.options-fermer { color: #adb5bd !important; }
+        .dark-mode .panneau-options a.options-fermer:hover, .dark-mode .panneau-options a.options-fermer:focus { color: #ffffff !important; background: #454d55; }
+        .dark-mode .panneau-options .options-section, .dark-mode .panneau-options .options-ligne .texte small { color: #adb5bd; }
+        .dark-mode .panneau-options .options-theme, .dark-mode .panneau-options .options-segments, .dark-mode .panneau-options .options-segments label { border-color: #5a6268; }
+        .dark-mode .panneau-options input:checked + .options-theme { border-color: #6fb0dc; color: #9cc3e8; }
+        .dark-mode .panneau-options .interrupteur { background: #5a6268; }
+    </style>
+
+    <div class="control-sidebar-content">
+
+        <div class="options-entete">
+            <span><i class="fa fa-sliders margin-r-5" aria-hidden="true"></i>Options d'affichage</span>
+            <a href="#" class="options-fermer" data-widget="control-sidebar" role="button" title="Fermer" aria-label="Fermer les options d'affichage"><i class="fa fa-times" aria-hidden="true"></i></a>
         </div>
 
-        {# Case text-sm #}
-        <div class="mb-4">
-            <input id="check_text_sm" type="checkbox" value="1" class="mr-1">
-            <span>Petite police de caractères</span>
-        </div>
+        {# Thème #}
+        <fieldset>
+            <legend class="options-section mb-0">Thème</legend>
+            <div class="options-themes">
+                <div>
+                    <input type="radio" class="sr-only" name="option_theme" id="option_theme_clair" value="clair">
+                    <label class="options-theme clair" for="option_theme_clair"><span class="miniature" aria-hidden="true"><span class="menu"></span><span class="contenu"></span></span>Clair</label>
+                </div>
+                <div>
+                    <input type="radio" class="sr-only" name="option_theme" id="option_theme_sombre" value="sombre">
+                    <label class="options-theme sombre" for="option_theme_sombre"><span class="miniature" aria-hidden="true"><span class="menu"></span><span class="contenu"></span></span>Sombre</label>
+                </div>
+            </div>
+        </fieldset>
 
-        {# Case sidebar-no-expand #}
-        <div class="mb-4">
-            <input id="check_sidebar_no_expand" type="checkbox" value="1" class="mr-1">
-            <span>Désactive l'agrandissement du menu latéral gauche lors du survol</span>
-        </div>
+        {# Couleur principale #}
+        <fieldset>
+            <legend class="options-section mb-0">Couleur principale</legend>
+            <div class="options-couleurs">
+                {% for code, nom, couleur in couleurs_principales %}
+                    <span>
+                        <input type="radio" class="sr-only" name="option_couleur" id="option_couleur_{{ code }}" value="{{ code }}">
+                        <label class="options-couleur" for="option_couleur_{{ code }}" style="background: {{ couleur }};" title="{{ nom }}"><span class="sr-only">{{ nom }}</span></label>
+                    </span>
+                {% endfor %}
+            </div>
+        </fieldset>
 
+        {# Taille du texte #}
+        <fieldset>
+            <legend class="options-section mb-0">Taille du texte</legend>
+            <div class="options-segments">
+                <input type="radio" class="sr-only" name="option_taille" id="option_taille_grande" value="grande">
+                <label class="options-segment" for="option_taille_grande">Grande</label>
+                <input type="radio" class="sr-only" name="option_taille" id="option_taille_normale" value="normale">
+                <label class="options-segment" for="option_taille_normale">Normale</label>
+            </div>
+        </fieldset>
+
+        {# Menu #}
+        <div class="options-section">Menu</div>
+        <input type="checkbox" class="sr-only" id="option_menu_clair" role="switch">
+        <label class="options-ligne" for="option_menu_clair">
+            <span class="texte"><b>Menu clair</b><small>Fond blanc au lieu de gris foncé</small></span>
+            <span class="interrupteur" aria-hidden="true"></span>
+        </label>
+        <input type="checkbox" class="sr-only" id="option_menu_reduit" role="switch">
+        <label class="options-ligne" for="option_menu_reduit">
+            <span class="texte"><b>Menu réduit par défaut</b><small>Seules les icônes sont affichées</small></span>
+            <span class="interrupteur" aria-hidden="true"></span>
+        </label>
+        <input type="checkbox" class="sr-only" id="option_menu_survol" role="switch">
+        <label class="options-ligne" for="option_menu_survol">
+            <span class="texte"><b>Ouvrir le menu au survol</b><small>Le menu réduit s'agrandit au passage de la souris</small></span>
+            <span class="interrupteur" aria-hidden="true"></span>
+        </label>
+
+        {# Confort #}
+        <div class="options-section">Confort</div>
+        <input type="checkbox" class="sr-only" id="option_tableaux_compacts" role="switch">
+        <label class="options-ligne" for="option_tableaux_compacts">
+            <span class="texte"><b>Tableaux compacts</b><small>Plus de lignes visibles dans les listes</small></span>
+            <span class="interrupteur" aria-hidden="true"></span>
+        </label>
+        <input type="checkbox" class="sr-only" id="option_contraste" role="switch">
+        <label class="options-ligne" for="option_contraste">
+            <span class="texte"><b>Contraste renforcé</b><small>Textes et bordures plus marqués</small></span>
+            <span class="interrupteur" aria-hidden="true"></span>
+        </label>
+
+        <div class="options-pied">Vos choix sont enregistrés automatiquement.</div>
 
         <script>
         $(document).ready(function() {
@@ -41,43 +158,68 @@
                 });
             }
 
-            {# Coche la case dark-mode #}
-            $("#check_dark_mode").prop('checked', $('body').hasClass('dark-mode'));
-            $("#check_dark_mode").on('click', function () {
-                if ($(this).is(':checked')) {
-                    $('body').addClass('dark-mode');
-                } else {
-                    $('body').removeClass('dark-mode');
-                };
+            {# Thème clair ou sombre #}
+            $($('body').hasClass('dark-mode') ? "#option_theme_sombre" : "#option_theme_clair").prop('checked', true);
+            $("input[name=option_theme]").on('change', function () {
+                $('body').toggleClass('dark-mode', this.value === "sombre");
                 memorise_option("dark-mode", $('body').hasClass('dark-mode'));
             });
 
-            {# Coche la case text-sm #}
-            $("#check_text_sm").prop('checked', $('body').hasClass('text-sm'));
-            $("#check_text_sm").on('click', function () {
-                if ($(this).is(':checked')) {
-                    $('body').addClass('text-sm');
-                } else {
-                    $('body').removeClass('text-sm');
-                };
+            {# Taille du texte : "Normale" correspond à la classe text-sm, "Grande" à la taille par défaut d'AdminLTE #}
+            $($('body').hasClass('text-sm') ? "#option_taille_normale" : "#option_taille_grande").prop('checked', true);
+            $("input[name=option_taille]").on('change', function () {
+                $('body').toggleClass('text-sm', this.value === "normale");
                 memorise_option("text-sm", $('body').hasClass('text-sm'));
             });
 
-            {# Coche la case sidebar-no-expand #}
-            $("#check_sidebar_no_expand").prop('checked', $('.main-sidebar').hasClass('sidebar-no-expand'));
-            $("#check_sidebar_no_expand").on('click', function () {
-                if ($(this).is(':checked')) {
-                    $('.main-sidebar').addClass('sidebar-no-expand');
-                } else {
-                    $('.main-sidebar').removeClass('sidebar-no-expand');
-                };
+            {# Couleur principale #}
+            var couleur = ($('body').attr('class').match(/couleur-([a-z]+)/) || [null, "bleu"])[1];
+            $("#option_couleur_" + couleur).prop('checked', true);
+            $("input[name=option_couleur]").on('change', function () {
+                $('body').removeClass(function (index, classes) { return (classes.match(/couleur-[a-z]+/g) || []).join(" "); }).addClass("couleur-" + this.value);
+                memorise_option("couleur-principale", JSON.stringify(this.value));
+            });
+
+            {# Menu clair #}
+            $("#option_menu_clair").prop('checked', $('.main-sidebar').hasClass('sidebar-light-lightblue'));
+            $("#option_menu_clair").on('change', function () {
+                $('.main-sidebar').toggleClass('sidebar-light-lightblue', this.checked).toggleClass('sidebar-dark-lightblue', !this.checked);
+                memorise_option("menu-clair", this.checked);
+            });
+
+            {# Menu réduit par défaut (même option que le bouton du menu dans la barre bleue) #}
+            $("#option_menu_reduit").prop('checked', $('body').hasClass('sidebar-collapse'));
+            $("#option_menu_reduit").on('change', function () {
+                $('body').toggleClass('sidebar-collapse', this.checked);
+                memorise_option("masquer-sidebar", this.checked);
+            });
+            $(document).on('collapsed.lte.pushmenu shown.lte.pushmenu', function () {
+                $("#option_menu_reduit").prop('checked', $('body').hasClass('sidebar-collapse'));
+            });
+
+            {# Tableaux compacts #}
+            $("#option_tableaux_compacts").prop('checked', $('body').hasClass('tableaux-compacts'));
+            $("#option_tableaux_compacts").on('change', function () {
+                $('body').toggleClass('tableaux-compacts', this.checked);
+                memorise_option("tableaux-compacts", this.checked);
+            });
+
+            {# Contraste renforcé #}
+            $("#option_contraste").prop('checked', $('body').hasClass('contraste-renforce'));
+            $("#option_contraste").on('change', function () {
+                $('body').toggleClass('contraste-renforce', this.checked);
+                memorise_option("contraste-renforce", this.checked);
+            });
+
+            {# Ouverture du menu au survol (option enregistrée : sidebar-no-expand, de sens inverse) #}
+            $("#option_menu_survol").prop('checked', !$('.main-sidebar').hasClass('sidebar-no-expand'));
+            $("#option_menu_survol").on('change', function () {
+                $('.main-sidebar').toggleClass('sidebar-no-expand', !this.checked);
                 memorise_option("sidebar-no-expand", $('.main-sidebar').hasClass('sidebar-no-expand'));
             });
 
         });
         </script>
 
-
     </div>
 </aside>
-

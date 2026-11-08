@@ -32,7 +32,7 @@
     text-align: left;
 }
 #contextMenu .ctx_entete {
-    background: #3C8DBC;
+    background: var(--couleur-principale, #3c8dbc);
     color: #fff;
     padding: 8px 14px;
 }
@@ -76,12 +76,12 @@
 }
 #contextMenu .ctx_etat:hover, #contextMenu .ctx_etat:focus {
     background: #f1f6fb;
-    border-color: #9cc3dd;
+    border-color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 51%, #fff);
     outline: none;
 }
 #contextMenu .ctx_etat.ctx_actif {
-    border-color: #3C8DBC;
-    background: #e8f1fa;
+    border-color: var(--couleur-principale, #3c8dbc);
+    background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 11%, #fff);
     font-weight: 600;
 }
 #contextMenu .ctx_pastille {
@@ -112,13 +112,13 @@
     white-space: nowrap;
 }
 #contextMenu .ctx_groupe:hover, #contextMenu .ctx_groupe:focus {
-    border-color: #9cc3dd;
+    border-color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 51%, #fff);
     background: #f1f6fb;
     outline: none;
 }
 #contextMenu .ctx_groupe.ctx_actif {
-    background: #3C8DBC;
-    border-color: #3C8DBC;
+    background: var(--couleur-principale, #3c8dbc);
+    border-color: var(--couleur-principale, #3c8dbc);
     color: #fff;
 }
 #contextMenu .ctx_actions {
@@ -451,7 +451,7 @@ td.complet {
 .facturation-option {display: flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; font-weight: normal; color: #6c757d; cursor: pointer;}
 .facturation-switch {position: relative; flex-shrink: 0; width: 30px; height: 17px; padding: 0; border: 0; border-radius: 9px; background: #ced4da; cursor: pointer; transition: background .15s;}
 .facturation-switch::after {content: ""; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: #fff; transition: left .15s;}
-.facturation-switch[aria-checked=true] {background: #3c8dbc;}
+.facturation-switch[aria-checked=true] {background: var(--couleur-principale, #3c8dbc);}
 .facturation-switch[aria-checked=true]::after {left: 15px;}
 .facturation-switch:focus {outline: none; box-shadow: 0 0 0 2px rgba(0, 123, 255, .3);}
 

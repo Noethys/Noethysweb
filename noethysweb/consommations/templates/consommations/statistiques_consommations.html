@@ -8,7 +8,7 @@
         /* États pris en compte : deux colonnes */
         .statistiques_etats > div {columns: 2; column-gap: 12px}
         .statistiques_etats .form-check {break-inside: avoid; padding-top: 2px; padding-bottom: 2px}
-        .statistiques_etats input[type=checkbox] {accent-color: #3c8dbc}
+        .statistiques_etats input[type=checkbox] {accent-color: var(--couleur-principale, #3c8dbc)}
         .statistiques_suivi.vertical li:last-child {border-bottom: 0}
 
         /* Indicateurs clés */
@@ -20,7 +20,7 @@
             box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
         }
         .statistiques_kpi .libelle {display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #6c757d}
-        .statistiques_kpi .libelle i {color: #3c8dbc}
+        .statistiques_kpi .libelle i {color: var(--couleur-principale, #3c8dbc)}
         .statistiques_kpi .valeur {margin-top: 4px; font-size: clamp(20px, 1.9vw, 28px); white-space: nowrap; font-weight: 700; line-height: 1.2; color: #1f2d3d; font-variant-numeric: tabular-nums}
         .statistiques_kpi .detail {margin-top: 2px; font-size: 12px; color: #6c757d}
         .statistiques_evolution {display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 600}
@@ -28,7 +28,7 @@
         .statistiques_evolution.baisse {background: #fdecee; color: #a8323e}
         .statistiques_evolution.stable {background: #f1f3f5; color: #6c757d}
         .statistiques_barre {height: 6px; margin-top: 8px; overflow: hidden; border-radius: 3px; background: #e9ecef}
-        .statistiques_barre > span {display: block; height: 100%; border-radius: 3px; background: #3c8dbc}
+        .statistiques_barre > span {display: block; height: 100%; border-radius: 3px; background: var(--couleur-principale, #3c8dbc)}
 
         /* Cartes */
         .statistiques_page .card-title {font-size: 15px}
@@ -276,7 +276,7 @@
             var comparer = {{ data.comparer|yesno:"true,false" }};
 
             // Palette validée (daltonisme et contraste) : lightblue Noethysweb en premier
-            var couleurs = ["#3c8dbc", "#d0790a", "#7a6fc4", "#4f8f35", "#c2477a"];
+            var couleurs = [Couleur_principale(), "#d0790a", "#7a6fc4", "#4f8f35", "#c2477a"];
             var sombre = $("body").hasClass("dark-mode");
             var couleur_grille = sombre ? "rgba(255, 255, 255, .08)" : "#eef0f2";
             var couleur_fond = sombre ? "#343a40" : "#ffffff";
@@ -301,7 +301,7 @@
             // Consommations par mois
             var series_mois = [$.extend({label: "Période sélectionnée", data: graphes.mois.valeurs, backgroundColor: couleurs[0]}, barres)];
             if (comparer) {
-                series_mois.push($.extend({label: "Période précédente", data: graphes.mois.valeurs_precedentes, backgroundColor: sombre ? "#4a6576" : "#c9dceb"}, barres));
+                series_mois.push($.extend({label: "Période précédente", data: graphes.mois.valeurs_precedentes, backgroundColor: sombre ? "#4a6576" : Couleur_principale(0.3)}, barres));
             }
             Creer("graphique_mois", {type: "bar", data: {labels: graphes.mois.labels, datasets: series_mois},
                 options: {maintainAspectRatio: false, scales: axes, plugins: {legend: comparer ? legende : {display: false}}}});

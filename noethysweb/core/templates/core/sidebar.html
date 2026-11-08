@@ -63,8 +63,9 @@
 </style>
 
 {% get_item_defaut options_interface "sidebar-no-expand" True as sidebar_no_expand %}
+{% get_item_defaut options_interface "menu-clair" False as menu_clair %}
 
-<aside class="main-sidebar main-sidebar-custom sidebar-dark-lightblue
+<aside class="main-sidebar main-sidebar-custom {% if menu_clair %}sidebar-light-lightblue{% else %}sidebar-dark-lightblue{% endif %}
     {% if sidebar_no_expand %}sidebar-no-expand{% endif %}
 ">
 

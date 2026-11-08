@@ -12,6 +12,74 @@
 {{ form.media.css }}
 
 <link rel="stylesheet" type="text/css" href="{% static 'lib/select2/css/select2-bootstrap4.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/couleur_principale.css' %}">
+
+<style type="text/css">
+    /* Couleur principale de l'interface (option d'affichage de l'utilisateur) */
+    :root, body.couleur-bleu { --couleur-principale: #3c8dbc; --couleur-principale-rgb: 60, 141, 188; }
+    body.couleur-vert { --couleur-principale: #2a7d4f; --couleur-principale-rgb: 42, 125, 79; }
+    body.couleur-violet { --couleur-principale: #6f42c1; --couleur-principale-rgb: 111, 66, 193; }
+    body.couleur-orange { --couleur-principale: #b45309; --couleur-principale-rgb: 180, 83, 9; }
+    body.couleur-gris { --couleur-principale: #5a6570; --couleur-principale-rgb: 90, 101, 112; }
+    body.couleur-marine { --couleur-principale: #1f4e79; --couleur-principale-rgb: 31, 78, 121; }
+    body.couleur-petrole { --couleur-principale: #155e75; --couleur-principale-rgb: 21, 94, 117; }
+    body.couleur-framboise { --couleur-principale: #be185d; --couleur-principale-rgb: 190, 24, 93; }
+    body.couleur-prune { --couleur-principale: #86198f; --couleur-principale-rgb: 134, 25, 143; }
+    :root, body { --couleur-principale-fonce: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 88%, #000); --couleur-principale-clair: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 80%, #fff); }
+
+    /* Lignes sélectionnées des listes : couleur principale (le bleu par défaut de DataTables est conservé pour le thème bleu) */
+    body:not(.couleur-bleu) table.dataTable > tbody > tr.selected > *,
+    body:not(.couleur-bleu) table.dataTable.table-striped > tbody > tr.odd.selected > *,
+    body:not(.couleur-bleu) table.dataTable.table-hover > tbody > tr.selected:hover > * { box-shadow: inset 0 0 0 9999px rgba(var(--couleur-principale-rgb, 60, 141, 188), 0.92) !important; }
+
+    /* Zones toujours claires, même en mode sombre (grille des consommations, suivi des inscriptions et des consommations) */
+    .dark-mode .zone-toujours-claire #table_grille { background-color: #ffffff; color: #1f2d3d; }
+    .dark-mode .zone-toujours-claire .card-body { background-color: #ffffff; color: #212529; }
+    .dark-mode .zone-toujours-claire #table_grille { border-color: #e8e8e8; }
+    .dark-mode .zone-toujours-claire #table_grille table,
+    .dark-mode .zone-toujours-claire .card-body table { background-color: #ffffff; color: #212529; }
+    .dark-mode .zone-toujours-claire #table_grille table, .dark-mode .zone-toujours-claire #table_grille thead,
+    .dark-mode .zone-toujours-claire #table_grille tbody, .dark-mode .zone-toujours-claire #table_grille tr { border-color: #dee2e6; }
+    .dark-mode .zone-toujours-claire #table_grille .table td, .dark-mode .zone-toujours-claire #table_grille .table th,
+    .dark-mode .zone-toujours-claire .card-body .table td, .dark-mode .zone-toujours-claire .card-body .table th,
+    .dark-mode .zone-toujours-claire .card-body .table thead th, .dark-mode .zone-toujours-claire .card-body .table-bordered { border-color: #dee2e6; }
+    .dark-mode .zone-toujours-claire .table-grille th { background-color: #ffffff; color: #1f2d3d; }
+    .dark-mode .zone-toujours-claire .vacances { background-color: #faffc9 !important; color: #1f2d3d; }
+    .dark-mode .zone-toujours-claire td.date_regroupement { background-color: #d9d9d9 !important; }
+    .dark-mode .zone-toujours-claire th.date_regroupement { background-color: #ffffff !important; }
+    .dark-mode .zone-toujours-claire .badge_information { background-color: #f0f0f0; }
+    .dark-mode .zone-toujours-claire #table_suivi_inscriptions .activite { background-color: #efefef; }
+    .dark-mode .zone-toujours-claire .card-body .text-muted, .dark-mode .zone-toujours-claire #table_grille .text-muted { color: #6c757d !important; }
+    .dark-mode .zone-toujours-claire .card-body a:not(.btn):not(.dropdown-item),
+    .dark-mode .zone-toujours-claire #table_grille a:not(.btn):not(.dropdown-item) { color: var(--couleur-principale, #3c8dbc); }
+    .dark-mode .zone-toujours-claire .text-green, .dark-mode .zone-toujours-claire .text-success { color: #28a745 !important; }
+    .dark-mode .zone-toujours-claire .text-red, .dark-mode .zone-toujours-claire .text-danger { color: #dc3545 !important; }
+    .dark-mode .zone-toujours-claire .text-yellow, .dark-mode .zone-toujours-claire .text-warning { color: #ffc107 !important; }
+    .dark-mode .zone-toujours-claire .text-orange { color: #fd7e14 !important; }
+    .dark-mode .zone-toujours-claire .text-info { color: #17a2b8 !important; }
+    .dark-mode .zone-toujours-claire .btn-primary { background-color: var(--couleur-principale, #3c8dbc); border-color: var(--couleur-principale, #3c8dbc); color: #ffffff; }
+    .dark-mode .zone-toujours-claire .table-hover tbody tr:hover { color: #1f2d3d; background-color: rgba(0, 0, 0, .075); }
+
+    /* Menu clair : textes de l'organisateur lisibles sur fond blanc */
+    .sidebar-light-lightblue .organisateur > .info { color: #343a40; }
+
+    /* Tableaux compacts */
+    body.tableaux-compacts .table td, body.tableaux-compacts .table th,
+    body.tableaux-compacts table.dataTable tbody td, body.tableaux-compacts table.dataTable thead th { padding-top: .2rem !important; padding-bottom: .2rem !important; }
+
+    /* Contraste renforcé */
+    body.contraste-renforce { color: #000000; }
+    body.contraste-renforce .text-muted, body.contraste-renforce small, body.contraste-renforce .help-block, body.contraste-renforce .form-text { color: #3d4349 !important; }
+    body.contraste-renforce .card { box-shadow: 0 0 0 1px #6c757d; }
+    body.contraste-renforce .table td, body.contraste-renforce .table th, body.contraste-renforce .table thead th { border-color: #8a939b; }
+    body.contraste-renforce .form-control, body.contraste-renforce .select2-container--default .select2-selection { border-color: #6c757d; }
+    body.contraste-renforce .form-control::placeholder { color: #5a6268; }
+    body.contraste-renforce .content-wrapper a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link) { text-decoration: underline; }
+    body.contraste-renforce.dark-mode { color: #ffffff; }
+    body.contraste-renforce.dark-mode .text-muted, body.contraste-renforce.dark-mode small, body.contraste-renforce.dark-mode .help-block, body.contraste-renforce.dark-mode .form-text { color: #dee2e6 !important; }
+    body.contraste-renforce.dark-mode .card { box-shadow: 0 0 0 1px #adb5bd; }
+    body.contraste-renforce.dark-mode .table td, body.contraste-renforce.dark-mode .table th { border-color: #8a939b; }
+</style>
 
 <style type="text/css">
     fieldset legend {
@@ -48,7 +116,7 @@
         background-color: #e6e5e5;
     }
     .accordeon-titre a:focus-visible {
-        outline: 2px solid #3c8dbc;
+        outline: 2px solid var(--couleur-principale, #3c8dbc);
         outline-offset: 1px;
     }
     .dark-mode .accordeon-titre a {
@@ -82,8 +150,8 @@
         border-radius: 0px !important;
     }
     .select2-container--default .select2-selection--multiple .select2-selection__choice {
-        background-color: #3c8dbc !important;
-        border-color: #367fa9!important;
+        background-color: var(--couleur-principale, #3c8dbc) !important;
+        border-color: var(--couleur-principale-fonce, #357ca5)!important;
         padding: 1px 10px!important;
         color: #fff!important;
     }
@@ -172,6 +240,36 @@
     .commandes > .btn {
         margin-top: 2px;
     }
+    .dark-mode .commandes {
+        background-color: #343a40;
+    }
+
+    /* En-têtes figés des tableaux (freeze-table impose un fond blanc) */
+    .dark-mode .clone-head-table-wrap table,
+    .dark-mode .clone-column-table-wrap table,
+    .dark-mode .clone-column-head-table-wrap table {
+        background-color: #343a40 !important;
+    }
+    .dark-mode .zone-toujours-claire .clone-head-table-wrap table,
+    .dark-mode .zone-toujours-claire .clone-column-table-wrap table,
+    .dark-mode .zone-toujours-claire .clone-column-head-table-wrap table {
+        background-color: #ffffff !important;
+    }
+
+    /* Boutons primary en mode sombre : couleur principale (le bleu sombre d'AdminLTE est conservé pour le thème bleu) */
+    .dark-mode:not(.couleur-bleu) .btn-primary,
+    .dark-mode:not(.couleur-bleu) .btn-primary.disabled,
+    .dark-mode:not(.couleur-bleu) .btn-primary:disabled {
+        background-color: var(--couleur-principale);
+        border-color: var(--couleur-principale);
+    }
+    .dark-mode:not(.couleur-bleu) .btn-primary:hover,
+    .dark-mode:not(.couleur-bleu) .btn-primary:focus,
+    .dark-mode:not(.couleur-bleu) .btn-primary:not(:disabled):not(.disabled):active,
+    .dark-mode:not(.couleur-bleu) .btn-primary:not(:disabled):not(.disabled).active {
+        background-color: var(--couleur-principale-fonce);
+        border-color: var(--couleur-principale-fonce);
+    }
     .margin-r-5 {
         margin-right: 5px;
     }
@@ -192,7 +290,7 @@
         padding: 12px;
     }
     a {
-        color: #3c8dbc;
+        color: var(--couleur-principale, #3c8dbc);
     }
 
     {# liste de commandes #}
@@ -217,10 +315,10 @@
         color: #0a0a0a;
     }
     .widget-user-2 .nav > li > a > i {
-        color: #3c8dbc;
+        color: var(--couleur-principale, #3c8dbc);
     }
     .widget-user-2 .nav > li.active > a  {
-        border-left-color: #3c8dbc;
+        border-left-color: var(--couleur-principale, #3c8dbc);
         font-weight: 600;
     }
 
@@ -254,7 +352,7 @@
         color: #b5b5b5 !important;
     }
     .list-group a > i {
-        color: #3c8dbc;
+        color: var(--couleur-principale, #3c8dbc);
     }
 
     {# Commandes onglet #}
@@ -263,7 +361,7 @@
         border-left: 3px solid transparent;
     }
     .widget-user-2 .list-group a > i {
-        color: #3c8dbc;
+        color: var(--couleur-principale, #3c8dbc);
     }
 
     .list-unstyled {
@@ -300,11 +398,29 @@
     }
 
     .datatable tfoot th {
-        background-color: #e6f1fb;
+        background-color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 10%, #fff);
         color: #0c447c;
         font-weight: bold;
     }
 
+
+    /* Boutons d'ajout (verts « Ajouter » avec une icône +) : couleur principale de l'interface */
+    .btn-success:has(.fa-plus) {
+        color: #ffffff;
+        background-color: var(--couleur-principale, #3c8dbc);
+        border-color: var(--couleur-principale, #3c8dbc);
+    }
+    .btn-success:has(.fa-plus):hover,
+    .btn-success:has(.fa-plus):focus,
+    .btn-success:has(.fa-plus):not(:disabled):not(.disabled):active {
+        color: #ffffff;
+        background-color: var(--couleur-principale-fonce, #357ca5);
+        border-color: var(--couleur-principale-fonce, #357ca5);
+    }
+    .btn-success:has(.fa-plus):focus,
+    .btn-success:has(.fa-plus):not(:disabled):not(.disabled):active:focus {
+        box-shadow: 0 0 0 .2rem rgba(var(--couleur-principale-rgb, 60, 141, 188), .5);
+    }
 
     /* Bouton rond d'ajout (en-têtes de cadres) */
     .bouton-rond-ajouter {
@@ -314,14 +430,14 @@
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background: #3c8dbc;
+        background: var(--couleur-principale, #3c8dbc);
         color: #ffffff !important;
         font-size: 10px;
         vertical-align: middle;
     }
     .bouton-rond-ajouter:hover,
     .bouton-rond-ajouter:focus {
-        background: #357ca5;
+        background: var(--couleur-principale-fonce, #357ca5);
         color: #ffffff !important;
         text-decoration: none;
     }

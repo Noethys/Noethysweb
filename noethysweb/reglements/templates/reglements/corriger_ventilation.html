@@ -19,8 +19,8 @@
         .ventil-recherche i {position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #adb5bd; font-size: 12px;}
         .ventil-recherche input {padding-left: 30px; border-radius: 999px; height: 32px; font-size: 13px;}
         .ventil-filtre {border: 1px solid #dee2e6; background: #fff; border-radius: 999px; padding: 3px 11px; font-size: 12.5px; color: #495057; cursor: pointer;}
-        .ventil-filtre:hover {border-color: #3c8dbc; color: #3c8dbc;}
-        .ventil-filtre.actif {background: #3c8dbc; border-color: #3c8dbc; color: #fff;}
+        .ventil-filtre:hover {border-color: var(--couleur-principale, #3c8dbc); color: var(--couleur-principale, #3c8dbc);}
+        .ventil-filtre.actif {background: var(--couleur-principale, #3c8dbc); border-color: var(--couleur-principale, #3c8dbc); color: #fff;}
         .ventil-outils .droite {margin-left: auto; display: flex; gap: 6px;}
 
         /* Tableau */
@@ -30,11 +30,11 @@
         .ventil-table td {padding: 7px 10px; border-top: 1px solid #f1f3f5; vertical-align: middle; font-size: 13.5px;}
         .ventil-table tr.ligne:hover td {background: #f6f9fb;}
         .ventil-table tr.ouvert td {background: #f6f9fb;}
-        .ventil-table input[type=checkbox] {accent-color: #3c8dbc; width: 15px; height: 15px; vertical-align: -2px; cursor: pointer;}
+        .ventil-table input[type=checkbox] {accent-color: var(--couleur-principale, #3c8dbc); width: 15px; height: 15px; vertical-align: -2px; cursor: pointer;}
         .ventil-table .num {text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;}
         .ventil-table .aventiler {font-weight: 700; color: #1f2d3d;}
         .ventil-mini {height: 4px; border-radius: 2px; background: #e9ecef; margin-top: 4px; overflow: hidden; width: 90px; margin-left: auto;}
-        .ventil-mini span {display: block; height: 100%; background: #3c8dbc;}
+        .ventil-mini span {display: block; height: 100%; background: var(--couleur-principale, #3c8dbc);}
         .ventil-badge {font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap;}
         .ventil-badge.du {background: #fdecee; color: #a8323e;}
         .ventil-badge.avoir {background: #e6f4ea; color: #2d6a1f;}
@@ -43,7 +43,7 @@
         .ventil-act {display: flex; gap: 4px; justify-content: flex-end;}
         .ventil-act .btn {width: 30px; height: 30px; padding: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center;}
         .ventil-act .btn:disabled {opacity: .4;}
-        .ventil-act .btn.actif {background: #e3eff7; color: #3c8dbc; border-color: #c5dcec;}
+        .ventil-act .btn.actif {background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 13%, #fff); color: var(--couleur-principale, #3c8dbc); border-color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 30%, #fff);}
         .ventil-aucun td {text-align: center; color: #6c757d; padding: 20px !important;}
 
         /* Aperçu */
@@ -55,7 +55,7 @@
         .ventil-apercu li:first-child {border-top: 0;}
         .ventil-apercu li small {color: #8a96a3;}
         .ventil-apercu li b {white-space: nowrap; font-variant-numeric: tabular-nums;}
-        .ventil-apercu .fleche {align-self: center; text-align: center; color: #3c8dbc; font-size: 18px; padding-top: 18px;}
+        .ventil-apercu .fleche {align-self: center; text-align: center; color: var(--couleur-principale, #3c8dbc); font-size: 18px; padding-top: 18px;}
         .ventil-resume {margin-top: 10px; font-size: 12.5px; color: #495057;}
         .ventil-alerte-neg {font-size: 12.5px; color: #856404; background: #fff8e1; border: 1px solid #ffe8a1; border-radius: 6px; padding: 6px 10px;}
         @media (max-width: 767px) {
@@ -133,7 +133,7 @@
                     <div><div class="v">{{ nbre_anomalies }}</div><div class="l">famille{{ nbre_anomalies|pluralize }} à corriger</div></div></div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <div class="ventil-kpi"><div class="ic" style="background:#e3eff7;color:#3c8dbc"><i class="fa fa-random"></i></div>
+                    <div class="ventil-kpi"><div class="ic" style="background:color-mix(in srgb, var(--couleur-principale, #3c8dbc) 13%, #fff);color:var(--couleur-principale, #3c8dbc)"><i class="fa fa-random"></i></div>
                     <div><div class="v">{{ total_a_ventiler|montant }}</div><div class="l">restant à ventiler</div></div></div>
                 </div>
                 <div class="col-md-4 mb-3">

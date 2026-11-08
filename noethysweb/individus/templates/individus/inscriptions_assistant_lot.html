@@ -10,8 +10,8 @@
         .ail_etapes button {display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #dee2e6; border-radius: 999px; background: #ffffff; color: #495057; font-size: 13.5px}
         .ail_etapes button:disabled {cursor: default; opacity: .75}
         .ail_etapes button .numero {display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #e9ecef; font-size: 12px; font-weight: 700}
-        .ail_etapes button.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80; font-weight: 600}
-        .ail_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .ail_etapes button.active {border-color: var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000); font-weight: 600}
+        .ail_etapes button.active .numero {background: var(--couleur-principale, #3c8dbc); color: #ffffff}
         .ail_etapes button.valide .numero {background: #28a745; color: #ffffff}
         .ail_etape {display: none}
         .ail_etape.active {display: block}
@@ -39,22 +39,22 @@
         .ail_sources button {text-align: left; border: 2px solid #dee2e6; background: #ffffff; border-radius: 6px; padding: 10px 12px; color: #212529; min-height: 64px}
         .ail_sources button .titre {display: block; font-weight: 600}
         .ail_sources button .description {display: block; font-size: 13px; color: #6c757d}
-        .ail_sources button[aria-selected=true] {border-color: #3c8dbc; background: #f0f7fc}
+        .ail_sources button[aria-selected=true] {border-color: var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 6%, #fff)}
         .ail_affiner_ligne {margin-bottom: 10px}
         .ail_affiner_ligne > label {font-weight: normal; display: flex; align-items: center; gap: 8px; margin-bottom: 6px}
         .ail_affiner_ligne .ail_bloc_filtre {margin-left: 24px}
-        .ail_compteur {display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 4px; background: #e8f1f8; color: #1d5a80}
+        .ail_compteur {display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 4px; background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000)}
         .ail_compteur .valeur {font-size: 22px; font-weight: 700}
         .ail_compteur.erreur {background: #fdecea; color: #8a1c13}
 
         /* Étiquettes (villes, individus) */
         .ail_etiquettes {display: flex; flex-wrap: wrap; gap: 6px; align-items: center; border: 1px solid #ced4da; border-radius: 4px; padding: 5px 6px; min-height: 38px; max-width: 620px; background: #ffffff}
         .ail_etiquettes input {flex: 1 1 140px; border: 0; outline: none; padding: 3px 4px; min-width: 120px; background: transparent}
-        .ail_etiquette {display: inline-flex; align-items: center; gap: 4px; background: #e8f1f8; color: #1d5a80; border-radius: 3px; padding: 2px 4px 2px 8px; font-size: 14px}
+        .ail_etiquette {display: inline-flex; align-items: center; gap: 4px; background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000); border-radius: 3px; padding: 2px 4px 2px 8px; font-size: 14px}
         .ail_etiquette button {border: 0; background: transparent; color: inherit; padding: 0 3px; font-size: 16px; line-height: 1}
         .ail_resultats_recherche {max-width: 620px; border: 1px solid #dee2e6; border-radius: 4px; margin-top: 4px; max-height: 240px; overflow-y: auto}
         .ail_resultats_recherche button {display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid #f1f3f5; background: #ffffff; padding: 6px 10px}
-        .ail_resultats_recherche button:hover, .ail_resultats_recherche button:focus {background: #f0f7fc}
+        .ail_resultats_recherche button:hover, .ail_resultats_recherche button:focus {background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 6%, #fff)}
 
         /* Aperçu */
         .ail_barre_outils {display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px}
@@ -65,7 +65,7 @@
         .ail_table tr.decoche td:not(:first-child) {opacity: .5}
         .ail_badge {display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12.5px; margin: 1px 2px 1px 0}
         .ail_badge.alerte {background: #fff3cd; color: #6b4e00}
-        .ail_badge.info {background: #e8f1f8; color: #1d5a80}
+        .ail_badge.info {background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000)}
         .ail_badge.neutre {background: #e9ecef; color: #495057}
         .ail_pagination {display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: flex-end}
 
@@ -75,7 +75,7 @@
         .ail_jauges {display: flex; flex-wrap: wrap; gap: 14px; flex-grow: 1; font-size: 13px}
         .ail_jauge {display: flex; flex-direction: column; gap: 3px; min-width: 140px}
         .ail_jauge .fond {display: block; height: 6px; background: #e9ecef; border-radius: 3px}
-        .ail_jauge .barre {display: block; height: 6px; background: #3c8dbc; border-radius: 3px}
+        .ail_jauge .barre {display: block; height: 6px; background: var(--couleur-principale, #3c8dbc); border-radius: 3px}
         .ail_jauge.depassement {color: #8a4b00; font-weight: 600}
         .ail_jauge.depassement .barre {background: #e8590c}
 
@@ -93,12 +93,12 @@
         .ail_succes i {font-size: 40px; color: #28a745}
 
         .dark-mode .ail_etapes button, .dark-mode .ail_sources button, .dark-mode .ail_etiquettes, .dark-mode .ail_barre_bas, .dark-mode .ail_resultats_recherche button {background: #343a40; color: #e9ecef; border-color: #6c757d}
-        .dark-mode .ail_etapes button.active, .dark-mode .ail_sources button[aria-selected=true] {background: #2f3a43; color: #8fc1e3; border-color: #3c8dbc}
+        .dark-mode .ail_etapes button.active, .dark-mode .ail_sources button[aria-selected=true] {background: #2f3a43; color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 55%, #fff); border-color: var(--couleur-principale, #3c8dbc)}
         .dark-mode .ail_etapes button .numero {background: #495057; color: #e9ecef}
-        .dark-mode .ail_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .dark-mode .ail_etapes button.active .numero {background: var(--couleur-principale, #3c8dbc); color: #ffffff}
         .dark-mode .ail_etapes button.valide .numero {background: #28a745; color: #ffffff}
         .dark-mode .ail_sources button .description, .dark-mode .ail_kpi .libelle {color: #adb5bd}
-        .dark-mode .ail_compteur, .dark-mode .ail_etiquette, .dark-mode .ail_badge.info {background: #2f3a43; color: #8fc1e3}
+        .dark-mode .ail_compteur, .dark-mode .ail_etiquette, .dark-mode .ail_badge.info {background: #2f3a43; color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 55%, #fff)}
         .dark-mode .ail_pastille, .dark-mode .ail_kpi, .dark-mode .ail_badge.neutre, .dark-mode .ail_table tr.deja td {background: #3a4047; color: #ced4da}
         .dark-mode .ail_avertissement, .dark-mode .ail_badge.alerte, .dark-mode .ail_kpi.attention {background: #4d3d12; color: #ffe08a; border-color: #6b5518}
         .dark-mode .ail_section {border-top-color: #454d55}

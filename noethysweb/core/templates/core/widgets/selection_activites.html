@@ -59,7 +59,7 @@
         width: 15px;
         height: 15px;
         margin: 0;
-        accent-color: #3c8dbc;
+        accent-color: var(--couleur-principale, #3c8dbc);
         cursor: pointer;
     }
     .table_activites .nom_item {
@@ -78,7 +78,7 @@
         cursor: pointer;
         user-select: none;
     }
-    .table_activites tr.entete_activite:hover td {color: #3c8dbc}
+    .table_activites tr.entete_activite:hover td {color: var(--couleur-principale, #3c8dbc)}
     .table_activites tr.entete_activite .tag_obsolete {margin-left: 8px}
     .table_activites tr.ligne_groupe td {
         padding-left: 24px !important;
@@ -148,7 +148,7 @@
         margin: 3px 0 0 4px;
     }
     .actions_recherche button {padding: 0; margin-right: 14px; border: 0; background: none; color: #8a96a3; font-size: 11px}
-    .actions_recherche button:hover {color: #3c8dbc; text-decoration: underline}
+    .actions_recherche button:hover {color: var(--couleur-principale, #3c8dbc); text-decoration: underline}
     .recherche_activites.active + .actions_recherche {display: block}
     .recherche_activites.masquer, .actions_recherche.masquer {display: none !important}
     .masquer_recherche {
@@ -170,8 +170,8 @@
         transition: background-color .12s, color .12s, border-color .12s;
     }
     .recherche_activites.avec_obsoletes .bouton_obsoletes {display: inline-block}
-    .recherche_activites .bouton_obsoletes:hover {border-color: #3c8dbc; color: #3c8dbc}
-    .recherche_activites .bouton_obsoletes.actif {background: #3c8dbc; border-color: #3c8dbc; color: #ffffff}
+    .recherche_activites .bouton_obsoletes:hover {border-color: var(--couleur-principale, #3c8dbc); color: var(--couleur-principale, #3c8dbc)}
+    .recherche_activites .bouton_obsoletes.actif {background: var(--couleur-principale, #3c8dbc); border-color: var(--couleur-principale, #3c8dbc); color: #ffffff}
     .afficher_obsoletes tr.obsolete {
         display: table-row;
     }
@@ -191,7 +191,7 @@
         white-space: nowrap;
     }
     .dark-mode .recherche_activites .bouton_obsoletes {background: transparent; border-color: #6c757d; color: #ced4da}
-    .dark-mode .recherche_activites .bouton_obsoletes.actif {background: #3c8dbc; border-color: #3c8dbc; color: #ffffff}
+    .dark-mode .recherche_activites .bouton_obsoletes.actif {background: var(--couleur-principale, #3c8dbc); border-color: var(--couleur-principale, #3c8dbc); color: #ffffff}
     .dark-mode .table_activites .tag_obsolete {background: #454d55; color: #adb5bd}
     .table_activites mark {
         padding: 0 1px;

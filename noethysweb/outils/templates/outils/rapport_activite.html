@@ -44,11 +44,11 @@
             transition: border-color .15s, background-color .15s;
         }
         .rapport-rubrique:hover {
-            border-color: #3c8dbc;
+            border-color: var(--couleur-principale, #3c8dbc);
         }
         .rapport-rubrique.cochee {
-            border-color: #3c8dbc;
-            background-color: rgba(60, 141, 188, .06);
+            border-color: var(--couleur-principale, #3c8dbc);
+            background-color: rgba(var(--couleur-principale-rgb, 60, 141, 188), .06);
         }
         .rapport-rubrique input {
             margin-top: 4px;

@@ -2,11 +2,11 @@
 <style>
     /* Sélecteur de période moderne aux couleurs Noethysweb (AdminLTE 3 lightblue) */
     .daterangepicker {
-        --dp-bleu: #3c8dbc;
-        --dp-bleu-fonce: #367fa9;
-        --dp-bleu-ombre: rgba(60, 141, 188, .35);
-        --dp-plage: rgba(60, 141, 188, .14);
-        --dp-survol: rgba(60, 141, 188, .10);
+        --dp-bleu: var(--couleur-principale, #3c8dbc);
+        --dp-bleu-fonce: var(--couleur-principale-fonce, #357ca5);
+        --dp-bleu-ombre: rgba(var(--couleur-principale-rgb, 60, 141, 188), .35);
+        --dp-plage: rgba(var(--couleur-principale-rgb, 60, 141, 188), .14);
+        --dp-survol: rgba(var(--couleur-principale-rgb, 60, 141, 188), .10);
         --dp-texte: #1f2d3d;
         --dp-secondaire: #6c757d;
         --dp-muet: #c3cad1;
@@ -28,7 +28,7 @@
     }
     .dark-mode .daterangepicker {
         --dp-bleu-ombre: rgba(0, 0, 0, .4);
-        --dp-plage: rgba(60, 141, 188, .28);
+        --dp-plage: rgba(var(--couleur-principale-rgb, 60, 141, 188), .28);
         --dp-survol: rgba(255, 255, 255, .07);
         --dp-texte: #eef1f4;
         --dp-secondaire: #adb5bd;

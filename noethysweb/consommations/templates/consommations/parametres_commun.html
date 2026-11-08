@@ -27,7 +27,7 @@
     .param-liens a {font-size: 12px; margin-right: 10px; cursor: pointer;}
     .param-liste {max-height: 240px; overflow-y: auto;}
     .param-liste label {display: flex; align-items: center; gap: 7px; margin: 0; padding: 3px 2px; font-size: 13px; font-weight: normal; cursor: pointer;}
-    .param-liste input[type=checkbox] {accent-color: #3c8dbc; flex-shrink: 0;}
+    .param-liste input[type=checkbox] {accent-color: var(--couleur-principale, #3c8dbc); flex-shrink: 0;}
     .param-raccourcis {display: flex; gap: 4px; margin-top: 6px;}
     .param-raccourcis button {flex: 1; padding: 2px 0; font-size: 12px; border: 1px solid #dee2e6; border-radius: 12px; background: transparent; color: #495057; cursor: pointer;}
     .param-raccourcis button:hover {background: rgba(0, 0, 0, .04);}
@@ -37,15 +37,15 @@
     .param-switch-ligne > label {margin: 0; font-weight: normal; font-size: 13px;}
     .param-switch {position: relative; flex-shrink: 0; width: 32px; height: 18px; padding: 0; border: 0; border-radius: 9px; background: #ced4da; cursor: pointer; transition: background .15s;}
     .param-switch::after {content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: left .15s;}
-    .param-switch[aria-checked=true] {background: #3c8dbc;}
+    .param-switch[aria-checked=true] {background: var(--couleur-principale, #3c8dbc);}
     .param-switch[aria-checked=true]::after {left: 16px;}
     .param-switch:focus {outline: none; box-shadow: 0 0 0 2px rgba(0, 123, 255, .3);}
 
     /* Mode sombre */
     .dark-mode .param-onglets {background: rgba(255, 255, 255, .03); border-color: rgba(255, 255, 255, .1);}
     .dark-mode .param-onglet {color: #adb5bd;}
-    .dark-mode .param-onglet.active {background: transparent; color: #8fc1f0; border-bottom-color: #3c8dbc;}
-    .dark-mode .param-onglet-valeur {color: #8fc1f0;}
+    .dark-mode .param-onglet.active {background: transparent; color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 55%, #fff); border-bottom-color: var(--couleur-principale, #3c8dbc);}
+    .dark-mode .param-onglet-valeur {color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 55%, #fff);}
     .dark-mode .param-switch {background: #6c757d;}
     .dark-mode .param-raccourcis button {color: #ced4da; border-color: #6c757d;}
 </style>

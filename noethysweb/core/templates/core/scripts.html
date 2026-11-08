@@ -25,3 +25,11 @@ toastr.options = {
 {{ form.media.js }}
 
 {% endblock %}
+
+<script>
+    // Couleur principale de l'interface pour les scripts (graphiques...) : Couleur_principale() ou Couleur_principale(0.5) pour une transparence
+    function Couleur_principale(opacite) {
+        var rgb = (getComputedStyle(document.body || document.documentElement).getPropertyValue("--couleur-principale-rgb") || "").trim() || "60, 141, 188";
+        return (opacite === undefined || opacite === null) ? "rgb(" + rgb + ")" : "rgba(" + rgb + ", " + opacite + ")";
+    }
+</script>

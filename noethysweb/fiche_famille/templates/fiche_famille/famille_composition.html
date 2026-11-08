@@ -230,7 +230,7 @@
 
     /* Couleurs (homme / femme / décès) - bandeau désaturé, fond bas dans la même teinte atténuée */
     .vignette2.homme .bandeau           { background: #5C7C99; }
-    .vignette2.homme .vignette-contenu  { background: #E6F1FB; color: #185FA5; }
+    .vignette2.homme .vignette-contenu  { background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 10%, #fff); color: #185FA5; }
     .vignette2.homme .image_titulaire   { color: #3D5A73; }
     .vignette2.homme .vignette-image .initiales { background: #5C7C99; }
 
@@ -256,7 +256,7 @@
         height: 28px;
         border-radius: 50%;
         background: #ffffff;
-        color: #3c8dbc !important;
+        color: var(--couleur-principale, #3c8dbc) !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.25);
         display: flex;
         align-items: center;
@@ -266,7 +266,7 @@
     }
     .bouton-ajouter-individu:hover,
     .bouton-ajouter-individu:focus {
-        background: #3c8dbc;
+        background: var(--couleur-principale, #3c8dbc);
         color: #ffffff !important;
         text-decoration: none;
     }

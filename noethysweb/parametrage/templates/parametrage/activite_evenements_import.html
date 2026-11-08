@@ -10,8 +10,8 @@
         .iev_etapes button {display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #dee2e6; border-radius: 999px; background: #ffffff; color: #495057; font-size: 13.5px}
         .iev_etapes button:disabled {cursor: default; opacity: .75}
         .iev_etapes button .numero {display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #e9ecef; font-size: 12px; font-weight: 700}
-        .iev_etapes button.active {border-color: #3c8dbc; background: #e8f1f8; color: #1d5a80; font-weight: 600}
-        .iev_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .iev_etapes button.active {border-color: var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 62%, #000); font-weight: 600}
+        .iev_etapes button.active .numero {background: var(--couleur-principale, #3c8dbc); color: #ffffff}
         .iev_etapes button.valide .numero {background: #28a745; color: #ffffff}
         .iev_etape {display: none}
         .iev_etape.active {display: block}
@@ -37,9 +37,9 @@
         .dark-mode .iev_avertissement {color: #f0c36d}
         .dark-mode .iev_etapes {border-color: #454d55}
         .dark-mode .iev_etapes button {background: #343a40; color: #e9ecef; border-color: #6c757d}
-        .dark-mode .iev_etapes button.active {background: #2f3a43; color: #8fc1e3; border-color: #3c8dbc}
+        .dark-mode .iev_etapes button.active {background: #2f3a43; color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 55%, #fff); border-color: var(--couleur-principale, #3c8dbc)}
         .dark-mode .iev_etapes button .numero {background: #495057; color: #e9ecef}
-        .dark-mode .iev_etapes button.active .numero {background: #3c8dbc; color: #ffffff}
+        .dark-mode .iev_etapes button.active .numero {background: var(--couleur-principale, #3c8dbc); color: #ffffff}
         .dark-mode .iev_etapes button.valide .numero {background: #28a745; color: #ffffff}
         .dark-mode .iev_etape .iev_intro, .dark-mode .iev_barre_bas .iev_info_etape {color: #adb5bd}
     </style>

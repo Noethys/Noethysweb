@@ -53,17 +53,17 @@
         display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%;
         background: rgba(255,255,255,.92); color: #555; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,.25);
     }
-    .notes-postit .note-actions a.modifier:hover, .notes-postit .note-actions a.modifier:focus { background: #3c8dbc; color: #ffffff; }
+    .notes-postit .note-actions a.modifier:hover, .notes-postit .note-actions a.modifier:focus { background: var(--couleur-principale, #3c8dbc); color: #ffffff; }
     .notes-postit .note-actions a.supprimer:hover, .notes-postit .note-actions a.supprimer:focus { background: #dc3545; color: #ffffff; }
 
     /* Post-it vierge pour ajouter une note */
     .notes-postit-ajouter {
         display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 90px;
-        border: 2px dashed rgba(70,130,190,0.45); background: rgba(255,255,255,0.6); color: #3c8dbc !important; font-size: 13px;
+        border: 2px dashed rgba(70,130,190,0.45); background: rgba(255,255,255,0.6); color: var(--couleur-principale, #3c8dbc) !important; font-size: 13px;
         transform: rotate(var(--inclinaison, 0deg));
     }
     .notes-postit-ajouter:hover, .notes-postit-ajouter:focus { background: rgba(255,255,255,0.9); text-decoration: none; }
-    .dark-mode .notes-postit-ajouter { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.35); color: #9fc6e4 !important; }
+    .dark-mode .notes-postit-ajouter { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.35); color: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 47%, #fff) !important; }
 
     .np-1 { --inclinaison:  1.2deg; --angle-scotch: -4deg; }
     .np-2 { --inclinaison: -1.0deg; --angle-scotch:  3deg; }

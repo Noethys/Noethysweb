@@ -131,6 +131,10 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
                 "masquer-sidebar": False,
                 "text-sm": True,
                 "sidebar-no-expand": True,
+                "menu-clair": False,
+                "tableaux-compacts": False,
+                "contraste-renforce": False,
+                "couleur-principale": "bleu",
                 "configuration_accueil": json.dumps(settings.CONFIG_ACCUEIL_DEFAUT),
                 "menu_favoris": "[]",
                 "menu_affichage_condense": False,
@@ -139,6 +143,13 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
             parametres = utils_parametres.Get_categorie(categorie='options_interface', utilisateur=self.request.user, parametres=defaut)
             context['options_interface'] = parametres
             cache.set(key_cache, parametres)
+
+        # Couleurs principales proposées dans les options d'affichage (code, nom, couleur)
+        context['couleurs_principales'] = [
+            ("bleu", "Bleu", "#3c8dbc"), ("marine", "Bleu marine", "#1f4e79"), ("petrole", "Pétrole", "#155e75"),
+            ("vert", "Vert", "#2a7d4f"), ("violet", "Violet", "#6f42c1"), ("prune", "Prune", "#86198f"),
+            ("framboise", "Framboise", "#be185d"), ("orange", "Orange", "#b45309"), ("gris", "Gris", "#5a6570"),
+        ]
 
         # Mémorise le menu principal
         menu_principal = GetMenuPrincipal(organisateur=organisateur, user=self.request.user)
