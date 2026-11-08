@@ -23,8 +23,8 @@ class Page(Onglet):
     url_modifier = "famille_pieces_modifier"
     url_supprimer = "famille_pieces_supprimer"
     url_supprimer_plusieurs = "famille_pieces_supprimer_plusieurs"
-    description_liste = "Consultez et saisissez ici les pièces de la famille."
-    description_saisie = "Saisissez toutes les informations concernant la pièce et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les pièces fournies par la famille (justificatifs, certificats, attestations...). Les pièces manquantes sont signalées dans le résumé de la fiche."
+    description_saisie = "Choisissez le type de pièce, l'individu concerné et la période de validité, joignez si besoin le document numérisé puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une pièce"
     objet_pluriel = "des pièces"
 

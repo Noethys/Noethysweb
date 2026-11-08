@@ -26,9 +26,9 @@ class Consulter(Onglet, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Régimes alimentaires"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Consultez ci-dessous les informations de cette rubrique. Cliquez sur le bouton Modifier pour les mettre à jour."
         if not self.request.user.has_perm("core.individu_regimes_alimentaires_modifier"):
-            context['box_introduction'] = "Vous n'avez pas l'autorisation de modifier les informations de cette page."
+            context['box_introduction'] = "Vous pouvez consulter ces informations mais vous n'avez pas l'autorisation de les modifier. Adressez-vous à un administrateur si besoin."
         context['onglet_actif'] = "regimes_alimentaires"
         return context
 
@@ -41,7 +41,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Sélectionnez dans la liste déroulante les régimes alimentaires de l'individu."
+        context['box_introduction'] = "Sélectionnez les régimes alimentaires de l'individu (sans porc, végétarien...). Ils sont repris notamment dans la liste des repas."
         return context
 
     def test_func_page(self):

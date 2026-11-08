@@ -15,19 +15,24 @@ from core.widgets import DatePickerWidget, Select_avec_commandes
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
-    date_fin = forms.DateField(label="Date de fin", required=True, widget=DatePickerWidget())
-    date_edition = forms.DateField(label="Date d'émission", required=True, widget=DatePickerWidget())
-    date_echeance = forms.DateField(label="Date d'échéance", required=False, widget=DatePickerWidget())
-    date_limite_paiement = forms.DateField(label="Date limite de paiement en ligne", required=False, widget=DatePickerWidget())
+    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget(), help_text="Début de la période facturée.")
+    date_fin = forms.DateField(label="Date de fin", required=True, widget=DatePickerWidget(), help_text="Fin de la période facturée.")
+    date_edition = forms.DateField(label="Date d'émission", required=True, widget=DatePickerWidget(), help_text="Date imprimée sur la facture.")
+    date_echeance = forms.DateField(label="Date d'échéance", required=False, widget=DatePickerWidget(), help_text="Date avant laquelle la famille doit régler la facture.")
+    date_limite_paiement = forms.DateField(label="Date limite de paiement en ligne", required=False, widget=DatePickerWidget(), help_text="Après cette date, la facture ne peut plus être payée en ligne sur le portail. Laissez vide pour ne pas limiter.")
     lot = forms.ModelChoiceField(label="Lot de factures", queryset=LotFactures.objects.all(), required=False, widget=Select_avec_commandes(
                       {"donnees_extra": {}, "url_ajax": "ajax_modifier_lot_factures",
-                       "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot de factures", "modifier": "Modifier un lot de factures"}}))
+                       "textes": {"champ": "Nom du lot", "ajouter": "Saisir un lot de factures", "modifier": "Modifier un lot de factures"}}), help_text="Facultatif : lot auquel rattacher la facture pour la retrouver plus facilement.")
     observations = forms.CharField(label="Observations", required=False, widget=forms.Textarea(attrs={"rows": 2}))
 
     class Meta:
         model = Facture
         fields = ["date_debut", "date_fin", "date_edition", "date_echeance", "lot", "regie", "prefixe", "numero", "date_limite_paiement", "observations"]
+        help_texts = {
+            "regie": "Régie qui encaisse cette facture.",
+            "prefixe": "Préfixe ajouté devant le numéro de facture.",
+            "numero": "Numéro de la facture. Il doit rester unique.",
+        }
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -66,7 +71,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
 
 class Formulaire_annulation(FormulaireBase, forms.Form):
-    observations = forms.CharField(label="Observations", required=False, help_text="Vous pouvez ajouter un commentaire qui sera mémorisé dans la facture annulée. Il peut s'agir par exemple de la raison de l'annulation.", widget=forms.Textarea(attrs={"rows": 2}))
+    observations = forms.CharField(label="Observations", required=False, help_text="Commentaire conservé dans la facture annulée, par exemple le motif de l'annulation.", widget=forms.Textarea(attrs={"rows": 2}))
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_annulation, self).__init__(*args, **kwargs)

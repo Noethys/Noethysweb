@@ -22,8 +22,8 @@ class Formulaire(FormulaireBase, ModelForm):
     cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     # Naissance
-    date_naiss = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Saisissez la date de naissance au format JJ/MM/AAAA.")
-    pays_naiss_insee = forms.ChoiceField(label="Pays", choices=[], required=False, help_text="Sélectionnez le pays de naissance dans la liste déroulante.")
+    date_naiss = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Au format JJ/MM/AAAA. Elle permet de calculer l'âge de l'individu.")
+    pays_naiss_insee = forms.ChoiceField(label="Pays", choices=[], required=False, help_text="Pays de naissance. Par défaut, la France.")
 
     class Meta:
         model = Individu
@@ -37,11 +37,19 @@ class Formulaire(FormulaireBase, ModelForm):
             'photo': Crop_image(attrs={"largeur_min": 200, "hauteur_min": 200, "ratio": "1/1"}),
         }
         help_texts = {
-            "civilite": "Sélectionnez une civilité dans la liste déroulante.",
-            "nom": "Saisissez le nom de famille en majuscules.",
-            "prenom": "Saisissez le prénom en minuscules avec la première lettre majuscule.",
-            "cp_naiss": "Saisissez le code postal, patientez une seconde et sélectionnez la ville dans la liste déroulante.",
-            "ville_naiss": "Saisissez le nom de la ville, patientez une seconde et sélectionnez la ville dans la liste déroulante.",
+            "nom_jfille": "Facultatif : nom de naissance, s'il est différent du nom d'usage.",
+            "deces": "Cochez si l'individu est décédé.",
+            "type_sieste": "Type de sieste de l'enfant. Les types se créent dans Paramétrage > Types de sieste.",
+            "memo": "Note libre affichée sur la fiche individuelle.",
+            "photo": "Photo d'identité de l'individu (format image).",
+            "situation_familiale": "Situation des parents de l'enfant (mariés, séparés...).",
+            "type_garde": "Mode de garde de l'enfant, en cas de séparation des parents.",
+            "info_garde": "Précisions sur la garde. Exemple : semaines paires chez le père.",
+            "civilite": "Pour un enfant, choisissez Fille ou Garçon : la civilité détermine s'il est traité comme un enfant ou un adulte.",
+            "nom": "Nom de famille en majuscules. Exemple : DUPOND.",
+            "prenom": "Prénom avec une majuscule initiale. Exemple : Kévin.",
+            "cp_naiss": "Tapez le code postal puis choisissez la ville dans la liste proposée.",
+            "ville_naiss": "Tapez le début du nom puis choisissez la ville dans la liste proposée.",
         }
 
     def __init__(self, *args, **kwargs):

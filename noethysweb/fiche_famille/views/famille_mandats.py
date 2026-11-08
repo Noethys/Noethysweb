@@ -18,8 +18,8 @@ class Page(Onglet):
     url_ajouter = "famille_mandats_ajouter"
     url_modifier = "famille_mandats_modifier"
     url_supprimer = "famille_mandats_supprimer"
-    description_liste = "Saisissez ici les mandats de prélèvement SEPA de la famille."
-    description_saisie = "Saisissez toutes les informations concernant le mandat et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les mandats de prélèvement SEPA de la famille. Un mandat signé et actif est nécessaire pour prélever ses factures."
+    description_saisie = "Renseignez la référence unique du mandat (RUM), les coordonnées bancaires (IBAN et BIC) et le titulaire du compte puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un mandat"
     objet_pluriel = "des mandats"
 

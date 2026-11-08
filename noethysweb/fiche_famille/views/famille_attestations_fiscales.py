@@ -16,7 +16,7 @@ class Page(Onglet):
     model = AttestationFiscale
     url_liste = "famille_attestations_fiscales_liste"
     url_supprimer = "famille_attestations_fiscales_supprimer"
-    description_liste = "Voici ci-dessous la liste des attestations fiscales générées pour cette famille."
+    description_liste = "Retrouvez ici les attestations fiscales (frais de garde) éditées pour la famille. Elles se génèrent depuis Facturation > Génération des attestations fiscales."
     objet_singulier = "une attestation fiscale"
     objet_pluriel = "des attestations fiscales"
 

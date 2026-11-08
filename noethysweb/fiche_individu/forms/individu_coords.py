@@ -19,7 +19,7 @@ from fiche_individu.widgets import CarteOSM
 class Formulaire(FormulaireBase, ModelForm):
     type_adresse = forms.ChoiceField(label="Type d'adresse", widget=forms.RadioSelect, choices=[("RATTACHEE", "Adresse rattachée"), ("PROPRE", "Adresse propre")], required=False)
     adresse_auto = forms.ModelChoiceField(label="Adresse rattachée", widget=Select2Widget(), queryset=Rattachement.objects.none(), required=False)
-    listes_diffusion = forms.ModelMultipleChoiceField(label="Listes de diffusion", widget=Select2MultipleWidget(), queryset=ListeDiffusion.objects.all(), required=False)
+    listes_diffusion = forms.ModelMultipleChoiceField(label="Listes de diffusion", widget=Select2MultipleWidget(), queryset=ListeDiffusion.objects.all(), required=False, help_text="Listes de diffusion auxquelles l'individu est inscrit, utilisables dans les envois d'e-mails groupés.")
     carte = forms.ChoiceField(label="Localisation", widget=CarteOSM(), required=False)
 
     class Meta:
@@ -41,20 +41,23 @@ class Formulaire(FormulaireBase, ModelForm):
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }
         help_texts = {
-            "type_adresse": "Sélectionnez 'rattachée' pour faire le lien avec l'adresse d'un autre membre de la famille ou sélectionnez 'propre' pour saisir une adresse pour cet individu.",
-            "adresse_auto": "Sélectionnez l'individu dont vous souhaitez récupérer l'adresse.",
-            "rue_resid": "Saisissez le numéro et le nom de la voie. Exemple : 12 Rue des acacias. Astuce : Vous pouvez également saisir le nom de la ville puis cliquez dans la liste déroulante sur le choix souhaité.",
-            "cp_resid": "Saisissez le code postal de la ville de résidence, attendez une seconde et sélectionnez la ville dans la liste déroulante.",
-            "ville_resid": "Saisissez le nom de la ville en majuscules.",
-            "secteur": "Sélectionnez un secteur dans la liste déroulante.",
-            "tel_domicile": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
-            "tel_mobile": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
-            "mail": "Saisissez une adresse Email valide.",
-            "categorie_travail": "Sélectionnez une catégorie socio-professionnelle dans la liste déroulante.",
-            "profession": "Saisissez une profession.",
-            "employeur": "Saisissez le nom de l'employeur.",
-            "travail_tel": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
-            "travail_mail": "Saisissez une adresse Email valide.",
+            "tel_domicile_sms": "Cochez si ce numéro peut recevoir des SMS.",
+            "tel_mobile_sms": "Décochez si l'individu ne souhaite pas recevoir de SMS sur ce numéro.",
+            "travail_tel_sms": "Cochez si ce numéro peut recevoir des SMS.",
+            "type_adresse": "Choisissez 'rattachée' pour reprendre l'adresse d'un autre membre de la famille (elle suivra ses changements), ou 'propre' pour saisir une adresse différente.",
+            "adresse_auto": "Membre de la famille dont l'adresse est reprise.",
+            "rue_resid": "Numéro et nom de la voie. Exemple : 12 Rue des acacias. Astuce : tapez le début de l'adresse puis choisissez la proposition dans la liste pour remplir automatiquement le code postal et la ville.",
+            "cp_resid": "Tapez le code postal puis choisissez la ville dans la liste proposée.",
+            "ville_resid": "Nom de la ville en majuscules. Il est rempli automatiquement si vous choisissez la ville dans la liste.",
+            "secteur": "Secteur géographique de résidence. Les secteurs se créent dans Paramétrage > Secteurs géographiques.",
+            "tel_domicile": "Au format xx.xx.xx.xx.xx.",
+            "tel_mobile": "Au format xx.xx.xx.xx.xx.",
+            "mail": "Exemple : prenom.nom@exemple.fr.",
+            "categorie_travail": "Utilisée pour les statistiques.",
+            "profession": "Exemple : Infirmière.",
+            "employeur": "Nom de l'entreprise ou de l'organisme employeur.",
+            "travail_tel": "Au format xx.xx.xx.xx.xx.",
+            "travail_mail": "Exemple : prenom.nom@exemple.fr.",
         }
 
 

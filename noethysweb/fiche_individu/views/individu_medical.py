@@ -77,7 +77,7 @@ def Deselect_medecin(request):
 
 class Page(Onglet):
     url_liste = "individu_medical_liste"
-    description_saisie = "Saisissez toutes les informations et cliquez sur le bouton Enregistrer."
+    description_saisie = "Renseignez les informations demandées puis cliquez sur le bouton Enregistrer."
     objet_singulier = ""
     objet_pluriel = ""
 

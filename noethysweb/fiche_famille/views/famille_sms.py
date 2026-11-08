@@ -15,7 +15,7 @@ class Ajouter(Onglet, DetailView):
     def get_context_data(self, **kwargs):
         context = super(Ajouter, self).get_context_data(**kwargs)
         context['box_titre'] = "Envoyer un SMS"
-        context['box_introduction'] = "Vous pouvez ici envoyer un SMS à la famille."
+        context['box_introduction'] = "Rédigez ici un SMS à envoyer à la famille. Il est adressé au portable favori défini dans la rubrique Divers de la fiche."
         context['onglet_actif'] = "outils"
         context['form'] = Formulaire(instance=self.Get_nouveau_sms(), request=self.request)
         context['modeles'] = ModeleSMS.objects.filter(categorie="saisie_libre")

@@ -52,9 +52,9 @@ class Consulter(Onglet, crud.Modifier):
         self.object = self.get_object()
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Portail"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Consultez ci-dessous les informations de cette rubrique. Cliquez sur le bouton Modifier pour les mettre à jour."
         if not self.request.user.has_perm("core.famille_portail_modifier"):
-            context['box_introduction'] = "Vous n'avez pas l'autorisation de modifier les informations de cette page."
+            context['box_introduction'] = "Vous pouvez consulter ces informations mais vous n'avez pas l'autorisation de les modifier. Adressez-vous à un administrateur si besoin."
         context['onglet_actif'] = "portail"
         return context
 
@@ -73,7 +73,7 @@ class Modifier(Consulter):
     def get_context_data(self, **kwargs):
         self.object = self.get_object()
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Vous pouvez modifier ici les paramètres du compte internet de la famille."
+        context['box_introduction'] = "Gérez ici le compte de la famille sur le portail : activation, identifiant, mot de passe et droits d'accès."
         return context
 
     def test_func_page(self):

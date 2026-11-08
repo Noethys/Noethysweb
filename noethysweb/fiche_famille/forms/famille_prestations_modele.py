@@ -35,15 +35,20 @@ class Widget_modele(ModelSelect2Widget):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    multiprestations = forms.ChoiceField(label="Multi-prestations", initial=None, required=False, choices=LISTE_CHOIX_MULTI_PRESTATIONS, help_text="Cette option permet de générer plusieurs prestations selon le même modèle.")
-    nbre_mois = forms.IntegerField(label="Nbre mois", initial=1, min_value=1, required=False, help_text="Une prestation sera générée pour chaque mois à partir de la date saisie ci-dessus.")
-    selection_dates = forms.CharField(label="Dates", widget=forms.Textarea(attrs={"rows": 2}), required=False, help_text="Saisissez les dates souhaitées pour chaque prestation (séparées par des points-virgules). Exemple : 01/01/2024;01/02/2024;15/03/2024...")
+    multiprestations = forms.ChoiceField(label="Multi-prestations", initial=None, required=False, choices=LISTE_CHOIX_MULTI_PRESTATIONS, help_text="Permet de créer en une seule fois plusieurs prestations identiques, à des dates différentes.")
+    nbre_mois = forms.IntegerField(label="Nbre mois", initial=1, min_value=1, required=False, help_text="Nombre de prestations à créer : une par mois, à partir de la date saisie ci-dessus.")
+    selection_dates = forms.CharField(label="Dates", widget=forms.Textarea(attrs={"rows": 2}), required=False, help_text="Une prestation sera créée pour chaque date. Séparez les dates par des points-virgules. Exemple : 01/01/2024;01/02/2024;15/03/2024.")
 
     class Meta:
         model = Prestation
         fields = "__all__"
         widgets = {
             "date": DatePickerWidget(),
+        }
+        help_texts = {
+            "date": "Date de la prestation (ou de la première prestation en cas de multi-prestations).",
+            "label": "Libellé de la prestation, tel qu'il apparaîtra sur la facture.",
+            "individu": "Facultatif : membre de la famille concerné par la prestation.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -164,7 +169,7 @@ EXTRA_HTML = """
 
 
 class Formulaire_selection_modele(FormulaireBase, forms.Form):
-    modele = forms.ModelChoiceField(label="Modèle", widget=Widget_modele({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=ModelePrestation.objects.none(), required=True)
+    modele = forms.ModelChoiceField(label="Modèle", widget=Widget_modele({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=ModelePrestation.objects.none(), required=True, help_text="Modèle dont les caractéristiques seront reprises pour pré-remplir la prestation.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_selection_modele, self).__init__(*args, **kwargs)

@@ -20,7 +20,7 @@ class Ajouter(Onglet, crud.Ajouter):
     def get_context_data(self, **kwargs):
         context = super(Ajouter, self).get_context_data(**kwargs)
         context['box_titre'] = "Rembourser le crédit de la famille"
-        context['box_introduction'] = "Utilisez cette fonction lorsque la famille a payé plus que ce qui lui a été facturé et que vous lui rendez la différence (chèque, virement, espèces...)."
+        context['box_introduction'] = "Utilisez cette fonction lorsque la famille a payé plus que ce qui lui a été facturé et que vous lui rendez tout ou partie de ce crédit (chèque, virement, espèces...). Le remboursement est enregistré comme un règlement négatif."
         context['onglet_actif'] = "reglements"
         context['situation'] = context["form"].situation
         context['symbole_monnaie'] = utils_preferences.Get_symbole_monnaie()

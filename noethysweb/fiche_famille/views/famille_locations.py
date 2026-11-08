@@ -66,8 +66,8 @@ class Page(Onglet):
     url_modifier = "famille_locations_modifier"
     url_supprimer = "famille_locations_supprimer"
     url_supprimer_plusieurs = "famille_locations_supprimer_plusieurs"
-    description_liste = "Consultez et saisissez ici les locations de la famille."
-    description_saisie = "Saisissez toutes les informations concernant la location et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les locations de produits (salles, matériel...) réservées par la famille."
+    description_saisie = "Renseignez le produit loué, la période et le tarif puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une location"
     objet_pluriel = "des locations"
 

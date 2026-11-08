@@ -16,8 +16,8 @@ from django_select2.forms import ModelSelect2Widget, Select2Widget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
-    date_fin = forms.DateField(label="Date de fin", required=True, widget=DatePickerWidget())
+    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget(), help_text="Début de l'étape de scolarité, généralement la rentrée scolaire.")
+    date_fin = forms.DateField(label="Date de fin", required=True, widget=DatePickerWidget(), help_text="Fin de l'étape de scolarité, généralement la fin de l'année scolaire.")
 
     class Meta:
         model = Scolarite
@@ -26,6 +26,11 @@ class Formulaire(FormulaireBase, ModelForm):
             "ecole": Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
             "classe": Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
             "niveau": Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
+        }
+        help_texts = {
+            "ecole": "École fréquentée. Les écoles se créent dans Paramétrage > Ecoles.",
+            "classe": "Facultatif : classe de l'école pour cette année scolaire.",
+            "niveau": "Niveau scolaire (CP, CE1...).",
         }
 
     def __init__(self, *args, **kwargs):

@@ -109,8 +109,8 @@ class Page(Onglet):
     url_ajouter = None
     url_modifier = "famille_recus_modifier"
     url_supprimer = "famille_recus_supprimer"
-    description_liste = "Retrouvez ici la liste des reçus de règlements édités."
-    description_saisie = "Renseignez les champs demandés et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les reçus édités pour ce règlement."
+    description_saisie = "Renseignez les paramètres du reçu puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un reçu"
     objet_pluriel = "des reçus"
 
@@ -192,7 +192,7 @@ class Ajouter(Onglet, crud.Ajouter):
     def get_context_data(self, **kwargs):
         context = super(Ajouter, self).get_context_data(**kwargs)
         context['box_titre'] = "Créer un reçu de règlement"
-        context['box_introduction'] = "Renseignez les paramètres et cliquez sur Aperçu PDF. Terminez en cliquant sur le bouton Enregistrer pour mémoriser le reçu."
+        context['box_introduction'] = "Renseignez les paramètres du reçu et cliquez sur Aperçu PDF pour le vérifier. Cliquez ensuite sur le bouton Enregistrer pour le conserver."
         context['onglet_actif'] = "reglements"
         return context
 

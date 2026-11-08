@@ -19,8 +19,8 @@ class Page(Onglet):
     url_modifier = "famille_liste_consommations_modifier"
     url_supprimer = "famille_liste_consommations_supprimer"
     url_supprimer_plusieurs = "famille_liste_consommations_supprimer_plusieurs"
-    description_liste = "Voici ci-dessous la liste détaillée des consommations de cette famille. Cliquez sur <i class='fa fa-eye-slash'></i> pour afficher les colonnes masquées disponibles."
-    description_saisie = "Saisissez toutes les informations concernant la consommation à saisir et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici le détail des consommations des membres de la famille. Cliquez sur <i class='fa fa-eye-slash'></i> pour afficher les colonnes masquées."
+    description_saisie = "Renseignez les caractéristiques de la consommation puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une consommation"
     objet_pluriel = "des consommations"
 

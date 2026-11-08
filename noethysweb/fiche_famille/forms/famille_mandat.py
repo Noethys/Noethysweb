@@ -20,7 +20,7 @@ from facturation.utils import utils_prelevements
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    type_structures = forms.ChoiceField(label="Structures associées", choices=[("TOUTES", "Toutes les structures"), ("SELECTION", "Uniquement les structures suivantes")], initial="TOUTES", required=False)
+    type_structures = forms.ChoiceField(label="Structures associées", choices=[("TOUTES", "Toutes les structures"), ("SELECTION", "Uniquement les structures suivantes")], initial="TOUTES", required=False, help_text="Limitez si besoin l'utilisation de ce mandat à certaines structures.")
 
     class Meta:
         model = Mandat
@@ -39,17 +39,25 @@ class Formulaire(FormulaireBase, ModelForm):
             "structures": "Sélection des structures",
         }
         help_texts = {
-            "individu": "Titulaire du compte bancaire. Sélectionnez 'Autre individu' si le titulaire n'est pas dans la liste proposée ou si vous souhaitez saisir une adresse postale manuellement.",
-            "individu_nom": "Saisissez le nom complet du titulaire du compte (Généralement le nom de famille suivi du prénom). Exemple : DUPOND Philippe.",
-            "individu_service": "Identité du destinataire ou du service. Exemple : Service comptabilité.",
-            "individu_rue": "Libellé de la voie sans le numéro. Exemple : Rue des alouettes.",
-            "individu_numero": "Numéro de la voie. Exemple : 14.",
-            "individu_batiment": "Nom de l'immeuble, du bâtiment ou de la résidence, etc... Exemple : Résidence les acacias.",
-            "individu_etage": "Numéro de l'étage, de l'annexe, etc... Exemple : Etage 4.",
-            "individu_boite": "Boîte postale, tri service arrivée, etc... Exemple : BP64.",
-            "individu_cp": "Code postal. Exemple : 29200.",
-            "individu_ville": "Nom de la ville. Exemple : BREST.",
-            "individu_pays": "Code du pays. Exemple : FR.",
+            "rum": "Référence unique du mandat (RUM), proposée automatiquement à la suite du dernier mandat.",
+            "type": "Choisissez « Récurrent » pour des prélèvements répétés (cas le plus courant) ou « Ponctuel » pour un prélèvement unique.",
+            "date": "Date à laquelle la famille a signé le mandat.",
+            "iban": "Numéro de compte international. Sa validité est contrôlée pendant la saisie.",
+            "bic": "Code de la banque (8 ou 11 caractères). Son format est contrôlé pendant la saisie.",
+            "sequence": "Séquence du prochain prélèvement. Elle est mise à jour automatiquement après chaque prélèvement.",
+            "actif": "Décochez cette case pour ne plus utiliser ce mandat, par exemple après sa révocation.",
+            "structures": "Ce mandat ne sera utilisé que pour les prélèvements de ces structures.",
+            "individu": "Titulaire du compte bancaire. Choisissez 'Autre individu' s'il n'est pas dans la liste ou si vous souhaitez saisir son adresse manuellement.",
+            "individu_nom": "Nom complet du titulaire du compte, généralement le nom suivi du prénom. Exemple : DUPOND Philippe.",
+            "individu_service": "Destinataire ou service à l'intérieur de l'adresse. Exemple : Service comptabilité.",
+            "individu_rue": "Nom de la voie, sans le numéro. Exemple : Rue des alouettes.",
+            "individu_numero": "Numéro dans la voie. Exemple : 14 ou 14 bis.",
+            "individu_batiment": "Nom de l'immeuble, du bâtiment ou de la résidence. Exemple : Résidence les acacias.",
+            "individu_etage": "Étage, appartement ou escalier. Exemple : Étage 4.",
+            "individu_boite": "Boîte postale ou mention de distribution. Exemple : BP64.",
+            "individu_cp": "Exemple : 29200.",
+            "individu_ville": "Nom de la ville en majuscules. Exemple : BREST.",
+            "individu_pays": "Code du pays sur deux lettres. Exemple : FR.",
         }
 
     def __init__(self, *args, **kwargs):

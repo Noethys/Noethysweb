@@ -79,10 +79,10 @@ FORMSET_COMBI = inlineformset_factory(Aide, CombiAide, form=CombiAideForm, fk_na
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    montant_max = forms.DecimalField(label="Montant plafond", max_digits=6, decimal_places=2, initial=0.0, required=False)
+    montant_max = forms.DecimalField(label="Montant plafond", max_digits=6, decimal_places=2, initial=0.0, required=False, help_text="Facultatif : montant total que l'aide ne pourra pas dépasser sur la période.")
     jours_scolaires = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_scolaires"))
     jours_vacances = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("jours_vacances"))
-    individus = forms.ModelMultipleChoiceField(label="Bénéficiaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.none(), required=True)
+    individus = forms.ModelMultipleChoiceField(label="Bénéficiaires", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%"}), queryset=Individu.objects.none(), required=True, help_text="Membres de la famille qui bénéficient de l'aide.")
 
     class Meta:
         model = Aide
@@ -90,6 +90,13 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'date_debut': DatePickerWidget(),
             'date_fin': DatePickerWidget(),
+        }
+        help_texts = {
+            "nom": "Nom de l'aide, repris dans le détail des prestations. Exemple : Bons CAF 2025.",
+            "date_debut": "Date à partir de laquelle l'aide est déduite des prestations.",
+            "date_fin": "Date jusqu'à laquelle l'aide est déduite des prestations.",
+            "caisse": "Organisme qui finance l'aide.",
+            "nbre_dates_max": "Facultatif : nombre maximal de dates pour lesquelles l'aide pourra être déduite.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -175,8 +182,8 @@ class Formulaire(FormulaireBase, ModelForm):
 
 
 class Formulaire_selection_activite(FormulaireBase, forms.Form):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
-    modele_aide = forms.ModelChoiceField(label="Modèle d'aide", widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'], dependent_fields={"activite": "activite"}), queryset=Aide.objects.filter(famille__isnull=True), required=False)
+    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True, help_text="Activité sur laquelle l'aide sera déduite.")
+    modele_aide = forms.ModelChoiceField(label="Modèle d'aide", widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'], dependent_fields={"activite": "activite"}), queryset=Aide.objects.filter(famille__isnull=True), required=False, help_text="Facultatif : modèle dont les caractéristiques seront reprises pour pré-remplir l'aide.")
 
     def __init__(self, *args, **kwargs):
         super(Formulaire_selection_activite, self).__init__(*args, **kwargs)

@@ -42,7 +42,7 @@ class Consulter(Page, crud.Liste):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Consulter une facture"
-        context['box_introduction'] = "Vous pouvez ici ajouter ou retirer des prestations ou modifier les caractéristiques de la facture. La suppression des prestations ici entraîne juste le retrait de la facture mais pas leur suppression de la fiche famille."
+        context['box_introduction'] = "Ajoutez ou retirez des prestations, ou modifiez les caractéristiques de la facture. Retirer une prestation de la facture ne la supprime pas : elle reste dans la fiche famille et pourra être facturée plus tard."
         context['onglet_actif'] = "famille_factures_liste"
         context['active_checkbox'] = True
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"idfamille": self.kwargs["idfamille"], "idfacture": self.kwargs["pk"], "listepk": "xxx"})
@@ -88,7 +88,7 @@ class Modifier(Page, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
         context['box_titre'] = "Modifier les caractéristiques de la facture"
-        context['box_introduction'] = "Modifiez les caractéristiques souhaitées et cliquez sur Enregistrer. A utiliser avec précaution."
+        context['box_introduction'] = "Modifiez les caractéristiques souhaitées puis cliquez sur Enregistrer. Attention : une facture déjà transmise à la famille ou exportée en comptabilité ne devrait plus être modifiée."
         return context
 
     def get_form_kwargs(self, **kwargs):

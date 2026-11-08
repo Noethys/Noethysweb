@@ -17,7 +17,7 @@ from core.widgets import DatePickerWidget
 class Formulaire(FormulaireBase, ModelForm):
     # Durée de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
-    validite_type = forms.TypedChoiceField(label="Validité", choices=choix_validite, initial='ILLIMITEE', required=False)
+    validite_type = forms.TypedChoiceField(label="Validité", choices=choix_validite, initial='ILLIMITEE', required=False, help_text="Indiquez si l'information est permanente ou valable seulement sur une période.")
     date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget())
     date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
 
@@ -35,6 +35,18 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
             'description_traitement': forms.Textarea(attrs={'rows': 4}),
+        }
+        help_texts = {
+            "categorie": "Catégorie de l'information (allergie, maladie, handicap...). Les catégories se créent dans Paramétrage > Catégories d'infos personnelles.",
+            "intitule": "Intitulé court affiché dans les listes. Exemple : Allergie aux arachides.",
+            "description": "Détails utiles pour l'équipe d'animation (symptômes, conduite à tenir...).",
+            "document": "Facultatif : joignez un document (PAI, certificat médical...).",
+            "traitement_medical": "Cochez si l'individu suit un traitement médical.",
+            "description_traitement": "Nom du médicament, posologie et horaires de prise.",
+            "eviction": "Cochez si l'individu ne doit pas fréquenter l'activité pendant une période (maladie contagieuse...).",
+            "diffusion_listing_enfants": "Affiche l'information sur la liste des informations personnelles.",
+            "diffusion_listing_conso": "Affiche l'information sur la liste des consommations imprimée.",
+            "diffusion_listing_repas": "Affiche l'information sur la commande des repas.",
         }
 
     def __init__(self, *args, **kwargs):

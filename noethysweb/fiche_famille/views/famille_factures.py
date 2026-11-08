@@ -21,8 +21,8 @@ class Page(Onglet):
     url_liste = "famille_factures_liste"
     url_supprimer = "famille_factures_supprimer"
     url_supprimer_plusieurs = "famille_factures_supprimer_plusieurs"
-    description_liste = "Vous pouvez consulter ici les factures de la famille. Les boutons d'action vous permettent de modifier le contenu d'une facture, de la supprimer ou de la visualiser au format PDF ou de l'envoyer par email."
-    description_saisie = "Saisissez toutes les informations concernant la facture et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les factures de la famille. Les boutons de chaque ligne permettent de consulter et modifier une facture, de la supprimer ou l'annuler, et de l'imprimer ou l'envoyer par e-mail."
+    description_saisie = "Renseignez les caractéristiques de la facture puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une facture"
     objet_pluriel = "des factures"
 

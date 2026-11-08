@@ -80,7 +80,7 @@ class Importer(Page):
     def get_context_data(self, **kwargs):
         context = super(Importer, self).get_context_data(**kwargs)
         context["etape"] = "envoi"
-        context["box_introduction"] = "Sélectionnez un fichier d'export de fiches familles Noethysweb et saisissez son mot de passe."
+        context["box_introduction"] = "Sélectionnez le fichier d'export de fiches familles produit par une autre base Noethysweb et saisissez le mot de passe qui a servi à le protéger."
         return context
 
     def post(self, request, *args, **kwargs):

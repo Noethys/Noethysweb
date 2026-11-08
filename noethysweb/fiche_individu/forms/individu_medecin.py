@@ -21,7 +21,7 @@ class Form_choix_medecin(forms.ModelChoiceField):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    medecin = Form_choix_medecin(label="Médecin", queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False, help_text="Cliquez sur le '+' si vous souhaitez ajouter un nouveau médecin qui n'existe pas dans la liste.",
+    medecin = Form_choix_medecin(label="Médecin", queryset=Medecin.objects.all().order_by("nom", "prenom"), required=False, help_text="Recherchez le médecin traitant dans la liste. S'il n'existe pas encore, cliquez sur le bouton '+' pour l'ajouter.",
                                      widget=Select_avec_commandes_form(attrs={"url_ajax": "ajax_ajouter_medecin", "id_form": "medecins_form", "afficher_bouton_ajouter": True,
                                                                               "textes": {"champ": "Nom du médecin", "ajouter": "Ajouter un médecin", "modifier": "Modifier un médecin"}}))
 

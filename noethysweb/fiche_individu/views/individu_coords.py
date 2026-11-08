@@ -35,9 +35,9 @@ class Consulter(Onglet, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Coordonnées"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Consultez ci-dessous les informations de cette rubrique. Cliquez sur le bouton Modifier pour les mettre à jour."
         if not self.request.user.has_perm("core.individu_coords_modifier"):
-            context['box_introduction'] = "Vous n'avez pas l'autorisation de modifier les informations de cette page."
+            context['box_introduction'] = "Vous pouvez consulter ces informations mais vous n'avez pas l'autorisation de les modifier. Adressez-vous à un administrateur si besoin."
         context['onglet_actif'] = "coords"
         return context
 
@@ -56,7 +56,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Renseignez les coordonnées de l'individu."
+        context['box_introduction'] = "Renseignez l'adresse, les téléphones, l'adresse e-mail et la situation professionnelle de l'individu. L'adresse peut être rattachée à celle d'un autre membre de la famille."
         return context
 
     def test_func_page(self):

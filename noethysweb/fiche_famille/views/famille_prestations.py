@@ -86,7 +86,7 @@ class Page(Onglet):
     url_modifier = "famille_prestations_modifier"
     url_supprimer = "famille_prestations_supprimer"
     url_supprimer_plusieurs = "famille_prestations_supprimer_plusieurs"
-    description_liste = "Vous pouvez consulter ici les prestations de la famille. Il s'agit généralement de prestations générées automatiquement mais vous pouvez également cliquer sur le bouton Ajouter pour créer une prestation manuelle."
+    description_liste = "Retrouvez ici les prestations de la famille. Elles sont pour la plupart générées automatiquement (consommations, adhésions, locations...), mais vous pouvez aussi créer une prestation manuelle avec le bouton Ajouter."
     description_saisie = "Saisissez toutes les informations concernant la prestation et cliquez sur le bouton Enregistrer."
     objet_singulier = "une prestation"
     objet_pluriel = "des prestations"

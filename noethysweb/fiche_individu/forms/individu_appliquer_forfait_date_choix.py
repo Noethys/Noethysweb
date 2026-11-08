@@ -30,5 +30,5 @@ class Formulaire(FormulaireBase, forms.Form):
             tarif = Tarif.objects.select_related("activite").get(pk=idtarif)
             lignes_tarif = TarifLigne.objects.select_related("tarif", "activite").filter(tarif_id=idtarif).order_by("num_ligne")
             choix = [(ligne.pk, "%.02f %s  %s" % (ligne.montant_unique, utils_preferences.Get_symbole_monnaie(), ligne.label or "")) for ligne in lignes_tarif]
-            self.fields["tarif_%d" % idtarif] = forms.ChoiceField(label="%s - Forfait %d" % (tarif.activite.nom, index), choices=choix, required=True, help_text="Sélectionnez un montant dans la liste déroulante.")
+            self.fields["tarif_%d" % idtarif] = forms.ChoiceField(label="%s - Forfait %d" % (tarif.activite.nom, index), choices=choix, required=True, help_text="Montant du forfait à appliquer.")
             self.helper.layout.append(Field("tarif_%d" % idtarif))

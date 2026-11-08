@@ -16,7 +16,7 @@ from core.forms.base import FormulaireBase
 class Formulaire(FormulaireBase, forms.Form):
     action = forms.CharField(label="Action", required=False)
     forfaits = forms.CharField(label="Forfaits disponibles", required=False, widget=SelectionForfaitsDatesWidget(attrs={"coche_tout": False}))
-    afficher_forfaits_obsoletes = forms.BooleanField(label="Afficher les forfaits obsolètes", required=False, initial=False)
+    afficher_forfaits_obsoletes = forms.BooleanField(label="Afficher les forfaits obsolètes", required=False, initial=False, help_text="Affiche aussi les forfaits dont la période est terminée.")
 
     def __init__(self, *args, **kwargs):
         self.idfamille = kwargs.pop("idfamille")

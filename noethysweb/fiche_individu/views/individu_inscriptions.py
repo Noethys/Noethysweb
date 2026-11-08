@@ -59,8 +59,8 @@ class Page(Onglet):
     url_ajouter = "individu_inscriptions_ajouter"
     url_modifier = "individu_inscriptions_modifier"
     url_supprimer = "individu_inscriptions_supprimer"
-    description_liste = "Consultez et saisissez ici les inscriptions de l'individu."
-    description_saisie = "Saisissez toutes les informations concernant l'inscription et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les inscriptions de l'individu aux activités. Une inscription est nécessaire pour pouvoir saisir ses consommations sur l'activité."
+    description_saisie = "Choisissez l'activité, le groupe et la catégorie de tarif, renseignez la période d'inscription puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une inscription"
     objet_pluriel = "des inscriptions"
 

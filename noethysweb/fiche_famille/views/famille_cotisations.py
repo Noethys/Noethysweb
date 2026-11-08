@@ -97,8 +97,8 @@ class Page(Onglet):
     url_modifier = "famille_cotisations_modifier"
     url_supprimer = "famille_cotisations_supprimer"
     url_supprimer_plusieurs = "famille_cotisations_supprimer_plusieurs"
-    description_liste = "Consultez et saisissez ici les adhésions de la famille."
-    description_saisie = "Saisissez toutes les informations concernant l'adhésion et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les adhésions (cotisations) de la famille et de ses membres. Une adhésion peut générer automatiquement une prestation à facturer."
+    description_saisie = "Renseignez les caractéristiques de l'adhésion (type, période de validité, bénéficiaires) puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une adhésion"
     objet_pluriel = "des adhésions"
 

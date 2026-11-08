@@ -96,7 +96,7 @@ class Selection_modele(Onglet, TemplateView):
         context = super(Selection_modele, self).get_context_data(**kwargs)
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Sélection d'un modèle de prestation"
-        context['box_introduction'] = "Vous devez commencer par sélectionner le modèle de prestation à appliquer. Les modèles peuvent être créés depuis le menu Paramétrage."
+        context['box_introduction'] = "Commencez par sélectionner le modèle de prestation à appliquer. Les modèles se créent dans Paramétrage > Modèles de prestations."
         context['onglet_actif'] = "prestations"
         context['form'] = Formulaire_selection_modele(request=self.request)
         return context

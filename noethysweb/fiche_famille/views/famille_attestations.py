@@ -112,8 +112,8 @@ class Page(Onglet):
     url_ajouter = "famille_attestations_ajouter"
     url_modifier = "famille_attestations_modifier"
     url_supprimer = "famille_attestations_supprimer"
-    description_liste = "Vous pouvez créer ici des attestations de présence."
-    description_saisie = "Saisissez toutes les informations concernant l'attestation et cliquez sur Aperçu PDF ou Envoyer par email. Vous pourrez ensuite mémoriser l'attestation en cliquant sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les attestations de présence éditées pour la famille. Cliquez sur le bouton Ajouter pour en créer une nouvelle."
+    description_saisie = "Renseignez les paramètres de l'attestation puis cliquez sur Aperçu PDF ou Envoyer par Email. Cliquez ensuite sur le bouton Enregistrer pour la conserver dans la fiche famille."
     objet_singulier = "une attestation de présence"
     objet_pluriel = "des attestations de présence"
 

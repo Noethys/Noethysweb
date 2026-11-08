@@ -94,7 +94,7 @@ class Page(crud.Page):
     url_modifier = "famille_resume"
     url_supprimer = "famille_supprimer"
     description_liste = "Retrouvez ici toutes les familles enregistrées. Cliquez sur une famille pour ouvrir sa fiche, d'où vous gérez ses membres, ses inscriptions, ses consommations, sa facturation et ses règlements. Utilisez la zone de recherche ou le bouton Filtrer pour retrouver rapidement une famille."
-    description_saisie = "Saisissez les informations de la famille puis cliquez sur le bouton Enregistrer."
+    description_saisie = "Renseignez les informations de la famille puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une famille"
     objet_pluriel = "des familles"
     boutons_liste = [

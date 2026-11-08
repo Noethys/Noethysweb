@@ -20,8 +20,8 @@ class Page(Onglet):
     url_ajouter = "famille_aides_ajouter"
     url_modifier = "famille_aides_modifier"
     url_supprimer = "famille_aides_supprimer"
-    description_liste = "Consultez et saisissez ici les aides de la famille."
-    description_saisie = "Saisissez toutes les informations concernant l'aide et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les aides accordées à la famille (bons CAF, aides de la commune, chèques vacances...). Elles sont déduites automatiquement des prestations concernées lors de leur calcul."
+    description_saisie = "Renseignez les caractéristiques de l'aide (période, bénéficiaires, montants) puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une aide"
     objet_pluriel = "des aides"
 
@@ -188,7 +188,7 @@ class Selection_activite(Onglet, TemplateView):
         context = super(Selection_activite, self).get_context_data(**kwargs)
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Aides"
-        context['box_introduction'] = "Vous devez commencer par sélectionner l'activité associée à l'aide que vous souhaitez créer. Vous pouvez éventuellement sélectionner un modèle d'aide existant à appliquer."
+        context['box_introduction'] = "Commencez par sélectionner l'activité concernée par l'aide. Vous pouvez aussi partir d'un modèle d'aide pour pré-remplir la saisie (les modèles se créent dans Paramétrage > Modèles d'aides)."
         context['onglet_actif'] = "aides"
         context['form'] = Formulaire_selection_activite(request=self.request)
         return context

@@ -28,6 +28,6 @@ class View(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['box_titre'] = "Aperçu d'un mandat"
-        context['box_introduction'] = "Cliquez sur Aperçu PDF ou Envoyer par Email."
+        context['box_introduction'] = "Cliquez sur Aperçu PDF pour afficher le mandat ou sur Envoyer par Email pour le transmettre à la famille."
         context['onglet_actif'] = "mandats"
         return context

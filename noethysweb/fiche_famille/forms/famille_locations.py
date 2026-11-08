@@ -70,22 +70,22 @@ class Formulaire(FormulaireBase, ModelForm):
                                      queryset=Famille.objects.all().order_by("nom"), required=True)
     # Produit
     produit = forms.ModelChoiceField(label="Produit", widget=Widget_modele({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
-                                     queryset=Produit.objects.select_related("categorie").all(), required=True)
+                                     queryset=Produit.objects.select_related("categorie").all(), required=True, help_text="Produit loué (salle, matériel...). Les produits se créent dans Paramétrage > Produits.")
 
     # Période
     choix_periode = [("UNIQUE", "Période unique"), ("RECURRENCE", "Récurrence")]
-    selection_periode = forms.TypedChoiceField(label="Type de période", choices=choix_periode, initial="UNIQUE", required=False)
-    recurrence_date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}))
-    recurrence_date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}))
-    recurrence_heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    recurrence_heure_fin = forms.TimeField(label="Heure de fin", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    recurrence_feries = forms.BooleanField(label="Inclure les fériés", required=False)
+    selection_periode = forms.TypedChoiceField(label="Type de période", choices=choix_periode, initial="UNIQUE", required=False, help_text="Choisissez une période unique ou une récurrence pour créer plusieurs locations à la fois.")
+    recurrence_date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}), help_text="Première date de la récurrence.")
+    recurrence_date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}), help_text="Dernière date de la récurrence.")
+    recurrence_heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Heure de début de chaque location.")
+    recurrence_heure_fin = forms.TimeField(label="Heure de fin", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Heure de fin de chaque location.")
+    recurrence_feries = forms.BooleanField(label="Inclure les fériés", required=False, help_text="Cochez pour créer aussi des locations les jours fériés.")
     recurrence_jours_scolaires = forms.MultipleChoiceField(label="Jours scolaires", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("recurrence_jours_scolaires"))
     recurrence_jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("recurrence_jours_vacances"))
     choix_frequence = [(1, "Toutes les semaines"), (2, "Une semaine sur deux"),
                         (3, "Une semaine sur trois"), (4, "Une semaine sur quatre"),
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]
-    recurrence_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False)
+    recurrence_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False, help_text="Toutes les semaines, une semaine sur deux, etc.")
 
     class Meta:
         model = Location
@@ -96,8 +96,9 @@ class Formulaire(FormulaireBase, ModelForm):
             "date_fin": DateTimePickerWidget(),
         }
         help_texts = {
-            "date_debut": "Saisissez une date et heure de début au format JJ/MM/AAAA HH:MM.",
-            "date_fin": "Saisissez une date et heure de début au format JJ/MM/AAAA HH:MM ou laissez vide pour une location sans durée définie.",
+            "quantite": "Nombre d'exemplaires du produit loués.",
+            "date_debut": "Date et heure de début de la location, au format JJ/MM/AAAA HH:MM.",
+            "date_fin": "Date et heure de fin de la location, au format JJ/MM/AAAA HH:MM. Laissez vide pour une location sans date de fin.",
         }
 
     def __init__(self, *args, **kwargs):

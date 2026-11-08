@@ -25,6 +25,9 @@ class Formulaire(FormulaireBase, ModelForm):
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }
+        help_texts = {
+            "tel_cabinet": "Au format xx.xx.xx.xx.xx.",
+        }
 
     def __init__(self, *args, **kwargs):
         idindividu = kwargs.pop("idindividu", None)

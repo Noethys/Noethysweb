@@ -27,6 +27,11 @@ class Formulaire(FormulaireBase, ModelForm):
             'date_debut': DatePickerWidget(),
             'date_fin': DatePickerWidget(),
         }
+        help_texts = {
+            "quotient": "Valeur du quotient familial, utilisée pour déterminer les tarifs applicables.",
+            "revenu": "Facultatif : revenu de référence, utilisé par certains modes de calcul de tarifs.",
+            "document": "Facultatif : joignez le justificatif (attestation CAF, avis d'imposition...).",
+        }
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -106,9 +111,9 @@ class Formulaire_saisie_api_particulier(FormulaireBase, ModelForm):
             "type_quotient": "Type",
         }
         help_texts = {
-            "date_debut": "Saisissez la date de début de validité du quotient à enregistrer",
-            "date_fin": "Saisissez la date de fin de validité du quotient à enregistrer",
-            "type_quotient": "Sélectionnez le type du quotient à enregistrer",
+            "date_debut": "Date à partir de laquelle le quotient s'applique.",
+            "date_fin": "Date jusqu'à laquelle le quotient s'applique.",
+            "type_quotient": "Organisme ou mode de calcul du quotient (CAF, MSA, interne...). Les types se créent dans Paramétrage > Types de quotients.",
         }
 
     def __init__(self, *args, **kwargs):

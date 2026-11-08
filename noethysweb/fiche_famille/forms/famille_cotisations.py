@@ -24,13 +24,13 @@ from cotisations.utils import utils_cotisations
 
 class Formulaire(FormulaireBase, ModelForm):
     # Carte
-    carte = forms.BooleanField(label="Créer", initial=False, required=False)
+    carte = forms.BooleanField(label="Créer", initial=False, required=False, help_text="Cochez cette case si une carte d'adhérent est remise.")
 
     # Facturation
-    facturer = forms.BooleanField(label="Facturer", initial=False, required=False)
-    date_facturation = forms.DateField(label="Date", required=False, widget=DatePickerWidget())
-    label_prestation = forms.CharField(label="Label", required=False)
-    montant = forms.DecimalField(label="Montant", max_digits=6, decimal_places=2, initial=0.0, required=False)
+    facturer = forms.BooleanField(label="Facturer", initial=False, required=False, help_text="Cochez cette case pour créer une prestation à facturer pour cette adhésion.")
+    date_facturation = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Date de la prestation créée.")
+    label_prestation = forms.CharField(label="Label", required=False, help_text="Libellé de la prestation, tel qu'il apparaîtra sur la facture.")
+    montant = forms.DecimalField(label="Montant", max_digits=6, decimal_places=2, initial=0.0, required=False, help_text="Montant de la prestation à facturer.")
 
     # Activités
     activites = forms.ModelMultipleChoiceField(label="Activités", widget=Select2MultipleWidget(), queryset=Activite.objects.all(), required=False)
@@ -52,6 +52,15 @@ class Formulaire(FormulaireBase, ModelForm):
         labels = {
             "type_cotisation": "Type",
             "unite_cotisation": "Unité",
+        }
+        help_texts = {
+            "type_cotisation": "Type d'adhésion. Les types se créent dans Paramétrage > Types d'adhésions.",
+            "unite_cotisation": "Unité du type d'adhésion (par exemple l'année concernée). Elle détermine la période de validité et le tarif proposés.",
+            "individu": "Membre de la famille qui adhère, pour une adhésion individuelle.",
+            "date_debut": "Date de début de validité de l'adhésion.",
+            "date_fin": "Date de fin de validité de l'adhésion.",
+            "date_creation_carte": "Date de création de la carte d'adhérent.",
+            "numero": "Numéro de la carte d'adhérent.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -136,7 +145,7 @@ class Formulaire(FormulaireBase, ModelForm):
             for champ in ("type_cotisation", "unite_cotisation", "individu",
                           "facturer", "date_facturation", "label_prestation", "montant"):
                 self.fields[champ].disabled = True
-                self.fields[champ].help_text = "Ce champ n'est pas modifiable car la prestation associée est déjà facturée."
+                self.fields[champ].help_text = "Ce champ n'est plus modifiable car la prestation associée a déjà été facturée."
 
         # Affichage
         self.helper.layout = Layout(
@@ -403,12 +412,12 @@ $(document).ready(function() {
 """
 
 class Formulaire_type_cotisation(FormulaireBase, forms.Form):
-    type_cotisation = forms.ModelChoiceField(label="Type d'adhésion", widget=Select2Widget(), queryset=TypeCotisation.objects.none().order_by("nom"), required=True)
-    unite_cotisation = forms.ModelChoiceField(label="Unité d'adhésion", widget=Select2Widget(), queryset=UniteCotisation.objects.none().order_by("nom"), required=True)
+    type_cotisation = forms.ModelChoiceField(label="Type d'adhésion", widget=Select2Widget(), queryset=TypeCotisation.objects.none().order_by("nom"), required=True, help_text="Type d'adhésion à saisir pour tous les bénéficiaires.")
+    unite_cotisation = forms.ModelChoiceField(label="Unité d'adhésion", widget=Select2Widget(), queryset=UniteCotisation.objects.none().order_by("nom"), required=True, help_text="Unité d'adhésion à saisir pour tous les bénéficiaires.")
     affichage_beneficiaires = forms.ChoiceField(label="Liste de bénéficiaires", initial=0, required=True, choices=[
         (0, "Afficher tous les bénéficiaires potentiels"),
         (1, "Afficher uniquement les bénéficiaires potentiels qui n'ont jamais adhéré à cette unité d'adhésion"),
-    ])
+    ], help_text="Permet de n'afficher que les familles ou individus qui n'ont pas encore adhéré à cette unité.")
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance", None)

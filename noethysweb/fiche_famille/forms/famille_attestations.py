@@ -20,14 +20,14 @@ from fiche_famille.widgets import Prestations_devis
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget(), help_text="Sélectionnez la période à inclure dans l'attestation.")
-    date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}), help_text="La date d'édition est par défaut la date du jour. Il est généralement inutile de la modifier.")
-    numero = forms.IntegerField(label="Numéro", required=True, help_text="Le numéro de l'attestation est généré automatiquement. Il est généralement inutile de le modifier.")
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="attestation").order_by("nom"), required=True, help_text="Sélectionnez le modèle de document à utiliser. Il doit avoir au préalable été créé dans Menu Paramétrage > Modèles de documents > Attestation.")
-    signataire = forms.CharField(label="Signataire", required=True, help_text="Saisissez le nom du signataire du document (par défaut l'utilisateur en cours).")
+    periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget(), help_text="Seules les prestations comprises dans cette période figureront sur l'attestation.")
+    date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}), help_text="Date imprimée sur le document. Par défaut, la date du jour.")
+    numero = forms.IntegerField(label="Numéro", required=True, help_text="Numéro attribué automatiquement à la suite de la dernière attestation. Il est déconseillé de le modifier.")
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="attestation").order_by("nom"), required=True, help_text="Mise en page du document. Les modèles se créent dans Paramétrage > Modèles de documents (catégorie Attestation).")
+    signataire = forms.CharField(label="Signataire", required=True, help_text="Nom imprimé en bas du document. Par défaut, votre nom d'utilisateur.")
     options_impression = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget())
     prestations = forms.CharField(label="Prestations", required=False, widget=Prestations_devis(
-        attrs={"texte_si_vide": "Aucune prestation", "hauteur_libre": True, "coche_tout": False}), help_text="Cochez les types de prestations à inclure dans l'attestation.")
+        attrs={"texte_si_vide": "Aucune prestation", "hauteur_libre": True, "coche_tout": False}), help_text="Seules les prestations cochées figureront sur l'attestation.")
 
     class Meta:
         model = Attestation
@@ -114,7 +114,7 @@ class Formulaire(FormulaireBase, ModelForm):
 class Formulaire_prestations(FormulaireBase, forms.Form):
     prestations = forms.CharField(label="Prestations", required=False, widget=Prestations_devis(
         attrs={"texte_si_vide": "Aucune prestation", "hauteur_libre": True, "coche_tout": True}),
-        help_text="Cochez les types de prestations à inclure dans l'attestation.")
+        help_text="Seules les prestations cochées figureront sur l'attestation.")
 
     def __init__(self, *args, **kwargs):
         prestations = kwargs.pop("prestations", {})

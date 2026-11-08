@@ -74,8 +74,8 @@ class Page(Onglet):
     url_ajouter = "individu_scolarite_ajouter"
     url_modifier = "individu_scolarite_modifier"
     url_supprimer = "individu_scolarite_supprimer"
-    description_liste = "Consultez et saisissez ici les étapes de scolarité de l'individu."
-    description_saisie = "Saisissez toutes les informations concernant l'étape de scolarité et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici le parcours scolaire de l'individu : école et classe fréquentées, année par année."
+    description_saisie = "Renseignez la période, l'école, la classe et le niveau scolaire puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une étape de scolarité"
     objet_pluriel = "des étapes de scolarité"
 

@@ -16,8 +16,8 @@ from core.widgets import DatePickerWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    type_vaccin = forms.ModelChoiceField(label="Type de vaccin", widget=Select2Widget(), queryset=TypeVaccin.objects.all().order_by("nom"), required=True)
-    date = forms.DateField(label="Date de vaccination", required=True, widget=DatePickerWidget())
+    type_vaccin = forms.ModelChoiceField(label="Type de vaccin", widget=Select2Widget(), queryset=TypeVaccin.objects.all().order_by("nom"), required=True, help_text="Vaccin reçu. Les types de vaccins se créent dans Paramétrage > Types de vaccins.")
+    date = forms.DateField(label="Date de vaccination", required=True, widget=DatePickerWidget(), help_text="Date de l'injection, à reporter depuis le carnet de santé.")
 
     class Meta:
         model = Vaccin

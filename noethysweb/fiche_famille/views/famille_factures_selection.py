@@ -26,7 +26,7 @@ class Liste(Onglet, crud.Liste):
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
         context['box_titre'] = "Sélection des prestations de la facture"
-        context['box_introduction'] = "Cochez les prestations à inclure dans la facture et cliquez sur le bouton Ajouter."
+        context['box_introduction'] = "Cochez les prestations non facturées à ajouter à cette facture puis cliquez sur le bouton Ajouter."
         context['active_checkbox'] = True
         context['bouton_supprimer'] = False
         context["hauteur_table"] = "400px"

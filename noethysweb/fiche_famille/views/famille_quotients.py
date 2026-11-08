@@ -80,8 +80,8 @@ class Page(Onglet):
     url_ajouter = "famille_quotients_ajouter"
     url_modifier = "famille_quotients_modifier"
     url_supprimer = "famille_quotients_supprimer"
-    description_liste = "Consultez et saisissez ici les quotients familiaux de la famille."
-    description_saisie = "Saisissez toutes les informations concernant le quotient et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les quotients familiaux de la famille. Ils permettent d'appliquer les tarifs correspondant à ses revenus."
+    description_saisie = "Renseignez la période de validité, le type et la valeur du quotient (et si besoin le revenu) puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un quotient familial"
     objet_pluriel = "des quotients familiaux"
 

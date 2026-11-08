@@ -16,22 +16,23 @@ from fiche_famille.utils import utils_doublons
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    action = forms.ChoiceField(label="Action*", widget=forms.RadioSelect, choices=[("CREER", "Créer un individu"), ("RATTACHER", "Rattacher un individu existant")], required=False)
-    categorie = forms.ChoiceField(label="Catégorie*", widget=forms.RadioSelect, choices=CATEGORIES_RATTACHEMENT, required=False)
-    titulaire = forms.BooleanField(label="Titulaire du dossier", initial=True, required=False)
-    nom = forms.CharField(label="Nom*", required=False, help_text="Saisissez le nom de famille en majuscules. Ex : DUPOND.")
-    prenom = forms.CharField(label="Prénom*", required=False, help_text="Saisissez le prénom en minuscules avec la première lettre en majuscule. Ex : Kévin.")
-    confirmation_doublon = forms.BooleanField(label="Je confirme qu'il s'agit d'une personne différente des individus signalés ci-dessus", required=False)
+    action = forms.ChoiceField(label="Action*", widget=forms.RadioSelect, choices=[("CREER", "Créer un individu"), ("RATTACHER", "Rattacher un individu existant")], required=False, help_text="Créez une nouvelle fiche, ou rattachez à cette famille un individu qui existe déjà dans une autre famille.")
+    categorie = forms.ChoiceField(label="Catégorie*", widget=forms.RadioSelect, choices=CATEGORIES_RATTACHEMENT, required=False, help_text="Représentant : adulte responsable de la famille. Enfant : enfant de la famille. Contact : autre personne rattachée.")
+    titulaire = forms.BooleanField(label="Titulaire du dossier", initial=True, required=False, help_text="Les titulaires forment le nom de la famille et reçoivent les courriers et les e-mails.")
+    nom = forms.CharField(label="Nom*", required=False, help_text="Nom de famille en majuscules. Exemple : DUPOND.")
+    prenom = forms.CharField(label="Prénom*", required=False, help_text="Prénom avec une majuscule initiale. Exemple : Kévin.")
+    confirmation_doublon = forms.BooleanField(label="Je confirme qu'il s'agit d'une personne différente des individus signalés ci-dessus", required=False, help_text="Des fiches similaires existent déjà. Cochez seulement si vous êtes sûr qu'il s'agit d'une autre personne.")
     individu = forms.ModelChoiceField(
         label="Individu*", queryset=Individu.objects.all().order_by("nom", "prenom"),
         widget=ModelSelect2Widget(model=Individu, search_fields=["nom__icontains", "prenom__icontains"], attrs={"data-minimum-input-length": 0}), required=False,
+        help_text="Recherchez l'individu existant par son nom.",
     )
 
     class Meta:
         model = Individu
         fields = ["civilite", "nom", "prenom"]
         help_texts = {
-            "civilite": "Sélectionnez une civilité dans la liste. S'il s'agit d'un enfant, sélectionnez Fille ou Garçon.",
+            "civilite": "Pour un enfant, choisissez Fille ou Garçon : la civilité détermine s'il est traité comme un enfant ou un adulte.",
         }
 
     def __init__(self, *args, **kwargs):

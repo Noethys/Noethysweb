@@ -18,17 +18,23 @@ from fiche_famille.widgets import Selection_emetteur, Selection_mode_reglement, 
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    date = forms.DateField(label="Date", required=True, widget=DatePickerWidget())
-    mode = forms.ModelChoiceField(label="Mode de règlement", queryset=ModeReglement.objects.all().order_by("label"), widget=Selection_mode_reglement(), required=True)
-    emetteur = forms.ModelChoiceField(label="Emetteur", queryset=Emetteur.objects.all().order_by("nom"), widget=Selection_emetteur(), required=False)
-    payeur = forms.ModelChoiceField(label="Payeur", queryset=Payeur.objects.none(), widget=Select_avec_commandes(), required=True)
+    date = forms.DateField(label="Date", required=True, widget=DatePickerWidget(), help_text="Date de réception du règlement.")
+    mode = forms.ModelChoiceField(label="Mode de règlement", queryset=ModeReglement.objects.all().order_by("label"), widget=Selection_mode_reglement(), required=True, help_text="Moyen de paiement utilisé. Les modes se créent dans Paramétrage > Modes de règlements.")
+    emetteur = forms.ModelChoiceField(label="Emetteur", queryset=Emetteur.objects.all().order_by("nom"), widget=Selection_emetteur(), required=False, help_text="Banque ou organisme émetteur du paiement (pour un chèque ou un titre de paiement).")
+    payeur = forms.ModelChoiceField(label="Payeur", queryset=Payeur.objects.none(), widget=Select_avec_commandes(), required=True, help_text="Personne qui a réglé. Elle est reprise sur le reçu.")
     observations = forms.CharField(label="Observations", widget=forms.Textarea(attrs={'rows': 1}), required=False)
-    date_differe = forms.DateField(label="Encaissement différé", required=False, widget=DatePickerWidget())
+    date_differe = forms.DateField(label="Encaissement différé", required=False, widget=DatePickerWidget(), help_text="Facultatif : date avant laquelle le règlement ne doit pas être encaissé.")
     ventilation = forms.CharField(label="Ventilation", widget=Saisie_ventilation(), required=False)
 
     class Meta:
         model = Reglement
         fields = ["famille", "date", "mode", "emetteur", "payeur", "observations", "date_differe", "numero_quittancier", "montant", "numero_piece", "compte", ]
+        help_texts = {
+            "numero_piece": "Numéro du chèque ou du titre de paiement.",
+            "montant": "Montant reçu. Il est ensuite ventilé sur les prestations ci-dessous.",
+            "compte": "Compte bancaire de la structure sur lequel le règlement sera déposé.",
+            "numero_quittancier": "Facultatif : numéro du reçu manuscrit remis à la famille.",
+        }
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")

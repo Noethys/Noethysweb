@@ -17,7 +17,7 @@ class Page(Onglet):
     model = SondageRepondant
     url_liste = "famille_formulaires_liste"
     url_supprimer = "famille_formulaires_supprimer"
-    description_liste = "Voici ci-dessous la liste des formulaires remplis par cette famille."
+    description_liste = "Retrouvez ici les formulaires remplis par la famille depuis le portail."
     objet_singulier = "un formulaire"
     objet_pluriel = "des formulaires"
 

@@ -36,7 +36,7 @@ class View(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['box_titre'] = "Edition des fiches de renseignements"
-        context['box_introduction'] = "Sélectionnez les individus à inclure dans le document et cliquez sur le bouton Générer le PDF."
+        context['box_introduction'] = "Ce document récapitule les renseignements de la famille (coordonnées, informations médicales, contacts...) pour qu'elle puisse les vérifier. Sélectionnez les individus à inclure puis cliquez sur le bouton Générer le PDF."
         context['onglet_actif'] = "outils"
         context['form'] = Formulaire(idfamille=kwargs["idfamille"], request=self.request)
         context['idfamille'] = kwargs["idfamille"]

@@ -27,16 +27,16 @@ class Widget_unites(ModelSelect2MultipleWidget):
 class Formulaire(FormulaireBase, ModelForm):
     # Récurrence
     choix_recurrence = [("AUCUNE", "Aucune"), ("PERIODE", "Selon le planning suivant")]
-    recurrence = forms.TypedChoiceField(label="Récurrence", choices=choix_recurrence, initial="AUCUNE", required=False)
+    recurrence = forms.TypedChoiceField(label="Récurrence", choices=choix_recurrence, initial="AUCUNE", required=False, help_text="Cochez pour créer ce transport sur plusieurs dates à la fois.")
     recurrence_date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}))
     recurrence_date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}))
-    recurrence_feries = forms.BooleanField(label="Inclure les fériés", required=False)
+    recurrence_feries = forms.BooleanField(label="Inclure les fériés", required=False, help_text="Cochez pour créer aussi des transports les jours fériés.")
     recurrence_jours_scolaires = forms.MultipleChoiceField(label="Jours scolaires", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("recurrence_jours_scolaires"))
     recurrence_jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("recurrence_jours_vacances"))
     choix_frequence = [(1, "Toutes les semaines"), (2, "Une semaine sur deux"),
                         (3, "Une semaine sur trois"), (4, "Une semaine sur quatre"),
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]
-    recurrence_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False)
+    recurrence_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False, help_text="Toutes les semaines, une semaine sur deux, etc.")
 
     class Meta:
         model = Transport
@@ -56,6 +56,11 @@ class Formulaire(FormulaireBase, ModelForm):
             "arrivee_date": "Date",
             "depart_heure": "Heure",
             "arrivee_heure": "Heure",
+        }
+        help_texts = {
+            "categorie": "Moyen de transport (bus, train, voiture...).",
+            "unites": "Unités de consommation associées à ce transport.",
+            "actif": "Décochez pour désactiver ce transport sans le supprimer.",
         }
 
     def __init__(self, *args, **kwargs):

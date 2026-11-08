@@ -111,8 +111,8 @@ class Page(Onglet):
     url_ajouter = "famille_devis_ajouter"
     url_modifier = "famille_devis_modifier"
     url_supprimer = "famille_devis_supprimer"
-    description_liste = "Vous pouvez créer ici des devis."
-    description_saisie = "Saisissez toutes les informations concernant le devis et cliquez sur Aperçu PDF ou Envoyer par email. Vous pourrez ensuite mémoriser le devis en cliquant sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les devis édités pour la famille. Cliquez sur le bouton Ajouter pour estimer le coût des prestations d'une période."
+    description_saisie = "Renseignez les paramètres du devis puis cliquez sur Aperçu PDF ou Envoyer par Email. Cliquez ensuite sur le bouton Enregistrer pour le conserver dans la fiche famille."
     objet_singulier = "un devis"
     objet_pluriel = "des devis"
 

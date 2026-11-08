@@ -16,7 +16,7 @@ class View(Onglet, DetailView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['box_titre'] = "Export XML"
-        context['box_introduction'] = "Vous pouvez exporter ici toutes les données de la famille au format XML."
+        context['box_introduction'] = "Exportez toutes les données de la famille dans un fichier XML, par exemple pour répondre à une demande d'accès aux données personnelles (RGPD)."
         context['onglet_actif'] = "outils"
 
         export = utils_export_xml.Export(famille=context['famille'])

@@ -123,14 +123,14 @@ class Fusion_familles(Page):
         # Étape 1 : sélection de la famille en double
         if not self.famille_doublon:
             context['etape'] = "selection"
-            context['box_introduction'] = "Sélectionnez la fiche famille saisie en double. Toutes ses données seront transférées dans cette fiche, puis elle sera supprimée. Rien n'est modifié avant la confirmation."
+            context['box_introduction'] = "Sélectionnez la fiche famille saisie en double. Toutes ses données seront transférées dans la fiche actuelle, puis elle sera supprimée. Rien n'est modifié avant votre confirmation."
             context['form'] = Formulaire_selection_famille(idfamille=famille.pk)
             context['suggestions'] = self.Get_suggestions(famille)
             return context
 
         # Étape 2 : analyse et rapprochement des individus
         context['etape'] = "analyse"
-        context['box_introduction'] = "Vérifiez les individus à fusionner puis confirmez. La fiche de gauche sera supprimée après le transfert de toutes ses données dans la fiche de droite."
+        context['box_introduction'] = "Vérifiez les individus à fusionner puis confirmez. Toutes les données de la fiche de gauche seront transférées dans la fiche de droite, puis la fiche de gauche sera supprimée. Cette opération est irréversible."
         context['famille_doublon'] = self.famille_doublon
         context.update(utils_fusion.Analyser_fusion_familles(famille_garde=famille, famille_doublon=self.famille_doublon))
         return context
@@ -212,7 +212,7 @@ class Fusion_individus(Page):
 
         # Étape 2 : analyse
         context['etape'] = "analyse"
-        context['box_introduction'] = "Vérifiez les informations puis confirmez. La fiche de gauche sera supprimée après le transfert de toutes ses données dans la fiche de droite."
+        context['box_introduction'] = "Vérifiez les informations puis confirmez. Toutes les données de la fiche de gauche seront transférées dans la fiche de droite, puis la fiche de gauche sera supprimée. Cette opération est irréversible."
         context['individu_garde'] = self.individu_garde
         context['individu_doublon'] = self.individu_doublon
         context['inversion_possible'] = Rattachement.objects.filter(famille=famille, individu=self.individu_doublon).exists()

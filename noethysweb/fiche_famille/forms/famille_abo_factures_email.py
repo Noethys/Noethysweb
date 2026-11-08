@@ -16,9 +16,9 @@ import re
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    email_factures = forms.BooleanField(label="Activer l'envoi des factures par Email", required=False, initial=False)
-    adresses_individus = forms.MultipleChoiceField(label="Adresses existantes", help_text="Sélectionnez une ou plusieurs adresses parmi la liste des adresses de la famille.", widget=Select2MultipleWidget(), choices=[], required=False)
-    adresses_autres = forms.CharField(label="Autres adresses", help_text="Saisissez une ou plusieurs autres adresses en les séparant par des points-virgules.", required=False)
+    email_factures = forms.BooleanField(label="Activer l'envoi des factures par Email", required=False, initial=False, help_text="Cochez cette case puis choisissez ci-dessous les adresses de destination.")
+    adresses_individus = forms.MultipleChoiceField(label="Adresses existantes", help_text="Sélectionnez une ou plusieurs adresses parmi celles renseignées dans la fiche des membres de la famille.", widget=Select2MultipleWidget(), choices=[], required=False)
+    adresses_autres = forms.CharField(label="Autres adresses", help_text="Pour envoyer à une adresse non renseignée dans la fiche, saisissez-la ici. Séparez plusieurs adresses par des points-virgules.", required=False)
 
     class Meta:
         model = Famille

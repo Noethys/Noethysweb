@@ -76,7 +76,7 @@ class View(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['box_titre'] = "Envoi d'un reçu"
-        context['box_introduction'] = "Cette famille est abonnée à l'envoi des reçus de règlements par email. Confirmez-vous l'envoi du reçu ?"
+        context['box_introduction'] = "Cette famille est abonnée à l'envoi des reçus de règlements par e-mail. Voulez-vous lui envoyer maintenant le reçu de ce règlement ?"
         context['onglet_actif'] = "reglements"
         context['reglement'] = Reglement.objects.get(pk=kwargs["idreglement"])
         return context

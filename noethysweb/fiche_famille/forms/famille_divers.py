@@ -14,8 +14,8 @@ from core.forms.base import FormulaireBase
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    mail = forms.ChoiceField(label="Mail favori", choices=[], required=False, help_text="Cette adresse mail sera privilégiée pour envoyer des mails à la famille.")
-    mobile = forms.ChoiceField(label="Portable favori", choices=[], required=False, help_text="Ce numéro de téléphone sera privilégié pour envoyer des SMS à la famille.")
+    mail = forms.ChoiceField(label="Mail favori", choices=[], required=False, help_text="Adresse utilisée en priorité pour tous les e-mails envoyés à la famille (factures, reçus, courriers...).")
+    mobile = forms.ChoiceField(label="Portable favori", choices=[], required=False, help_text="Numéro utilisé en priorité pour tous les SMS envoyés à la famille.")
 
     class Meta:
         model = Famille
@@ -25,6 +25,21 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "memo": forms.Textarea(attrs={'rows': 3}),
             "facturation_rue_resid": forms.Textarea(attrs={'rows': 2}),
+        }
+        help_texts = {
+            "memo": "Note libre affichée sur la fiche famille.",
+            "email_blocage": "Cochez pour que la famille ne soit pas proposée comme destinataire dans les envois d'e-mails groupés du menu Outils.",
+            "mobile_blocage": "Cochez pour que la famille ne soit pas proposée comme destinataire dans les envois de SMS groupés du menu Outils.",
+            "code_compta": "Code de la famille dans votre logiciel de comptabilité, repris dans les exports comptables.",
+            "titulaire_helios": "Membre de la famille déclaré comme débiteur dans les exports vers Hélios (Trésor public).",
+            "tiers_solidaire": "Second responsable déclaré comme tiers solidaire dans les exports vers Hélios.",
+            "idtiers_helios": "Identifiant national du tiers (SIRET, SIREN, FINESS ou NIR), si l'export Hélios l'exige.",
+            "natidtiers_helios": "Type de l'identifiant national saisi ci-dessus.",
+            "reftiers_helios": "Référence du tiers dans votre propre système, si vous en utilisez une.",
+            "cattiers_helios": "Catégorie du tiers pour les exports vers Hélios.",
+            "natjur_helios": "Nature juridique du tiers pour les exports vers Hélios.",
+            "facturation_nom": "Facultatif : nom à imprimer sur les factures à la place du nom de la famille.",
+            "facturation_rue_resid": "Facultatif : adresse à imprimer sur les factures à la place de l'adresse de la famille.",
         }
 
     def __init__(self, *args, **kwargs):

@@ -23,6 +23,9 @@ class Formulaire(FormulaireBase, ModelForm):
             'cp_resid': CodePostal(attrs={"id_ville": "id_ville_resid"}),
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }
+        help_texts = {
+            "nom": "Nom de la compagnie d'assurance.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

@@ -19,9 +19,9 @@ class Consulter(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Liens"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Consultez ci-dessous les informations de cette rubrique. Cliquez sur le bouton Modifier pour les mettre à jour."
         if not self.request.user.has_perm("core.individu_liens_modifier"):
-            context['box_introduction'] = "Vous n'avez pas l'autorisation de modifier les informations de cette page."
+            context['box_introduction'] = "Vous pouvez consulter ces informations mais vous n'avez pas l'autorisation de les modifier. Adressez-vous à un administrateur si besoin."
         context['onglet_actif'] = "liens"
         context['form'] = Formulaire(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request, mode=self.mode)
         return context
@@ -32,7 +32,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Renseignez les liens de l'individu avec les autres membres de la famille."
+        context['box_introduction'] = "Indiquez le lien de l'individu avec chacun des autres membres de la famille (père, mère, frère...) et, pour les responsables, le type d'autorisation."
         return context
 
     def test_func_page(self):

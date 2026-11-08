@@ -19,16 +19,19 @@ TEXTE_INTRO_DEFAUT = "Je soussigné(e) {SIGNATAIRE}, certifie avoir reçu pour l
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    modele_impression = forms.ChoiceField(label="Modèle d'impression", widget=Select2Widget(), choices=[], required=True, help_text="Vous pouvez créer un modèle d'impression depuis le menu Paramétrage > Modèles d'impression.")
-    date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}))
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="reglement").order_by("nom"), required=True)
-    signataire = forms.CharField(label="Signataire", required=True)
+    modele_impression = forms.ChoiceField(label="Modèle d'impression", widget=Select2Widget(), choices=[], required=True, help_text="Options d'impression à appliquer. Les modèles se créent dans Paramétrage > Modèles d'impressions.")
+    date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}), help_text="Date imprimée sur le reçu. Par défaut, la date du jour.")
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="reglement").order_by("nom"), required=True, help_text="Mise en page du reçu. Les modèles se créent dans Paramétrage > Modèles de documents.")
+    signataire = forms.CharField(label="Signataire", required=True, help_text="Nom imprimé en bas du reçu.")
     intro = forms.CharField(label="Introduction", widget=forms.Textarea(attrs={'rows': 4}), required=True)
-    afficher_prestations = forms.BooleanField(label="Inclure la liste des prestations payées avec ce règlement", required=False)
+    afficher_prestations = forms.BooleanField(label="Inclure la liste des prestations payées avec ce règlement", required=False, help_text="Ajoute au reçu la liste des prestations payées par ce règlement.")
 
     class Meta:
         model = Recu
         fields = "__all__"
+        help_texts = {
+            "numero": "Numéro attribué automatiquement à la suite du dernier reçu.",
+        }
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")
@@ -74,7 +77,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Introduction
         self.fields["intro"].initial = TEXTE_INTRO_DEFAUT
-        self.fields['intro'].help_text = "Mots-clés disponibles : {SIGNATAIRE}, {FAMILLE}, {MONTANT}, {DATE_REGLEMENT}, {MODE_REGLEMENT}, {NOM_PAYEUR}."
+        self.fields['intro'].help_text = "Les mots-clés suivants seront remplacés par leur valeur : {SIGNATAIRE}, {FAMILLE}, {MONTANT}, {DATE_REGLEMENT}, {MODE_REGLEMENT}, {NOM_PAYEUR}."
 
         # Affichage
         self.helper.layout = Layout(

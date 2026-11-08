@@ -48,7 +48,7 @@ class View(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['box_titre'] = "Aperçu d'une attestation fiscale"
-        context['box_introduction'] = "Ajustez si besoin les options d'impression et cliquez sur Aperçu PDF ou Envoyer par Email."
+        context['box_introduction'] = "Ajustez si besoin les options d'impression puis cliquez sur Aperçu PDF ou Envoyer par Email."
         context['onglet_actif'] = "outils"
         context['form_modele'] = Form_modele()
         context['form_parametres'] = Form_parametres(request=self.request)

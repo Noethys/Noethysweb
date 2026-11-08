@@ -12,7 +12,7 @@ from fiche_famille.views.famille import Onglet
 
 
 class Page(Onglet):
-    description_liste = "Vous pouvez consulter ici la liste des actions effectuées sur cette fiche famille."
+    description_liste = "Retrouvez ici l'historique des actions réalisées sur cette fiche famille, avec leur date et l'utilisateur concerné."
     if settings.PURGE_HISTORIQUE_JOURS:
         description_liste += " Les actions sont mémorisées uniquement jusqu'à %d jours." % settings.PURGE_HISTORIQUE_JOURS
 

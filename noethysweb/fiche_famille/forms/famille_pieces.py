@@ -19,16 +19,16 @@ from individus.utils import utils_pieces_manquantes
 
 class Formulaire(FormulaireBase, ModelForm):
     # Type de pièce
-    mode_piece = forms.ChoiceField(label="Type de pièce", choices=[("AFOURNIR", "Une pièce à fournir"), ("TOUTES", "Une pièce prédéfinie"), ("AUTRE", "Autre type de pièce")], initial="AFOURNIR", required=False)
-    pieces_fournir = forms.TypedChoiceField(label="Choix de la pièce", choices=[], required=False, help_text="Sélectionnez un type de pièce dans la liste.")
-    pieces_toutes = forms.TypedChoiceField(label="Choix de la pièce", choices=[], required=False, help_text="Sélectionnez un type de pièce dans la liste.")
-    choix_individu = forms.TypedChoiceField(label="Individu associé", choices=[], required=False, help_text="Sélectionnez le nom de l'individu concerné ou la famille.")
+    mode_piece = forms.ChoiceField(label="Type de pièce", choices=[("AFOURNIR", "Une pièce à fournir"), ("TOUTES", "Une pièce prédéfinie"), ("AUTRE", "Autre type de pièce")], initial="AFOURNIR", required=False, help_text="Choisissez parmi les pièces que la famille doit fournir, parmi tous les types de pièces, ou saisissez un titre libre.")
+    pieces_fournir = forms.TypedChoiceField(label="Choix de la pièce", choices=[], required=False, help_text="Type de document fourni. Les types de pièces se créent dans Paramétrage > Types de pièces.")
+    pieces_toutes = forms.TypedChoiceField(label="Choix de la pièce", choices=[], required=False, help_text="Type de document fourni. Les types de pièces se créent dans Paramétrage > Types de pièces.")
+    choix_individu = forms.TypedChoiceField(label="Individu associé", choices=[], required=False, help_text="Membre de la famille concerné par la pièce, ou la famille entière si la pièce la concerne dans son ensemble (justificatif de domicile, attestation CAF...).")
 
     # Période de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
-    validite_type = forms.TypedChoiceField(label="Validité", choices=choix_validite, initial='ILLIMITEE', required=False)
-    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
-    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
+    validite_type = forms.TypedChoiceField(label="Validité", choices=choix_validite, initial='ILLIMITEE', required=False, help_text="Indiquez si la pièce est valable sans limite de durée ou seulement sur une période.")
+    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget(), help_text="Date à partir de laquelle la pièce est valable.")
+    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Date jusqu'à laquelle la pièce est valable. Au-delà, elle sera de nouveau demandée.")
 
     class Meta:
         model = Piece
@@ -37,8 +37,9 @@ class Formulaire(FormulaireBase, ModelForm):
             "observations": forms.Textarea(attrs={'rows': 3}),
         }
         help_texts = {
-            "titre": "Vous devez obligatoirement saisir un titre pour cette pièce.",
-            "document": "Vous pouvez ajouter un document numérisé au format PDF ou image.",
+            "auteur": "Utilisateur qui a enregistré la pièce.",
+            "titre": "Titre de la pièce, affiché dans la liste des pièces fournies.",
+            "document": "Facultatif : joignez le document numérisé (PDF ou image).",
         }
 
     def __init__(self, *args, **kwargs):

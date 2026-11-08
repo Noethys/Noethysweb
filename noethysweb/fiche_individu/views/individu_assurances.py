@@ -43,8 +43,8 @@ class Page(Onglet):
     url_ajouter = "individu_assurances_ajouter"
     url_modifier = "individu_assurances_modifier"
     url_supprimer = "individu_assurances_supprimer"
-    description_liste = "Consultez et saisissez ici les assurances de l'individu."
-    description_saisie = "Saisissez toutes les informations concernant l'assurance et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les assurances de l'individu (responsabilité civile, extra-scolaire...). Vous pouvez aussi importer une assurance déjà saisie pour un autre membre de la famille."
+    description_saisie = "Renseignez l'assureur, le numéro de contrat et la période de validité puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une assurance"
     objet_pluriel = "des assurances"
 
@@ -146,7 +146,7 @@ class Importer(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Importer, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Cochez la ou les assurances à importer et cliquez sur le bouton Importer."
+        context['box_introduction'] = "Cochez les assurances d'autres membres de la famille à copier pour cet individu puis cliquez sur le bouton Importer."
         context['form'] = Formulaire_importer(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)
         return context
 

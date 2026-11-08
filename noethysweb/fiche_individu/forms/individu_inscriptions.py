@@ -18,9 +18,9 @@ from parametrage.forms import questionnaires
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
-    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
-    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Laissez vide la date de fin si vous ne connaissez pas la durée de l'inscription.")
+    activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True, help_text="Activité à laquelle l'individu est inscrit.")
+    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget(), help_text="Date à partir de laquelle l'inscription est valable.")
+    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Laissez vide si la durée de l'inscription n'est pas connue.")
     action_conso = forms.ChoiceField(label="Action", required=False, choices=[
         (None, "------"),
         ("MODIFIER_TOUT", "Modifier toutes les consommations existantes"),
@@ -28,11 +28,17 @@ class Formulaire(FormulaireBase, ModelForm):
         ("MODIFIER_DATE", "Modifier les consommations existantes à partir d'une date donnée"),
         ("MODIFIER_RIEN", "Ne pas modifier les consommations existantes"),
     ])
-    date_modification = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Renseignez la date de début d'application de la modification.")
+    date_modification = forms.DateField(label="Date", required=False, widget=DatePickerWidget(), help_text="Date à partir de laquelle la modification s'applique. Les consommations antérieures ne sont pas modifiées.")
 
     class Meta:
         model = Inscription
         fields = "__all__"
+        help_texts = {
+            "groupe": "Groupe de l'activité dans lequel l'individu sera placé (par exemple selon son âge).",
+            "categorie_tarif": "Catégorie de tarif à appliquer (par exemple habitants de la commune ou extérieurs).",
+            "statut": "Inscription validée, en attente (liste d'attente) ou refusée. Seules les inscriptions validées sont reprises dans les états des consommations.",
+            "internet_reservations": "Décochez pour empêcher la famille de réserver cette activité depuis le portail.",
+        }
 
     def __init__(self, *args, **kwargs):
         idindividu = kwargs.pop("idindividu", None)

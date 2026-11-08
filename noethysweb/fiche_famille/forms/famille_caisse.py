@@ -17,6 +17,13 @@ class Formulaire(FormulaireBase, ModelForm):
     class Meta:
         model = Famille
         fields = ["caisse", "num_allocataire", "allocataire", "autorisation_cafpro", "autorisation_apiparticulier"]
+        help_texts = {
+            "caisse": "Caisse d'allocations dont dépend la famille. Les caisses se créent dans Paramétrage > Caisses.",
+            "num_allocataire": "Numéro figurant sur les courriers de la caisse.",
+            "allocataire": "Membre de la famille titulaire du dossier auprès de la caisse.",
+            "autorisation_cafpro": "Cochez si la famille autorise la consultation de ses données (quotient familial notamment) sur le service CAF-CDAP.",
+            "autorisation_apiparticulier": "Cochez si la famille autorise la récupération automatique de son quotient familial via le service API Particulier.",
+        }
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille")

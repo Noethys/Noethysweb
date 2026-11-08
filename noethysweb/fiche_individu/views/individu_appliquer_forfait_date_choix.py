@@ -18,7 +18,7 @@ class View(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['box_titre'] = "Choisir le montant d'un forfait"
-        context['box_introduction'] = "L'inscription est associée à un forfait avec montant au choix. Veuillez sélectionner le montant à appliquer. Si vous cliquez sur Annuler, le forfait ne sera pas appliqué."
+        context['box_introduction'] = "Cette inscription est associée à un forfait dont le montant est au choix. Sélectionnez le montant à appliquer. Si vous cliquez sur Annuler, le forfait ne sera pas appliqué."
         context['onglet_actif'] = "inscriptions"
         if "form" in kwargs:
             context['form'] = Formulaire(self.request.POST.copy(), idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], tarifs=self.kwargs['tarifs'], request=self.request)

@@ -16,7 +16,7 @@ class Page(Onglet):
     model = Rappel
     url_liste = "famille_rappels_liste"
     url_supprimer = "famille_rappels_supprimer"
-    description_liste = "Voici ci-dessous la liste des lettres de rappel générées pour cette famille."
+    description_liste = "Retrouvez ici les lettres de rappel éditées pour les impayés de la famille. Elles se génèrent depuis Facturation > Génération des lettres de rappel."
     objet_singulier = "une lettre de rappel"
     objet_pluriel = "des lettres de rappel"
 

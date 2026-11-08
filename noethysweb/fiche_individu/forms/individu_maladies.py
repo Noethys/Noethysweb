@@ -17,7 +17,7 @@ from core.widgets import Select_many_avec_plus
 class Formulaire(FormulaireBase, ModelForm):
     maladies = forms.ModelMultipleChoiceField(label="Maladies",
                     widget=Select_many_avec_plus(attrs={"url_ajax": "ajax_ajouter_maladie", "textes": {"champ": "Nom de la maladie", "ajouter": "Ajouter une maladie"}}),
-                    queryset=TypeMaladie.objects.all().order_by("nom"), required=False, help_text="Cliquez sur le champ ci-dessus pour faire apparaître la liste de choix ou tapez les premières lettres de la maladie recherchée. Cliquez sur le '+' pour ajouter une maladie manquante dans la liste de choix.")
+                    queryset=TypeMaladie.objects.all().order_by("nom"), required=False, help_text="Tapez les premières lettres de la maladie pour la retrouver. Si elle n'existe pas encore, cliquez sur le bouton '+' pour l'ajouter.")
 
     class Meta:
         model = Individu

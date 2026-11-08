@@ -40,7 +40,7 @@ def Get_info_transport(request):
 
 class Page(Onglet):
     url_liste = "individu_transports_liste"
-    description_saisie = "Saisissez toutes les informations et cliquez sur le bouton Enregistrer."
+    description_saisie = "Renseignez les informations demandées puis cliquez sur le bouton Enregistrer."
     objet_singulier = ""
     objet_pluriel = ""
 

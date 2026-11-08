@@ -16,19 +16,28 @@ from core.widgets import DatePickerWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    date_parution = forms.DateField(label="Date de parution", required=True, widget=DatePickerWidget())
-    acces = forms.ChoiceField(label="Utilisateurs associés", initial="automatique", required=True, help_text="Sélectionnez les utilisateurs qui auront accès à cette note.", choices=[
+    date_parution = forms.DateField(label="Date de parution", required=True, widget=DatePickerWidget(), help_text="La note n'apparaît qu'à partir de cette date.")
+    acces = forms.ChoiceField(label="Utilisateurs associés", initial="automatique", required=True, help_text="Choisissez qui pourra lire cette note : vous seul, les utilisateurs d'une structure ou tous les utilisateurs.", choices=[
         (None, "-------"), ("moi", "Uniquement moi"),
         ("structure", "Les utilisateurs de la structure suivante"),
         ("tous", "Tous les utilisateurs"),
     ])
-    structure = forms.ModelChoiceField(label="Structure", queryset=Structure.objects.none(), required=False, help_text="Sélectionnez une structure dans la liste proposée.")
+    structure = forms.ModelChoiceField(label="Structure", queryset=Structure.objects.none(), required=False, help_text="Seuls les utilisateurs de cette structure pourront lire la note.")
 
     class Meta:
         model = Note
         fields = "__all__"
         widgets = {
             'texte': forms.Textarea(attrs={'rows': 4}),
+        }
+        help_texts = {
+            "categorie": "Facultatif : catégorie de la note.",
+            "texte": "Contenu de la note.",
+            "priorite": "Une note de priorité haute est mise en évidence.",
+            "afficher_accueil": "Affiche la note sur la page d'accueil des utilisateurs concernés.",
+            "afficher_liste": "Affiche la note sur la liste des consommations imprimée.",
+            "rappel": "Affiche la note en rappel à l'ouverture de Noethysweb.",
+            "afficher_commande": "Affiche la note sur la commande des repas.",
         }
 
     def __init__(self, *args, **kwargs):

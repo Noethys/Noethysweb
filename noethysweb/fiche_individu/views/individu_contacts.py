@@ -21,8 +21,8 @@ class Page(Onglet):
     url_ajouter = "individu_contacts_ajouter"
     url_modifier = "individu_contacts_modifier"
     url_supprimer = "individu_contacts_supprimer"
-    description_liste = "Consultez et saisissez ici les contacts d'urgence et de sortie de l'individu."
-    description_saisie = "Saisissez toutes les informations concernant le contact et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les personnes à prévenir en cas d'urgence et celles autorisées à venir chercher l'individu. Vous pouvez aussi importer les contacts d'un autre membre de la famille."
+    description_saisie = "Renseignez l'identité, les coordonnées et les autorisations du contact puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un contact d'urgence et de sortie"
     objet_pluriel = "des contacts d'urgence et de sortie"
 
@@ -142,7 +142,7 @@ class Importer(Page, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(Importer, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Cochez le ou les contacts à importer et cliquez sur le bouton Importer."
+        context['box_introduction'] = "Cochez les contacts d'autres membres de la famille à copier pour cet individu puis cliquez sur le bouton Importer."
         context['form'] = Formulaire_importer(idfamille=self.kwargs['idfamille'], idindividu=self.kwargs['idindividu'], request=self.request)
         return context
 

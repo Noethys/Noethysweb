@@ -16,8 +16,8 @@ from fiche_famille.widgets import Periodes_releve_prestations
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    periodes = forms.CharField(label="Périodes", required=True, widget=Periodes_releve_prestations(attrs={}))
-    memoriser = forms.BooleanField(label="Mémoriser les périodes", required=False, initial=True)
+    periodes = forms.CharField(label="Périodes", required=True, widget=Periodes_releve_prestations(attrs={}), help_text="Ajoutez une ou plusieurs périodes à inclure dans le relevé.")
+    memoriser = forms.BooleanField(label="Mémoriser les périodes", required=False, initial=True, help_text="Conserve ces périodes pour le prochain relevé de cette famille.")
 
     def __init__(self, *args, **kwargs):
         idfamille = kwargs.pop("idfamille", None)
@@ -56,12 +56,12 @@ class Formulaire(FormulaireBase, forms.Form):
 
 class Formulaire_periode(FormulaireBase, forms.Form):
     index = forms.CharField(widget=forms.HiddenInput(), required=False)
-    type_donnee = forms.ChoiceField(label="Type", choices=[("PRESTATIONS", "Prestations"), ("FACTURES", "Factures")], required=True)
+    type_donnee = forms.ChoiceField(label="Type", choices=[("PRESTATIONS", "Prestations"), ("FACTURES", "Factures")], required=True, help_text="Afficher des prestations ou des factures.")
     type_periode = forms.ChoiceField(label="Période", choices=[("TOUTES", "Toutes les périodes"), ("SELECTION", "Uniquement la période sélectionnée")], required=True)
     periode = forms.CharField(label="Période", required=False, widget=DateRangePickerWidget())
-    impayes = forms.BooleanField(label="Uniquement les impayés", required=False, initial=False)
-    detail_conso = forms.BooleanField(label="Détailler les consommations", required=False, initial=False)
-    regroupement = forms.ChoiceField(label="Regroupement", choices=[("DATE", "Date"), ("MOIS", "Mois"), ("ANNEE", "Année")], initial="DATE", required=False)
+    impayes = forms.BooleanField(label="Uniquement les impayés", required=False, initial=False, help_text="N'affiche que les éléments qui ne sont pas entièrement réglés.")
+    detail_conso = forms.BooleanField(label="Détailler les consommations", required=False, initial=False, help_text="Affiche le détail des consommations sous chaque prestation.")
+    regroupement = forms.ChoiceField(label="Regroupement", choices=[("DATE", "Date"), ("MOIS", "Mois"), ("ANNEE", "Année")], initial="DATE", required=False, help_text="Regroupe les lignes du relevé par date, par mois ou par année.")
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop("request", None)

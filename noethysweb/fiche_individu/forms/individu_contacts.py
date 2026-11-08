@@ -30,6 +30,14 @@ class Formulaire(FormulaireBase, ModelForm):
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
             'observations': forms.Textarea(attrs={'rows': 3}),
         }
+        help_texts = {
+            "lien": "Lien du contact avec l'individu. Exemple : Grand-mère, Voisin.",
+            "autorisation_sortie": "Cochez si cette personne est autorisée à venir chercher l'individu.",
+            "autorisation_appel": "Cochez si cette personne doit être prévenue en cas d'urgence.",
+            "tel_mobile": "Au format xx.xx.xx.xx.xx.",
+            "tel_domicile": "Au format xx.xx.xx.xx.xx.",
+            "tel_travail": "Au format xx.xx.xx.xx.xx.",
+        }
 
     def __init__(self, *args, **kwargs):
         self.idfamille = kwargs.pop("idfamille", None)

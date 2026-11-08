@@ -18,7 +18,7 @@ class Modifier(Onglet, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
         context['box_titre'] = "Envoi des factures par Email"
-        context['box_introduction'] = "Vous pouvez activer ici le service d'envoi des factures par Email. Sélectionnez une ou plusieurs adresses de destination."
+        context['box_introduction'] = "Activez ce service pour que la famille reçoive ses factures par e-mail plutôt que sur papier. Choisissez ensuite une ou plusieurs adresses de destination."
         context['onglet_actif'] = "factures"
         return context
 

@@ -77,7 +77,7 @@ class View(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['box_titre'] = "Edition d'un relevé des prestations"
-        context['box_introduction'] = "Le relevé des prestations permet d'afficher dans un unique document une liste de prestations ou de factures selon les critères souhaités. Commencez par créer des périodes de prestations ou de factures, puis cliquez sur le bouton Générer le PDF ou Envoyer par Email."
+        context['box_introduction'] = "Le relevé regroupe dans un seul document les prestations ou les factures de la famille selon les périodes de votre choix. Ajoutez une ou plusieurs périodes puis cliquez sur le bouton Générer le PDF ou Envoyer par Email."
         context['onglet_actif'] = "outils"
         context['form'] = Formulaire(request=self.request, idfamille=kwargs["idfamille"])
         context['idfamille'] = kwargs["idfamille"]

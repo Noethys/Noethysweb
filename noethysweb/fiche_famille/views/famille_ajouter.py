@@ -41,7 +41,7 @@ def Get_individus_existants(request):
 class Page(Onglet):
     model = Individu
     url_liste = "famille_resume"
-    description_saisie = "Saisissez les informations sur l'individu et cliquez sur le bouton Valider."
+    description_saisie = "Renseignez les informations du nouveau membre de la famille puis cliquez sur le bouton Valider. Si l'individu existe déjà dans une autre famille, sélectionnez-le pour éviter de créer un doublon."
     objet_singulier = "un individu"
     objet_pluriel = "des individus"
 

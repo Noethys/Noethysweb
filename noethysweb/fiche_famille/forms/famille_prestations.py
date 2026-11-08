@@ -24,6 +24,11 @@ class DeductionForm(forms.ModelForm):
     class Meta:
         model = Deduction
         exclude = []
+        help_texts = {
+            "date": "Date de la déduction.",
+            "label": "Libellé de la déduction. Exemple : Réduction fratrie.",
+            "montant": "Montant déduit de la prestation.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(DeductionForm, self).__init__(*args, **kwargs)
@@ -65,24 +70,24 @@ FORMSET_DEDUCTIONS = inlineformset_factory(Prestation, Deduction, form=Deduction
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    quantite = forms.IntegerField(label="Quantité", initial=1, min_value=1, required=True)
-    montant_unitaire = forms.DecimalField(label="Montant unitaire", max_digits=6, decimal_places=2, initial=0.0, required=True)
+    quantite = forms.IntegerField(label="Quantité", initial=1, min_value=1, required=True, help_text="Nombre d'unités facturées.")
+    montant_unitaire = forms.DecimalField(label="Montant unitaire", max_digits=6, decimal_places=2, initial=0.0, required=True, help_text="Prix d'une unité.")
     consommations = forms.CharField(label="Consommations", widget=Consommations_prestation(), required=False)
     reglements = forms.CharField(label="Règlements", widget=Reglements_prestation(), required=False)
     activite = forms.ModelChoiceField(label="Activité", widget=Select2Widget({"lang": "fr", "data-width": "100%"}),
-                                      queryset=Activite.objects.all().order_by("-date_fin", "nom"), required=False)
+                                      queryset=Activite.objects.all().order_by("-date_fin", "nom"), required=False, help_text="Facultatif : activité à laquelle rattacher la prestation.")
     categorie_tarif = forms.ModelChoiceField(label="Catégorie de tarif", widget=ModelSelect2Widget(
         {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'],
         dependent_fields={"activite": "activite"}, queryset=CategorieTarif.objects.all()), queryset=CategorieTarif.objects.all(), required=False,
-        help_text="Attention, modifier ici la catégorie de tarif ne changera pas automatiquement le montant de la prestation.")
+        help_text="Attention : modifier la catégorie de tarif ne recalcule pas le montant de la prestation. Corrigez-le si besoin.")
     tarif = forms.ModelChoiceField(label="Tarif", widget=ModelSelect2Widget(
         {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom_tarif__nom__icontains'],
         dependent_fields={"activite": "activite"}, queryset=Tarif.objects.all().order_by("date_debut")), queryset=Tarif.objects.all().order_by("date_debut"), required=False,
-        help_text="Attention, modifier ici le tarif ne changera pas automatiquement le montant de la prestation.")
+        help_text="Attention : modifier le tarif ne recalcule pas le montant de la prestation. Corrigez-le si besoin.")
     tarif_ligne = forms.ModelChoiceField(label="Ligne tarifaire", widget=ModelSelect2Widget(
         {"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom_tarif__nom__icontains'],
         dependent_fields={"tarif": "tarif"}, queryset=TarifLigne.objects.all()), queryset=TarifLigne.objects.all(), required=False,
-        help_text="Attention, modifier ici la ligne tarifaire ne changera pas automatiquement le montant de la prestation.")
+        help_text="Attention : modifier la ligne tarifaire ne recalcule pas le montant de la prestation. Corrigez-le si besoin.")
 
     class Meta:
         model = Prestation
@@ -98,8 +103,16 @@ class Formulaire(FormulaireBase, ModelForm):
             "montant": "Montant final",
         }
         help_texts = {
-            "montant_initial": "Le montant initial est égal à quantité x montant unitaire.",
-            "montant": "Le montant final est égal à montant initial - total des déductions.",
+            "date": "Date de la prestation. Elle détermine la période de facturation dans laquelle elle sera incluse.",
+            "categorie": "Catégorie de la prestation (consommation, adhésion, autre...).",
+            "label": "Libellé de la prestation, tel qu'il apparaîtra sur la facture.",
+            "individu": "Facultatif : membre de la famille concerné par la prestation.",
+            "tva": "Facultatif : taux de TVA appliqué, en pourcentage.",
+            "code_compta": "Facultatif : code comptable repris dans les exports comptables.",
+            "code_analytique": "Facultatif : code analytique repris dans les exports comptables.",
+            "code_produit_local": "Facultatif : code produit local repris dans les exports vers Hélios.",
+            "montant_initial": "Calculé automatiquement : quantité x montant unitaire.",
+            "montant": "Calculé automatiquement : montant initial - total des déductions (aides, réductions...).",
         }
 
     def __init__(self, *args, **kwargs):
@@ -134,7 +147,7 @@ class Formulaire(FormulaireBase, ModelForm):
         if self.instance.facture:
             for champ in ("date", "categorie", "individu", "activite", "categorie_tarif", "tarif", "quantite", "montant_unitaire", "montant_initial", "montant", "tva", "tarif_ligne"):
                 self.fields[champ].disabled = True
-                self.fields[champ].help_text = "Ce champ n'est pas modifiable car la prestation est déjà facturée."
+                self.fields[champ].help_text = "Ce champ n'est plus modifiable car la prestation a déjà été facturée."
 
         self.fields["consommations"].initial = self.instance.pk
         self.fields["reglements"].initial = self.instance.pk

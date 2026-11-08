@@ -20,15 +20,15 @@ from fiche_famille.widgets import Prestations_devis
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget(), help_text="Sélectionnez la période à inclure dans le devis.")
-    date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}), help_text="La date d'édition est par défaut la date du jour. Il est généralement inutile de la modifier.")
-    numero = forms.IntegerField(label="Numéro", required=True, help_text="Le numéro du devis est généré automatiquement. Il est généralement inutile de le modifier.")
-    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="devis").order_by("nom"), required=True, help_text="Sélectionnez le modèle de document à utiliser. Il doit avoir au préalable été créé dans Menu Paramétrage > Modèles de documents > Devis.")
+    periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget(), help_text="Seules les prestations comprises dans cette période figureront sur le devis.")
+    date_edition = forms.DateField(label="Date d'édition", required=True, widget=DatePickerWidget(attrs={'afficher_fleches': True}), help_text="Date imprimée sur le document. Par défaut, la date du jour.")
+    numero = forms.IntegerField(label="Numéro", required=True, help_text="Numéro attribué automatiquement à la suite du dernier devis. Il est déconseillé de le modifier.")
+    modele = forms.ModelChoiceField(label="Modèle de document", widget=Select2Widget(), queryset=ModeleDocument.objects.filter(categorie="devis").order_by("nom"), required=True, help_text="Mise en page du document. Les modèles se créent dans Paramétrage > Modèles de documents (catégorie Devis).")
     options_impression = forms.CharField(label="Options d'impression", required=False, widget=FormIntegreWidget())
     choix_categories = [("consommation", "Consommations"), ("cotisation", "Adhésions"), ("location", "Locations"), ("autre", "Autres"), ]
-    categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget(), choices=choix_categories, required=True, help_text="Cochez les catégories de prestations à inclure dans le devis.")
+    categories = forms.MultipleChoiceField(label="Catégories de prestations", widget=Select2MultipleWidget(), choices=choix_categories, required=True, help_text="Seules les prestations de ces catégories figureront sur le devis.")
     prestations = forms.CharField(label="Prestations", required=False, widget=Prestations_devis(
-        attrs={"texte_si_vide": "Aucune prestation", "hauteur_libre": True, "coche_tout": False}), help_text="Cochez les types de prestations à inclure dans le devis.")
+        attrs={"texte_si_vide": "Aucune prestation", "hauteur_libre": True, "coche_tout": False}), help_text="Seules les prestations cochées figureront sur le devis.")
 
     class Meta:
         model = Devis
@@ -114,7 +114,7 @@ class Formulaire(FormulaireBase, ModelForm):
 class Formulaire_prestations(FormulaireBase, forms.Form):
     prestations = forms.CharField(label="Prestations", required=False, widget=Prestations_devis(
         attrs={"texte_si_vide": "Aucune prestation", "hauteur_libre": True, "coche_tout": True}),
-        help_text="Cochez les types de prestations à inclure dans le devis.")
+        help_text="Seules les prestations cochées figureront sur le devis.")
 
     def __init__(self, *args, **kwargs):
         prestations = kwargs.pop("prestations", {})

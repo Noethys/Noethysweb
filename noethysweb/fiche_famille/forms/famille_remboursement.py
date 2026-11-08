@@ -30,16 +30,16 @@ def Get_situation_famille(idfamille=None):
 class Formulaire(FormulaireBase, ModelForm):
     date = forms.DateField(label="Date du remboursement", required=True, widget=DatePickerWidget())
     choix_montant = forms.ChoiceField(label="Montant à rembourser", choices=[("total", "Tout le crédit"), ("partiel", "Un autre montant")],
-                                      widget=forms.RadioSelect, initial="total", required=True)
+                                      widget=forms.RadioSelect, initial="total", required=True, help_text="Remboursez la totalité du crédit de la famille ou seulement une partie.")
     montant = forms.DecimalField(label="Montant", max_digits=6, decimal_places=2, initial=0.0, required=True)
-    confirmation_depassement = forms.BooleanField(label="Je confirme vouloir rembourser plus que le crédit disponible", required=False)
+    confirmation_depassement = forms.BooleanField(label="Je confirme vouloir rembourser plus que le crédit disponible", required=False, help_text="Le montant saisi dépasse le crédit de la famille : cochez pour confirmer.")
     payeur = forms.ModelChoiceField(label="Rembourser à", queryset=Payeur.objects.none(), widget=Select_avec_commandes(), required=True,
-                                    help_text="Personne qui reçoit l'argent.")
-    mode = forms.ModelChoiceField(label="Mode de remboursement", queryset=ModeReglement.objects.all().order_by("label"), widget=Selection_mode_reglement(), required=True)
+                                    help_text="Personne à qui l'argent est rendu.")
+    mode = forms.ModelChoiceField(label="Mode de remboursement", queryset=ModeReglement.objects.all().order_by("label"), widget=Selection_mode_reglement(), required=True, help_text="Moyen utilisé pour rendre l'argent (chèque, virement, espèces...).")
     compte = forms.ModelChoiceField(label="Compte bancaire débité", widget=Select2Widget({"data-minimum-input-length": 0}), queryset=CompteBancaire.objects.none(), required=True,
-                                    help_text="Compte de la structure d'où part l'argent.")
+                                    help_text="Compte bancaire de la structure à partir duquel l'argent est rendu.")
     observations = forms.CharField(label="Observations", widget=forms.Textarea(attrs={'rows': 2}), required=False,
-                                   help_text="Ce commentaire sera enregistré dans le règlement de remboursement.")
+                                   help_text="Commentaire conservé dans le règlement de remboursement.")
 
     class Meta:
         model = Reglement
