@@ -19,25 +19,79 @@
     <div class="col-md-9">
 
         {# Caractéristiques #}
-        {% embed 'core/box.html' %}
-            {% block box_theme %}card-outline card-lightblue{% endblock %}
-            {% block box_titre %}Caractéristiques{% endblock %}
-            {% block box_contenu %}
-                <dl class="row caracteristiques">
-                    <dt class="col-sm-4">Nom de l'activité</dt><dd class="col-sm-8">{{ activite.nom }}</dd>
-                    <dt class="col-sm-4">Période de validité</dt>
-                    {% if activite.date_fin|date:"Y" == "2999" %}
-                        <dd class="col-sm-8">Illimitée</dd>
-                    {% elif activite.date_debut and activite.date_fin %}
-                        <dd class="col-sm-8">Du {{ activite.date_debut }} au {{ activite.date_fin }}</dd>
-                    {% endif %}
-                    <dt class="col-sm-4">Groupes d'activités</dt><dd class="col-sm-8">{{ activite.groupes_activites.all|join:", " }}</dd>
-                    <dt class="col-sm-4">Date de création</dt><dd class="col-sm-8">{{ activite.date_creation|date:"j F Y" }}</dd>
-                    <dt class="col-sm-4">ID Activité</dt><dd class="col-sm-8">{{ activite.pk }}</dd>
-                    <dt class="col-sm-4">Inscriptions</dt><dd class="col-sm-8">{{ stats_inscrits }} inscrits</dd>
-                </dl>
-            {% endblock %}
-        {% endembed %}
+        <style>
+        /* Papier et étiquettes (même présentation que les pages Résumé) */
+        .caracteristiques_papier {
+            padding: 26px 20px 20px;
+            background-color: #fdfdfa;
+            background-image: linear-gradient(rgba(70,130,190,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(70,130,190,0.18) 1px, transparent 1px);
+            background-size: 20px 20px;
+            box-shadow: inset 0 0 0 1px #e3e3dc;
+            border-radius: .25rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 26px 20px;
+        }
+        .dark-mode .caracteristiques_papier {
+            background-color: #2b2f33;
+            background-image: linear-gradient(rgba(120,170,220,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(120,170,220,0.16) 1px, transparent 1px);
+            box-shadow: inset 0 0 0 1px #3d4247;
+        }
+        .etiquette-carac {
+            position: relative; background: #fffdf8; border-radius: 6px; padding: 12px 14px 10px;
+            display: flex; flex-direction: column; gap: 2px; min-width: 0; margin: 0;
+            box-shadow: 0 5px 10px rgba(50,25,5,0.34);
+            transform: rotate(var(--inclinaison, 0deg));
+        }
+        .etiquette-carac.large { grid-column: span 2; }
+        .etiquette-carac .libelle { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #4f7fae; }
+        .etiquette-carac .valeur { font-size: 15px; overflow-wrap: anywhere; }
+        .dark-mode .etiquette-carac { background: #3a3f44; color: #f1f1f1; }
+        .dark-mode .etiquette-carac .libelle { color: #9cc3e8; }
+        .etiquette-carac .scotch {
+            position: absolute; top: -6px; left: 50%; z-index: 2; pointer-events: none;
+            transform: translateX(-50%) rotate(var(--angle-scotch, 0deg));
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+        }
+        .etiquette-carac .scotch::before {
+            content: ""; display: block; width: 36px; height: 12px;
+            background: linear-gradient(180deg, rgba(240,236,220,0.40), rgba(226,219,196,0.30));
+            clip-path: polygon(3% 0,97% 0,100% 14%,96% 30%,100% 48%,97% 66%,100% 84%,97% 100%,3% 100%,0 84%,4% 66%,0 48%,3% 30%,0 14%);
+        }
+        .dark-mode .etiquette-carac .scotch::before { background: linear-gradient(180deg, rgba(255,255,250,0.30), rgba(240,234,212,0.22)); }
+        .etiquette-carac:nth-child(7n+1) { --inclinaison: -0.7deg; --angle-scotch:  3deg; }
+        .etiquette-carac:nth-child(7n+2) { --inclinaison:  0.5deg; --angle-scotch: -4deg; }
+        .etiquette-carac:nth-child(7n+3) { --inclinaison:  0.8deg; --angle-scotch: -2deg; }
+        .etiquette-carac:nth-child(7n+4) { --inclinaison: -0.4deg; --angle-scotch:  5deg; }
+        .etiquette-carac:nth-child(7n+5) { --inclinaison:  0.6deg; --angle-scotch: -3deg; }
+        .etiquette-carac:nth-child(7n+6) { --inclinaison: -0.8deg; --angle-scotch:  2deg; }
+        .etiquette-carac:nth-child(7n+7) { --inclinaison:  0.3deg; --angle-scotch: -5deg; }
+        .etiquette-carac .pictos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+        .etiquette-carac .picto { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 16px; font-size: 13px; font-weight: 600; background: #e8f0fb; color: #1f4f8a; }
+        .dark-mode .etiquette-carac .picto { background: #2f4a66; color: #dbe9f7; }
+        @media (max-width: 575px) { .etiquette-carac.large { grid-column: auto; } }
+        </style>
+        <div class="card card-outline card-lightblue">
+            <div class="card-body p-0" style="min-height: 0">
+                <div class="caracteristiques caracteristiques_papier">
+                    <dl class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Nom de l'activité</dt><dd class="valeur mb-0">{{ activite.nom }}</dd></dl>
+                    <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Inscriptions</dt><dd class="valeur mb-0">{{ stats_inscrits }} inscrit{{ stats_inscrits|pluralize }}</dd></dl>
+                    <dl class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Période de validité</dt><dd class="valeur mb-0">{% if activite.date_fin|date:"Y" == "2999" %}Illimitée{% elif activite.date_debut and activite.date_fin %}Du {{ activite.date_debut }} au {{ activite.date_fin }}{% else %}Non renseignée{% endif %}</dd></dl>
+                    <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Date de création</dt><dd class="valeur mb-0">{{ activite.date_creation|date:"j F Y" }}</dd></dl>
+                    {% with groupes=activite.groupes_activites.all %}
+                        <div class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span>
+                            <span class="libelle">Groupes d'activités</span>
+                            {% if groupes %}
+                                <div class="pictos">{% for groupe in groupes %}<span class="picto">{{ groupe }}</span>{% endfor %}</div>
+                            {% else %}
+                                <span class="valeur">Aucun groupe d'activités</span>
+                            {% endif %}
+                        </div>
+                    {% endwith %}
+                    <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">ID activité</dt><dd class="valeur mb-0">{{ activite.pk }}</dd></dl>
+                </div>
+            </div>
+        </div>
 
         {# Rubriques #}
 {% comment %}
