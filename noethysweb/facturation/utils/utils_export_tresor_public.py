@@ -88,22 +88,7 @@ class ExporterBase():
                 liste_dates_prestations.append(prestation.date)
 
             # Définit le label
-            libelle = self.lot.modele.prestation_libelle
-            libelle = libelle.replace("{ACTIVITE_NOM}", prestation.activite.nom if prestation.activite else "")
-            libelle = libelle.replace("{ACTIVITE_ABREGE}", prestation.activite.abrege if prestation.activite and prestation.activite.abrege else "")
-            libelle = libelle.replace("{PRESTATION_LABEL}", prestation.label)
-            libelle = libelle.replace("{PRESTATION_QUANTITE}", str(prestation.quantite))
-            libelle = libelle.replace("{PRESTATION_MOIS}", {num: label for (num, label) in LISTE_MOIS}[prestation.date.month])
-            libelle = libelle.replace("{PRESTATION_ANNEE}", str(prestation.date.year))
-            libelle = libelle.replace("{INDIVIDU_PRENOM}", prestation.individu.prenom or prestation.individu.nom if prestation.individu else "")
-            libelle = libelle.replace("{INDIVIDU_NOM}", prestation.individu.nom if prestation.individu and prestation.individu.nom else "")
-            libelle = libelle.replace("{MOIS}", str(self.lot.mois))
-            libelle = libelle.replace("{MOIS_LETTRES}", self.lot.get_mois_display())
-            libelle = libelle.replace("{ANNEE}", str(self.lot.exercice))
-            libelle = libelle.replace("{DATE_DEBUT_MOIS}", datetime.date(prestation.date.year, prestation.date.month, 1).strftime('%d/%m/%Y'))
-            libelle = libelle.replace("{DATE_FIN_MOIS}", datetime.date(prestation.date.year, prestation.date.month, calendar.monthrange(prestation.date.year, prestation.date.month)[1]).strftime('%d/%m/%Y'))
-            libelle = libelle.replace("{PRESTATION_DEBUT_MOIS}", datetime.date(prestation.date.year, prestation.date.month, 1).strftime('%d/%m/%Y'))
-            libelle = libelle.replace("{PRESTATION_FIN_MOIS}", datetime.date(prestation.date.year, prestation.date.month, calendar.monthrange(prestation.date.year, prestation.date.month)[1]).strftime('%d/%m/%Y'))
+            libelle = self.Get_libelle_prestation(prestation)
 
             # Mémorisation du label et de la quantité
             libelle = (libelle, montant_unitaire)
@@ -125,6 +110,25 @@ class ExporterBase():
         self.prestation_date_max = max(liste_dates_prestations)
 
         return dict_resultats2, dict_prestations_factures
+
+    def Get_libelle_prestation(self, prestation):
+        libelle = self.lot.modele.prestation_libelle
+        libelle = libelle.replace("{ACTIVITE_NOM}", prestation.activite.nom if prestation.activite else "")
+        libelle = libelle.replace("{ACTIVITE_ABREGE}", prestation.activite.abrege if prestation.activite and prestation.activite.abrege else "")
+        libelle = libelle.replace("{PRESTATION_LABEL}", prestation.label)
+        libelle = libelle.replace("{PRESTATION_QUANTITE}", str(prestation.quantite))
+        libelle = libelle.replace("{PRESTATION_MOIS}", {num: label for (num, label) in LISTE_MOIS}[prestation.date.month])
+        libelle = libelle.replace("{PRESTATION_ANNEE}", str(prestation.date.year))
+        libelle = libelle.replace("{INDIVIDU_PRENOM}", prestation.individu.prenom or prestation.individu.nom if prestation.individu else "")
+        libelle = libelle.replace("{INDIVIDU_NOM}", prestation.individu.nom if prestation.individu and prestation.individu.nom else "")
+        libelle = libelle.replace("{MOIS}", str(self.lot.mois))
+        libelle = libelle.replace("{MOIS_LETTRES}", self.lot.get_mois_display())
+        libelle = libelle.replace("{ANNEE}", str(self.lot.exercice))
+        libelle = libelle.replace("{DATE_DEBUT_MOIS}", datetime.date(prestation.date.year, prestation.date.month, 1).strftime('%d/%m/%Y'))
+        libelle = libelle.replace("{DATE_FIN_MOIS}", datetime.date(prestation.date.year, prestation.date.month, calendar.monthrange(prestation.date.year, prestation.date.month)[1]).strftime('%d/%m/%Y'))
+        libelle = libelle.replace("{PRESTATION_DEBUT_MOIS}", datetime.date(prestation.date.year, prestation.date.month, 1).strftime('%d/%m/%Y'))
+        libelle = libelle.replace("{PRESTATION_FIN_MOIS}", datetime.date(prestation.date.year, prestation.date.month, calendar.monthrange(prestation.date.year, prestation.date.month)[1]).strftime('%d/%m/%Y'))
+        return libelle
 
     def Get_dict_codes(self, dict_prestations_factures=None):
         # Recherche poste et code local

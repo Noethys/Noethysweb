@@ -106,6 +106,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("modele_document", type=None if format in ("magnus",) else "hidden"),
                 Field("code_compta_as_alias", type=None if format in ("magnus",) else "hidden"),
                 Field("nom_collectivite", type=None if format in ("jvs",) else "hidden"),
+                Field("detail_deductions", type=None if format in ("jvs",) else "hidden"),
             ),
             Fieldset("Libellés",
                 Field("objet_piece"),

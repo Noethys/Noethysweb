@@ -3,14 +3,79 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import os
+import os, decimal
 from xml.dom.minidom import Document
 from noethysweb.version import GetVersion
+from core.models import Deduction
 from facturation.utils.utils_export_tresor_public import ExporterBase
 
 
 class Exporter(ExporterBase):
     code_format = "jvs"
+
+    def Get_lignes_factures(self, dict_prestations_factures=None):
+        """ Regroupe les prestations de chaque facture en lignes de pièce.
+            Si l'option 'detail_deductions' est cochée, chaque ligne de prestation est exportée à son montant initial
+            et suivie de lignes négatives pour les aides et déductions qui lui ont été appliquées. """
+        detailler_deductions = self.lot.modele.detail_deductions
+
+        # Récupération des déductions
+        dict_deductions = {}
+        if detailler_deductions:
+            for deduction in Deduction.objects.filter(prestation__facture_id__in=[piece.facture_id for piece in self.pieces]).order_by("date", "pk"):
+                dict_deductions.setdefault(deduction.prestation_id, []).append(deduction)
+
+        dict_lignes = {}
+        for facture, liste_prestations in dict_prestations_factures.items():
+            dict_groupes = {}
+            for dict_prestation in liste_prestations:
+                prestation = dict_prestation["prestation"]
+                deductions = dict_deductions.get(prestation.pk, [])
+                total_deductions = sum([deduction.montant for deduction in deductions], decimal.Decimal(0))
+
+                # Le montant brut est recalculé à partir du montant net pour que le total de la pièce reste toujours juste
+                montant_brut = prestation.montant + total_deductions
+                montant_unitaire = (montant_brut / prestation.quantite).quantize(decimal.Decimal("0.01"))
+
+                # Regroupement par code comptable, individu, libellé et montant unitaire
+                libelle = self.Get_libelle_prestation(prestation)
+                key = (dict_prestation["id_poste"], dict_prestation["code_prodloc"], dict_prestation["service1"], dict_prestation["service2"], prestation.individu_id, libelle, montant_unitaire)
+                if key not in dict_groupes:
+                    dict_groupes[key] = {
+                        "libelle": libelle, "montant_unitaire": montant_unitaire, "quantite": 0, "montant_total": decimal.Decimal(0),
+                        "id_poste": dict_prestation["id_poste"], "code_prodloc": dict_prestation["code_prodloc"],
+                        "prenom": (prestation.individu.prenom or prestation.individu.nom) if prestation.individu else "",
+                        "deductions": {},
+                    }
+                groupe = dict_groupes[key]
+                groupe["quantite"] += prestation.quantite
+                groupe["montant_total"] += montant_brut
+                for deduction in deductions:
+                    if deduction.montant:
+                        groupe["deductions"].setdefault(deduction.label, []).append(deduction.montant)
+
+            # Création des lignes
+            dict_lignes[facture] = []
+            for groupe in sorted(dict_groupes.values(), key=lambda x: x["libelle"]):
+                dict_lignes[facture].append({
+                    "libelle": groupe["libelle"], "quantite": groupe["quantite"], "montant_unitaire": groupe["montant_unitaire"],
+                    "montant_total": groupe["montant_total"], "montant_prelevement": groupe["montant_total"], "remise": None,
+                    "id_poste": groupe["id_poste"], "code_prodloc": groupe["code_prodloc"],
+                })
+
+                # Lignes de remise pour les aides et déductions : selon la doc JVS, MtHT et MtPrel sont négatifs,
+                # JVS_LFAC_MtRemise est positif et les imputations sont identiques à celles de la ligne positive
+                # pour permettre le regroupement lors de la transmission PES.
+                for label, montants in groupe["deductions"].items():
+                    total = sum(montants, decimal.Decimal(0))
+                    libelle = "Remise %s" % label
+                    dict_lignes[facture].append({
+                        "libelle": "%s - %s" % (groupe["prenom"], libelle) if groupe["prenom"] else libelle,
+                        "quantite": None, "montant_unitaire": None, "montant_total": -total, "montant_prelevement": -total, "remise": total,
+                        "id_poste": groupe["id_poste"], "code_prodloc": groupe["code_prodloc"],
+                    })
+
+        return dict_lignes
 
     def Creation_fichiers(self):
         # Vérifications
@@ -24,7 +89,7 @@ class Exporter(ExporterBase):
 
         # Récupération du détail des pièces
         detail_factures, dict_prestations_factures = self.Get_detail_pieces()
-        dict_codes = self.Get_dict_codes(dict_prestations_factures=dict_prestations_factures)
+        lignes_factures = self.Get_lignes_factures(dict_prestations_factures=dict_prestations_factures)
 
         # Génération du XML
         doc = Document()
@@ -193,236 +258,237 @@ class Exporter(ExporterBase):
             ObjPce.setAttribute("V", self.ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:160], majuscules=True))
             BlocPiece.appendChild(ObjPce)
 
-            num_sous_ligne = 1
-            if piece.facture in dict_codes:
-                for (IDposte, code_produit_local, service1, service2), montant in dict_codes[piece.facture].items():
-                    detail = detail_factures.get(piece.facture, None)
-                    if detail:
-                        for index, dict_detail in enumerate(detail, start=1):
+            for num_sous_ligne, ligne in enumerate(lignes_factures.get(piece.facture, []), start=1):
 
-                            # Ligne de pièce
-                            LigneDePiece = doc.createElement("LigneDePiece")
-                            Piece.appendChild(LigneDePiece)
+                # Ligne de pièce
+                LigneDePiece = doc.createElement("LigneDePiece")
+                Piece.appendChild(LigneDePiece)
 
-                            BlocLignePiece = doc.createElement("BlocLignePiece")
-                            LigneDePiece.appendChild(BlocLignePiece)
+                BlocLignePiece = doc.createElement("BlocLignePiece")
+                LigneDePiece.appendChild(BlocLignePiece)
 
-                            InfoLignePiece = doc.createElement("InfoLignePiece")
-                            BlocLignePiece.appendChild(InfoLignePiece)
+                InfoLignePiece = doc.createElement("InfoLignePiece")
+                BlocLignePiece.appendChild(InfoLignePiece)
 
-                            IdLigne = doc.createElement("IdLigne")
-                            IdLigne.setAttribute("V", str(num_sous_ligne))
-                            InfoLignePiece.appendChild(IdLigne)
+                IdLigne = doc.createElement("IdLigne")
+                IdLigne.setAttribute("V", str(num_sous_ligne))
+                InfoLignePiece.appendChild(IdLigne)
 
-                            ObjLignePce = doc.createElement("ObjLignePce")
-                            ObjLignePce.setAttribute("V", self.ConvertToTexte(dict_detail["libelle"][:160], majuscules=True))
-                            InfoLignePiece.appendChild(ObjLignePce)
+                ObjLignePce = doc.createElement("ObjLignePce")
+                ObjLignePce.setAttribute("V", self.ConvertToTexte(ligne["libelle"][:160], majuscules=True))
+                InfoLignePiece.appendChild(ObjLignePce)
 
-                            CodProdLoc = doc.createElement("CodProdLoc")
-                            CodProdLoc.setAttribute("V", code_produit_local)
-                            InfoLignePiece.appendChild(CodProdLoc)
+                CodProdLoc = doc.createElement("CodProdLoc")
+                CodProdLoc.setAttribute("V", ligne["code_prodloc"])
+                InfoLignePiece.appendChild(CodProdLoc)
 
-                            Nature = doc.createElement("Nature")
-                            Nature.setAttribute("V", IDposte)
-                            InfoLignePiece.appendChild(Nature)
+                Nature = doc.createElement("Nature")
+                Nature.setAttribute("V", ligne["id_poste"])
+                InfoLignePiece.appendChild(Nature)
 
-                            if self.lot.modele.fonction:
-                                fonction = doc.createElement("Fonction")
-                                fonction.setAttribute("V", self.lot.modele.fonction)
-                                InfoLignePiece.appendChild(fonction)
+                if self.lot.modele.fonction:
+                    fonction = doc.createElement("Fonction")
+                    fonction.setAttribute("V", self.lot.modele.fonction)
+                    InfoLignePiece.appendChild(fonction)
 
-                            if self.lot.modele.service1:
-                                CptAna = doc.createElement("CptAna")
-                                CptAna.setAttribute("V", self.lot.modele.service1)
-                                InfoLignePiece.appendChild(CptAna)
+                if self.lot.modele.service1:
+                    CptAna = doc.createElement("CptAna")
+                    CptAna.setAttribute("V", self.lot.modele.service1)
+                    InfoLignePiece.appendChild(CptAna)
 
-                            if self.lot.modele.service2:
-                                Ventilation = doc.createElement("Ventilation")
-                                Ventilation.setAttribute("V", self.lot.modele.service2)
-                                InfoLignePiece.appendChild(Ventilation)
+                if self.lot.modele.service2:
+                    Ventilation = doc.createElement("Ventilation")
+                    Ventilation.setAttribute("V", self.lot.modele.service2)
+                    InfoLignePiece.appendChild(Ventilation)
 
-                            Majo = doc.createElement("Majo")
-                            Majo.setAttribute("V", "0")
-                            InfoLignePiece.appendChild(Majo)
+                Majo = doc.createElement("Majo")
+                Majo.setAttribute("V", "0")
+                InfoLignePiece.appendChild(Majo)
 
-                            TvaIntraCom = doc.createElement("TvaIntraCom")
-                            TvaIntraCom.setAttribute("V", "0")
-                            InfoLignePiece.appendChild(TvaIntraCom)
+                TvaIntraCom = doc.createElement("TvaIntraCom")
+                TvaIntraCom.setAttribute("V", "0")
+                InfoLignePiece.appendChild(TvaIntraCom)
 
-                            MtHT = doc.createElement("MtHT")
-                            MtHT.setAttribute("V", str(dict_detail["montant"] * dict_detail["quantite"]))
-                            InfoLignePiece.appendChild(MtHT)
+                MtHT = doc.createElement("MtHT")
+                MtHT.setAttribute("V", str(ligne["montant_total"]))
+                InfoLignePiece.appendChild(MtHT)
 
-                            JVS_FAC_NumeroFacture = doc.createElement("JVS_FAC_NumeroFacture")
-                            JVS_FAC_NumeroFacture.setAttribute("V", str(piece.facture.numero)[:20])
-                            InfoLignePiece.appendChild(JVS_FAC_NumeroFacture)
+                JVS_FAC_NumeroFacture = doc.createElement("JVS_FAC_NumeroFacture")
+                JVS_FAC_NumeroFacture.setAttribute("V", str(piece.facture.numero)[:20])
+                InfoLignePiece.appendChild(JVS_FAC_NumeroFacture)
 
-                            JVS_LFAC_Date = doc.createElement("JVS_LFAC_Date")
-                            JVS_LFAC_Date.setAttribute("V", self.ConvertToTexte(self.date_min_lot.strftime("%Y-%m-%d")))
-                            InfoLignePiece.appendChild(JVS_LFAC_Date)
+                JVS_LFAC_Date = doc.createElement("JVS_LFAC_Date")
+                JVS_LFAC_Date.setAttribute("V", self.ConvertToTexte(self.date_min_lot.strftime("%Y-%m-%d")))
+                InfoLignePiece.appendChild(JVS_LFAC_Date)
 
-                            JVS_LFAC_DateFin = doc.createElement("JVS_LFAC_DateFin")
-                            JVS_LFAC_DateFin.setAttribute("V", self.ConvertToTexte(self.date_max_lot.strftime("%Y-%m-%d")))
-                            InfoLignePiece.appendChild(JVS_LFAC_DateFin)
+                JVS_LFAC_DateFin = doc.createElement("JVS_LFAC_DateFin")
+                JVS_LFAC_DateFin.setAttribute("V", self.ConvertToTexte(self.date_max_lot.strftime("%Y-%m-%d")))
+                InfoLignePiece.appendChild(JVS_LFAC_DateFin)
 
-                            JVS_LFAC_Libelle = doc.createElement("JVS_LFAC_Libelle")
-                            JVS_LFAC_Libelle.setAttribute("V", self.ConvertToTexte(dict_detail["libelle"][:160], majuscules=True))
-                            InfoLignePiece.appendChild(JVS_LFAC_Libelle)
+                JVS_LFAC_Libelle = doc.createElement("JVS_LFAC_Libelle")
+                JVS_LFAC_Libelle.setAttribute("V", self.ConvertToTexte(ligne["libelle"][:160], majuscules=True))
+                InfoLignePiece.appendChild(JVS_LFAC_Libelle)
 
-                            JVS_LFAC_Quantite = doc.createElement("JVS_LFAC_Quantite")
-                            JVS_LFAC_Quantite.setAttribute("V", str(dict_detail["quantite"]))
-                            InfoLignePiece.appendChild(JVS_LFAC_Quantite)
+                if ligne["remise"] is None:
+                    # Ligne détaillée : quantité, unité et prix unitaire (strictement positif)
+                    JVS_LFAC_Quantite = doc.createElement("JVS_LFAC_Quantite")
+                    JVS_LFAC_Quantite.setAttribute("V", str(ligne["quantite"]))
+                    InfoLignePiece.appendChild(JVS_LFAC_Quantite)
 
-                            JVS_LFAC_Unite = doc.createElement("JVS_LFAC_Unite")
-                            JVS_LFAC_Unite.setAttribute("V", "Unite")
-                            InfoLignePiece.appendChild(JVS_LFAC_Unite)
+                    JVS_LFAC_Unite1 = doc.createElement("JVS_LFAC_Unite1")
+                    JVS_LFAC_Unite1.setAttribute("V", "Unite")
+                    InfoLignePiece.appendChild(JVS_LFAC_Unite1)
 
-                            JVS_LFAC_MtUnitaire = doc.createElement("JVS_LFAC_MtUnitaire")
-                            JVS_LFAC_MtUnitaire.setAttribute("V", str(dict_detail["montant"]))
-                            InfoLignePiece.appendChild(JVS_LFAC_MtUnitaire)
+                    JVS_LFAC_MtUnitaire = doc.createElement("JVS_LFAC_MtUnitaire")
+                    JVS_LFAC_MtUnitaire.setAttribute("V", str(ligne["montant_unitaire"]))
+                    InfoLignePiece.appendChild(JVS_LFAC_MtUnitaire)
+                else:
+                    # Ligne de remise : MtHT négatif et montant de la remise en positif (doc JVS Millésime On-Line)
+                    JVS_LFAC_MtRemise = doc.createElement("JVS_LFAC_MtRemise")
+                    JVS_LFAC_MtRemise.setAttribute("V", str(ligne["remise"]))
+                    InfoLignePiece.appendChild(JVS_LFAC_MtRemise)
 
-                            JVS_LFAC_Ordre = doc.createElement("JVS_LFAC_Ordre")
-                            JVS_LFAC_Ordre.setAttribute("V", str(num_sous_ligne))
-                            InfoLignePiece.appendChild(JVS_LFAC_Ordre)
+                JVS_LFAC_Ordre = doc.createElement("JVS_LFAC_Ordre")
+                JVS_LFAC_Ordre.setAttribute("V", str(num_sous_ligne))
+                InfoLignePiece.appendChild(JVS_LFAC_Ordre)
 
-                            num_sous_ligne += 1
 
-                            # Info prélèvement SEPA
-                            if piece.prelevement:
+                # Info prélèvement SEPA (MtPrel négatif pour les lignes de remise)
+                if piece.prelevement and ligne["montant_prelevement"]:
 
-                                InfoPrelevementSEPA = doc.createElement("InfoPrelevementSEPA")
-                                BlocLignePiece.appendChild(InfoPrelevementSEPA)
+                    InfoPrelevementSEPA = doc.createElement("InfoPrelevementSEPA")
+                    BlocLignePiece.appendChild(InfoPrelevementSEPA)
 
-                                NatPrel = doc.createElement("NatPrel")
-                                NatPrel.setAttribute("V", "01")
-                                InfoPrelevementSEPA.appendChild(NatPrel)
+                    NatPrel = doc.createElement("NatPrel")
+                    NatPrel.setAttribute("V", "01")
+                    InfoPrelevementSEPA.appendChild(NatPrel)
 
-                                PerPrel = doc.createElement("PerPrel")
-                                PerPrel.setAttribute("V", "07")
-                                InfoPrelevementSEPA.appendChild(PerPrel)
+                    PerPrel = doc.createElement("PerPrel")
+                    PerPrel.setAttribute("V", "07")
+                    InfoPrelevementSEPA.appendChild(PerPrel)
 
-                                DtePrel = doc.createElement("DtePrel")
-                                DtePrel.setAttribute("V", self.lot.date_prelevement.strftime("%Y-%m-%d"))
-                                InfoPrelevementSEPA.appendChild(DtePrel)
+                    DtePrel = doc.createElement("DtePrel")
+                    DtePrel.setAttribute("V", self.lot.date_prelevement.strftime("%Y-%m-%d"))
+                    InfoPrelevementSEPA.appendChild(DtePrel)
 
-                                MtPrel = doc.createElement("MtPrel")
-                                MtPrel.setAttribute("V", str(dict_detail["montant"] * dict_detail["quantite"]))
-                                InfoPrelevementSEPA.appendChild(MtPrel)
+                    MtPrel = doc.createElement("MtPrel")
+                    MtPrel.setAttribute("V", str(ligne["montant_prelevement"]))
+                    InfoPrelevementSEPA.appendChild(MtPrel)
 
-                                if piece.prelevement_sequence == "FRST": sequence = "02"
-                                elif piece.prelevement_sequence == "RCUR": sequence = "03"
-                                elif piece.prelevement_sequence == "FNAL": sequence = "04"
-                                else: sequence = "01"
-                                SequencePres = doc.createElement("SequencePres")
-                                SequencePres.setAttribute("V", sequence)
-                                InfoPrelevementSEPA.appendChild(SequencePres)
+                    if piece.prelevement_sequence == "FRST": sequence = "02"
+                    elif piece.prelevement_sequence == "RCUR": sequence = "03"
+                    elif piece.prelevement_sequence == "FNAL": sequence = "04"
+                    else: sequence = "01"
+                    SequencePres = doc.createElement("SequencePres")
+                    SequencePres.setAttribute("V", sequence)
+                    InfoPrelevementSEPA.appendChild(SequencePres)
 
-                                DateSignMandat = doc.createElement("DateSignMandat")
-                                DateSignMandat.setAttribute("V", piece.prelevement_mandat.date.strftime("%Y-%m-%d"))
-                                InfoPrelevementSEPA.appendChild(DateSignMandat)
+                    DateSignMandat = doc.createElement("DateSignMandat")
+                    DateSignMandat.setAttribute("V", piece.prelevement_mandat.date.strftime("%Y-%m-%d"))
+                    InfoPrelevementSEPA.appendChild(DateSignMandat)
 
-                                RefUniMdt = doc.createElement("RefUniMdt")
-                                RefUniMdt.setAttribute("V", piece.prelevement_mandat.rum)
-                                InfoPrelevementSEPA.appendChild(RefUniMdt)
+                    RefUniMdt = doc.createElement("RefUniMdt")
+                    RefUniMdt.setAttribute("V", piece.prelevement_mandat.rum)
+                    InfoPrelevementSEPA.appendChild(RefUniMdt)
 
-                                LibPrel = doc.createElement("LibPrel")
-                                LibPrel.setAttribute("V", self.ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.prelevement_libelle, piece=piece)[:140], majuscules=True))
-                                InfoPrelevementSEPA.appendChild(LibPrel)
+                    LibPrel = doc.createElement("LibPrel")
+                    LibPrel.setAttribute("V", self.ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.prelevement_libelle, piece=piece)[:140], majuscules=True))
+                    InfoPrelevementSEPA.appendChild(LibPrel)
 
-                            # Tiers
-                            Tiers = doc.createElement("Tiers")
-                            LigneDePiece.appendChild(Tiers)
+                # Tiers
+                Tiers = doc.createElement("Tiers")
+                LigneDePiece.appendChild(Tiers)
 
-                            InfoTiers = doc.createElement("InfoTiers")
-                            Tiers.appendChild(InfoTiers)
+                InfoTiers = doc.createElement("InfoTiers")
+                Tiers.appendChild(InfoTiers)
 
-                            if piece.famille.idtiers_helios:
-                                IdTiers = doc.createElement("IdTiers")
-                                IdTiers.setAttribute("V", piece.famille.idtiers_helios)
-                                InfoTiers.appendChild(IdTiers)
+                if piece.famille.idtiers_helios:
+                    IdTiers = doc.createElement("IdTiers")
+                    IdTiers.setAttribute("V", piece.famille.idtiers_helios)
+                    InfoTiers.appendChild(IdTiers)
 
-                            if piece.famille.natidtiers_helios:
-                                NatIdTiers = doc.createElement("NatIdTiers")
-                                NatIdTiers.setAttribute("V", "" if piece.famille.natidtiers_helios == 9999 else piece.famille.natidtiers_helios)
-                                InfoTiers.appendChild(NatIdTiers)
+                if piece.famille.natidtiers_helios:
+                    NatIdTiers = doc.createElement("NatIdTiers")
+                    NatIdTiers.setAttribute("V", "" if piece.famille.natidtiers_helios == 9999 else piece.famille.natidtiers_helios)
+                    InfoTiers.appendChild(NatIdTiers)
 
-                            ref_tiers = piece.famille.reftiers_helios if piece.famille.reftiers_helios else piece.famille.code_compta
-                            Numo = doc.createElement("Numo")
-                            Numo.setAttribute("V", ref_tiers)
-                            InfoTiers.appendChild(Numo)
+                ref_tiers = piece.famille.reftiers_helios if piece.famille.reftiers_helios else piece.famille.code_compta
+                Numo = doc.createElement("Numo")
+                Numo.setAttribute("V", ref_tiers)
+                InfoTiers.appendChild(Numo)
 
-                            CatTiers = doc.createElement("CatTiers")
-                            CatTiers.setAttribute("V", "%02d" % piece.famille.cattiers_helios)
-                            InfoTiers.appendChild(CatTiers)
+                CatTiers = doc.createElement("CatTiers")
+                CatTiers.setAttribute("V", "%02d" % piece.famille.cattiers_helios)
+                InfoTiers.appendChild(CatTiers)
 
-                            NatJur = doc.createElement("NatJur")
-                            NatJur.setAttribute("V", "%02d" % piece.famille.natjur_helios)
-                            InfoTiers.appendChild(NatJur)
+                NatJur = doc.createElement("NatJur")
+                NatJur.setAttribute("V", "%02d" % piece.famille.natjur_helios)
+                InfoTiers.appendChild(NatJur)
 
-                            TypTiers = doc.createElement("TypTiers")
-                            TypTiers.setAttribute("V", "01")
-                            InfoTiers.appendChild(TypTiers)
+                TypTiers = doc.createElement("TypTiers")
+                TypTiers.setAttribute("V", "01")
+                InfoTiers.appendChild(TypTiers)
 
-                            civilite_titulaire = piece.famille.titulaire_helios.Get_abrege_civilite()
-                            if civilite_titulaire == "M.": civilite_titulaire = "M"
-                            if civilite_titulaire == "Melle": civilite_titulaire = "MME"
-                            if civilite_titulaire == "Mme": civilite_titulaire = "MME"
-                            if civilite_titulaire:
-                                Civilite = doc.createElement("Civilite")
-                                Civilite.setAttribute("V", civilite_titulaire[:10])
-                                InfoTiers.appendChild(Civilite)
+                civilite_titulaire = piece.famille.titulaire_helios.Get_abrege_civilite()
+                if civilite_titulaire == "M.": civilite_titulaire = "M"
+                if civilite_titulaire == "Melle": civilite_titulaire = "MME"
+                if civilite_titulaire == "Mme": civilite_titulaire = "MME"
+                if civilite_titulaire:
+                    Civilite = doc.createElement("Civilite")
+                    Civilite.setAttribute("V", civilite_titulaire[:10])
+                    InfoTiers.appendChild(Civilite)
 
-                            Nom = doc.createElement("Nom")
-                            Nom.setAttribute("V", self.ConvertToTexte(piece.famille.titulaire_helios.nom[:38], majuscules=True))
-                            InfoTiers.appendChild(Nom)
+                Nom = doc.createElement("Nom")
+                Nom.setAttribute("V", self.ConvertToTexte(piece.famille.titulaire_helios.nom[:38], majuscules=True))
+                InfoTiers.appendChild(Nom)
 
-                            prenom = piece.famille.titulaire_helios.prenom
-                            if prenom:
-                                Prenom = doc.createElement("Prenom")
-                                Prenom.setAttribute("V", self.ConvertToTexte(prenom[:38], majuscules=True))
-                                InfoTiers.appendChild(Prenom)
+                prenom = piece.famille.titulaire_helios.prenom
+                if prenom:
+                    Prenom = doc.createElement("Prenom")
+                    Prenom.setAttribute("V", self.ConvertToTexte(prenom[:38], majuscules=True))
+                    InfoTiers.appendChild(Prenom)
 
-                            # Adresse
-                            Adresse = doc.createElement("Adresse")
-                            Tiers.appendChild(Adresse)
+                # Adresse
+                Adresse = doc.createElement("Adresse")
+                Tiers.appendChild(Adresse)
 
-                            TypAdr = doc.createElement("TypAdr")
-                            TypAdr.setAttribute("V", "1")
-                            Adresse.appendChild(TypAdr)
+                TypAdr = doc.createElement("TypAdr")
+                TypAdr.setAttribute("V", "1")
+                Adresse.appendChild(TypAdr)
 
-                            Adr2 = doc.createElement("Adr2")
-                            Adr2.setAttribute("V", self.ConvertToTexte(piece.famille.titulaire_helios.rue_resid[:38], majuscules=True))
-                            Adresse.appendChild(Adr2)
+                Adr2 = doc.createElement("Adr2")
+                Adr2.setAttribute("V", self.ConvertToTexte(piece.famille.titulaire_helios.rue_resid[:38], majuscules=True))
+                Adresse.appendChild(Adr2)
 
-                            CP = doc.createElement("CP")
-                            CP.setAttribute("V", piece.famille.titulaire_helios.cp_resid[:5])
-                            Adresse.appendChild(CP)
+                CP = doc.createElement("CP")
+                CP.setAttribute("V", piece.famille.titulaire_helios.cp_resid[:5])
+                Adresse.appendChild(CP)
 
-                            Ville = doc.createElement("Ville")
-                            Ville.setAttribute("V", self.ConvertToTexte(piece.famille.titulaire_helios.ville_resid[:38], majuscules=True))
-                            Adresse.appendChild(Ville)
+                Ville = doc.createElement("Ville")
+                Ville.setAttribute("V", self.ConvertToTexte(piece.famille.titulaire_helios.ville_resid[:38], majuscules=True))
+                Adresse.appendChild(Ville)
 
-                            CodRes = doc.createElement("CodRes")
-                            CodRes.setAttribute("V", "0")
-                            Adresse.appendChild(CodRes)
+                CodRes = doc.createElement("CodRes")
+                CodRes.setAttribute("V", "0")
+                Adresse.appendChild(CodRes)
 
-                            # Compte bancaire
-                            if piece.prelevement:
-                                CpteBancaire = doc.createElement("CpteBancaire")
-                                Tiers.appendChild(CpteBancaire)
+                # Compte bancaire
+                if piece.prelevement:
+                    CpteBancaire = doc.createElement("CpteBancaire")
+                    Tiers.appendChild(CpteBancaire)
 
-                                BIC = doc.createElement("BIC")
-                                BIC.setAttribute("V", piece.prelevement_mandat.bic)
-                                CpteBancaire.appendChild(BIC)
+                    BIC = doc.createElement("BIC")
+                    BIC.setAttribute("V", piece.prelevement_mandat.bic)
+                    CpteBancaire.appendChild(BIC)
 
-                                IBAN = doc.createElement("IBAN")
-                                IBAN.setAttribute("V", piece.prelevement_mandat.iban)
-                                CpteBancaire.appendChild(IBAN)
+                    IBAN = doc.createElement("IBAN")
+                    IBAN.setAttribute("V", piece.prelevement_mandat.iban)
+                    CpteBancaire.appendChild(IBAN)
 
-                                TitCpte = doc.createElement("TitCpte")
-                                individu_mandat = piece.prelevement_mandat.individu_nom or piece.prelevement_mandat.individu.Get_nom()
-                                TitCpte.setAttribute("V", self.ConvertToTexte(individu_mandat[:32], majuscules=True))
-                                CpteBancaire.appendChild(TitCpte)
+                    TitCpte = doc.createElement("TitCpte")
+                    individu_mandat = piece.prelevement_mandat.individu_nom or piece.prelevement_mandat.individu.Get_nom()
+                    TitCpte.setAttribute("V", self.ConvertToTexte(individu_mandat[:32], majuscules=True))
+                    CpteBancaire.appendChild(TitCpte)
 
         # Enregistrement du fichier XML
         f = open(os.path.join(self.rep_destination, self.nom_fichier_simple), "w")

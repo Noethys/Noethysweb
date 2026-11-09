@@ -3437,6 +3437,7 @@ class PesModele(models.Model):
     code_compta_as_alias = models.BooleanField(verbose_name="Utiliser le code comptable familial comme code tiers", default=True, help_text="Utiliser le code comptable de la famille (Fiche famille > Onglet Divers) comme code tiers (ou alias). Sinon un code de type FAM000001 sera généré automatiquement.")
     modele_document = models.ForeignKey(ModeleDocument, verbose_name="Modèle de document", on_delete=models.PROTECT, blank=True, null=True)
     inclure_tiers_solidaires = models.BooleanField(verbose_name="Inclure les tiers solidaires", default=True, help_text="Cochez cette case si vous souhaitez que Noethys intègre les tiers solidaires.")
+    detail_deductions = models.BooleanField(verbose_name="Détailler les aides et déductions", default=False, help_text="Cochez cette case pour faire apparaître les prestations à leur montant initial, suivies des aides et déductions appliquées sous forme de lignes négatives. Sinon, seul le montant net de chaque prestation est exporté.")
 
     class Meta:
         db_table = 'pes_modeles'
