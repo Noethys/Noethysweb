@@ -68,6 +68,11 @@ def Envoyer_email(utilisateur=None, domain_override=None,
         backend = 'anymail.backends.sendinblue.EmailBackend'
         backend_kwargs = {"api_key": adresse_exp.Get_parametre("api_key")}
 
+    # Backend MICROSOFT 365 (API Graph + OAuth2)
+    if adresse_exp.moteur == "microsoft365":
+        backend = 'outils.utils.backend_microsoft365.EmailBackend'
+        backend_kwargs = {"tenant_id": adresse_exp.Get_parametre("tenant_id"), "client_id": adresse_exp.Get_parametre("client_id"), "client_secret": adresse_exp.motdepasse}
+
     # Création de la connexion
     connection = djangomail.get_connection(backend=backend, fail_silently=False, **backend_kwargs)
     try:

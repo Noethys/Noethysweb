@@ -66,6 +66,15 @@ def Envoyer_model_mail(idmail=None, request=None):
             "api_key": mail.adresse_exp.Get_parametre("api_key"),
         }
 
+    # Backend MICROSOFT 365 (API Graph + OAuth2)
+    if mail.adresse_exp.moteur == "microsoft365":
+        backend = 'outils.utils.backend_microsoft365.EmailBackend'
+        backend_kwargs = {
+            "tenant_id": mail.adresse_exp.Get_parametre("tenant_id"),
+            "client_id": mail.adresse_exp.Get_parametre("client_id"),
+            "client_secret": mail.adresse_exp.motdepasse,
+        }
+
     # Recherche si envoi par lot activé
     nbre_mails_lot = mail.adresse_exp.Get_parametre("nbre_mails")
     duree_pause = mail.adresse_exp.Get_parametre("duree_pause")
@@ -246,6 +255,11 @@ def Envoyer_mail_test(request=None, dict_options={}):
     if dict_options["moteur"] == "brevo":
         backend = 'anymail.backends.sendinblue.EmailBackend'
         backend_kwargs = {"api_key": dict_options["cle_api"]}
+
+    # Backend MICROSOFT 365 (API Graph + OAuth2)
+    if dict_options["moteur"] == "microsoft365":
+        backend = 'outils.utils.backend_microsoft365.EmailBackend'
+        backend_kwargs = {"tenant_id": dict_options["tenant_id"], "client_id": dict_options["client_id"], "client_secret": dict_options["client_secret"]}
 
     # Création de la connexion
     connection = djangomail.get_connection(backend=backend, fail_silently=False, **backend_kwargs)
