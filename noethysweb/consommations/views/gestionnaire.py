@@ -27,6 +27,11 @@ class View(CustomView, TemplateView):
     mode_grille = "date"
 
     def post(self, request, *args, **kwargs):
+        # Données absentes (erreur JS côté client)
+        if not request.POST.get("donnees"):
+            messages.add_message(request, messages.ERROR, "Les données de la grille n'ont pas pu être transmises. Veuillez recharger la page.")
+            return HttpResponseRedirect(request.get_full_path())
+
         # Si requête de MAJ
         if request.POST.get("type_submit") == "MAJ" or request.POST.get("donnees_ajouter_individu"):
             context = self.get_context_data()

@@ -9,6 +9,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 from django.shortcuts import render
 from core.utils import utils_parametres
 from core.models import Inscription, Activite, JOURS_COMPLETS_SEMAINE
@@ -33,6 +34,11 @@ class Modifier(Onglet, TemplateView):
     template_name = "fiche_famille/famille_grille.html"
 
     def post(self, request, *args, **kwargs):
+        # Données absentes (erreur JS côté client)
+        if not request.POST.get("donnees"):
+            messages.add_message(request, messages.ERROR, "Les données de la grille n'ont pas pu être transmises. Veuillez recharger la page.")
+            return HttpResponseRedirect(request.get_full_path())
+
         # Si requête de MAJ
         if request.POST.get("type_submit") == "MAJ":
             context = self.get_context_data(**kwargs)

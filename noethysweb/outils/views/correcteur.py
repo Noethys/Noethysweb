@@ -89,6 +89,17 @@ def Get_anomalies():
         idcategorie="presta_sans_conso", idfamille=r["famille__pk"], idindividu=r["individu__pk"], idactivite=r["activite__pk"], date_min=r["min_date"], date_max=r["max_date"])
         for r in resultats]
 
+    # Recherche les consommations sans événement associé sur une unité événementielle (bloquent l'affichage de la grille)
+    resultats = Consommation.objects.values("individu__nom", "individu__prenom", "individu__pk", "inscription__famille_id", "activite__pk", "activite__nom", "unite__nom", "date")\
+        .filter(unite__type="Evenement", evenement__isnull=True)\
+        .annotate(nbre=Count("pk"))\
+        .order_by("individu__nom", "individu__prenom", "date")
+    data["Consommations événementielles sans événement associé (%d)" % len(resultats)] = [Anomalie(
+        label="%s %s (famille ID%d) : %d consommation(s) le %s sur l'unité %s de l'activité %s." % (r["individu__nom"], r["individu__prenom"], r["inscription__famille_id"], r["nbre"], r["date"].strftime("%d/%m/%Y"), r["unite__nom"], r["activite__nom"]),
+        idcategorie="conso_evenement_orpheline", idfamille=r["inscription__famille_id"], idindividu=r["individu__pk"], idactivite=r["activite__pk"], date_min=r["date"], date_max=r["date"],
+        corrigeable=False)
+        for r in resultats]
+
     return data
 
 
@@ -140,7 +151,7 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Correcteur d'anomalies"
         context['box_titre'] = ""
-        context['box_introduction'] = "Le correcteur recherche les anomalies apparues dans les données au cours des %d derniers jours (consommations ou prestations en double, consommations non facturées, prestations sans consommation). Cochez les anomalies que l'application peut corriger automatiquement et cliquez sur le bouton Corriger les anomalies cochées. Les autres doivent être corrigées manuellement." % settings.CORRECTEUR_JOURS_RETROACTION
+        context['box_introduction'] = "Le correcteur recherche les anomalies apparues dans les données au cours des %d derniers jours (consommations ou prestations en double, consommations non facturées, prestations sans consommation, consommations événementielles sans événement). Cochez les anomalies que l'application peut corriger automatiquement et cliquez sur le bouton Corriger les anomalies cochées. Les autres doivent être corrigées manuellement." % settings.CORRECTEUR_JOURS_RETROACTION
         context['form'] = Formulaire(request=self.request, anomalies=Get_anomalies())
         return context
 

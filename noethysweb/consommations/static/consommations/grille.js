@@ -942,6 +942,13 @@ class Case_evenement extends Case_base {
 
     };
 
+    importe_conso(conso) {
+        // Une conso sans événement ne peut pas être affichée sur une unité événementielle
+        console.warn("Conso ignorée (unité événementielle sans événement associé) :", conso);
+    };
+
+    maj_affichage() {};
+
 };
 
 
