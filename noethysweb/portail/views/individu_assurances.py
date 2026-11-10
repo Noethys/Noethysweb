@@ -66,7 +66,7 @@ class Page(Onglet):
     def get_object(self):
         if not self.kwargs.get("idassurance"):
             return None
-        return Assurance.objects.get(pk=self.kwargs.get("idassurance"))
+        return self.get_objet_individu(model=Assurance, pk=self.kwargs.get("idassurance"), avec_famille=True)
 
     def get_success_url(self):
         url = self.url_liste
@@ -154,8 +154,9 @@ class Importer(Page, TemplateView):
         # Importation des assurances
         liste_txt = form.cleaned_data.get("assurances", "")
         if liste_txt:
-            liste_idassurance = liste_txt.split(";")
-            for assurance in Assurance.objects.filter(pk__in=[int(idassurance) for idassurance in liste_idassurance]):
+            liste_assurances = Assurance.objects.filter(pk__in=[int(idassurance) for idassurance in liste_txt.split(";") if idassurance.isdigit()], famille=self.request.user.famille)
+            liste_idassurance = list(liste_assurances)
+            for assurance in liste_assurances:
                 assurance.pk = None
                 assurance.individu_id = self.get_individu().pk
                 assurance.save()

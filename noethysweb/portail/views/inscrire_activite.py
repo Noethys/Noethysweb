@@ -77,7 +77,8 @@ def Valid_form(request):
             return JsonResponse({"erreur": "Ce groupe est déjà complet"}, status=401)
 
     # Enregistrement de la demande
-    demande = form.save()
+    demande = form.save(commit=False)
+    demande.validation_auto, demande.traitement_utilisateur, demande.traitement_date, demande.idobjet, demande.ancienne_valeur = False, None, None, None, None
     demande.nouvelle_valeur = json.dumps("%d;%d" % (activite.pk, groupe.pk), cls=DjangoJSONEncoder)
     demande.save()
 

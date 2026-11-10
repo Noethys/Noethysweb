@@ -8,11 +8,21 @@ logger = logging.getLogger(__name__)
 from portail.views.base import CustomView
 from django.views.generic import TemplateView
 from django.urls import reverse_lazy
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.db.models import Q
 from django.utils.translation import gettext as _
 from core.models import Sondage, SondagePage, SondageQuestion, SondageRepondant, SondageReponse, Rattachement, Individu
 from portail.forms.sondage import Formulaire
+
+
+def Get_individu_famille(request, idindividu=None):
+    """ Sécurité : l'individu doit être rattaché à la famille connectée """
+    if not idindividu:
+        return None
+    rattachement = Rattachement.objects.select_related("individu").filter(famille=request.user.famille, individu_id=idindividu).first()
+    if not rattachement:
+        raise Http404
+    return rattachement.individu
 
 
 class View_questions(CustomView, TemplateView):
@@ -23,7 +33,7 @@ class View_questions(CustomView, TemplateView):
         context = super(View_questions, self).get_context_data(**kwargs)
         sondage = Sondage.objects.get(code=self.kwargs.get("code", None))
         idindividu = self.kwargs.get("idindividu", None)
-        individu = Individu.objects.get(pk=idindividu) if idindividu else None
+        individu = Get_individu_famille(self.request, idindividu)
 
         context["sondage"] = sondage
         context["page_titre"] = "Formulaire"
@@ -43,6 +53,7 @@ class View_questions(CustomView, TemplateView):
 
     def post(self, request, **kwargs):
         idindividu = self.kwargs.get("idindividu", None)
+        Get_individu_famille(request, idindividu)
 
         # Récupération des valeurs des forms
         valeurs = {}

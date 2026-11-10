@@ -52,6 +52,9 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.form_id = 'portail_messages_form'
         self.helper.form_method = 'post'
 
+        # Sécurité : la famille n'est jamais lue depuis le navigateur
+        self.fields["famille"].disabled = True
+        self.initial["famille"] = self.request.user.famille.pk
         self.fields["texte"].widget = SummernoteInplaceWidgetBS5(attrs=self.fields["texte"].widget.attrs)
 
         # Affichage

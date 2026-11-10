@@ -41,7 +41,7 @@ class Page(Onglet):
     def get_object(self):
         if not self.kwargs.get("idcontact"):
             return None
-        return ContactUrgence.objects.get(pk=self.kwargs.get("idcontact"))
+        return self.get_objet_individu(model=ContactUrgence, pk=self.kwargs.get("idcontact"), avec_famille=True)
 
     def get_success_url(self):
         url = self.url_liste
@@ -124,8 +124,9 @@ class Importer(Page, TemplateView):
         # Importation des contacts
         liste_txt = form.cleaned_data.get("contacts", "")
         if liste_txt:
-            liste_idcontact = liste_txt.split(";")
-            for contact in ContactUrgence.objects.filter(pk__in=[int(idcontact) for idcontact in liste_idcontact]):
+            liste_contacts = ContactUrgence.objects.filter(pk__in=[int(idcontact) for idcontact in liste_txt.split(";") if idcontact.isdigit()], famille=self.request.user.famille)
+            liste_idcontact = list(liste_contacts)
+            for contact in liste_contacts:
                 contact.pk = None
                 contact.individu_id = self.get_individu().pk
                 contact.save()

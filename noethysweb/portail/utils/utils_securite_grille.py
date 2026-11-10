@@ -14,7 +14,7 @@ Le navigateur n'est jamais cru :
   envoyés par le navigateur sont ignorés.
 """
 
-import logging, json, datetime
+import logging, json, datetime, uuid
 logger = logging.getLogger(__name__)
 from django.db.models import Q
 from core.models import Inscription, Prestation, Consommation, Deduction, Evenement, MemoJournee
@@ -133,6 +133,40 @@ def Filtrer_donnees_facturation(request, donnees):
     return donnees
 
 
+# ------------------------------------- Capacité d'accueil --------------------------------------------
+
+class Places():
+    """ Places prises et capacités d'accueil, calculées depuis la base selon les mêmes règles que grille.js :
+    réservations et présents de tous, plus les attentes des autres familles. """
+    def __init__(self, activite=None, inscriptions={}, suppressions_conso=[], dates=set()):
+        from core.models import Remplissage, UniteRemplissage
+        self.prises = {}
+        self.capacites = {(r.date, r.unite_remplissage_id, r.groupe_id or 0): r.places for r in Remplissage.objects.filter(activite=activite, date__in=dates)}
+        self.unites_remplissage = {unite.pk: [unite_conso.pk for unite_conso in unite.unites.all()] for unite in UniteRemplissage.objects.prefetch_related("unites").filter(activite=activite)}
+        conditions = Q(activite=activite, date__in=dates) & (Q(etat__in=("reservation", "present")) | (Q(etat="attente") & ~Q(inscription__in=inscriptions.keys())))
+        for conso in Consommation.objects.filter(conditions).exclude(pk__in=suppressions_conso).values("date", "unite_id", "groupe_id", "quantite", "evenement_id"):
+            self.Ajouter(date=conso["date"], idunite=conso["unite_id"], idgroupe=conso["groupe_id"], idevenement=conso["evenement_id"], quantite=conso["quantite"] or 1)
+
+    def Ajouter(self, date=None, idunite=None, idgroupe=None, idevenement=None, quantite=1):
+        for groupe in (idgroupe, 0):
+            self.prises[(date, idunite, groupe)] = self.prises.get((date, idunite, groupe), 0) + quantite
+        if idevenement:
+            self.prises[(date, idunite, idgroupe, idevenement)] = self.prises.get((date, idunite, idgroupe, idevenement), 0) + 1
+
+    def Is_complet(self, date=None, idunite=None, idgroupe=None, evenement=None):
+        # Capacité de l'événement
+        if evenement and evenement.capacite_max and self.prises.get((date, idunite, idgroupe, evenement.pk), 0) >= evenement.capacite_max:
+            return True
+        # Capacité des unités de remplissage associées à l'unité de consommation, pour le groupe et tous groupes confondus
+        for idunite_remplissage, unites_conso in self.unites_remplissage.items():
+            if idunite in unites_conso:
+                for groupe in (idgroupe, 0):
+                    capacite = self.capacites.get((date, idunite_remplissage, groupe))
+                    if capacite and capacite - sum(self.prises.get((date, idunite_conso, groupe), 0) for idunite_conso in unites_conso) <= 0:
+                        return True
+        return False
+
+
 # ------------------------------------- Enregistrement --------------------------------------------
 
 def Securiser_donnees_save(request, donnees, data):
@@ -178,6 +212,10 @@ def Securiser_donnees_save(request, donnees, data):
             pk__in=suppressions_conso).values("date", "inscription_id", "unite_id", "evenement_id"):
         cases_occupees.add((str(conso["date"]), conso["inscription_id"], conso["unite_id"], conso["evenement_id"]))
 
+    places = Places(activite=activite, inscriptions=inscriptions, suppressions_conso=suppressions_conso,
+                    dates={_date(c.get("date")) for k, c in liste_conso if _date(c.get("date"))})
+
+    mises_en_attente = []
     consommations = {}
     for key_case, conso in liste_conso:
         idconso = _int(conso.get("pk"))
@@ -213,8 +251,15 @@ def Securiser_donnees_save(request, donnees, data):
                 continue
             if activite.validation_type == "MANUELLE":
                 etat = "demande"
+            elif etat == "reservation" and places.Is_complet(date=date, idunite=idunite, idgroupe=inscription.groupe_id, evenement=dict_evenements.get(idevenement)):
+                # Plus de place : liste d'attente, comme le fait la grille dans le navigateur
+                rejets.append("conso %s %s placée en attente (complet)" % (date, idunite))
+                mises_en_attente.append({"date": str(date), "unite": idunite, "individu": inscription.individu_id})
+                etat = "attente"
+            if etat == "reservation":
+                places.Ajouter(date=date, idunite=idunite, idgroupe=inscription.groupe_id, idevenement=idevenement, quantite=_int(conso.get("quantite")) or 1)
             dict_conso = {
-                "pk": str(conso.get("pk")), "individu": inscription.individu_id, "inscription": inscription.pk, "activite": inscription.activite_id,
+                "pk": str(uuid.uuid4()), "individu": inscription.individu_id, "inscription": inscription.pk, "activite": inscription.activite_id,
                 "famille": inscription.famille_id, "date": str(date), "unite": idunite, "groupe": inscription.groupe_id,
                 "heure_debut": _heure(conso.get("heure_debut")), "heure_fin": _heure(conso.get("heure_fin")), "etat": etat,
                 "categorie_tarif": inscription.categorie_tarif_id, "prestation": None,
@@ -320,5 +365,6 @@ def Securiser_donnees_save(request, donnees, data):
         "prestations": prestations,
         "memos": memos,
         "conso_masquees": conso_masquees,
+        "mises_en_attente": mises_en_attente,
         "suppressions": {"consommations": suppressions_conso, "prestations": suppressions_prestations, "memos": suppressions_memos},
     }

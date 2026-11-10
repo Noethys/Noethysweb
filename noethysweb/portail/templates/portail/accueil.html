@@ -172,7 +172,7 @@
 
 
     {# En attente #}
-    {% if nbre_approbations_requises or nbre_messages_non_lus or nbre_pieces_manquantes or nbre_informations_manquantes or nbre_vaccinations_manquantes or nbre_assurances_manquantes or cotisations_manquantes %}
+    {% if nbre_reservations_attente or nbre_approbations_requises or nbre_messages_non_lus or nbre_pieces_manquantes or nbre_informations_manquantes or nbre_vaccinations_manquantes or nbre_assurances_manquantes or cotisations_manquantes %}
         <section aria-labelledby="titre-attente" class="section-accueil">
 
             <h2 id="titre-attente" class="section-title-portail">
@@ -190,6 +190,18 @@
                         {% block url %}{% url 'portail_contact' %}{% endblock %}
                         {% block label_action %}{% trans 'Consulter' %}{% endblock %}
                         {% block label_aria %}{% blocktranslate count counter=nbre_messages_non_lus %}Consulter le nouveau message{% plural %}Consulter les nouveaux messages{% endblocktranslate %}{% endblock %}
+                    {% endembed %}
+                {% endif %}
+
+                {% if nbre_reservations_attente %}
+                    {% embed 'portail/accueil_attente.html' %}
+                        {% block card_style %}background:var(--stat-color-warning){% endblock %}
+                        {% block quantite %}{{ nbre_reservations_attente }}{% endblock %}
+                        {% block label %}{% blocktranslate count counter=nbre_reservations_attente %}Réservation sur liste d'attente{% plural %}Réservations sur liste d'attente{% endblocktranslate %}{% endblock %}
+                        {% block icone %}bi bi-hourglass-split{% endblock %}
+                        {% block url %}{% url 'portail_reservations' %}{% endblock %}
+                        {% block label_action %}{% trans 'Consulter' %}{% endblock %}
+                        {% block label_aria %}{% blocktranslate count counter=nbre_reservations_attente %}Consulter la réservation sur liste d'attente{% plural %}Consulter les réservations sur liste d'attente{% endblocktranslate %}{% endblock %}
                     {% endembed %}
                 {% endif %}
 

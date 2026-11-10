@@ -13,8 +13,10 @@ from core.models import RegimeAlimentaire
 
 def Ajouter_regime_alimentaire(request):
     """ Ajouter un régime alimentaire """
-    nom = request.POST.get("valeur")
-    regime = RegimeAlimentaire.objects.create(nom=nom)
+    nom = " ".join((request.POST.get("valeur") or "").split())[:100]
+    if not nom:
+        return JsonResponse({"erreur": "Vous devez saisir un nom"}, status=401)
+    regime = RegimeAlimentaire.objects.filter(nom__iexact=nom).first() or RegimeAlimentaire.objects.create(nom=nom)
     return JsonResponse({"id": regime.pk, "valeur": regime.nom})
 
 

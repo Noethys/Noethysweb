@@ -41,7 +41,7 @@ class Page(Onglet):
     def get_object(self):
         if not self.kwargs.get("idvaccin"):
             return None
-        return Vaccin.objects.get(pk=self.kwargs.get("idvaccin"))
+        return self.get_objet_individu(model=Vaccin, pk=self.kwargs.get("idvaccin"))
 
     def get_success_url(self):
         url = self.url_liste

@@ -38,6 +38,20 @@
 
 {% block contenu_page %}
 
+    {# Avertissement : réservations placées sur liste d'attente lors du dernier enregistrement #}
+    {% if reservations_mises_en_attente %}
+        <div class="alert alert-warning d-print-none" role="alert" id="alerte_mises_en_attente">
+            <p class="mb-1">
+                <i class="fa fa-exclamation-triangle margin-r-5" aria-hidden="true"></i>
+                <strong>{% blocktranslate count counter=reservations_mises_en_attente|length %}1 réservation a été placée sur liste d'attente{% plural %}{{ counter }} réservations ont été placées sur liste d'attente{% endblocktranslate %}</strong>
+            </p>
+            <p class="mb-1">{% blocktranslate with prenom=data.individu.prenom %}La dernière place venait d'être prise au moment de votre enregistrement. {{ prenom }} est sur la liste d'attente pour :{% endblocktranslate %}</p>
+            <ul class="mb-0">
+                {% for texte in reservations_mises_en_attente %}<li>{{ texte }}</li>{% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     {# Texte d'introduction #}
     {% if parametres_portail.reservations_intro_planning %}
         <div class="div-intro" role="note" aria-label="{% trans "Information" %}">

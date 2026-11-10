@@ -41,7 +41,7 @@ class Page(Onglet):
     def get_object(self):
         if not self.kwargs.get("idinformation"):
             return None
-        return Information.objects.get(pk=self.kwargs.get("idinformation"))
+        return self.get_objet_individu(model=Information, pk=self.kwargs.get("idinformation"))
 
     def get_success_url(self):
         url = self.url_liste

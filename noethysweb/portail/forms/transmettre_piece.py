@@ -54,9 +54,11 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields['selection_piece'].choices = [(index, piece["label"]) for index, piece in enumerate(self.liste_pieces_fournir)] + [(9999, "Un autre type de pièce")]
         self.fields['selection_piece'].initial = None
 
-        # Auteur
-        if not self.instance.pk:
-            self.fields["auteur"].initial = self.request.user
+        # Sécurité : la famille et l'auteur ne sont jamais lus depuis le navigateur
+        for nom, valeur in (("famille", self.request.user.famille.pk), ("auteur", self.request.user.pk)):
+            self.fields[nom].disabled = True
+            self.fields[nom].initial = valeur
+            self.initial[nom] = valeur
 
         # Choix de l'individu
         rattachements = Rattachement.objects.select_related("individu").filter(famille=self.request.user.famille).exclude(individu__in=self.request.user.famille.individus_masques.all()).order_by("categorie")

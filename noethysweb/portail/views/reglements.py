@@ -10,20 +10,28 @@ from django.views.generic import TemplateView
 from django.utils.translation import gettext as _
 from core.models import Reglement, ModeleImpression, Recu
 from portail.views.base import CustomView
+from core.utils import utils_portail
 
 
 def imprimer_recu(request):
     """ Imprimer un reçu de règlement au format PDF """
     idreglement = int(request.POST.get("idreglement", 0))
-    idmodele = int(request.POST.get("idmodele_impression", 0))
+
+    # Vérifie que le téléchargement est autorisé (le modèle utilisé est celui paramétré, pas celui envoyé par le navigateur)
+    parametres_portail = utils_portail.Get_dict_parametres()
+    idmodele = parametres_portail.get("reglements_modele_impression_recu")
+    if not parametres_portail.get("reglements_autoriser_telechargement_recu") or not idmodele:
+        return JsonResponse({"erreur": "Accès interdit"}, status=401)
 
     # Importation des options d'impression
-    modele_impression = ModeleImpression.objects.get(pk=idmodele)
+    modele_impression = ModeleImpression.objects.get(pk=int(idmodele))
     dict_options = json.loads(modele_impression.options)
     dict_options["modele"] = modele_impression.modele_document
 
     # Importation du règlement
-    reglement = Reglement.objects.get(pk=idreglement, famille=request.user.famille)
+    reglement = Reglement.objects.filter(pk=idreglement, famille=request.user.famille).first()
+    if not reglement:
+        return JsonResponse({"erreur": "Accès interdit"}, status=401)
 
     # Création du numéro de reçu
     numero = 1

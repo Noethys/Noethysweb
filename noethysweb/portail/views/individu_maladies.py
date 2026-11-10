@@ -13,8 +13,10 @@ from core.models import TypeMaladie
 
 def Ajouter_maladie(request):
     """ Ajouter un type de maladie """
-    nom = request.POST.get("valeur")
-    maladie = TypeMaladie.objects.create(nom=nom)
+    nom = " ".join((request.POST.get("valeur") or "").split())[:100]
+    if not nom:
+        return JsonResponse({"erreur": "Vous devez saisir un nom"}, status=401)
+    maladie = TypeMaladie.objects.filter(nom__iexact=nom).first() or TypeMaladie.objects.create(nom=nom)
     return JsonResponse({"id": maladie.pk, "valeur": maladie.nom})
 
 

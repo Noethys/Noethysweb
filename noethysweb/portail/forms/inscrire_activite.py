@@ -103,6 +103,12 @@ class Formulaire(FormulaireBase, ModelForm):
         self.fields["individu"].choices = [(None, "---------")] + [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
         self.fields["individu"].required = True
 
+        # Sécurité : ces champs ne sont jamais lus depuis le navigateur
+        for nom, valeur in (("famille", self.request.user.famille.pk), ("etat", "ATTENTE"), ("categorie", "activites"), ("code", "inscrire_activite")):
+            self.fields[nom].disabled = True
+            self.fields[nom].initial = valeur
+            self.initial[nom] = valeur
+
         # Éligibilité des individus pour chaque activité ouverte
         self.dict_categories = {rattachement.individu_id: rattachement.categorie for rattachement in rattachements}
         eligibilites = {}

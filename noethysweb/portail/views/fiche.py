@@ -10,7 +10,7 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from django.db.models.fields.files import FieldFile
@@ -58,8 +58,20 @@ class Onglet(CustomView):
 
     def get_rattachement(self):
         if not self.rattachement and self.onglet_actif.startswith("individu_"):
-            self.rattachement = Rattachement.objects.select_related("individu", "famille").get(pk=self.kwargs['idrattachement'])
+            self.rattachement = Rattachement.objects.select_related("individu", "famille").filter(pk=self.kwargs['idrattachement'], famille=self.request.user.famille).first()
+            if not self.rattachement:
+                raise Http404
         return self.rattachement
+
+    def get_objet_individu(self, model=None, pk=None, avec_famille=False):
+        """ Sécurité : renvoie l'objet demandé uniquement s'il appartient à l'individu (et à la famille) de la fiche """
+        conditions = {"pk": pk, "individu": self.get_individu()}
+        if avec_famille:
+            conditions["famille"] = self.request.user.famille
+        objet = model.objects.filter(**conditions).first()
+        if not objet:
+            raise Http404
+        return objet
 
     def get_categorie_rattachement(self):
         rattachement = self.get_rattachement()
@@ -100,6 +112,19 @@ class Onglet(CustomView):
         form_kwargs["mode"] = getattr(self, "mode", None)
         return form_kwargs
 
+    def get_form(self, form_class=None):
+        """ Sécurité : les champs famille et individu ne sont jamais lus depuis le navigateur """
+        form = super(Onglet, self).get_form(form_class)
+        valeurs = {"famille": self.request.user.famille.pk}
+        if self.onglet_actif.startswith("individu_"):
+            valeurs["individu"] = self.get_rattachement().individu_id
+        for nom, valeur in valeurs.items():
+            if nom in form.fields:
+                form.fields[nom].disabled = True
+                form.fields[nom].initial = valeur
+                form.initial[nom] = valeur
+        return form
+
     def form_save(self, form=None):
         """ Pour enregistrement direct des données """
         # super().form_valid(form)
@@ -137,6 +162,10 @@ class Onglet(CustomView):
 
     def form_valid(self, form):
         """ Enregistrement des modifications """
+        # Suppression : sans ce renvoi, cette méthode interceptait la confirmation et rien n'était supprimé
+        if getattr(self, "verbe_action", None) == "Supprimer":
+            return self.delete(self.request)
+
         if not form.changed_data:
             messages.add_message(self.request, messages.INFO, _("Aucune modification n'a été enregistrée"))
         else:

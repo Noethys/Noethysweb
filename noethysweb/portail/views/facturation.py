@@ -51,8 +51,8 @@ def get_detail_facture(request):
     idfacture = int(request.POST.get("idfacture", 0))
 
     # Importation de la facture
-    facture = Facture.objects.get(pk=idfacture)
-    if facture.famille != request.user.famille:
+    facture = Facture.objects.filter(pk=idfacture, famille=request.user.famille).first()
+    if not facture or not utils_portail.Get_parametre(code="facturation_autoriser_detail_facture"):
         return JsonResponse({"texte": "Accès interdit"}, status=401)
 
     # Importation des prestations
@@ -70,14 +70,15 @@ def get_detail_facture(request):
 def imprimer_facture(request):
     """ Imprimer une facture au format PDF """
     idfacture = int(request.POST.get("idfacture", 0))
-    idmodele_impression = int(request.POST.get("idmodele_impression", 0))
 
-    # Vérifie que la facture appartient à la famille connectée
-    if not Facture.objects.filter(pk=idfacture, famille=request.user.famille).exists():
+    # Vérifie que le téléchargement est autorisé et que la facture appartient à la famille connectée
+    parametres_portail = utils_portail.Get_dict_parametres()
+    idmodele_impression = parametres_portail.get("facturation_modele_impression_facture")
+    if not parametres_portail.get("facturation_autoriser_telechargement_facture") or not idmodele_impression or not Facture.objects.filter(pk=idfacture, famille=request.user.famille).exists():
         return JsonResponse({"erreur": "Accès interdit"}, status=401)
 
     # Importation des options d'impression
-    modele_impression = ModeleImpression.objects.get(pk=idmodele_impression)
+    modele_impression = ModeleImpression.objects.get(pk=int(idmodele_impression))
     dict_options = json.loads(modele_impression.options)
     dict_options["modele"] = modele_impression.modele_document
 

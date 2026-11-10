@@ -32,6 +32,10 @@ class Accueil(CustomView, TemplateView):
         # Messages non lus
         context['nbre_messages_non_lus'] = len(PortailMessage.objects.filter(famille=self.request.user.famille, utilisateur__isnull=False, date_lecture__isnull=True))
 
+        # Réservations à venir sur liste d'attente
+        context['nbre_reservations_attente'] = Consommation.objects.filter(inscription__famille=self.request.user.famille, etat="attente", date__gte=datetime.date.today()) \
+                                                .exclude(individu__in=self.request.user.famille.individus_masques.all()).count()
+
         # Approbations
         approbations_requises = utils_approbations.Get_approbations_requises(famille=self.request.user.famille)
         context['nbre_approbations_requises'] = approbations_requises["nbre_total"]

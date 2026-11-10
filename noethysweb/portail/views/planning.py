@@ -11,8 +11,8 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext as _
 from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib import messages
-from core.models import Individu, Inscription, PortailPeriode, Vacance, Ferie, Activite, JOURS_COMPLETS_SEMAINE, AdresseMail, ModeleEmail, Mail, Destinataire, Rattachement
-from core.utils import utils_portail
+from core.models import Individu, Inscription, PortailPeriode, Vacance, Ferie, Activite, JOURS_COMPLETS_SEMAINE, AdresseMail, ModeleEmail, Mail, Destinataire, Rattachement, Unite
+from core.utils import utils_portail, utils_dates
 from outils.utils import utils_email
 from consommations.views.grille import Get_periode, Get_generic_data, Save_grille, Preparer_dict_donnees_reservations
 from consommations.forms.grille_forfaits import Formulaire as form_forfaits
@@ -21,6 +21,7 @@ from portail.templatetags.planning import is_ajout_allowed
 from portail.utils import utils_approbations
 from portail.utils import utils_securite_grille
 from portail.views.base import CustomView
+from portail.views.reservations import Is_blocage_impayes
 from reglements.utils import utils_ventilation
 
 
@@ -55,30 +56,49 @@ class View(CustomView, TemplateView):
         if idadresse_exp:
             self.Envoi_mail_confirmation(request=request, resultat=resultat, idadresse_exp=idadresse_exp)
 
+        # Si des réservations ont été placées sur liste d'attente (séance devenue complète), on réaffiche le planning avec un avertissement
+        if donnees.get("mises_en_attente"):
+            request.session["reservations_mises_en_attente"] = self.Get_textes_mises_en_attente(donnees["mises_en_attente"])
+            return HttpResponseRedirect(reverse_lazy("portail_planning", kwargs=self.kwargs))
+
         return HttpResponseRedirect(reverse_lazy("portail_reservations"))
+
+    def Get_textes_mises_en_attente(self, mises_en_attente=[]):
+        """ Renvoie une ligne de texte par réservation placée sur liste d'attente. Ex : mercredi 18 novembre 2026 (Journée) """
+        dict_unites = {unite.pk: unite.nom for unite in Unite.objects.filter(pk__in=[item["unite"] for item in mises_en_attente])}
+        return ["%s (%s)" % (utils_dates.DateComplete(datetime.date.fromisoformat(item["date"])), dict_unites.get(item["unite"], "")) for item in sorted(mises_en_attente, key=lambda item: item["date"])]
 
     def test_func(self):
         """ Vérifie que l'utilisateur peut se connecter à cette page """
         if not super(View, self).test_func():
             return False
-        inscription = Inscription.objects.filter(famille=self.request.user.famille, individu_id=self.kwargs.get('idindividu'), activite_id=self.kwargs["idactivite"])
-        if not inscription:
-            logger.debug("test_func False : Pas d'inscription valide.")
+        famille = self.request.user.famille
+        if not self.Get_inscriptions_autorisees().exists():
+            logger.debug("test_func False : Pas d'inscription valide avec réservations autorisées.")
             return False
-        if not inscription.first().internet_reservations:
-            logger.debug("test_func False : la case internet_reservations est décochée sur cette inscription.")
+        if not Rattachement.objects.filter(famille=famille, individu_id=self.kwargs.get('idindividu'), individu__deces=False).exists() \
+                or famille.individus_masques.filter(pk=self.kwargs.get('idindividu')).exists():
+            logger.debug("test_func False : individu non rattaché, masqué ou décédé.")
             return False
         if not self.request.user.famille.internet_reservations:
             logger.debug("test_func False : la case internet_reservations est décochée sur cette fiche famille.")
             return False
-        periode = PortailPeriode.objects.select_related("activite").prefetch_related("categories").get(pk=self.kwargs.get('idperiode'))
+        periode = PortailPeriode.objects.select_related("activite").prefetch_related("categories").filter(pk=self.kwargs.get('idperiode'), activite_id=self.kwargs["idactivite"]).first()
         if not periode or not periode.Is_active_today():
             logger.debug("test_func False : Pas de période active disponible pour cette activité.")
             return False
         if not periode.Is_famille_authorized(famille=self.request.user.famille):
             logger.debug("test_func False : Famille non autorisée.")
             return False
+        if Is_blocage_impayes(famille=famille, parametres_portail=utils_portail.Get_dict_parametres()):
+            logger.debug("test_func False : réservations bloquées pour cause d'impayés.")
+            return False
         return True
+
+    def Get_inscriptions_autorisees(self):
+        """ Inscriptions de l'individu pour lesquelles la famille a le droit de réserver (mêmes conditions que la page Réservations) """
+        return Inscription.objects.filter(famille=self.request.user.famille, individu_id=self.kwargs.get('idindividu'), activite_id=self.kwargs["idactivite"],
+                                          statut="ok", internet_reservations=True)
 
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
@@ -86,6 +106,7 @@ class View(CustomView, TemplateView):
         context['form_appliquer_semaine_type'] = form_appliquer_semaine_type
         context['jours_complets_semaine'] = JOURS_COMPLETS_SEMAINE
         context['data'] = self.Get_data_planning()
+        context['reservations_mises_en_attente'] = self.request.session.pop("reservations_mises_en_attente", None)
         if context['data']["tarifs_credits_exists"]:
             context['form_forfaits'] = form_forfaits(inscriptions=context['data']["liste_inscriptions"], is_portail=True)
         return context
@@ -145,7 +166,7 @@ class View(CustomView, TemplateView):
 
         # Importation de toutes les inscriptions de l'individu
         data['liste_inscriptions'] = []
-        for inscription in Inscription.objects.select_related('individu', 'activite', 'groupe', 'famille', 'categorie_tarif').filter(famille=self.request.user.famille, individu=individu, activite=periode_reservation.activite):
+        for inscription in self.Get_inscriptions_autorisees().select_related('individu', 'activite', 'groupe', 'famille', 'categorie_tarif'):
             if inscription.Is_inscription_in_periode(data["date_min"], data["date_max"]):
                 data['liste_inscriptions'].append(inscription)
 

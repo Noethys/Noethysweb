@@ -14,6 +14,19 @@ from portail.views.base import CustomView
 from portail.utils import utils_approbations
 
 
+def Is_blocage_impayes(famille=None, parametres_portail={}):
+    """ Renvoie True si les réservations de la famille sont bloquées pour cause d'impayés """
+    blocage_impayes = parametres_portail.get("reservations_blocage_impayes", None)
+    if not blocage_impayes or famille.blocage_impayes_off:
+        return False
+    blocage_impayes = decimal.Decimal(blocage_impayes)
+    factures = False
+    if blocage_impayes > decimal.Decimal(10000):
+        blocage_impayes -= decimal.Decimal(10000)
+        factures = True
+    return utils_familles.Get_solde_famille(idfamille=famille.pk, date_situation=datetime.date.today(), factures=factures) >= blocage_impayes
+
+
 class View(CustomView, TemplateView):
     menu_code = "portail_reservations"
     template_name = "portail/reservations.html"
@@ -64,16 +77,6 @@ class View(CustomView, TemplateView):
         context['nbre_approbations_requises'] = approbations_requises["nbre_total"]
 
         # Blocage si impayés
-        blocage_impayes = context["parametres_portail"].get("reservations_blocage_impayes", None)
-        context["blocage_impayes"] = False
-
-        if blocage_impayes and not self.request.user.famille.blocage_impayes_off:
-            blocage_impayes = decimal.Decimal(blocage_impayes)
-            factures = False
-            if blocage_impayes > decimal.Decimal(10000):
-                blocage_impayes -= decimal.Decimal(10000)
-                factures = True
-            if utils_familles.Get_solde_famille(idfamille=self.request.user.famille.pk, date_situation=datetime.date.today(), factures=factures) >= blocage_impayes:
-                context["blocage_impayes"] = True
+        context["blocage_impayes"] = Is_blocage_impayes(famille=self.request.user.famille, parametres_portail=context["parametres_portail"])
 
         return context
