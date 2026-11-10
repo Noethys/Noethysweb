@@ -28,7 +28,7 @@ LISTE_RUBRIQUES = [
     ("Page de la facturation", ["facturation_afficher_page", "facturation_intro", "facturation_afficher_solde_famille", "facturation_afficher_numero_facture", "facturation_afficher_solde_facture",
                                 "facturation_autoriser_detail_facture", "facturation_autoriser_telechargement_facture", "facturation_modele_impression_facture"]),
     ("Paiement en ligne", ["paiement_ligne_systeme", "paiement_ligne_mode_reglement", "paiement_ligne_compte_bancaire", "paiement_ligne_montant_minimal",
-                           "paiement_ligne_multi_factures", "paiement_ligne_off_si_prelevement", "payfip_mode", "payzen_site_id", "payzen_certificat_test",
+                           "paiement_ligne_multi_factures", "paiement_ligne_off_si_prelevement", "payfip_protocole", "payfip_mode", "payzen_site_id", "payzen_certificat_test",
                            "payzen_certificat_production", "payzen_mode", "payzen_algo", "payzen_echelonnement",
                            "helloasso_organisation_slug", "helloasso_client_id", "helloasso_client_secret", "helloasso_mode", "helloasso_cle_notification"]),
     ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu", "reglements_modele_impression_recu"]),
@@ -106,6 +106,7 @@ EXTRA_HTML = """
         $('#div_id_paiement_ligne_montant_minimal').hide();
         $('#div_id_paiement_ligne_multi_factures').hide();
         $('#div_id_paiement_ligne_off_si_prelevement').hide();
+        $('#div_id_payfip_protocole').hide();
         $('#div_id_payfip_mode').hide();
         $('#div_id_payzen_site_id').hide();
         $('#div_id_payzen_certificat_test').hide();
@@ -126,6 +127,7 @@ EXTRA_HTML = """
             $('#div_id_paiement_ligne_off_si_prelevement').show();
         };
         if ($("#id_paiement_ligne_systeme").val() == "payfip") {
+            $('#div_id_payfip_protocole').show();
             $('#div_id_payfip_mode').show();
         };
         if ($("#id_paiement_ligne_systeme").val() == "payzen") {

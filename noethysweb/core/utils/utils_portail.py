@@ -135,6 +135,7 @@ LISTE_PARAMETRES = [
     Parametre(code="paiement_ligne_montant_minimal", label="Montant minimal autorisé", type="decimal", valeur=decimal.Decimal("1.00")),
     Parametre(code="paiement_ligne_multi_factures", label="Autoriser le paiement multi factures", type="boolean", valeur=False, help_text="Cochez la case pour autoriser le paiement de plusieurs factures à la fois avec un seul paiement."),
     Parametre(code="paiement_ligne_off_si_prelevement", label="Désactiver le paiement en ligne si prélèvement auto.", type="boolean", valeur=True),
+    Parametre(code="payfip_protocole", label="Protocole PayFiP", type="choix", valeur="url", choix=[("url", "Mode URL"), ("ws", "Web service (recommandé)")], help_text="Le mode web service est plus sûr : le résultat de chaque paiement est vérifié auprès de la DGFiP. Il nécessite l'option 'PayFiP régie Web Service' auprès de votre correspondant moyens de paiement DGFiP."),
     Parametre(code="payfip_mode", label="Mode de fonctionnement", type="choix", valeur="test", choix=[("test", "Test"), ("validation", "Validation"), ("production", "Production")], help_text="Sélectionnez le mode de fonctionnement."),
     Parametre(code="payzen_site_id", label="Identifiant boutique", type="char_1ligne", valeur="", help_text="Saisissez l'identifiant boutique que vous trouverez sur le backoffice Payzen."),
     Parametre(code="payzen_certificat_test", label="Certificat de test", type="char_1ligne", valeur="", help_text="Saisissez le certificat de test que vous trouverez sur le backoffice Payzen."),

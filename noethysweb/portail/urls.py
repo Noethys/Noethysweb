@@ -13,6 +13,7 @@ from portail.views import reset_password, change_password, reservations, plannin
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
                             transmettre_piece, activites, inscrire_activite, attente_paiement, cotisations, sondage, famille_questionnaire, famille_parametres, pages_speciales, \
                             creer_compte, creer_individu, accessibilite
+from portail.utils.paiements import payfip, payzen, helloasso
 
 
 urlpatterns = [
@@ -134,12 +135,13 @@ urlpatterns = [
     path('retour_payzen_error', facturation.View_retour_paiement.as_view(etat="error"), name='retour_payzen_error'),
     path('retour_payzen_refused', facturation.View_retour_paiement.as_view(etat="refused"), name='retour_payzen_refused'),
     path('retour_payzen_success', facturation.View_retour_paiement.as_view(etat="success"), name='retour_payzen_success'),
-    path('ipn_payzen', facturation.ipn_payzen, name='ipn_payzen'),
-    path('retour_payfip', facturation.retour_payfip, name='retour_payfip'),
+    path('ipn_payzen', payzen.ipn_payzen, name='ipn_payzen'),
+    path('retour_payfip', payfip.retour_payfip, name='retour_payfip'),
+    path('retour_payfip_utilisateur', payfip.retour_payfip_utilisateur, name='retour_payfip_utilisateur'),
     path('retour_helloasso_cancel', facturation.View_retour_paiement.as_view(etat="cancel"), name='retour_helloasso_cancel'),
     path('retour_helloasso_error', facturation.View_retour_paiement.as_view(etat="error"), name='retour_helloasso_error'),
     path('retour_helloasso_success', facturation.View_retour_paiement.as_view(etat="success"), name='retour_helloasso_success'),
-    path('notification_helloasso/<str:cle>', facturation.notification_helloasso, name='notification_helloasso'),
+    path('notification_helloasso/<str:cle>', helloasso.notification_helloasso, name='notification_helloasso'),
     path('attente_paiement', attente_paiement.View.as_view(), name='portail_attente_paiement'),
 
     # Règlements
