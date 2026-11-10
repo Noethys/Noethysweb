@@ -13,7 +13,7 @@ from crispy_forms.bootstrap import Field, InlineCheckboxes
 from core.utils.utils_commandes import Commandes
 from core.utils.utils_texte import Creation_tout_cocher
 from core.models import Activite, ModeleEmail, JOURS_SEMAINE, JOURS_COMPLETS_SEMAINE
-from core.widgets import DateTimePickerWidget
+from core.widgets import DateTimePickerWidget, DatePickerWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
@@ -60,10 +60,24 @@ class Formulaire(FormulaireBase, ModelForm):
         model = Activite
         fields = ["portail_inscriptions_affichage", "portail_inscriptions_date_debut", "portail_inscriptions_date_fin", "portail_reservations_affichage",
                   "portail_reservations_limite", "portail_reservations_limite_suppr", "portail_afficher_dates_passees", "portail_masquer_capacite", "portail_inscriptions_bloquer_si_complet", "portail_inscriptions_imposer_pieces",
+                  "portail_inscriptions_categories", "portail_inscriptions_age_min", "portail_inscriptions_age_max", "portail_inscriptions_age_date",
+                  "portail_inscriptions_age_date_specifique", "portail_inscriptions_non_eligibles",
                   "reattribution_auto", "reattribution_adresse_exp", "reattribution_delai", "reattribution_modele_email",
                   "validation_type", "validation_modele_email",
                   ]
+        widgets = {
+            "portail_inscriptions_categories": forms.CheckboxSelectMultiple,
+            "portail_inscriptions_age_date_specifique": DatePickerWidget(),
+            "portail_inscriptions_age_min": forms.NumberInput(attrs={"min": 0, "max": 120, "placeholder": "Aucun"}),
+            "portail_inscriptions_age_max": forms.NumberInput(attrs={"min": 0, "max": 120, "placeholder": "Aucun"}),
+        }
         help_texts = {
+            "portail_inscriptions_categories": "Seuls les membres rattachés à la famille dans les catégories cochées pourront être sélectionnés. Aucune case cochée = pas de restriction.",
+            "portail_inscriptions_age_min": "Laissez vide pour ne pas limiter. Âge inclus.",
+            "portail_inscriptions_age_max": "Laissez vide pour ne pas limiter. Âge inclus.",
+            "portail_inscriptions_age_date": "Sélectionnez la date à laquelle l'âge de l'individu est calculé. Si l'activité n'a pas de date de début, la date de la demande est utilisée.",
+            "portail_inscriptions_age_date_specifique": "Saisissez la date à laquelle l'âge est calculé.",
+            "portail_inscriptions_non_eligibles": "Sélectionnez si les membres de la famille qui ne remplissent pas les conditions doivent apparaître grisés avec le motif ou ne pas apparaître du tout.",
             "portail_inscriptions_affichage": "Sélectionnez Autoriser pour permettre aux usagers de demander une inscription à cette activité depuis le portail. Cette demande devra être validée par un utilisateur.",
             "portail_reservations_affichage": "Sélectionnez Autoriser pour permettre aux usagers de gérer leurs réservations pour cette activité sur le portail.",
             "portail_inscriptions_bloquer_si_complet": "L'usager ne peut pas envoyer sa demande d'inscription si l'activité est complète.",
@@ -154,6 +168,17 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("portail_inscriptions_bloquer_si_complet"),
                 Field("portail_inscriptions_imposer_pieces"),
             ),
+            Fieldset("Individus autorisés à l'inscription",
+                InlineCheckboxes("portail_inscriptions_categories"),
+                Field("portail_inscriptions_age_min"),
+                Field("portail_inscriptions_age_max"),
+                Field("portail_inscriptions_age_date"),
+                Div(
+                    Field("portail_inscriptions_age_date_specifique"),
+                    id="bloc_age_date_specifique"
+                ),
+                Field("portail_inscriptions_non_eligibles"),
+            ),
             Fieldset("Réservations",
                 Field("portail_reservations_affichage"),
 
@@ -200,6 +225,18 @@ class Formulaire(FormulaireBase, ModelForm):
         )
 
     def clean(self):
+        # Individus autorisés à l'inscription
+        age_min, age_max = self.cleaned_data.get("portail_inscriptions_age_min"), self.cleaned_data.get("portail_inscriptions_age_max")
+        if age_min is not None and age_max is not None and age_min > age_max:
+            self.add_error("portail_inscriptions_age_max", "L'âge maximal doit être supérieur ou égal à l'âge minimal")
+            return
+        if self.cleaned_data.get("portail_inscriptions_age_date") == "DATE":
+            if not self.cleaned_data.get("portail_inscriptions_age_date_specifique"):
+                self.add_error("portail_inscriptions_age_date_specifique", "Vous devez saisir la date de calcul de l'âge")
+                return
+        else:
+            self.cleaned_data["portail_inscriptions_age_date_specifique"] = None
+
         # Inscriptions
         if self.cleaned_data["portail_inscriptions_affichage"] == "PERIODE":
             if not self.cleaned_data["portail_inscriptions_date_debut"]:
@@ -308,6 +345,15 @@ function On_change_affichage_inscriptions() {
 $(document).ready(function() {
     $('#id_portail_inscriptions_affichage').change(On_change_affichage_inscriptions);
     On_change_affichage_inscriptions.call($('#id_portail_inscriptions_affichage').get(0));
+});
+
+// Date de calcul de l'âge
+function On_change_age_date() {
+    $('#bloc_age_date_specifique').toggle($(this).val() == 'DATE');
+}
+$(document).ready(function() {
+    $('#id_portail_inscriptions_age_date').change(On_change_age_date);
+    On_change_age_date.call($('#id_portail_inscriptions_age_date').get(0));
 });
 
 // Délai ajout

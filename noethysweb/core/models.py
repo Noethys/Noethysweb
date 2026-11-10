@@ -1176,6 +1176,14 @@ class Activite(models.Model):
     portail_inscriptions_date_fin = models.DateTimeField(verbose_name="Date de fin d'affichage", blank=True, null=True)
     portail_inscriptions_imposer_pieces = models.BooleanField(verbose_name="Imposer le téléchargement des pièces à fournir", default=False)
     portail_inscriptions_bloquer_si_complet = models.BooleanField(verbose_name="Empêcher l'inscription si activité complète", default=False)
+    portail_inscriptions_categories = MultiSelectField(verbose_name="Catégories autorisées", max_length=20, choices=[("1", "Représentants"), ("2", "Enfants")], blank=True, null=True)
+    portail_inscriptions_age_min = models.PositiveSmallIntegerField(verbose_name="Âge minimal", blank=True, null=True)
+    portail_inscriptions_age_max = models.PositiveSmallIntegerField(verbose_name="Âge maximal", blank=True, null=True)
+    choix_date_calcul_age = [("DEBUT_ACTIVITE", "Date de début de l'activité"), ("DEMANDE", "Date de la demande"), ("DATE", "Date spécifique")]
+    portail_inscriptions_age_date = models.CharField(verbose_name="Âge calculé au", max_length=50, choices=choix_date_calcul_age, default="DEBUT_ACTIVITE")
+    portail_inscriptions_age_date_specifique = models.DateField(verbose_name="Date spécifique", blank=True, null=True)
+    choix_affichage_non_eligibles = [("AFFICHER", "Afficher grisés avec le motif"), ("MASQUER", "Masquer de la liste")]
+    portail_inscriptions_non_eligibles = models.CharField(verbose_name="Individus non éligibles", max_length=50, choices=choix_affichage_non_eligibles, default="AFFICHER")
     choix_affichage_reservations = [("JAMAIS", "Ne pas autoriser"), ("TOUJOURS", "Autoriser")]
     portail_reservations_affichage = models.CharField(verbose_name="Réservations autorisées", max_length=100, choices=choix_affichage_reservations, default="JAMAIS")
     portail_reservations_limite = models.CharField(verbose_name="Date limite d'ajout d'une réservation", max_length=200, blank=True, null=True)
@@ -1204,6 +1212,30 @@ class Activite(models.Model):
         db_table = 'activites'
         verbose_name = "activité"
         verbose_name_plural = "activités"
+
+    def Get_date_calcul_age_portail(self):
+        """ Retourne la date à laquelle est calculé l'âge pour les inscriptions depuis le portail """
+        if self.portail_inscriptions_age_date == "DATE" and self.portail_inscriptions_age_date_specifique:
+            return self.portail_inscriptions_age_date_specifique
+        if self.portail_inscriptions_age_date == "DEBUT_ACTIVITE" and self.date_debut:
+            return self.date_debut
+        return datetime.date.today()
+
+    def Get_motif_non_eligible_portail(self, individu=None, categorie=None):
+        """ Retourne le motif de non-éligibilité d'un individu à l'inscription depuis le portail (None si éligible) """
+        categories = [int(c) for c in (self.portail_inscriptions_categories or [])]
+        if categories and categorie not in categories:
+            return _("Réservée aux %s") % " et aux ".join([label.lower() for code, label in [(1, _("Représentants")), (2, _("Enfants"))] if code in categories])
+        if self.portail_inscriptions_age_min is not None or self.portail_inscriptions_age_max is not None:
+            date_calcul = self.Get_date_calcul_age_portail()
+            age = individu.Get_age(today=date_calcul)
+            if age is None:
+                return _("Date de naissance non renseignée")
+            if self.portail_inscriptions_age_min is not None and age < self.portail_inscriptions_age_min:
+                return _("Âge minimal : %d ans") % self.portail_inscriptions_age_min
+            if self.portail_inscriptions_age_max is not None and age > self.portail_inscriptions_age_max:
+                return _("Âge maximal : %d ans") % self.portail_inscriptions_age_max
+        return None
 
     def __str__(self):
         return self.nom

@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime
+import datetime, json
 from django import forms
 from django.forms import ModelForm
 from django.db.models import Q
@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Div
 from crispy_forms.bootstrap import Field
-from core.models import Activite, Rattachement, Groupe, PortailRenseignement
+from core.models import Activite, Rattachement, Groupe, PortailRenseignement, Individu
 from core.utils.utils_commandes import Commandes
 from portail.forms.fiche import FormulaireBase
 from individus.utils import utils_pieces_manquantes
@@ -92,14 +92,27 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.use_custom_control = False
         self.helper.attrs = {'enctype': 'multipart/form-data'}
 
-        # Individu
-        rattachements = Rattachement.objects.select_related("individu").filter(famille=self.request.user.famille).exclude(individu__in=self.request.user.famille.individus_masques.all()).order_by("categorie")
-        self.fields["individu"].choices = [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
-        self.fields["individu"].required = True
-
         # Activité
         conditions = (Q(portail_inscriptions_affichage="TOUJOURS") | (Q(portail_inscriptions_affichage="PERIODE") & Q(portail_inscriptions_date_debut__lte=datetime.datetime.now()) & Q(portail_inscriptions_date_fin__gte=datetime.datetime.now())))
-        self.fields["activite"].queryset = Activite.objects.filter(conditions).order_by("-date_fin", "nom")
+        activites = Activite.objects.filter(conditions).order_by("-date_fin", "nom")
+        self.fields["activite"].queryset = activites
+
+        # Individu
+        rattachements = Rattachement.objects.select_related("individu").filter(famille=self.request.user.famille, individu__deces=False).exclude(individu__in=self.request.user.famille.individus_masques.all()).order_by("categorie")
+        self.fields["individu"].queryset = Individu.objects.filter(pk__in=[rattachement.individu_id for rattachement in rattachements])
+        self.fields["individu"].choices = [(None, "---------")] + [(rattachement.individu_id, rattachement.individu.Get_nom()) for rattachement in rattachements]
+        self.fields["individu"].required = True
+
+        # Éligibilité des individus pour chaque activité ouverte
+        self.dict_categories = {rattachement.individu_id: rattachement.categorie for rattachement in rattachements}
+        eligibilites = {}
+        for activite in activites:
+            motifs = {}
+            for rattachement in rattachements:
+                motif = activite.Get_motif_non_eligible_portail(individu=rattachement.individu, categorie=rattachement.categorie)
+                if motif:
+                    motifs[rattachement.individu_id] = str(motif)
+            eligibilites[activite.pk] = {"masquer": activite.portail_inscriptions_non_eligibles == "MASQUER", "motifs": motifs}
 
         # Affichage
         self.helper.layout = Layout(
@@ -107,14 +120,24 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden("etat", value="ATTENTE"),
             Hidden("categorie", value="activites"),
             Hidden("code", value="inscrire_activite"),
-            Field("individu"),
             Field("activite"),
+            Field("individu"),
+            HTML("<div class='row'><div class='offset-md-2 col-md-10' id='bloc_non_eligibles' aria-live='polite'></div></div>"),
             Div(id="form_extra"),
+            HTML("<script>var eligibilites = %s;</script>" % json.dumps(eligibilites)),
             HTML(EXTRA_SCRIPT),
             Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer la demande d'inscription"), annuler_url="{% url 'portail_activites' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
         self.Appliquer_version_bootstrap(5)
 
+    def clean(self):
+        cleaned_data = super().clean()
+        activite, individu = cleaned_data.get("activite"), cleaned_data.get("individu")
+        if activite and individu:
+            motif = activite.Get_motif_non_eligible_portail(individu=individu, categorie=self.dict_categories.get(individu.pk))
+            if motif:
+                self.add_error("individu", _("Cet individu ne peut pas être inscrit à cette activité (%s)") % motif)
+        return cleaned_data
 
 EXTRA_SCRIPT = """
 <script>
@@ -131,8 +154,49 @@ function On_change_activite() {
         }
     });
 };
+// Filtre la liste des individus selon les conditions de l'activité sélectionnée
+var options_individus = null;
+function Actualiser_individus() {
+    var select = $("#id_individu");
+    if (options_individus === null) {
+        options_individus = select.find("option").filter(function() { return $(this).val(); }).map(function() { return {id: $(this).val(), nom: $(this).text()}; }).get();
+    }
+    var valeur = select.val();
+    var parametres = eligibilites[$("#id_activite").val()] || {masquer: false, motifs: {}};
+    var nbre_eligibles = 0, non_eligibles = [];
+    select.empty().append(new Option("---------", ""));
+    $.each(options_individus, function(index, individu) {
+        var motif = parametres.motifs[individu.id];
+        if (!motif) {
+            nbre_eligibles += 1;
+            select.append(new Option(individu.nom, individu.id, false, individu.id == valeur));
+        } else {
+            non_eligibles.push({nom: individu.nom, motif: motif});
+            if (!parametres.masquer) {
+                select.append($("<option>", {value: individu.id, disabled: true, text: individu.nom + " (" + motif.toLowerCase() + ")"}));
+            }
+        }
+    });
+
+    // Message d'information
+    var bloc = $("#bloc_non_eligibles").empty();
+    if ($("#id_activite").val() && nbre_eligibles === 0) {
+        bloc.html("<div class='alert alert-warning'><i class='fa fa-exclamation-triangle margin-r-5' aria-hidden='true'></i>" + "Aucun membre de votre famille ne remplit les conditions d'inscription à cette activité." + "</div>");
+    } else if (non_eligibles.length && !parametres.masquer) {
+        var liste = $("<ul class='mb-0'>");
+        $.each(non_eligibles, function(index, item) { liste.append($("<li>").text(item.nom + " : " + item.motif)); });
+        bloc.append($("<div class='alert alert-light border'>").append("<i class='fa fa-info-circle margin-r-5' aria-hidden='true'></i>Non éligibles à cette activité :", liste));
+    }
+    $("#portail_inscrire_activite_form button[type='submit']").prop("disabled", $("#id_activite").val() && nbre_eligibles === 0);
+};
+
 $(document).ready(function() {
-    $('#id_activite').change(On_change_activite);
+    $('#id_activite').change(function() {
+        Actualiser_individus();
+        On_change_activite();
+    });
+    $('#id_individu').change(On_change_activite);
+    Actualiser_individus();
     On_change_activite.call($('#id_activite').get(0));
 });
 
