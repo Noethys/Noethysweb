@@ -45,9 +45,9 @@ class ExporterBase():
             return False
 
         # Renvoie le fichier à télécharger
-        if self.code_format == "magnus":
+        if self.code_format in ("magnus", "corail"):
             # Création du fichier ZIP
-            nom_fichier_zip = utils_texte.Supprimer_accents(self.lot.nom + ".zip")
+            nom_fichier_zip = utils_texte.Supprimer_accents(self.lot.nom.replace("/", "-").replace("\\", "-") + ".zip")
             shutil.make_archive(os.path.join(settings.MEDIA_ROOT, self.rep_base, nom_fichier_zip.replace(".zip", "")), "zip", self.rep_destination)
             return os.path.join(settings.MEDIA_URL, self.rep_base, nom_fichier_zip)
         else:

@@ -14,7 +14,7 @@ from core.models import PesModele, ModeleDocument, CHOIX_FORMAT_EXPORT_TRESOR
 
 
 class Formulaire_creation(FormulaireBase, forms.Form):
-    format = forms.ChoiceField(label="Format", choices=CHOIX_FORMAT_EXPORT_TRESOR, required=True, help_text="Sélectionnez le format du fichier d'export selon le logiciel ou l'organisme destinataire : PES v2 pour la DGFiP, Magnus pour Berger-Levrault ou Millésime pour JVS.")
+    format = forms.ChoiceField(label="Format", choices=CHOIX_FORMAT_EXPORT_TRESOR, required=True, help_text="Sélectionnez le format du fichier d'export selon le logiciel ou l'organisme destinataire : PES v2 pour la DGFiP, Magnus pour Berger-Levrault, Millésime pour JVS ou Corail pour Cosoluce.")
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop("instance", None)
@@ -88,24 +88,24 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("id_collectivite", type=None if format in ("pes", "jvs") else "hidden"),
                 Field("code_collectivite", type=None if format in ("pes", "magnus", "jvs") else "hidden"),
                 Field("code_budget", type=None if format in ("pes", "magnus", "jvs") else "hidden"),
-                Field("code_prodloc", type=None if format in ("pes", "magnus", "jvs") else "hidden"),
-                Field("id_poste", type=None if format in ("pes", "magnus", "jvs") else "hidden"),
+                Field("code_prodloc", type=None if format in ("pes", "magnus", "jvs", "corail") else "hidden"),
+                Field("id_poste", type=None if format in ("pes", "magnus", "jvs", "corail") else "hidden"),
                 Field("code_etab", type=None if format in ("pes",) else "hidden"),
-                Field("objet_dette", type=None if format in ("pes",) else "hidden"),
+                Field("objet_dette", type=None if format in ("pes", "corail") else "hidden"),
                 Field("operation", type=None if format in ("magnus",) else "hidden"),
-                Field("fonction", type=None if format in ("magnus", "jvs") else "hidden"),
-                Field("service1", type=None if format in ("magnus", "jvs") else "hidden"),
-                Field("service2", type=None if format in ("magnus", "jvs") else "hidden"),
+                Field("fonction", type=None if format in ("magnus", "jvs", "corail") else "hidden"),
+                Field("service1", type=None if format in ("magnus", "jvs", "corail") else "hidden"),
+                Field("service2", type=None if format in ("magnus", "jvs", "corail") else "hidden"),
                 Field("edition_asap", type=None if format in ("magnus", "jvs") else "hidden"),
                 Field("type_pj", type=None if format in ("magnus",) else "hidden"),
                 Field("nom_tribunal", type=None if format in ("magnus",) else "hidden"),
                 Field("payable_internet", type=None if format in ("magnus",) else "hidden"),
-                Field("inclure_detail", type=None if format in ("magnus",) else "hidden"),
-                Field("inclure_pieces_jointes", type=None if format in ("magnus",) else "hidden"),
-                Field("inclure_tiers_solidaires", type=None if format in ("magnus",) else "hidden"),
-                Field("modele_document", type=None if format in ("magnus",) else "hidden"),
+                Field("inclure_detail", type=None if format in ("magnus", "corail") else "hidden"),
+                Field("inclure_pieces_jointes", type=None if format in ("magnus", "corail") else "hidden"),
+                Field("inclure_tiers_solidaires", type=None if format in ("magnus", "corail") else "hidden"),
+                Field("modele_document", type=None if format in ("magnus", "corail") else "hidden"),
                 Field("code_compta_as_alias", type=None if format in ("magnus",) else "hidden"),
-                Field("nom_collectivite", type=None if format in ("jvs",) else "hidden"),
+                Field("nom_collectivite", type=None if format in ("jvs", "corail") else "hidden"),
                 Field("detail_deductions", type=None if format in ("jvs",) else "hidden"),
             ),
             Fieldset("Libellés",
@@ -132,23 +132,23 @@ class Formulaire(FormulaireBase, ModelForm):
         if not self.cleaned_data["code_budget"] and format in ("magnus", "pes", "jvs"):
             self.add_error("code_budget", "Vous devez renseigner le code budget")
 
-        if not self.cleaned_data["id_poste"] and format in ("magnus", "pes", "jvs"):
+        if not self.cleaned_data["id_poste"] and format in ("magnus", "pes", "jvs", "corail"):
             self.add_error("id_poste", "Vous devez renseigner le poste")
 
-        if not self.cleaned_data["code_prodloc"] and format in ("magnus", "pes", "jvs"):
+        if not self.cleaned_data["code_prodloc"] and format in ("magnus", "pes", "jvs", "corail"):
             self.add_error("code_prodloc", "Vous devez renseigner le code produit local")
 
         if not self.cleaned_data["code_etab"] and format in ("pes",):
             self.add_error("code_etab", "Vous devez renseigner le code établissement")
 
-        if not self.cleaned_data["objet_dette"] and format in ("pes",):
+        if not self.cleaned_data["objet_dette"] and format in ("pes", "corail"):
             self.add_error("objet_dette", "Vous devez renseigner l'objet de la dette")
 
-        if not self.cleaned_data["modele_document"] and format in ("magnus",) and self.cleaned_data["inclure_pieces_jointes"]:
+        if not self.cleaned_data["modele_document"] and format in ("magnus", "corail") and self.cleaned_data["inclure_pieces_jointes"]:
             self.add_error("modele_document", "Vous devez sélectionner un modèle de facture")
 
-        if not self.cleaned_data["nom_collectivite"] and format in ("jvs",):
-            self.add_error("code_prodloc", "Vous devez renseigner le nom de la collectivité")
+        if not self.cleaned_data["nom_collectivite"] and format in ("jvs", "corail"):
+            self.add_error("nom_collectivite", "Vous devez renseigner le nom de la collectivité")
 
         return self.cleaned_data
 

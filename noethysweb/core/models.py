@@ -240,6 +240,7 @@ CHOIX_FORMAT_EXPORT_TRESOR = [
     ("pes", "PES v2 ORMC Recette"),
     ("magnus", "Gestion financière/Magnus Berger-Levrault"),
     ("jvs", "Millesime Online JVS"),
+    ("corail", "Corail Cosoluce"),
 ]
 
 CHOIX_FORMAT_PRELEVEMENTS = [
