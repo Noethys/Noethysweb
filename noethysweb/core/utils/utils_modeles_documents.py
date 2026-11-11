@@ -8,7 +8,7 @@ from io import BytesIO
 from django.conf import settings
 from django.core.cache import cache
 from reportlab.lib.units import mm as mmPDF
-from reportlab.lib.utils import ImageReader
+from reportlab.lib.utils import ImageReader, simpleSplit
 from reportlab.lib.colors import Color
 from reportlab.graphics.barcode.common import Codabar, Code11, I2of5, MSI
 from reportlab.graphics.barcode.code128 import Code128
@@ -1020,31 +1020,33 @@ class ObjetPDF():
             if self.categorie == "texte":
                 if valeur == None:
                     valeur = self.text
+                valeur = str(valeur or "")
                 taillePolice = self.fontSize
-                textObject = canvas.beginText()
-                textObject.setFont(self.GetPolice(), taillePolice)
+                police = self.GetPolice()
                 canvas.scale(1, -1)
-                textObject.setTextOrigin(self.left, -self.top - taillePolice)# - taillePolice + (taillePolice * 0.1))  # textObject._leading * 0.5)
                 self.SetCouleurPolice()
+                canvas.setFont(police, taillePolice)
+                interligne = taillePolice * 1.2
 
-                # Si largeur fixe, on wrap le texte
-                from reportlab.platypus import Paragraph
-                from reportlab.lib.styles import ParagraphStyle
+                # Retour à la ligne automatique selon la largeur du cadre (uniquement pour les Textbox)
+                if getattr(self, "type", None) == "textbox" and self.width:
+                    lignes = []
+                    for paragraphe in valeur.split("\n"):
+                        lignes.extend(simpleSplit(paragraphe, police, taillePolice, self.width) or [""])
+                else:
+                    lignes = valeur.split("\n")
 
-                # para = Paragraph(valeur.replace("\\n", "<br/>"), ParagraphStyle(name="A", fontName="Helvetica", fontSize=taillePolice))
-                # para.wrap(self.width, 100) # paragraph.wrap(A4_TRANSVERSE[0] - 50, A4_TRANSVERSE[1] - 50)
-                # print(para)
-                # # print(para.blPara.lines)
-                # para.drawOn(self.canvas, self.left, -self.top - taillePolice)
-
-                # if objet.largeurTexte != None:
-                #     dc = wx.MemoryDC()
-                #     dc.SetFont(wx.Font(taillePolice, wx.FONTFAMILY_DEFAULT, wx.NORMAL, wx.NORMAL))
-                #     valeur = wordwrap(valeur, objet.largeurTexte * 3.7, dc, breakLongWords=True)
-
-                textObject.textLines(valeur)
-                canvas.drawText(textObject)
-
+                # Dessin des lignes avec l'alignement défini dans l'éditeur
+                alignement = getattr(self, "textAlign", "left") or "left"
+                y = -self.top - taillePolice
+                for ligne in lignes:
+                    if alignement == "center":
+                        canvas.drawCentredString(self.left + self.width / 2, y, ligne)
+                    elif alignement == "right":
+                        canvas.drawRightString(self.left + self.width, y, ligne)
+                    else:
+                        canvas.drawString(self.left, y, ligne)
+                    y -= interligne
 
             # ------- IMAGE ------
             if self.categorie in ("image", "logo", "photo"):
