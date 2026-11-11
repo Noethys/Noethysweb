@@ -33,6 +33,14 @@ LOGIN_REDIRECT_URL = "accueil"
 # AXES
 AXES_FAILURE_LIMIT = 5
 AXES_COOLOFF_TIME = 24
+# Blocage sur le couple identifiant + adresse IP (et non plus sur l'adresse IP seule) :
+# une IP partagée ne bloque plus les autres comptes, et une connexion réussie remet le compteur à zéro
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+AXES_RESET_ON_SUCCESS = True
+
+# Portail : nombre maximal d'échecs de connexion par compte, toutes adresses IP confondues, et durée du blocage en heures
+PORTAIL_LIMITE_ECHECS_COMPTE = 20
+PORTAIL_DUREE_BLOCAGE_COMPTE = 24
 AXES_LOCKOUT_URL = '/locked'
 
 # CAPTCHA

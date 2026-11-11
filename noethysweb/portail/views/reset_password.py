@@ -13,6 +13,7 @@ from core.models import Utilisateur
 from portail.forms.reset_password import MyPasswordResetForm, MySetPasswordForm
 from portail.views.login import ClassCommuneLogin
 from portail.utils import utils_secquest, utils_email
+from axes.models import AccessAttempt
 
 
 class MyPasswordResetView(ClassCommuneLogin, auth_views.PasswordResetView):
@@ -69,6 +70,9 @@ class MyPasswordResetConfirmView(ClassCommuneLogin, auth_views.PasswordResetConf
             if not utils_secquest.Check_secquest(famille=self.user.famille, reponse=form.cleaned_data["secquest"]):
                 form.add_error(None, "La réponse à la question est erronée")
                 return self.render_to_response(self.get_context_data(form=form))
+
+        # Le changement de mot de passe par email prouve l'identité de la famille : on lève le blocage du compte
+        AccessAttempt.objects.filter(username__iexact=self.user.username).delete()
 
         return super().form_valid(form)
 
