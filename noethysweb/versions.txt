@@ -1,3 +1,19 @@
+Version 1.3.6.3 (11/11/2026) :
+
+Nouveautés
+- Paramétrage > Adresses d'expédition des mails : ajout de l'envoi des mails avec Microsoft 365 (authentification OAuth par une application inscrite dans Microsoft Entra ID)
+- Paramétrage > Modèles d'export vers le Trésor public : ajout du format Corail Cosoluce
+- Paramétrage des activités > Portail : ajout du filtrage des individus autorisés à s'inscrire (représentants et/ou enfants, âge minimal et maximal)
+- Export Millésime JVS : ajout de l'option Détailler les aides et déductions (prestations exportées à leur montant initial, suivies des déductions sous forme de lignes négatives)
+- Paramétrage > Portail > Paiement en ligne : ajout du protocole PayFiP par web service
+- Portail > Accueil : affichage du nombre de réservations sur liste d'attente
+Améliorations
+- Portail > Réservations : contrôle des places disponibles à l'enregistrement. Si la dernière place vient d'être prise, la réservation est placée sur liste d'attente et la famille en est avertie
+- Outils > Correcteur d'anomalies : détection des consommations événementielles sans évènement associé
+Corrections
+- Grille des consommations : correction du blocage de l'affichage en présence de consommations événementielles sans évènement associé
+- Grille des consommations : affichage d'un message explicite lorsque les données de la grille n'ont pas pu être transmises
+
 Version 1.3.6.2 (08/11/2026) :
 
 Nouveautés
