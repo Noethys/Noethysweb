@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import os, zipfile
+import os, re, zipfile, gzip, base64
 from urllib.request import urlretrieve
 from xml.dom.minidom import Document
 from lxml import etree
@@ -11,6 +11,10 @@ from io import BytesIO
 from noethysweb.version import GetVersion
 from core.utils import utils_fichiers
 from facturation.utils.utils_export_tresor_public import ExporterBase
+
+
+# Taille maximale d'un flux PES V2 (128 Mo)
+TAILLE_MAX_FLUX_PES = 128 * 1024 * 1024
 
 
 class Exporter(ExporterBase):
@@ -21,6 +25,13 @@ class Exporter(ExporterBase):
         if not self.pieces:
             self.erreurs.append("Vous devez ajouter au moins une pièce.")
             return False
+
+        # Génération des factures PDF à joindre
+        dict_pieces_jointes = {}
+        if self.lot.modele.inclure_pieces_jointes:
+            dict_pieces_jointes = self.Generation_pieces_jointes_pes()
+            if not dict_pieces_jointes:
+                return False
 
         # Génération du XML
         doc = Document()
@@ -167,6 +178,13 @@ class Exporter(ExporterBase):
             NatPce.setAttribute("V", "01")
             BlocPiece.appendChild(NatPce)
 
+            # Edition (uniquement si la facture est jointe, car la balise impose un PJRef)
+            pj = dict_pieces_jointes.get(piece.facture_id, None)
+            if pj and self.lot.modele.edition_asap:
+                Edition = doc.createElement("Edition")
+                Edition.setAttribute("V", self.lot.modele.edition_asap)
+                BlocPiece.appendChild(Edition)
+
             ObjPce = doc.createElement("ObjPce")
             ObjPce.setAttribute("V", self.ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:160], majuscules=True))
             BlocPiece.appendChild(ObjPce)
@@ -194,6 +212,28 @@ class Exporter(ExporterBase):
             ])
             Cle2.setAttribute("V", cle2)
             BlocPiece.appendChild(Cle2)
+
+            # Référence de la facture jointe
+            if pj:
+                PJRef = doc.createElement("PJRef")
+                BlocPiece.appendChild(PJRef)
+
+                Support = doc.createElement("Support")
+                Support.setAttribute("V", "01")
+                PJRef.appendChild(Support)
+
+                IdUnique = doc.createElement("IdUnique")
+                IdUnique.setAttribute("V", pj["IdUnique"])
+                PJRef.appendChild(IdUnique)
+
+                NomPJ = doc.createElement("NomPJ")
+                NomPJ.setAttribute("V", pj["NomPJ"])
+                PJRef.appendChild(NomPJ)
+
+                # TypePJ dans PJRef : disponible à partir du schéma PES 5.12
+                TypePJ = doc.createElement("TypePJ")
+                TypePJ.setAttribute("V", self.lot.modele.type_pj)
+                PJRef.appendChild(TypePJ)
 
             NumeroFacture = doc.createElement("NumeroFacture")
             NumeroFacture.setAttribute("V", str(piece.facture.numero)[:20])
@@ -377,8 +417,57 @@ class Exporter(ExporterBase):
                 TitCpte.setAttribute("V", self.ConvertToTexte(individu_mandat[:32], majuscules=True))
                 CpteBancaire.appendChild(TitCpte)
 
+        # PES_PJ : factures PDF compressées en GZip puis encodées en Base64
+        if dict_pieces_jointes:
+            PES_PJ = doc.createElement("PES_PJ")
+            racine.appendChild(PES_PJ)
+
+            EnTetePES_PJ = doc.createElement("EnTetePES_PJ")
+            PES_PJ.appendChild(EnTetePES_PJ)
+
+            IdVer = doc.createElement("IdVer")
+            IdVer.setAttribute("V", "1")
+            EnTetePES_PJ.appendChild(IdVer)
+
+            for piece in self.pieces:
+                pj = dict_pieces_jointes.get(piece.facture_id, None)
+                if not pj:
+                    continue
+
+                PJ = doc.createElement("PJ")
+                PES_PJ.appendChild(PJ)
+
+                Contenu = doc.createElement("Contenu")
+                PJ.appendChild(Contenu)
+
+                Fichier = doc.createElement("Fichier")
+                Fichier.setAttribute("MIMEType", "application/pdf")
+                Fichier.appendChild(doc.createTextNode(pj["contenu"]))
+                Contenu.appendChild(Fichier)
+
+                IdUnique = doc.createElement("IdUnique")
+                IdUnique.setAttribute("V", pj["IdUnique"])
+                PJ.appendChild(IdUnique)
+
+                NomPJ = doc.createElement("NomPJ")
+                NomPJ.setAttribute("V", pj["NomPJ"])
+                PJ.appendChild(NomPJ)
+
+                TypePJ = doc.createElement("TypePJ")
+                TypePJ.setAttribute("V", self.lot.modele.type_pj)
+                PJ.appendChild(TypePJ)
+
+                Description = doc.createElement("Description")
+                Description.setAttribute("V", self.ConvertToTexte(self.Formate_libelle(texte=self.lot.modele.objet_piece, piece=piece)[:250], majuscules=True))
+                PJ.appendChild(Description)
+
         # Génération du XML
         xml = doc.toprettyxml(indent="  ", encoding="ISO-8859-1")
+
+        # Contrôle de la taille maximale d'un flux PES
+        if len(xml) > TAILLE_MAX_FLUX_PES:
+            self.erreurs.append("Le fichier généré pèse %.1f Mo, ce qui dépasse la limite de 128 Mo d'un flux PES. Réduisez le nombre de pièces du lot." % (len(xml) / 1024 / 1024))
+            return False
 
         # Validation XSD
         validation = self.ValidationXSD(xml)
@@ -391,6 +480,31 @@ class Exporter(ExporterBase):
         f.close()
 
         return True
+
+    def Generation_pieces_jointes_pes(self):
+        """ Génère les factures PDF et prépare leur contenu pour le bloc PES_PJ """
+        dict_pieces_jointes = self.Generation_pieces_jointes()
+        if not dict_pieces_jointes:
+            return False
+
+        repertoire_pj = os.path.join(self.rep_destination, "PJ")
+        siret = re.sub(r"[^0-9A-Za-z]", "", self.lot.modele.id_collectivite or "")
+        for IDfacture, pj in dict_pieces_jointes.items():
+            # IdUnique : SIRET + exercice + numéro de facture (convention cadre : SiretDomaineExerciceNuméroSéquentiel)
+            numero = re.sub(r"[^0-9A-Za-z]", "", str(pj["numero_facture"]))
+            pj["IdUnique"] = ("%s%sFAC%s" % (siret, self.lot.exercice, numero))[:50]
+            pj["NomPJ"] = pj["NomPJ"][:100]
+
+            # Contenu : PDF compressé en GZip puis encodé en Base64
+            with open(os.path.join(repertoire_pj, pj["NomPJ"]), "rb") as fichier:
+                pj["contenu"] = base64.b64encode(gzip.compress(fichier.read())).decode("ascii")
+
+        # Contrôle de l'unicité des IdUnique
+        if len({pj["IdUnique"] for pj in dict_pieces_jointes.values()}) != len(dict_pieces_jointes):
+            self.erreurs.append("Plusieurs factures du lot génèrent le même identifiant unique de pièce jointe.")
+            return False
+
+        return dict_pieces_jointes
 
     def Get_cle_modulo_11(self, elements=[]):
         """ Calcul de la clé Modulo 11 """

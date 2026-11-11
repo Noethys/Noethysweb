@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import datetime, json
+import datetime, json, re
 from django import forms
 from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
@@ -140,10 +140,20 @@ class Formulaire(FormulaireBase, ModelForm):
         )
 
     def clean(self):
-        format = self.cleaned_data["modele"].format
+        # Lecture via get() : un champ invalide (ou déjà en erreur) est absent de cleaned_data
+        modele = self.cleaned_data.get("modele")
+        if not modele:
+            return self.cleaned_data
+        format = modele.format
+        id_bordereau = self.cleaned_data.get("id_bordereau")
 
-        if not self.cleaned_data["id_bordereau"] and format in ("pes", "jvs"):
-            self.add_error("id_bordereau", "Vous devez renseigner l'identifiant du bordereau")
+        if "id_bordereau" not in self.errors:
+            if not id_bordereau and format in ("pes", "jvs"):
+                self.add_error("id_bordereau", "Vous devez renseigner l'identifiant du bordereau")
+
+            # PES ORMC : IdBord numérique sur 7 chiffres maximum (type V_Num7 du schéma PES)
+            elif format == "pes" and not re.fullmatch(r"[0-9]{1,7}", id_bordereau.strip()):
+                self.add_error("id_bordereau", "L'identifiant du bordereau doit être un nombre de 7 chiffres maximum (exemple : 202612)")
 
         return self.cleaned_data
 
