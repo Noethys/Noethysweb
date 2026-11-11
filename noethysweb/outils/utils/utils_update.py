@@ -3,13 +3,17 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, os, datetime, codecs, zipfile, requests
+import logging, os, datetime, codecs, zipfile, requests, shutil
 logger = logging.getLogger(__name__)
 from urllib.request import urlopen, urlretrieve
 from noethysweb import version
 from django.core.management import call_command
 from django.conf import settings
 from django.core.cache import cache
+
+# Répertoires remplacés intégralement à chaque mise à jour : les fichiers qui n'existent plus
+# dans la nouvelle version (anciennes librairies JS, etc.) sont ainsi supprimés.
+REPERTOIRES_REMPLACES = ("core/static/lib/",)
 
 
 def Get_update_for_accueil(request=None):
@@ -101,6 +105,69 @@ def Update():
     prefixe = "Noethysweb-%s/noethysweb/" % version_online_txt
     chemin_dest = os.path.join(settings.BASE_DIR, "")
 
+    # Mise de côté des répertoires remplacés intégralement (uniquement s'ils sont bien présents dans le zip).
+    # Ils sont déplacés hors des répertoires static et restaurés si l'installation échoue.
+    sauvegardes = []
+    try:
+        for index, repertoire in enumerate(REPERTOIRES_REMPLACES):
+            if any(nom.startswith(prefixe + repertoire) and not nom.endswith("/") for nom in liste_fichiers):
+                chemin_repertoire = os.path.join(chemin_dest, repertoire).rstrip("/")
+                if os.path.isdir(chemin_repertoire):
+                    chemin_sauvegarde = os.path.join(rep_temp, "ancien_repertoire_%d" % index)
+                    shutil.rmtree(chemin_sauvegarde, ignore_errors=True)
+                    logger.debug("Mise de cote du repertoire %s..." % repertoire)
+                    shutil.move(chemin_repertoire, chemin_sauvegarde)
+                    sauvegardes.append((chemin_repertoire, chemin_sauvegarde))
+    except Exception as err:
+        logger.error("Impossible de mettre de cote les anciens repertoires : %s" % err)
+        Restaurer_repertoires(sauvegardes)
+        zfile.close()
+        os.remove(chemin_fichier)
+        return False
+
+    try:
+        Installer_fichiers(zfile, liste_fichiers, prefixe, chemin_dest, version_online_txt)
+    except Exception as err:
+        logger.error("Erreur lors de l'installation des nouveaux fichiers : %s" % err)
+        Restaurer_repertoires(sauvegardes)
+        zfile.close()
+        os.remove(chemin_fichier)
+        return False
+
+    # Installation réussie : suppression des anciens répertoires mis de côté
+    for chemin_repertoire, chemin_sauvegarde in sauvegardes:
+        shutil.rmtree(chemin_sauvegarde, ignore_errors=True)
+
+    zfile.close()
+    os.remove(chemin_fichier)
+    logger.debug("Installation terminee.")
+
+    # Efface le numéro de version du cache
+    cache.delete('version_application')
+
+    # AutoReloadWSGI
+    logger.debug("AutoReloadWSGI...")
+    AutoReloadWSGI()
+
+    # Mise à jour du répertoire Static
+    logger.debug("Collectstatic...")
+    # clear=True : vide le répertoire STATIC_ROOT avant la copie pour supprimer les fichiers obsolètes
+    call_command("collectstatic", verbosity=0, interactive=False, clear=True)
+
+    # Mise à jour de la DB
+    logger.debug("Migration DB...")
+    call_command("migrate")
+
+    # Mise à jour des permissions
+    logger.debug("Mise à jour des permissions...")
+    call_command("update_permissions")
+
+    logger.debug("Mise a jour terminee.")
+    return True
+
+
+def Installer_fichiers(zfile=None, liste_fichiers=[], prefixe="", chemin_dest="", version_online_txt=""):
+    """ Copie les fichiers du zip dans le répertoire de l'application """
     logger.debug("Installation des nouveaux fichiers...")
     for i in liste_fichiers:
         d = i.replace(prefixe, "")
@@ -123,31 +190,17 @@ def Update():
                 fp.write(data)
                 fp.close()
 
-    zfile.close()
-    os.remove(chemin_fichier)
-    logger.debug("Installation terminee.")
 
-    # Efface le numéro de version du cache
-    cache.delete('version_application')
 
-    # AutoReloadWSGI
-    logger.debug("AutoReloadWSGI...")
-    AutoReloadWSGI()
-
-    # Mise à jour du répertoire Static
-    logger.debug("Collectstatic...")
-    call_command("collectstatic", verbosity=0, interactive=False)
-
-    # Mise à jour de la DB
-    logger.debug("Migration DB...")
-    call_command("migrate")
-
-    # Mise à jour des permissions
-    logger.debug("Mise à jour des permissions...")
-    call_command("update_permissions")
-
-    logger.debug("Mise a jour terminee.")
-    return True
+def Restaurer_repertoires(sauvegardes=[]):
+    """ Remet en place les répertoires mis de côté si l'installation a échoué """
+    for chemin_repertoire, chemin_sauvegarde in sauvegardes:
+        try:
+            shutil.rmtree(chemin_repertoire, ignore_errors=True)
+            shutil.move(chemin_sauvegarde, chemin_repertoire)
+            logger.debug("Repertoire %s restaure." % chemin_repertoire)
+        except Exception as err:
+            logger.error("Impossible de restaurer le repertoire %s : %s" % (chemin_repertoire, err))
 
 
 def AutoReloadWSGI():
