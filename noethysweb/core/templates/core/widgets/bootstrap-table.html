@@ -27,7 +27,7 @@
     <script type="text/javascript" src="{% static 'lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/bootstrap-table/extensions/treegrid/bootstrap-table-treegrid.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/table-export/tableExport.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'lib/table-export/libs/jsPDF/jspdf.umd.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/table-export/libs/html2canvas/html2canvas.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/table-export/libs/pdfmake/pdfmake.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/table-export/libs/pdfmake/vfs_fonts.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/table-export/libs/js-xlsx/xlsx.core.min.js' %}"></script>
@@ -47,6 +47,7 @@
                         return "export"
                     },
                     excelstyles: ['background-color', 'color', 'font-size', 'font-weight'],
+                    pdfmake: {enabled: true},
                 },
                 // iconSize: 'md',
                 iconsPrefix: 'fa',
