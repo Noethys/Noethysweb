@@ -73,7 +73,6 @@
                 <small>
                     <a href="{% url 'portail_sondage' code=article.sondage.code %}"
                        class="text-decoration-none"
-                       title="{% trans 'Cliquez ici pour accéder au formulaire' %}"
                        aria-label="{% blocktrans with titre=article.sondage.titre %}Accéder au formulaire {{ titre }}{% endblocktrans %}">
                         <i class="fa fa-file-text-o me-1" aria-hidden="true"></i>
                         {% blocktrans %}Accéder au formulaire{% endblocktrans %} « {{ article.sondage.titre }} »

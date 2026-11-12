@@ -152,7 +152,7 @@
                             </td>
                             <td class="text-right">
                                 {% if url_fiche_famille %}
-                                    <a href="{{ url_fiche_famille }}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
+                                    <a href="{{ url_fiche_famille }}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche Famille" %}">
                                         <i class="fa fa-pencil" aria-hidden="true"></i>
                                         <span class="sr-only">{% blocktrans %}Ouvrir la fiche Famille{% endblocktrans %}</span>
                                     </a>
@@ -199,7 +199,7 @@
                                     </small>
                                 </td>
                                 <td class="text-right">
-                                    <a href="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" class="btn btn-sm btn-primary" title="{% trans "Ouvrir la fiche" %}">
+                                    <a href="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" class="btn btn-sm btn-primary" title="{% blocktrans %}Ouvrir la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}">
                                         <i class="fa fa-pencil" aria-hidden="true"></i>
                                         <span class="sr-only">{% blocktrans %}Ouvrir la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}</span>
                                     </a>
