@@ -29,7 +29,7 @@ class Formulaire(FormulaireBase, ModelForm):
             'logo': Selection_image(),
         }
         help_texts = {
-            "nom": "Saisissez le nom de l'organisateur. Exemples : Mairie de Lannilis, Association Les Petits Loups...",
+            "nom": "Saisissez le nom de l'organisateur. Exemples : Mairie de Noethys, Association Les Petits Loups...",
             "rue": "Saisissez le numéro et le nom de la voie. Exemple : 12 rue des Lilas.",
             "cp": "Saisissez le code postal. La ville correspondante vous sera proposée automatiquement.",
             "ville": "Saisissez le nom de la ville.",

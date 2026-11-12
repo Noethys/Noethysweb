@@ -164,6 +164,7 @@ class MyPageTemplate(PageTemplate):
 
         # Insertion des lignes de textes
         doc.modele_doc.DessineImages(canvas, dict_valeurs=dict_valeurs)
+        doc.modele_doc.DessineQRCodes(canvas, dict_valeurs=dict_valeurs)
         doc.modele_doc.DessineTextes(canvas, dict_valeurs=dict_valeurs)
 
         canvas.restoreState()

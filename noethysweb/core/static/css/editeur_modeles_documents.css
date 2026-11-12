@@ -1,0 +1,915 @@
+/* Éditeur de modèles de documents (Noethysweb) */
+
+.margin-r-5 {
+    margin-right: 5px;
+}
+
+.editeur-card {
+    overflow: hidden;
+}
+
+/* ---------- Barre d'outils ---------- */
+.editeur-barre {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #dee2e6;
+    background: #fff;
+}
+.editeur-barre-droite {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+.editeur-sep {
+    width: 1px;
+    height: 22px;
+    background: #dee2e6;
+    margin: 0 4px;
+}
+.btn-outil {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #495057;
+    line-height: 30px;
+}
+.btn-outil:hover:not(:disabled) {
+    background: #e9ecef;
+}
+.btn-outil.active {
+    background: #dbe9fb;
+    color: #0b5394;
+}
+.btn-outil:disabled {
+    opacity: 0.35;
+}
+.btn-outil.dropdown-toggle::after {
+    display: none;
+}
+.editeur-zoom {
+    min-width: 62px;
+}
+.editeur-menu-affichage {
+    min-width: 230px;
+}
+.editeur-menu-ajouter {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* ---------- Zone de dessin ---------- */
+.editeur-zone {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    grid-template-rows: 20px minmax(0, 1fr) 24px;
+    height: 600px;
+    background: #ced4da;
+}
+.editeur-zone.sans-regles {
+    grid-template-columns: 0 minmax(0, 1fr);
+    grid-template-rows: 0 minmax(0, 1fr) 24px;
+}
+.editeur-zone.sans-regles .editeur-coin,
+.editeur-zone.sans-regles .editeur-regle-h,
+.editeur-zone.sans-regles .editeur-regle-v {
+    visibility: hidden;
+}
+.editeur-coin {
+    grid-row: 1;
+    grid-column: 1;
+    background: #f1f3f5;
+    border-right: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 9px;
+    color: #868e96;
+    text-align: center;
+    line-height: 19px;
+    overflow: hidden;
+}
+.editeur-regle-h {
+    grid-row: 1;
+    grid-column: 2;
+    width: 100%;
+    height: 20px;
+    display: block;
+}
+.editeur-regle-v {
+    grid-row: 2;
+    grid-column: 1;
+    width: 20px;
+    height: 100%;
+    display: block;
+}
+.editeur-canvas {
+    grid-row: 2;
+    grid-column: 2;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+}
+.editeur-canvas.depot-actif {
+    outline: 2px dashed #007bff;
+    outline-offset: -4px;
+}
+.editeur-statut {
+    grid-row: 3;
+    grid-column: 1 / span 2;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 10px;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    font-size: 12px;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.editeur-statut-modifie {
+    margin-left: auto;
+    color: #d9822b;
+}
+.editeur-statut-modifie .fa {
+    font-size: 8px;
+    vertical-align: 2px;
+}
+
+/* ---------- Panneau latéral ---------- */
+.editeur-panneau .nav-tabs .nav-link {
+    padding: 8px 10px;
+    font-size: 13px;
+}
+.editeur-panneau .tab-content {
+    max-height: 60vh; /* ajusté en JS pour s'arrêter au bas de la zone de dessin */
+    overflow-y: auto;
+}
+.prop-section {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f3f5;
+}
+.prop-titre {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #868e96;
+    margin-bottom: 6px;
+}
+.prop-entete {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.prop-nom {
+    flex: 1;
+    border-color: transparent;
+    font-weight: 600;
+    padding-left: 4px;
+}
+.prop-nom:hover,
+.prop-nom:focus {
+    border-color: #ced4da;
+}
+.prop-multi {
+    flex: 1;
+    font-weight: 600;
+}
+.prop-grille {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    position: relative;
+}
+.prop-ligne {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.prop-champ {
+    display: flex;
+    align-items: center;
+    height: 30px;
+    margin: 0;
+    padding: 0 6px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background: #fff;
+    font-weight: normal;
+    cursor: text;
+}
+.prop-champ:focus-within {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.2);
+}
+.prop-champ > span {
+    font-size: 11px;
+    color: #868e96;
+    margin-right: 4px;
+    white-space: nowrap;
+}
+.prop-champ input {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    text-align: right;
+    font-size: 13px;
+}
+.prop-champ input:disabled {
+    color: #adb5bd;
+}
+.prop-champ-court {
+    width: 110px;
+    flex: none;
+}
+.prop-proportions {
+    height: 30px;
+    justify-self: start;
+}
+.prop-segment .btn.active {
+    background: #dbe9fb;
+    color: #0b5394;
+    border-color: #a9c8ef;
+}
+.prop-couleur {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.prop-couleur input {
+    width: 140px;
+    flex: none;
+    margin-left: auto;
+    font-size: 12px;
+}
+.prop-couleur-label {
+    font-size: 13px;
+}
+.prop-pastille {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background-image: linear-gradient(45deg, #e9ecef 25%, transparent 25%, transparent 75%, #e9ecef 75%), linear-gradient(45deg, #e9ecef 25%, transparent 25%, transparent 75%, #e9ecef 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 4px 4px;
+    position: relative;
+    cursor: pointer;
+}
+.prop-pastille::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 3px;
+    background: var(--couleur, transparent);
+}
+.prop-recentes {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+.couleur-recente {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 3px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    vertical-align: middle;
+}
+.couleur-recente:hover {
+    transform: scale(1.15);
+}
+.prop-alignements {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+.prop-alignements .btn-outil {
+    width: 100%;
+}
+.prop-alignements svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+}
+.prop-alignements svg rect {
+    fill: currentColor;
+    fill-opacity: 0.25;
+}
+.editeur-astuces {
+    padding-left: 18px;
+    font-size: 13px;
+    color: #495057;
+}
+.editeur-astuces li {
+    margin-bottom: 4px;
+}
+
+/* ---------- Calques ---------- */
+.editeur-calques {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.calque {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 6px 1px 2px;
+    border-bottom: 1px solid #f1f3f5;
+    font-size: 12.5px;
+    cursor: pointer;
+    user-select: none;
+}
+.calque:hover {
+    background: #f8f9fa;
+}
+.calque.selectionne {
+    background: #dbe9fb;
+    color: #0b5394;
+}
+.calque.masque .calque-nom {
+    color: #adb5bd;
+    text-decoration: line-through;
+}
+.calque.survol-depot-haut {
+    box-shadow: inset 0 2px 0 #007bff;
+}
+.calque.survol-depot-bas {
+    box-shadow: inset 0 -2px 0 #007bff;
+}
+.calque-poignee {
+    color: #ced4da;
+    cursor: grab;
+    padding: 0 2px;
+}
+.calque-icone {
+    color: #868e96;
+    width: 16px;
+    text-align: center;
+}
+.calque-nom {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.calque-nom input {
+    width: 100%;
+    font-size: 13px;
+    padding: 0 4px;
+}
+.calque .btn-outil {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    color: #adb5bd;
+}
+.calque .btn-outil.actif {
+    color: #d9822b;
+}
+.calques-vide {
+    padding: 12px;
+    color: #868e96;
+    font-size: 13px;
+}
+
+/* ---------- Champs ---------- */
+.editeur-champs {
+    font-size: 13px;
+}
+.champ-groupe {
+    padding: 6px 10px 1px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #868e96;
+}
+.champ {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 10px;
+    font-size: 12.5px;
+    border-bottom: 1px solid #f8f9fa;
+    cursor: pointer;
+}
+.champ:hover {
+    background: #f3f0ff;
+}
+.champ-label {
+    flex: 1;
+    min-width: 0;
+}
+.champ-code {
+    flex: none;
+    max-width: 55%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: #eeedfe;
+    color: #3c3489;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px;
+}
+.champs-vide {
+    padding: 12px;
+    color: #868e96;
+}
+
+/* ---------- Raccourcis ---------- */
+.editeur-raccourcis td:last-child {
+    text-align: right;
+    white-space: nowrap;
+}
+.editeur-raccourcis kbd {
+    background: #f1f3f5;
+    color: #212529;
+    border: 1px solid #ced4da;
+    box-shadow: none;
+    font-size: 11px;
+}
+
+/* ---------- Menu contextuel ---------- */
+.editeur-menu-contextuel {
+    position: fixed;
+    z-index: 1060;
+    outline: none;
+}
+.ctx-menu {
+    min-width: 210px;
+    padding: 4px 0;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+}
+.ctx-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 5px 12px;
+    border: 0;
+    background: transparent;
+    color: #212529;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.ctx-item:hover:not(:disabled),
+.ctx-item:focus:not(:disabled),
+.ctx-groupe:hover > .ctx-item:not(:disabled) {
+    background: #dbe9fb;
+    color: #0b5394;
+    outline: none;
+}
+.ctx-item:disabled {
+    color: #adb5bd;
+    cursor: default;
+}
+.ctx-icone {
+    width: 16px;
+    color: #6c757d;
+    text-align: center;
+}
+.ctx-item:disabled .ctx-icone {
+    color: #ced4da;
+}
+.ctx-libelle {
+    flex: 1;
+}
+.ctx-raccourci,
+.ctx-fleche {
+    margin-left: 16px;
+    color: #868e96;
+    font-size: 11px;
+}
+.ctx-danger:not(:disabled),
+.ctx-danger:not(:disabled) .ctx-icone {
+    color: #c92a2a;
+}
+.ctx-danger:hover:not(:disabled),
+.ctx-danger:focus:not(:disabled) {
+    background: #fdecec;
+    color: #c92a2a;
+}
+.ctx-separateur {
+    height: 1px;
+    margin: 4px 0;
+    background: #e9ecef;
+}
+.ctx-groupe {
+    position: relative;
+}
+.ctx-groupe > .ctx-menu {
+    display: none;
+    position: absolute;
+    top: -5px;
+    left: 100%;
+    margin-left: -2px;
+}
+.ctx-vers-gauche .ctx-groupe > .ctx-menu {
+    left: auto;
+    right: 100%;
+    margin-left: 0;
+    margin-right: -2px;
+}
+.ctx-groupe:hover > .ctx-menu,
+.ctx-groupe:focus-within > .ctx-menu {
+    display: block;
+}
+
+/* ---------- Champs non reconnus, aperçu, QR code ---------- */
+.editeur-statut-alerte {
+    color: #b35c00;
+}
+.editeur-statut-alerte:hover {
+    color: #8a4700;
+    text-decoration: underline;
+}
+.alerte-champ {
+    background: #fff4e5;
+    color: #8a4700;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.alerte-champ + .alerte-champ {
+    margin-top: 6px;
+}
+.alerte-champ code {
+    color: #a32d2d;
+    background: transparent;
+    padding: 0;
+}
+.alerte-champ a {
+    color: #0b5394;
+    text-decoration: underline;
+}
+.prop-qr-contenu {
+    font-family: SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    resize: vertical;
+}
+#bascule_apercu .btn.active {
+    background: #dbe9fb;
+    color: #0b5394;
+    border-color: #a9c8ef;
+}
+
+/* ---------- Icônes d'ordre des plans ---------- */
+.icone-ordre {
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+}
+.icone-ordre .plein {
+    fill: currentColor;
+}
+.icone-ordre .fond {
+    fill: var(--fond-icone, #fff);
+}
+.btn-outil:hover:not(:disabled) {
+    --fond-icone: #e9ecef;
+}
+.ctx-item:hover:not(:disabled),
+.ctx-item:focus:not(:disabled) {
+    --fond-icone: #dbe9fb;
+}
+.ctx-icone.icone-ordre {
+    width: 16px;
+    color: #6c757d;
+}
+
+/* ---------- Cadre "Modèle" compact ---------- */
+.editeur-modele .form-group {
+    margin: 0;
+}
+.modele-entete {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+}
+.modele-nom-zone {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+.modele-nom input {
+    height: 30px;
+    padding: 2px 26px 2px 6px;
+    border: 1px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    font-size: 15px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    cursor: text;
+    /* Soulignement pointillé au repos : indique que le titre est modifiable */
+    border-bottom: 1px dashed #adb5bd;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+.modele-nom input:hover {
+    border-color: #ced4da;
+    border-style: solid;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}
+.modele-nom input:focus {
+    border-color: #80bdff;
+    border-style: solid;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.2);
+}
+.modele-nom input.is-invalid {
+    border-color: #dc3545;
+    border-style: solid;
+}
+.modele-nom-crayon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 26px;
+    height: 30px;
+    margin: 0;
+    line-height: 30px;
+    text-align: center;
+    color: #adb5bd;
+    font-weight: normal;
+    cursor: pointer;
+}
+.modele-nom-zone:hover .modele-nom-crayon,
+.modele-nom-zone:focus-within .modele-nom-crayon {
+    color: #007bff;
+}
+.modele-entete .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    flex: none;
+    line-height: 30px;
+}
+.modele-corps {
+    padding: 8px 10px;
+}
+.modele-ligne {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 6px;
+}
+.modele-ligne > .form-group,
+.modele-ligne > div[id^="div_id_"] {
+    flex: 1;
+    min-width: 0;
+}
+#modele_format {
+    width: auto;
+    flex: 1.1;
+    min-width: 0;
+}
+.modele-ligne > .modele-dimension {
+    flex: 0.9;
+}
+.modele-dimension input {
+    text-align: center;
+    padding-left: 4px;
+    padding-right: 4px;
+    -moz-appearance: textfield;
+}
+.modele-dimension input::-webkit-outer-spin-button,
+.modele-dimension input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.modele-fois,
+.modele-unite {
+    color: #868e96;
+    font-size: 12px;
+}
+#modele_pivoter svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+}
+.modele-picto {
+    flex: none;
+    width: 14px;
+    color: #868e96;
+    text-align: center;
+}
+.modele-ligne select.custom-select-sm {
+    font-size: 12px;
+    padding-left: 4px;
+}
+.modele-ligne:last-of-type {
+    margin-bottom: 4px;
+}
+.modele-defaut {
+    font-size: 13px;
+    color: #495057;
+}
+.modele-defaut .custom-control-label,
+.modele-defaut .form-check-label {
+    padding-top: 1px;
+}
+.modele-ligne-listes {
+    flex-wrap: wrap;
+    row-gap: 6px;
+}
+.modele-paire {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1 1 135px;
+    min-width: 135px;
+}
+.modele-paire > .form-group {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ---------- Boutons Enregistrer / Annuler dans la barre d'outils ---------- */
+.editeur-enregistrer {
+    position: relative;
+}
+.editeur-enregistrer.modifie::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f59f00;
+    border: 2px solid #fff;
+}
+
+/* ---------- En-têtes compacts des onglets Calques et Champs ---------- */
+.panneau-entete {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 12px;
+    color: #868e96;
+}
+.panneau-entete .input-group {
+    flex: 1;
+}
+#calques_nombre {
+    flex: 1;
+}
+.panneau-aide {
+    color: #adb5bd;
+    cursor: help;
+    font-size: 14px;
+}
+.panneau-note {
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #868e96;
+}
+.panneau-note:empty {
+    display: none;
+}
+
+/* ---------- Barre d'outils sur une seule ligne : libellés masqués sur les écrans moyens ---------- */
+.libelle-bascule,
+.libelle-apercu {
+    margin-left: 5px;
+}
+
+/* ---------- Champs sur une seule ligne ---------- */
+.champ-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.champ-code {
+    max-width: 50%;
+}
+
+/* ---------- Barre d'outils : paliers de compactage (classes p1 à p6 posées en JS) ---------- */
+.libelle-barre {
+    margin-left: 5px;
+}
+.groupe-ordre {
+    display: inline-flex;
+    gap: 2px;
+}
+.menu-ordre,
+#bascule_apercu_unique,
+.options-compactes {
+    display: none;
+}
+.menu-ordre .dropdown-item .icone-ordre {
+    margin-right: 6px;
+}
+/* p1 : libellés Champs / Exemples masqués */
+.editeur-barre.p1 .libelle-bascule {
+    display: none;
+}
+/* p2 : boutons zoom - / + et libellé Aperçu masqués */
+.editeur-barre.p2 #zoom_moins,
+.editeur-barre.p2 #zoom_plus,
+.editeur-barre.p2 .libelle-apercu {
+    display: none;
+}
+/* p3 : les 4 boutons d'ordre deviennent un menu */
+.editeur-barre.p3 .groupe-ordre {
+    display: none;
+}
+.editeur-barre.p3 .menu-ordre {
+    display: inline-flex;
+}
+/* p4 : grille et magnétisme passent dans le menu Options ; Champs/Exemples en un seul bouton */
+.editeur-barre.p4 #bascule_grille,
+.editeur-barre.p4 #bascule_magnetisme,
+.editeur-barre.p4 #bascule_apercu {
+    display: none;
+}
+.editeur-barre.p4 .options-compactes {
+    display: block;
+}
+.editeur-barre.p4 #bascule_apercu_unique {
+    display: inline-block;
+}
+/* p5 : Annuler et Ajouter sans libellé */
+.editeur-barre.p5 .libelle-annuler,
+.editeur-barre.p5 .libelle-ajouter {
+    display: none;
+}
+/* p6 : dernier recours, Enregistrer sans libellé */
+.editeur-barre.p6 .libelle-enregistrer {
+    display: none;
+}
+
+/* ---------- Menu de zoom ---------- */
+.menu-zoom {
+    min-width: 240px;
+}
+.menu-zoom .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+.menu-zoom .dropdown-item > .fa {
+    color: #868e96;
+}
+.menu-zoom-coche {
+    visibility: hidden;
+}
+.menu-zoom .dropdown-item.zoom-actuel {
+    background: #dbe9fb;
+    color: #0b5394;
+}
+.menu-zoom .dropdown-item.zoom-actuel .menu-zoom-coche {
+    visibility: visible;
+    color: #0b5394;
+}
+.menu-zoom-info {
+    margin-left: auto;
+    padding-left: 16px;
+    color: #868e96;
+}
+.menu-zoom .zoom-actuel .menu-zoom-info {
+    color: inherit;
+}

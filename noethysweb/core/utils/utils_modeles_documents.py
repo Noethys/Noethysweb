@@ -16,6 +16,9 @@ from reportlab.graphics.barcode.code39 import Extended39, Standard39
 from reportlab.graphics.barcode.code93 import Extended93, Standard93
 from reportlab.graphics.barcode.usps import FIM, POSTNET
 from reportlab.graphics.barcode import createBarcodeDrawing
+from reportlab.graphics.barcode.qr import QrCodeWidget
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics import renderPDF
 from core.utils import utils_infos_individus, utils_dates, utils_resolveur_formule, utils_polices
 from core.models import ModeleDocument, Organisateur
 
@@ -56,15 +59,15 @@ class Fond(Categorie):
         self.code = "fond"
         self.photosIndividuelles = False
         self.champs = [
-            (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
+            (u"Nom de l'organisateur", u"Association Exemple", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", u"29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
-            (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
+            (u"Numéro d'agrément de l'organisateur", u"0123ORG456", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
             (u"Code APE de l'organisateur", u"NO123", "{ORGANISATEUR_APE}"), ]
         self.codesbarres = []
@@ -81,18 +84,18 @@ class Facture(Categorie):
         self.champs = [
             (u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
             (u"Noms des titulaires de dossier", u"M. DUPOND Gérard", "{FAMILLE_NOM}"),
-            (u"Rue de la famille", u"10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Rue de la famille", u"9 Rue de Noethys", "{FAMILLE_RUE}"),
             (u"Code postal de la famille", u"29200", "{FAMILLE_CP}"),
             (u"Ville de la famille", u"BREST", "{FAMILLE_VILLE}"),
             (u"Individus concernés", u"Kévin ALLIBERT", "{INDIVIDUS_CONCERNES}"),
 
             (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", u"29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
@@ -154,8 +157,8 @@ class Attestation(Categorie):
         self.champs = [(u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
 
             (u"Nom du destinataire", u"M. DUPOND Gérard", "{DESTINATAIRE_NOM}"),
-            (u"Rue de l'adresse du destinataire", u"10 rue des oiseaux", "{DESTINATAIRE_RUE}"),
-            (u"Ville de l'adresse du destinataire", u"29000 QUIMPER", "{DESTINATAIRE_VILLE}"),
+            (u"Rue de l'adresse du destinataire", u"9 Rue de Noethys", "{DESTINATAIRE_RUE}"),
+            (u"Ville de l'adresse du destinataire", u"29200 BREST", "{DESTINATAIRE_VILLE}"),
 
             (u"Nom des individus concernés", u"Xavier DUPOND et Lucie DUPOND", "{NOMS_INDIVIDUS}"),
             (u"Date de début de la période", u"01/01/2011", "{DATE_DEBUT}"),
@@ -163,11 +166,11 @@ class Attestation(Categorie):
 
             (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", u"29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
@@ -207,17 +210,17 @@ class Rappel(Categorie):
         self.champs = [
             (u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
             (u"Noms des titulaires de dossier", u"M. DUPOND Gérard", "{FAMILLE_NOM}"),
-            (u"Rue de la famille", u"10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Rue de la famille", u"9 Rue de Noethys", "{FAMILLE_RUE}"),
             (u"Code postal de la famille", u"29200", "{FAMILLE_CP}"),
             (u"Ville de la famille", u"BREST", "{FAMILLE_VILLE}"),
 
             (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", u"29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
@@ -263,16 +266,16 @@ class Reglement(Categorie):
             (u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
 
             (u"Nom du destinataire", u"M. DUPOND Gérard", "{DESTINATAIRE_NOM}"),
-            (u"Rue de l'adresse du destinataire", u"10 rue des oiseaux", "{DESTINATAIRE_RUE}"),
-            (u"Ville de l'adresse du destinataire", u"29000 QUIMPER", "{DESTINATAIRE_VILLE}"),
+            (u"Rue de l'adresse du destinataire", u"9 Rue de Noethys", "{DESTINATAIRE_RUE}"),
+            (u"Ville de l'adresse du destinataire", u"29200 BREST", "{DESTINATAIRE_VILLE}"),
 
             (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", u"29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
@@ -326,7 +329,7 @@ class Individu(Categorie):
             (u"Age de l'individu", u"12", "{INDIVIDU_AGE}"),
             (u"Code postal de la ville de naissance", u"29200", "{INDIVIDU_CP_NAISS}"),
             (u"Nom de la ville de naissance", u"BREST", "{INDIVIDU_VILLE_NAISS}"),
-            (u"Rue de l'adresse de l'individu", u"10 rue des oiseaux", "{INDIVIDU_RUE}"),
+            (u"Rue de l'adresse de l'individu", u"9 Rue de Noethys", "{INDIVIDU_RUE}"),
             (u"Code postal de l'adresse de l'individu", u"29200", "{INDIVIDU_CP}"),
             (u"Ville de l'adresse de l'individu", u"BREST", "{INDIVIDU_VILLE}"),
             (u"Profession de l'individu", u"Menuisier", "{INDIVIDU_PROFESSION}"),
@@ -341,11 +344,11 @@ class Individu(Categorie):
 
             (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", u"29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
@@ -373,7 +376,7 @@ class Famille(Categorie):
         self.champs = [
             (u"Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
             (u"Noms des titulaires", u"DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
-            (u"Rue de l'adresse de la famille", u"10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Rue de l'adresse de la famille", u"9 Rue de Noethys", "{FAMILLE_RUE}"),
             (u"Code postal de l'adresse de la famille", u"29200", "{FAMILLE_CP}"),
             (u"Ville de l'adresse de la famille", u"BREST", "{FAMILLE_VILLE}"),
             (u"Régime social de la famille", u"Régime général", "{FAMILLE_REGIME}"),
@@ -382,11 +385,11 @@ class Famille(Categorie):
 
             (u"Nom de l'organisateur", u"Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", u"Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", u"LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", u"noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", u"29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", u"BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", u"test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
@@ -422,7 +425,7 @@ class Inscription(Categorie):
             (u"Age de l'individu", u"12", "{INDIVIDU_AGE}"),
             (u"Code postal de la ville de naissance", u"29200", "{INDIVIDU_CP_NAISS}"),
             (u"Nom de la ville de naissance", u"BREST", "{INDIVIDU_VILLE_NAISS}"),
-            (u"Rue de l'adresse de l'individu", u"10 rue des oiseaux", "{INDIVIDU_RUE}"),
+            (u"Rue de l'adresse de l'individu", u"9 Rue de Noethys", "{INDIVIDU_RUE}"),
             (u"Code postal de l'adresse de l'individu", u"29200", "{INDIVIDU_CP}"),
             (u"Ville de l'adresse de l'individu", u"BREST", "{INDIVIDU_VILLE}"),
             (u"Profession de l'individu", u"Menuisier", "{INDIVIDU_PROFESSION}"),
@@ -437,7 +440,7 @@ class Inscription(Categorie):
 
             (u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
             (u"Noms des titulaires", "DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
-            (u"Rue de l'adresse de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Rue de l'adresse de la famille", "9 Rue de Noethys", "{FAMILLE_RUE}"),
             (u"Code postal de l'adresse de la famille", "29200", "{FAMILLE_CP}"),
             (u"Ville de l'adresse de la famille", "BREST", "{FAMILLE_VILLE}"),
             (u"Régime social de la famille", "Régime général", "{FAMILLE_REGIME}"),
@@ -461,11 +464,11 @@ class Inscription(Categorie):
 
             (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", "29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
@@ -528,13 +531,13 @@ class Cotisation(Categorie):
 
             (u"Numéro ID de l'individu bénéficiaire", "4654", "{IDINDIVIDU}"),
             (u"Numéro ID de la famille bénéficiare", "13211", "{BENEFICIAIRE_NOM}"),
-            (u"Adresse du bénéficiaire - Rue", "10 rue des oiseaux", "{BENEFICIAIRE_RUE}"),
+            (u"Adresse du bénéficiaire - Rue", "9 Rue de Noethys", "{BENEFICIAIRE_RUE}"),
             (u"Adresse du bénéficiaire - CP", "29200", "{BENEFICIAIRE_CP}"),
             (u"Adresse du bénéficiaire - Ville", "BREST", "{BENEFICIAIRE_VILLE}"),
 
             (u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
             (u"Noms des titulaires", "DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
-            (u"Rue de l'adresse de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Rue de l'adresse de la famille", "9 Rue de Noethys", "{FAMILLE_RUE}"),
             (u"Code postal de l'adresse de la famille", "29200", "{FAMILLE_CP}"),
             (u"Ville de l'adresse de la famille", "BREST", "{FAMILLE_VILLE}"),
             (u"Régime social de la famille", "Régime général", "{FAMILLE_REGIME}"),
@@ -543,11 +546,11 @@ class Cotisation(Categorie):
 
             (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", "29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
@@ -578,17 +581,17 @@ class Attestation_fiscale(Categorie):
 
         self.champs = [(u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
             (u"Noms des titulaires de dossier", "M. DUPOND Gérard", "{FAMILLE_NOM}"),
-            (u"Rue de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Rue de la famille", "9 Rue de Noethys", "{FAMILLE_RUE}"),
             (u"Code postal de la famille", "29200", "{FAMILLE_CP}"),
             (u"Ville de la famille", "BREST", "{FAMILLE_VILLE}"),
 
             (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", "29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
@@ -638,7 +641,7 @@ class Location(Categorie):
 
             (u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
             (u"Noms des titulaires", "DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
-            (u"Rue de l'adresse de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Rue de l'adresse de la famille", "9 Rue de Noethys", "{FAMILLE_RUE}"),
             (u"Code postal de l'adresse de la famille", "29200", "{FAMILLE_CP}"),
             (u"Ville de l'adresse de la famille", "BREST", "{FAMILLE_VILLE}"),
             (u"Régime social de la famille", "Régime général", "{FAMILLE_REGIME}"),
@@ -647,11 +650,11 @@ class Location(Categorie):
 
             (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", "29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
@@ -694,7 +697,7 @@ class Location_demande(Categorie):
 
             (u"Numéro ID de la famille", "2582", "{IDFAMILLE}"),
             (u"Noms des titulaires", "DUPOND Gérard et Lucie", "{FAMILLE_NOM}"),
-            (u"Rue de l'adresse de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
+            (u"Rue de l'adresse de la famille", "9 Rue de Noethys", "{FAMILLE_RUE}"),
             (u"Code postal de l'adresse de la famille", "29200", "{FAMILLE_CP}"),
             (u"Ville de l'adresse de la famille", "BREST", "{FAMILLE_VILLE}"),
             (u"Régime social de la famille", "Régime général", "{FAMILLE_REGIME}"),
@@ -703,11 +706,11 @@ class Location_demande(Categorie):
 
             (u"Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
             (u"Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            (u"Code postal de l'organisateur", "29870", "{ORGANISATEUR_CP}"),
-            (u"Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
-            (u"Téléphone de l'organisateur", "01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            (u"Fax de l'organisateur", "01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            (u"Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            (u"Code postal de l'organisateur", "29200", "{ORGANISATEUR_CP}"),
+            (u"Ville de l'organisateur", "BREST", "{ORGANISATEUR_VILLE}"),
+            (u"Téléphone de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            (u"Fax de l'organisateur", "00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            (u"Mail de l'organisateur", "test@test.com", "{ORGANISATEUR_MAIL}"),
             (u"Site internet de l'organisateur", "www.noethys.com", "{ORGANISATEUR_SITE}"),
             (u"Numéro d'agrément de l'organisateur", "0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             (u"Numéro SIRET de l'organisateur", "123456789123", "{ORGANISATEUR_SIRET}"),
@@ -743,8 +746,8 @@ class Devis(Categorie):
             ("Numéro ID de la famille", u"2582", "{IDFAMILLE}"),
 
             ("Nom du destinataire", "M. DUPOND Gérard", "{DESTINATAIRE_NOM}"),
-            ("Rue de l'adresse du destinataire", "10 rue des oiseaux", "{DESTINATAIRE_RUE}"),
-            ("Ville de l'adresse du destinataire", "29000 QUIMPER", "{DESTINATAIRE_VILLE}"),
+            ("Rue de l'adresse du destinataire", "9 Rue de Noethys", "{DESTINATAIRE_RUE}"),
+            ("Ville de l'adresse du destinataire", "29200 BREST", "{DESTINATAIRE_VILLE}"),
 
             ("Nom des individus concernés", u"Xavier DUPOND et Lucie DUPOND", "{NOMS_INDIVIDUS}"),
             ("Date de début de la période", u"01/01/2011", "{DATE_DEBUT}"),
@@ -752,11 +755,11 @@ class Devis(Categorie):
 
             ("Nom de l'organisateur", "Association Noethys", "{ORGANISATEUR_NOM}"),
             ("Rue de l'organisateur", "Avenue des Lilas", "{ORGANISATEUR_RUE}"),
-            ("Code postal de l'organisateur", u"29870", "{ORGANISATEUR_CP}"),
-            ("Ville de l'organisateur", "LANNILIS", "{ORGANISATEUR_VILLE}"),
-            ("Téléphone de l'organisateur", u"01.98.01.02.03", "{ORGANISATEUR_TEL}"),
-            ("Fax de l'organisateur", u"01.04.05.06.", "{ORGANISATEUR_FAX}"),
-            ("Mail de l'organisateur", "noethys" + u"@gmail.com", "{ORGANISATEUR_MAIL}"),
+            ("Code postal de l'organisateur", u"29200", "{ORGANISATEUR_CP}"),
+            ("Ville de l'organisateur", "BREST", "{ORGANISATEUR_VILLE}"),
+            ("Téléphone de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_TEL}"),
+            ("Fax de l'organisateur", u"00.00.00.00.00", "{ORGANISATEUR_FAX}"),
+            ("Mail de l'organisateur", "test@test.com", "{ORGANISATEUR_MAIL}"),
             ("Site internet de l'organisateur", u"www.noethys.com", "{ORGANISATEUR_SITE}"),
             ("Numéro d'agrément de l'organisateur", u"0256ORG234", "{ORGANISATEUR_AGREMENT}"),
             ("Numéro SIRET de l'organisateur", u"123456789123", "{ORGANISATEUR_SIRET}"),
@@ -861,6 +864,22 @@ class Modele_doc():
                 if etat == False:
                     return False
 
+    def ResoudreTexte(self, texte="", dict_valeurs={}):
+        """ Remplace les formules et les mots-clés d'un texte par leurs valeurs """
+        if dict_valeurs:
+            # Traitement des formules (une seule fois, et non plus une fois par champ)
+            texte = utils_resolveur_formule.ResolveurTexte(texte=texte, listeChamps=list(dict_valeurs.keys()), dictValeurs=dict_valeurs)
+
+            # Remplacement des mots-clés par les valeurs : on ne traite que les mots-clés présents dans le texte
+            def Remplacer(match):
+                nomChamp = match.group(0)
+                if nomChamp not in dict_valeurs:
+                    return nomChamp
+                return Formater_valeur_mot_cle(dict_valeurs[nomChamp])
+            texte = REGEX_MOTS_CLES_PRESENTS.sub(Remplacer, texte)
+        # Remplace également les mots-clés non utilisés par des chaînes vides
+        return REGEX_MOTS_CLES_NON_UTILISES.sub("", texte or "")
+
     def GetValeur(self, objet=None, dict_valeurs={}):
         valeur = None
         # -------- CODE-BARRES -------
@@ -872,22 +891,12 @@ class Modele_doc():
 
         # -------- TEXTE ----------
         if "texte" in objet.get("categorie", ""):
-            texte = objet.get("text")
-            if dict_valeurs:
-                # Traitement des formules (une seule fois, et non plus une fois par champ)
-                texte = utils_resolveur_formule.ResolveurTexte(texte=texte, listeChamps=list(dict_valeurs.keys()), dictValeurs=dict_valeurs)
+            valeur = self.ResoudreTexte(objet.get("text"), dict_valeurs)
 
-                # Remplacement des mots-clés par les valeurs : on ne traite que les mots-clés présents dans le texte
-                def Remplacer(match):
-                    nomChamp = match.group(0)
-                    if nomChamp not in dict_valeurs:
-                        return nomChamp
-                    return Formater_valeur_mot_cle(dict_valeurs[nomChamp])
-                texte = REGEX_MOTS_CLES_PRESENTS.sub(Remplacer, texte)
-            # Remplace également les mots-clés non utilisés par des chaînes vides
-            texte = REGEX_MOTS_CLES_NON_UTILISES.sub("", texte)
+        # -------- QR CODE ----------
+        if objet.get("categorie") == "qrcode":
+            valeur = self.ResoudreTexte(objet.get("qr_contenu") or "", dict_valeurs)
 
-            valeur = texte
 
         # -------- PHOTO -------
         if objet.get("categorie") == "photo":
@@ -930,7 +939,7 @@ class Modele_doc():
     def DessineFormes(self, canvas):
         """ Dessine les formes """
         for objet in self.objets:
-            if objet.get("categorie") in ("rectangle", "ligne", "ellipse", "polygone"):
+            if objet.get("categorie") in ("rectangle", "cercle", "ligne", "ellipse", "polygone"):
                 ObjetPDF(objet, canvas)
 
     def DessineCodesBarres(self, canvas, dict_valeurs={}):
@@ -940,6 +949,12 @@ class Modele_doc():
                 valeur = self.GetValeur(objet, dict_valeurs)
                 if valeur:
                     ObjetPDF(objet, canvas, valeur=valeur)
+
+    def DessineQRCodes(self, canvas, dict_valeurs={}):
+        """ Dessine les QR codes """
+        for objet in self.objets:
+            if objet.get("categorie") == "qrcode":
+                ObjetPDF(objet, canvas, valeur=self.GetValeur(objet, dict_valeurs))
 
     def DessineTextes(self, canvas, dict_valeurs={}):
         """ Dessine les textes """
@@ -975,6 +990,10 @@ class ObjetPDF():
 
         self.width *= getattr(self, 'scaleX', 1)
         self.height *= getattr(self, 'scaleY', 1)
+
+        # Les objets masqués dans l'éditeur (calques) ne sont pas imprimés
+        if objet.get("visible") is False and self.categorie != "special":
+            canvas = None
 
         if canvas:
 
@@ -1028,22 +1047,34 @@ class ObjetPDF():
                 canvas.setFont(police, taillePolice)
                 interligne = taillePolice * 1.2
 
-                # Retour à la ligne automatique selon la largeur du cadre (uniquement pour les Textbox)
-                if getattr(self, "type", None) == "textbox" and self.width:
-                    lignes = []
-                    for paragraphe in valeur.split("\n"):
-                        lignes.extend(simpleSplit(paragraphe, police, taillePolice, self.width) or [""])
-                else:
-                    lignes = valeur.split("\n")
+                # Retour à la ligne automatique selon la largeur du cadre (uniquement pour les Textbox).
+                # Chaque ligne est accompagnée d'un indicateur "dernière ligne du paragraphe" (non justifiée).
+                lignes = []
+                for paragraphe in valeur.split("\n"):
+                    if getattr(self, "type", None) == "textbox" and self.width:
+                        morceaux = simpleSplit(paragraphe, police, taillePolice, self.width) or [""]
+                    else:
+                        morceaux = [paragraphe]
+                    lignes.extend((morceau, index == len(morceaux) - 1) for index, morceau in enumerate(morceaux))
 
                 # Dessin des lignes avec l'alignement défini dans l'éditeur
                 alignement = getattr(self, "textAlign", "left") or "left"
                 y = -self.top - taillePolice
-                for ligne in lignes:
+                for ligne, derniere_ligne in lignes:
                     if alignement == "center":
                         canvas.drawCentredString(self.left + self.width / 2, y, ligne)
                     elif alignement == "right":
                         canvas.drawRightString(self.left + self.width, y, ligne)
+                    elif alignement == "justify" and not derniere_ligne and ligne.count(" ") > 0:
+                        # Justifié : l'espace restant est réparti entre les mots (comme dans l'éditeur)
+                        ligne = ligne.rstrip(" ")
+                        nbre_espaces = ligne.count(" ")
+                        espace_restant = self.width - canvas.stringWidth(ligne, police, taillePolice)
+                        objet_texte = canvas.beginText(self.left, y)
+                        objet_texte.setFont(police, taillePolice)
+                        objet_texte.setWordSpace(max(0, espace_restant / nbre_espaces) if nbre_espaces else 0)
+                        objet_texte.textLine(ligne)
+                        canvas.drawText(objet_texte)
                     else:
                         canvas.drawString(self.left, y, ligne)
                     y -= interligne
@@ -1143,14 +1174,80 @@ class ObjetPDF():
                         canvas.scale(1, -1)
                         barcode.drawOn(canvas, self.left - 18, -self.top - self.height)
 
-            # ------- SPECIAL ------
-            if self.categorie == "special":
-                canvas.rect(self.left, self.top, self.width, self.height, self.SetTrait(), self.SetRemplissage())
-                canvas.setFillColorRGB(0, 0, 0)
-                canvas.setFont(utils_polices.FONT_NORMAL, 9)
-                canvas.scale(1, -1)
-                canvas.drawString(self.left + 6, -self.top -12, self.nom)
+            # ------- QR CODE ------
+            if self.categorie == "qrcode":
+                contenu = valeur if valeur is not None else getattr(self, "qr_contenu", "")
+                contenu = str(contenu or "").strip()
+                if contenu and self.width > 0 and self.height > 0:
+                    try:
+                        widget = QrCodeWidget(contenu, barLevel=getattr(self, "qr_correction", "M") or "M",
+                                              barBorder=0, barWidth=self.width, barHeight=self.height)
+                        dessin = Drawing(self.width, self.height)
+                        dessin.add(widget)
+                        canvas.scale(1, -1)
+                        renderPDF.draw(dessin, canvas, self.left, -self.top - self.height)
+                    except Exception:
+                        pass
 
+            # ------- SPECIAL ------
+            # Zone réservée remplie à l'impression (dessinée uniquement dans l'aperçu de l'éditeur)
+            if self.categorie == "special":
+                self.DessineCadreSpecial(canvas)
+
+            canvas.restoreState()
+
+    def DessineCadreSpecial(self, canvas):
+        """ Cadre spécial : fond bleu léger, bord pointillé, étiquette avec le nom et aperçu des lignes du tableau """
+        bleu = Color(55 / 255, 138 / 255, 221 / 255)
+        x, y, largeur, hauteur = self.left, self.top, self.width, self.height
+        canvas.setFillColor(Color(55 / 255, 138 / 255, 221 / 255, alpha=0.06))
+        canvas.rect(x, y, largeur, hauteur, stroke=0, fill=1)
+        canvas.setStrokeColor(bleu)
+        canvas.setLineWidth(0.6)
+        canvas.setDash(3, 2)
+        canvas.rect(x, y, largeur, hauteur, stroke=1, fill=0)
+        canvas.setDash()
+
+        # Aperçu des lignes du tableau
+        hauteur_etiquette = 4.5 * mmPDF
+        ligne_y = y + hauteur_etiquette + 3 * mmPDF
+        for index, proportion in enumerate((1, 0.92, 0.85, 0.95, 1, 0.92, 0.85, 0.95)):
+            if ligne_y + 2 * mmPDF >= y + hauteur - 6 * mmPDF:
+                break
+            canvas.setFillColor(Color(55 / 255, 138 / 255, 221 / 255, alpha=0.22 if index == 0 else 0.12))
+            canvas.rect(x + 3 * mmPDF, ligne_y, (largeur - 6 * mmPDF) * proportion, 2 * mmPDF, stroke=0, fill=1)
+            ligne_y += 5 * mmPDF
+
+        # Étiquette avec le nom
+        nom = getattr(self, "nom", "") or "Zone spéciale"
+        icone = 2.6 * mmPDF
+        largeur_etiquette = min(canvas.stringWidth(nom, utils_polices.FONT_NORMAL, 7) + icone + 5 * mmPDF, largeur)
+        canvas.setFillColor(bleu)
+        canvas.rect(x, y, largeur_etiquette, hauteur_etiquette, stroke=0, fill=1)
+        canvas.saveState()
+        canvas.scale(1, -1)
+        chemin = canvas.beginPath()
+        chemin.rect(x, -y - hauteur_etiquette, largeur_etiquette, hauteur_etiquette)
+        canvas.clipPath(chemin, stroke=0, fill=0)
+        # Icône "tableau"
+        icone_x, icone_y = x + 1.6 * mmPDF, -y - hauteur_etiquette + (hauteur_etiquette - icone * 0.8) / 2
+        canvas.setStrokeColorRGB(1, 1, 1)
+        canvas.setLineWidth(0.5)
+        canvas.rect(icone_x, icone_y, icone, icone * 0.8, stroke=1, fill=0)
+        canvas.line(icone_x, icone_y + icone * 0.5, icone_x + icone, icone_y + icone * 0.5)
+        canvas.line(icone_x + icone * 0.4, icone_y, icone_x + icone * 0.4, icone_y + icone * 0.8)
+        canvas.setFillColorRGB(1, 1, 1)
+        canvas.setFont(utils_polices.FONT_NORMAL, 7)
+        canvas.drawString(icone_x + icone + 1.4 * mmPDF, -y - hauteur_etiquette + 1.5 * mmPDF, nom)
+        canvas.restoreState()
+
+        # Mention en pied de cadre
+        if hauteur > 15 * mmPDF:
+            canvas.saveState()
+            canvas.scale(1, -1)
+            canvas.setFillColor(Color(24 / 255, 95 / 255, 165 / 255))
+            canvas.setFont(utils_polices.FONT_NORMAL, 6)
+            canvas.drawRightString(x + largeur - 2 * mmPDF, -y - hauteur + 1.6 * mmPDF, "rempli à l'impression")
             canvas.restoreState()
 
     def SetTrait(self):
@@ -1176,8 +1273,8 @@ class ObjetPDF():
     def GetPolice(self):
         police = utils_polices.FONT_NORMAL
         if hasattr(self, "fontWeight") and self.fontWeight == "bold" : police = utils_polices.FONT_BOLD
-        if hasattr(self, "fontStyle") and self.fontStyle == "italic" : police = utils_polices.FONT_BOLD
-        if hasattr(self, "fontWeight") and self.fontWeight == "bold" and self.fontStyle == "italic" : police = utils_polices.FONT_BOLD_OBLIQUE
+        if hasattr(self, "fontStyle") and self.fontStyle == "italic" : police = utils_polices.FONT_OBLIQUE
+        if getattr(self, "fontWeight", None) == "bold" and getattr(self, "fontStyle", None) == "italic" : police = utils_polices.FONT_BOLD_OBLIQUE
         return police
 
     def ConvertCouleur(self, couleur=""):

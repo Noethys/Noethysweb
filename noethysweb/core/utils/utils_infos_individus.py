@@ -12,24 +12,6 @@ from core.data.data_liens import DICT_TYPES_LIENS
 from django.db.models import Q
 
 
-# import GestionDB
-# import sqlite3
-# import datetime
-# import base64
-# from six.moves import cPickle
-# import six
-# from Utils import UTILS_Dates
-# from Utils import UTILS_Cotisations_manquantes
-# from Utils import UTILS_Pieces_manquantes
-# from Utils import UTILS_Questionnaires
-# from Utils import UTILS_Fichiers
-#
-# from Data.DATA_Liens import DICT_TYPES_LIENS, DICT_AUTORISATIONS
-# from Data import DATA_Civilites as Civilites
-#
-# DICT_CIVILITES = Civilites.GetDictCivilites()
-
-
 def GetTypeChamp(codeChamp=""):
     """ Renvoie le type de donnée d'un champ """
     codeChamp = codeChamp.replace("{", "").replace("}", "")
@@ -55,30 +37,30 @@ def GetNomsChampsPossibles(mode="individu+famille"):
         ("Numéro de sécu de l'individu", u"2 39 336...", "{INDIVIDU_NUM_SECU}"),
         ("Date de naissance de l'individu", u"23/01/2010", "{INDIVIDU_DATE_NAISS}"),
         ("Age de l'individu", "9 ans", "{INDIVIDU_AGE}"),
-        ("Code postal de la ville de naissance de l'individu", u"29200", "{INDIVIDU_CP_NAISS}"),
+        ("Code postal de la ville de naissance de l'individu", u"29000", "{INDIVIDU_CP_NAISS}"),
         ("Ville de naissance de l'individu", "BREST", "{INDIVIDU_VILLE_NAISS}"),
         ("Année de décès de l'individu", u"2012", "{INDIVIDU_ANNEE_DECES}"),
-        ("Rue de l'adresse de l'individu", "10 rue des oiseaux", "{INDIVIDU_RUE}"),
-        ("Code postal de l'adresse de l'individu", u"29870", "{INDIVIDU_CP}"),
-        ("Ville de l'adresse de l'individu", "LANNILIS", "{INDIVIDU_VILLE}"),
+        ("Rue de l'adresse de l'individu", "9 Rue de Noethys", "{INDIVIDU_RUE}"),
+        ("Code postal de l'adresse de l'individu", u"29200", "{INDIVIDU_CP}"),
+        ("Ville de l'adresse de l'individu", "BREST", "{INDIVIDU_VILLE}"),
         ("Secteur de l'adresse de l'individu", "Quartier sud", "{INDIVIDU_SECTEUR}"),
         ("Catégorie socio-professionnelle de l'individu", "Ouvrier", "{INDIVIDU_CATEGORIE_TRAVAIL}"),
         ("Profession de l'individu", "Peintre", "{INDIVIDU_PROFESSION}"),
         ("Employeur de l'individu", "Pinceaux et Cie", "{INDIVIDU_EMPLOYEUR}"),
-        ("Numéro de téléphone pro de l'individu", u"01.02.03.04.05", "{INDIVIDU_TEL_PRO}"),
-        ("Numéro de fax pro de l'individu", u"01.02.03.04.05", "{INDIVIDU_FAX_PRO}"),
+        ("Numéro de téléphone pro de l'individu", u"00.00.00.00.00", "{INDIVIDU_TEL_PRO}"),
+        ("Numéro de fax pro de l'individu", u"00.00.00.00.00", "{INDIVIDU_FAX_PRO}"),
         ("Mail pro de l'individu", u"monadresse@pro.fr", "{INDIVIDU_MAIL_PRO}"),
-        ("Numéro de téléphone domicile de l'individu", u"01.02.03.04.05", "{INDIVIDU_TEL_DOMICILE}"),
-        ("Numéro de téléphone portable de l'individu", u"06.02.03.04.05", "{INDIVIDU_TEL_MOBILE}"),
-        ("Numéro de fax domicile de l'individu", u"01.02.03.04.05", "{INDIVIDU_FAX}"),
+        ("Numéro de téléphone domicile de l'individu", u"00.00.00.00.00", "{INDIVIDU_TEL_DOMICILE}"),
+        ("Numéro de téléphone portable de l'individu", u"00.00.00.00.00", "{INDIVIDU_TEL_MOBILE}"),
+        ("Numéro de fax domicile de l'individu", u"00.00.00.00.00", "{INDIVIDU_FAX}"),
         ("Adresse Email de l'individu", u"monadresse@perso.fr", "{INDIVIDU_MAIL}"),
         ("Nom de famille du médecin traitant", "BERGOT", "{MEDECIN_NOM}"),
         ("Prénom du médecin traitant", "Albert", "{MEDECIN_PRENOM}"),
         ("Rue de l'adresse du médecin", "3 rue des allergies", "{MEDECIN_RUE}"),
-        ("Code postal de l'adresse du médecin traitant", u"29870", "{MEDECIN_CP}"),
-        ("Ville de l'adresse du médecin traitant", "LANNILIS", "{MEDECIN_VILLE}"),
-        ("Numéro de téléphone du cabinet du médecin", u"01.02.03.04.05", "{MEDECIN_TEL_CABINET}"),
-        ("Numéro de portable du médecin", u"06.02.03.04.05", "{MEDECIN_TEL_MOBILE}"),
+        ("Code postal de l'adresse du médecin traitant", u"29200", "{MEDECIN_CP}"),
+        ("Ville de l'adresse du médecin traitant", "BREST", "{MEDECIN_VILLE}"),
+        ("Numéro de téléphone du cabinet du médecin", u"00.00.00.00.00", "{MEDECIN_TEL_CABINET}"),
+        ("Numéro de portable du médecin", u"00.00.00.00.00", "{MEDECIN_TEL_MOBILE}"),
         ("Mémo de l'individu", "informations diverses...", "{INDIVIDU_MEMO}"),
         ("Date de création de la fiche individuelle", u"15/07/2014", "{INDIVIDU_DATE_CREATION}"), ]
 
@@ -139,9 +121,9 @@ def GetNomsChampsPossibles(mode="individu+famille"):
     # Famille
     listeChampsFamille = [
         ("Noms des titulaires de la famille", "DUPOND Philippe et Marie", "{FAMILLE_NOM}"),
-        ("Rue de l'adresse de la famille", "10 rue des oiseaux", "{FAMILLE_RUE}"),
-        ("Code postal de l'adresse de la famille", u"29870", "{FAMILLE_CP}"),
-        ("Ville de l'adresse de la famille", "LANNILIS", "{FAMILLE_VILLE}"),
+        ("Rue de l'adresse de la famille", "9 Rue de Noethys", "{FAMILLE_RUE}"),
+        ("Code postal de l'adresse de la famille", u"29200", "{FAMILLE_CP}"),
+        ("Ville de l'adresse de la famille", "BREST", "{FAMILLE_VILLE}"),
         ("Secteur de l'adresse de la famille", "Quartier sud", "{FAMILLE_SECTEUR}"),
         ("Nom de la caisse d'allocations", "CAF", "{FAMILLE_NOM_CAISSE}"),
         ("Nom du régime social", "Régime général", "{FAMILLE_NOM_REGIME}"),

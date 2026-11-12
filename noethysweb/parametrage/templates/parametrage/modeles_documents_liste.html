@@ -54,7 +54,9 @@
 {% block scripts %}
     {{ block.super }}
     <script src="{% static 'lib/fabric/fabric.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/modeles_documents_rendu.js' %}"></script>
     <script>
+        var URL_DATAMATRIX = "{% static 'images/datamatrix.png' %}";
         var apercus_donnees = {modeles: {}, exemples: {}, url_logo: ""};
         var apercu_courant = null;
         var apercu_mode = "exemple";
@@ -97,12 +99,21 @@
                 if (objet.categorie && objet.categorie.indexOf("texte") !== -1 && mode === "exemple" && objet.text) {
                     objet.text = apercu_remplacer_champs(objet.text, exemples);
                 }
+                // Textes affichés comme dans le PDF (taille en points, interligne, justifié)
+                RenduModelesDocuments.aligner_texte_sur_pdf(objet);
+                objet.styles = {};
+                // Zones spéciales : même style que dans l'éditeur (sans étiquette dans les miniatures)
                 if (objet.categorie === "special") {
-                    // Zones spéciales : discrètes dans les miniatures, signalées dans l'aperçu agrandi
-                    objet.fill = miniature ? "rgba(255, 230, 80, 0.12)" : "rgba(255, 230, 80, 0.35)";
-                    objet.stroke = miniature ? "rgba(0, 0, 0, 0)" : "rgba(200, 160, 0, 0.9)";
-                    objet.strokeWidth = miniature ? 0 : 0.4;
-                    objet.strokeDashArray = miniature ? null : [2, 2];
+                    objet.rendu_miniature = miniature;
+                }
+                // Datamatrix : image dédiée, à la taille prévue dans le modèle
+                if (RenduModelesDocuments.est_datamatrix(objet)) {
+                    objet.taille_cible = {largeur: (objet.width || 0) * (objet.scaleX || 1), hauteur: (objet.height || 0) * (objet.scaleY || 1)};
+                    objet.src = URL_DATAMATRIX;
+                    delete objet.width;
+                    delete objet.height;
+                    objet.cropX = 0;
+                    objet.cropY = 0;
                 }
                 resultat.push(objet);
             });
@@ -123,11 +134,15 @@
                         objet.set({width: element.naturalWidth || element.width, height: element.naturalHeight || element.height});
                         objet.scaleX = objet.scaleY = objet.hauteur_cible / objet.height;
                     }
-                    canvas.add(objet);
-                    // Libellé des zones spéciales
-                    if (objet.categorie === "special" && largeur_px > 200) {
-                        canvas.add(new fabric.Text(objet.nom || "", {left: objet.left + 2, top: objet.top + 2, fontSize: 3.5, fontFamily: "Arial", fill: "rgba(122, 100, 0, 1)"}));
+                    // Le datamatrix garde la taille prévue dans le modèle
+                    if (objet.taille_cible && objet.getElement && objet.getElement()) {
+                        var image = objet.getElement();
+                        objet.set({width: image.naturalWidth || image.width, height: image.naturalHeight || image.height});
+                        objet.scaleX = objet.taille_cible.largeur / objet.width;
+                        objet.scaleY = objet.taille_cible.hauteur / objet.height;
                     }
+                    RenduModelesDocuments.preparer_cadre_special(objet);
+                    canvas.add(objet);
                 });
                 canvas.renderAll();
             });

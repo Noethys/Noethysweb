@@ -7,7 +7,7 @@ from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import ModeleDocument, Organisateur, CHOIX_CATEGORIE_MODELE_DOCUMENT
-from parametrage.forms.modeles_documents import Formulaire, Formulaire_creation, Formulaire_champs
+from parametrage.forms.modeles_documents import Formulaire, Formulaire_creation
 from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from reportlab.pdfgen.canvas import Canvas as CanvasPDF
@@ -209,7 +209,7 @@ class Classe_commune(Page):
         context['photos_individuelles'] = infos_categorie["photosIndividuelles"]
         context['codes_barres'] = infos_categorie["codesbarres"]
         context['speciaux'] = infos_categorie["speciaux"]
-        context['formulaire_champs'] = Formulaire_champs(champs=infos_categorie["champs"])
+        context['liste_champs'] = [{"label": label, "exemple": exemple, "code": code} for (label, exemple, code) in infos_categorie["champs"]]
         return context
 
 

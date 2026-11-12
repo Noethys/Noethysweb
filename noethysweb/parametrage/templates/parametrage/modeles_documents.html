@@ -8,198 +8,278 @@
 {% block styles %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'lib/colorpicker/bootstrap-colorpicker.min.css' %}">
-
-    <style>
-        .dropdown-header {
-            margin-top: 0px;
-            margin-bottom: 0px;
-            margin-left: -10px;
-        }
-
-        #caracteristiques_modele .form-group {
-            margin-bottom: 5px;
-        }
-
-        #accordion_proprietes .card {
-            margin: 0px;
-            border: 0px;
-            box-shadow: none;
-        }
-        #accordion_proprietes .card-header {
-            padding: 5px;
-        }
-        #accordion_proprietes .card-title {
-            font-size: 14px;
-        }
-        #accordion_proprietes .card-body {
-            padding: 5px;
-        }
-        #accordion_proprietes .input-group {
-            margin-bottom: 5px;
-        }
-        #accordion_proprietes .active {
-            background-color: #ff8500 !important;
-        }
-
-    </style>
-
+    <link rel="stylesheet" type="text/css" href="{% static 'css/editeur_modeles_documents.css' %}">
 {% endblock styles %}
 
 {% block scripts %}
     {{ block.super }}
     <script src="{% static "lib/fabric/fabric.min.js" %}" type="text/javascript"></script>
+    <script src="{% static 'js/modeles_documents_rendu.js' %}"></script>
     <script src="{% static 'lib/css-element-queries/ResizeSensor.js' %}"></script>
-    <script src="{% static 'lib/css-element-queries/ElementQueries.js' %}"></script>
     <script src="{% static 'lib/colorpicker/bootstrap-colorpicker.min.js' %}"></script>
 {% endblock scripts %}
-
-
 
 
 {% block contenu_page %}
 
     <div class="row">
-        <div class="col-md-3">
 
-            {# Configuration du modèle #}
-            <div class="card" id="caracteristiques_modele">
-                <div class="card-header">
-                    <h3 class="card-title">Modèle</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Diminuer">
-                            <i class="fa fa-minus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    {% crispy form %}
-                </div>
-            </div>
+        {% block canvas %}
+            <div class="col-lg-9 col-md-8">
+                <div class="card editeur-card mb-2">
 
-            {# Aide #}
-            <div id="aide" class="card card-default">
-                <div class="card-header">
-                    <h3 class="card-title">Astuces</h3>
-                </div>
-                <div class="card-body">
-                    <dl>
-                        <dt>Sélectionner</dt><dd>Clic gauche de la souris</dd>
-                        <dt>Se déplacer</dt><dd>Clic droit de la souris</dd>
-                        <dt>Zoomer</dt><dd>Molette de la souris</dd>
-                        <dt>Supprimer un élément</dt><dd>Touche Suppr</dd>
-                        <dt>Modifier un texte</dt><dd>Double-clic gauche avec la souris</dd>
-                    </dl>
-                </div>
-            </div>
+                    {# ------------------- Barre d'outils ------------------- #}
+                    <div class="editeur-barre">
 
-            {# Propriétés de l'objet #}
-            <div id="proprietes_objet" class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Objet</h3>
-                </div>
-                <div class="card-body">
+                        {# Rattachés au formulaire du cadre "Modèle" par l'attribut form #}
+                        <button type="submit" form="modeles_documents_form" id="bouton_enregistrer" class="btn btn-primary btn-sm editeur-enregistrer" name="dupliquer" title="Enregistrer (Ctrl+S)"><i class="fa fa-check"></i><span class="libelle-barre libelle-enregistrer">Enregistrer</span></button>
+                        <a href="{{ view.get_success_url }}" id="bouton_quitter" class="btn btn-danger btn-sm ml-1" title="Annuler et revenir à la liste des modèles"><i class="fa fa-times"></i><span class="libelle-barre libelle-annuler">Annuler</span></a>
+                        <span class="editeur-sep"></span>
 
-                    {# Propriétés NOM #}
-                    <div class="controls" style="margin-bottom: 5px;">
-                        <div class="input-group input-group-sm">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">Nom</span>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" title="Ajouter un élément"><i class="fa fa-plus"></i><span class="libelle-barre libelle-ajouter">Ajouter</span></button>
+                            <div class="dropdown-menu editeur-menu-ajouter">
+                                <h6 class="dropdown-header">Formes</h6>
+                                <a class="dropdown-item" href="#" data-ajouter="texte"><i class="fa fa-fw fa-font"></i> Texte</a>
+                                <a class="dropdown-item" href="#" data-ajouter="rectangle"><i class="fa fa-fw fa-square-o"></i> Rectangle</a>
+                                <a class="dropdown-item" href="#" data-ajouter="cercle"><i class="fa fa-fw fa-circle-thin"></i> Cercle</a>
+                                <a class="dropdown-item" href="#" data-ajouter="ligne"><i class="fa fa-fw fa-minus"></i> Ligne</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Images</h6>
+                                <a class="dropdown-item" href="#" data-ajouter="image"><i class="fa fa-fw fa-picture-o"></i> Image</a>
+                                <a class="dropdown-item" href="#" data-ajouter="logo"><i class="fa fa-fw fa-star-o"></i> Logo de l'organisateur</a>
+                                {% if photos_individuelles %}
+                                    <a class="dropdown-item" href="#" data-ajouter="photo"><i class="fa fa-fw fa-user-o"></i> Photo individuelle</a>
+                                {% endif %}
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Codes</h6>
+                                <a class="dropdown-item" href="#" data-ajouter="qrcode"><i class="fa fa-fw fa-qrcode"></i> QR code</a>
+                                {% if codes_barres %}
+                                    <div class="dropdown-divider"></div>
+                                    <h6 class="dropdown-header">Codes-barres</h6>
+                                    {% for code_barre in codes_barres %}
+                                        <a class="dropdown-item" href="#" data-ajouter="codebarres" data-nom="{{ code_barre.0 }}" data-champ="{{ code_barre.2 }}"><i class="fa fa-fw fa-barcode"></i> {{ code_barre.0 }}</a>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if speciaux %}
+                                    <div class="dropdown-divider"></div>
+                                    <h6 class="dropdown-header">Objets spéciaux</h6>
+                                    {% for special in speciaux %}
+                                        <a class="dropdown-item" href="#" data-ajouter="special" data-nom="{{ special.nom }}" data-champ="{{ special.champ }}" data-largeur="{{ special.largeur }}" data-hauteur="{{ special.hauteur }}"><i class="fa fa-fw fa-table"></i> {{ special.nom }}</a>
+                                    {% endfor %}
+                                {% endif %}
                             </div>
-                            <input type="text" id="objet_nom" value="" class="form-control">
                         </div>
-                    </div>
 
-                    {# ACCORDION Propriétés #}
-                    <div id="accordion_proprietes" class="p-0">
+                        <button type="button" id="bouton_inserer_champ" class="btn btn-primary btn-sm ml-1" title="Insérer un champ dans le texte en cours d'édition" style="display: none;"><i class="fa fa-code margin-r-5"></i>Insérer un champ</button>
 
-                        {# Propriétés POSITION #}
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="card-title w-100">
-                                    <a class="d-block w-100" data-toggle="collapse" data-target="#proprietes_position" href="#proprietes_position"><i class="fa fa-fw fa-map-marker margin-r-5"></i>Position</a>
-                                </h4>
+                        <span class="editeur-sep"></span>
+                        <button type="button" class="btn btn-outil" id="bouton_annuler" title="Annuler (Ctrl+Z)"><i class="fa fa-undo"></i></button>
+                        <button type="button" class="btn btn-outil" id="bouton_retablir" title="Rétablir (Ctrl+Y)"><i class="fa fa-repeat"></i></button>
+
+                        <span class="editeur-sep"></span>
+                        <span class="groupe-ordre">
+                            <button type="button" class="btn btn-outil fonctions_objet" data-ordre="devant" title="Mettre au premier plan"><svg class="icone-ordre" viewBox="0 0 16 16" aria-hidden="true"><rect class="fond" x="1.5" y="1.5" width="7" height="7"/><rect class="fond" x="7.5" y="7.5" width="7" height="7"/><rect class="plein" x="4.5" y="4.5" width="7" height="7"/></svg></button>
+                            <button type="button" class="btn btn-outil fonctions_objet" data-ordre="avancer" title="Avancer d'un plan"><svg class="icone-ordre" viewBox="0 0 16 16" aria-hidden="true"><rect class="fond" x="1.5" y="1.5" width="8" height="8"/><rect class="plein" x="6.5" y="6.5" width="8" height="8"/></svg></button>
+                            <button type="button" class="btn btn-outil fonctions_objet" data-ordre="reculer" title="Reculer d'un plan"><svg class="icone-ordre" viewBox="0 0 16 16" aria-hidden="true"><rect class="plein" x="6.5" y="6.5" width="8" height="8"/><rect class="fond" x="1.5" y="1.5" width="8" height="8"/></svg></button>
+                            <button type="button" class="btn btn-outil fonctions_objet" data-ordre="derriere" title="Mettre à l'arrière-plan"><svg class="icone-ordre" viewBox="0 0 16 16" aria-hidden="true"><rect class="plein" x="4.5" y="4.5" width="7" height="7"/><rect class="fond" x="1.5" y="1.5" width="7" height="7"/><rect class="fond" x="7.5" y="7.5" width="7" height="7"/></svg></button>
+                        </span>
+                        <div class="btn-group menu-ordre">
+                            <button type="button" class="btn btn-outil dropdown-toggle fonctions_objet" data-toggle="dropdown" id="menu_ordre_bouton" title="Ordre des plans"></button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" data-ordre-menu="devant">Premier plan</a>
+                                <a class="dropdown-item" href="#" data-ordre-menu="avancer">Avancer</a>
+                                <a class="dropdown-item" href="#" data-ordre-menu="reculer">Reculer</a>
+                                <a class="dropdown-item" href="#" data-ordre-menu="derriere">Arrière-plan</a>
                             </div>
-                            <div id="proprietes_position" class="collapse" data-parent="#accordion_proprietes">
-                                <div class="card-body">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">X</span>
-                                        </div>
-                                        <input type="number" id="objet_x" value="" class="numberinput form-control">
-                                        <div class="input-group-append">
-                                            <button type="button" id="objet_lock_x" class="btn btn-default" data-toggle="button" aria-pressed="false"><i class='fa fa-lock'></i></button>
-                                        </div>
-                                    </div>
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Y</span>
-                                        </div>
-                                        <input type="number" id="objet_y" value="" class="numberinput form-control">
-                                        <div class="input-group-append">
-                                            <button type="button" id="objet_lock_y" class="btn btn-default" data-toggle="button" aria-pressed="false"><i class='fa fa-lock'></i></button>
-                                        </div>
-                                    </div>
+                        </div>
+
+                        <span class="editeur-sep"></span>
+                        <button type="button" class="btn btn-outil fonctions_objet" id="bouton_dupliquer" title="Dupliquer (Ctrl+D)"><i class="fa fa-clone"></i></button>
+                        <button type="button" class="btn btn-outil fonctions_objet" id="bouton_supprimer" title="Supprimer (Suppr)"><i class="fa fa-trash-o"></i></button>
+
+                        <span class="editeur-sep"></span>
+                        <button type="button" class="btn btn-outil" id="bascule_grille" title="Afficher la grille"><i class="fa fa-th"></i></button>
+                        <button type="button" class="btn btn-outil" id="bascule_magnetisme" title="Magnétisme : aligner automatiquement sur la page, les marges, les autres objets et la grille (maintenir Ctrl pour désactiver temporairement)"><i class="fa fa-magnet"></i></button>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outil dropdown-toggle" data-toggle="dropdown" title="Options d'affichage"><i class="fa fa-sliders"></i></button>
+                            <div class="dropdown-menu dropdown-menu-right editeur-menu-affichage p-2">
+                                <div class="options-compactes">
+                                    <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="option_grille"><label class="custom-control-label" for="option_grille">Grille</label></div>
+                                    <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="option_magnetisme"><label class="custom-control-label" for="option_magnetisme">Magnétisme</label></div>
+                                </div>
+                                <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="option_regles"><label class="custom-control-label" for="option_regles">Règles</label></div>
+                                <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="option_marges"><label class="custom-control-label" for="option_marges">Marges de sécurité</label></div>
+                                <div class="dropdown-divider"></div>
+                                <div class="input-group input-group-sm mb-1">
+                                    <div class="input-group-prepend"><span class="input-group-text">Pas de la grille</span></div>
+                                    <input type="number" id="option_pas_grille" class="form-control" min="1" max="50" step="1">
+                                    <div class="input-group-append"><span class="input-group-text">mm</span></div>
+                                </div>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend"><span class="input-group-text">Marges</span></div>
+                                    <input type="number" id="option_marge" class="form-control" min="0" max="50" step="1">
+                                    <div class="input-group-append"><span class="input-group-text">mm</span></div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <a href="#" class="dropdown-item px-1 small" id="bouton_raccourcis"><i class="fa fa-keyboard-o fa-fw"></i> Raccourcis clavier <span class="text-muted float-right">?</span></a>
+                            </div>
+                        </div>
+
+                        {% if liste_champs %}
+                            <span class="editeur-sep"></span>
+                            <button type="button" class="btn btn-outil" id="bascule_apercu_unique" title="Afficher des données d'exemple à la place des champs"><i class="fa fa-eye"></i></button>
+                            <div class="btn-group btn-group-sm" id="bascule_apercu" role="group" aria-label="Affichage des champs">
+                                <button type="button" class="btn btn-default active" data-apercu="0" title="Afficher les champs {…} dans les textes"><i class="fa fa-code"></i><span class="libelle-bascule">Champs</span></button>
+                                <button type="button" class="btn btn-default" data-apercu="1" title="Afficher des données d'exemple à la place des champs (affichage uniquement, rien n'est enregistré)"><i class="fa fa-eye"></i><span class="libelle-bascule">Exemples</span></button>
+                            </div>
+                        {% endif %}
+
+                        <div class="editeur-barre-droite">
+                            <button type="button" class="btn btn-outil" id="zoom_moins" title="Zoom arrière (Ctrl+-)"><i class="fa fa-search-minus"></i></button>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle editeur-zoom" data-toggle="dropdown" id="zoom_valeur" title="Niveau de zoom (100 % = taille réelle)">100 %</button>
+                                <div class="dropdown-menu dropdown-menu-right menu-zoom">
+                                    <a class="dropdown-item" href="#" data-zoom="ajuster"><i class="fa fa-fw fa-arrows-alt"></i>Ajuster à la page<small class="menu-zoom-info">Ctrl+0</small></a>
+                                    <a class="dropdown-item" href="#" data-zoom="largeur"><i class="fa fa-fw fa-arrows-h"></i>Ajuster à la largeur</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#" data-zoom="50"><i class="fa fa-fw fa-check menu-zoom-coche"></i>50 %</a>
+                                    <a class="dropdown-item" href="#" data-zoom="75"><i class="fa fa-fw fa-check menu-zoom-coche"></i>75 %</a>
+                                    <a class="dropdown-item" href="#" data-zoom="100"><i class="fa fa-fw fa-check menu-zoom-coche"></i>100 %<small class="menu-zoom-info">taille réelle</small></a>
+                                    <a class="dropdown-item" href="#" data-zoom="150"><i class="fa fa-fw fa-check menu-zoom-coche"></i>150 %</a>
+                                    <a class="dropdown-item" href="#" data-zoom="200"><i class="fa fa-fw fa-check menu-zoom-coche"></i>200 %</a>
+                                    <a class="dropdown-item" href="#" data-zoom="400"><i class="fa fa-fw fa-check menu-zoom-coche"></i>400 %</a>
                                 </div>
                             </div>
+                            <button type="button" class="btn btn-outil" id="zoom_plus" title="Zoom avant (Ctrl++)"><i class="fa fa-search-plus"></i></button>
+                            <button type="button" class="btn btn-default btn-sm ml-1" id="bouton_pdf" title="Aperçu PDF"><i class="fa fa-file-pdf-o"></i><span class="libelle-apercu">Aperçu</span></button>
                         </div>
+                    </div>
 
-                        {# Propriétés TAILLE #}
-                        <div id="panel_taille" class="card">
-                            <div class="card-header">
-                                <h4 class="card-title w-100">
-                                    <a class="d-block w-100" data-toggle="collapse" data-target="#proprietes_taille" href="#proprietes_taille"><i class="fa fa-fw fa-expand margin-r-5"></i>Dimensions</a>
-                                </h4>
+                    {# ------------------- Zone de dessin ------------------- #}
+                    <div id="zone_editeur" class="editeur-zone">
+                        <div class="editeur-coin" title="mm">mm</div>
+                        <canvas id="regle_h" class="editeur-regle-h"></canvas>
+                        <canvas id="regle_v" class="editeur-regle-v"></canvas>
+                        <div id="div_canvas" class="editeur-canvas">
+                            <canvas id="canvas"></canvas>
+                        </div>
+                        <div class="editeur-statut">
+                            <span id="statut_curseur"><i class="fa fa-mouse-pointer margin-r-5"></i>–</span>
+                            <span id="statut_page"></span>
+                            <span id="statut_selection"></span>
+                            <a href="#" id="statut_champs" class="editeur-statut-alerte" style="display: none;" title="Afficher le premier objet concerné"></a>
+                            <span id="statut_modifie" class="editeur-statut-modifie" style="display: none;"><i class="fa fa-circle margin-r-5"></i>Modifications non enregistrées</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        {% endblock %}
+
+        <div class="col-lg-3 col-md-4">
+
+            {# ------------------- Caractéristiques du modèle (formulaire compact) ------------------- #}
+            <div class="card editeur-modele" id="caracteristiques_modele">
+                {% crispy form %}
+            </div>
+
+            {# ------------------- Panneau à onglets ------------------- #}
+            <div class="card editeur-panneau">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" id="onglet_proprietes" data-toggle="pill" href="#panneau_proprietes" role="tab"><i class="fa fa-sliders margin-r-5"></i>Propriétés</a></li>
+                        <li class="nav-item"><a class="nav-link" id="onglet_calques" data-toggle="pill" href="#panneau_calques" role="tab"><i class="fa fa-clone margin-r-5"></i>Calques</a></li>
+                        <li class="nav-item"><a class="nav-link" id="onglet_champs" data-toggle="pill" href="#panneau_champs" role="tab"><i class="fa fa-code margin-r-5"></i>Champs</a></li>
+                    </ul>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content">
+
+                        {# ---------- Propriétés ---------- #}
+                        <div class="tab-pane fade show active" id="panneau_proprietes" role="tabpanel">
+
+                            {# Aucune sélection #}
+                            <div id="prop_vide" class="prop-section">
+                                <p class="text-muted mb-2">Aucun objet sélectionné.</p>
+                                <ul class="editeur-astuces">
+                                    <li><strong>Ajouter</strong> un élément avec le bouton vert, ou glisser un champ depuis l'onglet <em>Champs</em>.</li>
+                                    <li><strong>Sélectionner plusieurs</strong> objets avec Maj + clic ou en traçant un cadre.</li>
+                                    <li><strong>Clic droit</strong> sur un objet ou sur la page pour ouvrir le menu contextuel.</li>
+                                    <li><strong>Se déplacer</strong> avec Espace + glisser, ou en glissant avec le clic droit.</li>
+                                    <li><strong>Zoomer</strong> avec la molette.</li>
+                                    <li><strong>Modifier un texte</strong> avec un double-clic.</li>
+                                </ul>
+                                <a href="#" class="small" data-action="raccourcis"><i class="fa fa-keyboard-o margin-r-5"></i>Tous les raccourcis clavier</a>
                             </div>
-                            <div id="proprietes_taille" class="collapse" data-parent="#accordion_proprietes">
-                                <div class="card-body">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Largeur</span>
-                                        </div>
-                                        <input type="number" id="objet_largeur" value="" class="numberinput form-control" min="0">
-                                        <div class="input-group-append">
-                                            <button type="button" id="objet_lock_largeur" class="btn btn-default" data-toggle="button" aria-pressed="false"><i class='fa fa-lock'></i></button>
-                                        </div>
-                                    </div>
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Hauteur</span>
-                                        </div>
-                                        <input type="number" id="objet_hauteur" value="" class="numberinput form-control" min="0">
-                                        <div class="input-group-append">
-                                            <button type="button" id="objet_lock_hauteur" class="btn btn-default" data-toggle="button" aria-pressed="false"><i class='fa fa-lock'></i></button>
-                                        </div>
-                                    </div>
+
+                            {# En-tête de l'objet #}
+                            <div id="prop_entete" class="prop-section prop-entete">
+                                <i id="prop_icone" class="fa fa-fw fa-square-o text-muted"></i>
+                                <input type="text" id="objet_nom" class="form-control form-control-sm prop-nom" title="Nom de l'objet">
+                                <span id="prop_multi" class="prop-multi"></span>
+                                <button type="button" id="objet_verrouiller" class="btn btn-outil" title="Verrouiller la position et la taille"><i class="fa fa-unlock"></i></button>
+                            </div>
+
+                            {# Champs non reconnus #}
+                            <div id="prop_alerte_champs" class="prop-section"></div>
+
+                            {# Position et taille #}
+                            <div id="prop_position" class="prop-section">
+                                <div class="prop-titre">Position et taille <span class="text-muted">(mm)</span></div>
+                                <div class="prop-grille">
+                                    <label class="prop-champ"><span>X</span><input type="number" id="objet_x" step="0.5"></label>
+                                    <label class="prop-champ"><span>Y</span><input type="number" id="objet_y" step="0.5"></label>
+                                    <label class="prop-champ" id="champ_largeur"><span>L</span><input type="number" id="objet_largeur" step="0.5" min="0"></label>
+                                    <label class="prop-champ" id="champ_hauteur"><span>H</span><input type="number" id="objet_hauteur" step="0.5" min="0"></label>
+                                    <label class="prop-champ" id="champ_angle"><span>Angle</span><input type="number" id="objet_angle" step="1"></label>
+                                    <button type="button" id="objet_proportions" class="btn btn-outil prop-proportions" title="Conserver les proportions"><i class="fa fa-link"></i></button>
                                 </div>
                             </div>
-                        </div>
 
-                        {# Propriétés TRAIT #}
-                        <div id="panel_trait" class="card">
-                            <div class="card-header">
-                                <h4 class="card-title w-100">
-                                    <a class="d-block w-100" data-toggle="collapse" data-target="#proprietes_trait" href="#proprietes_trait"><i class="fa fa-fw fa-pencil margin-r-5"></i>Trait</a>
-                                </h4>
+                            {# Texte #}
+                            <div id="prop_texte" class="prop-section">
+                                <div class="prop-titre">Texte</div>
+                                <div class="prop-ligne">
+                                    <label class="prop-champ prop-champ-court" title="Taille d'impression en points"><span>Taille (pt)</span><input type="number" id="objet_texte_taille" min="1" step="0.5"></label>
+                                    <div class="btn-group btn-group-sm prop-segment">
+                                        <button type="button" class="btn btn-default" id="objet_texte_gras" title="Gras"><i class="fa fa-bold"></i></button>
+                                        <button type="button" class="btn btn-default" id="objet_texte_italique" title="Italique"><i class="fa fa-italic"></i></button>
+                                    </div>
+                                </div>
+                                <div class="btn-group btn-group-sm prop-segment w-100 mt-2" id="objet_texte_alignement">
+                                    <button type="button" class="btn btn-default" data-valeur="left" title="Aligner à gauche"><i class="fa fa-align-left"></i></button>
+                                    <button type="button" class="btn btn-default" data-valeur="center" title="Centrer"><i class="fa fa-align-center"></i></button>
+                                    <button type="button" class="btn btn-default" data-valeur="right" title="Aligner à droite"><i class="fa fa-align-right"></i></button>
+                                    <button type="button" class="btn btn-default" data-valeur="justify" title="Justifier"><i class="fa fa-align-justify"></i></button>
+                                </div>
                             </div>
-                            <div id="proprietes_trait" class="collapse" data-parent="#accordion_proprietes">
-                                <div class="card-body">
-                                    <div id="colorpicker_trait" class="input-group input-group-sm colorpicker-component">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Couleur</span>
-                                        </div>
-                                        <input type="text" id="objet_trait_couleur" value="#00AABB" class="form-control"/>
+
+                            {# Couleurs #}
+                            <div id="prop_couleurs" class="prop-section">
+                                <div class="prop-titre">Couleurs</div>
+
+                                <div id="bloc_couleur_texte" class="prop-couleur">
+                                    <span class="prop-pastille" id="pastille_texte"></span>
+                                    <span class="prop-couleur-label">Texte</span>
+                                    <input type="text" id="objet_texte_couleur" class="form-control form-control-sm">
+                                </div>
+
+                                <div id="bloc_couleur_remplissage" class="prop-couleur">
+                                    <span class="prop-pastille" id="pastille_remplissage"></span>
+                                    <span class="prop-couleur-label">Fond</span>
+                                    <input type="text" id="objet_remplissage_couleur" class="form-control form-control-sm">
+                                </div>
+
+                                <div id="bloc_trait">
+                                    <div class="prop-couleur">
+                                        <span class="prop-pastille" id="pastille_trait"></span>
+                                        <span class="prop-couleur-label">Trait</span>
+                                        <input type="text" id="objet_trait_couleur" class="form-control form-control-sm">
                                     </div>
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Epaisseur</span>
-                                        </div>
-                                        <input type="number" id="objet_trait_epaisseur" value="" class="numberinput form-control" min="0" step="0.25">
-                                    </div>
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Style</span>
-                                        </div>
-                                        <select id="objet_trait_style" class="form-control">
+                                    <div class="prop-ligne">
+                                        <label class="prop-champ prop-champ-court"><span>Épais.</span><input type="number" id="objet_trait_epaisseur" min="0" step="0.25"></label>
+                                        <select id="objet_trait_style" class="form-control form-control-sm">
                                             <option value="null">Plein</option>
                                             <option value="[1,2]">Pointillés</option>
                                             <option value="[6,3]">Traits longs</option>
@@ -208,107 +288,101 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        {# Propriétés REMPLISSAGE #}
-                        <div id="panel_remplissage" class="card">
-                            <div class="card-header">
-                                <h4 class="card-title w-100">
-                                    <a class="d-block w-100" data-toggle="collapse" data-target="#proprietes_remplissage" href="#proprietes_remplissage"><i class="fa fa-fw fa-paint-brush margin-r-5"></i>Remplissage</a>
-                                </h4>
-                            </div>
-                            <div id="proprietes_remplissage" class="collapse" data-parent="#accordion_proprietes">
-                                <div class="card-body">
-                                    <div id="colorpicker_remplissage" class="input-group input-group-sm colorpicker-component">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Couleur</span>
-                                        </div>
-                                        <input type="text" id="objet_remplissage_couleur" value="#00AABB" class="form-control"/>
-                                    </div>
+                                <div class="prop-recentes">
+                                    <span class="text-muted small">Récentes</span>
+                                    <span id="couleurs_recentes"></span>
                                 </div>
                             </div>
-                        </div>
 
-                        {# Propriétés TEXTE #}
-                        <div id="panel_texte" class="card">
-                            <div class="card-header">
-                                <h4 class="card-title w-100">
-                                    <a class="d-block w-100" data-toggle="collapse" data-target="#proprietes_texte" href="#proprietes_texte"><i class="fa fa-font margin-r-5"></i>Texte</a>
-                                </h4>
-                            </div>
-                            <div id="proprietes_texte" class="collapse" data-parent="#accordion_proprietes">
-                                <div class="card-body">
-                                    <div id="colorpicker_texte" class="input-group input-group-sm colorpicker-component">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Couleur</span>
-                                        </div>
-                                        <input type="text" id="objet_texte_couleur" value="#00AABB" class="form-control"/>
-                                    </div>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Taille</span>
-                                        </div>
-                                        <input type="number" id="objet_texte_taille" value="" class="numberinput form-control" min="1" step="1">
-                                    </div>
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Alignement</span>
-                                        </div>
-                                        <select id="objet_texte_alignement" class="form-control">
-                                            <option value="left">Gauche</option>
-                                            <option value="right">Droite</option>
-                                            <option value="center">Centré</option>
-                                            <option value="justify">Justifié</option>
-                                        </select>
-                                    </div>
-                                    <div class="input-group input-group-sm">
-                                        <span>
-                                            <button type="button" id="objet_texte_gras" class="btn btn-default" data-toggle="button" aria-pressed="false"><i class='fa fa-bold'></i></button>
-                                            <button type="button" id="objet_texte_italique" class="btn btn-default" data-toggle="button" aria-pressed="false"><i class='fa fa-italic'></i></button>
-                                        </span>
-                                    </div>
+                            {# Codes-barres #}
+                            <div id="prop_codebarres" class="prop-section">
+                                <div class="prop-titre">Code-barres</div>
+                                <select id="objet_cb_norme" class="form-control form-control-sm mb-2">
+                                    <option value="Codabar">Codabar</option>
+                                    <option value="Code11">Code11</option>
+                                    <option value="I2of5">I2of5</option>
+                                    <option value="MSI">MSI</option>
+                                    <option value="Code128">Code128</option>
+                                    <option value="EAN13">EAN13</option>
+                                    <option value="EAN8">EAN8</option>
+                                    <option value="Extended39">Extended39</option>
+                                    <option value="Standard39">Standard39</option>
+                                    <option value="Extended93">Extended93</option>
+                                    <option value="Standard93">Standard93</option>
+                                    <option value="POSTNET">POSTNET</option>
+                                    <option value="datamatrix">Datamatrix</option>
+                                </select>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="codes_barres_numero">
+                                    <label class="custom-control-label" for="codes_barres_numero">Afficher le numéro</label>
                                 </div>
                             </div>
-                        </div>
 
-                        {# Propriétés CODES-BARRES #}
-                        <div id="panel_cb" class="card">
-                            <div class="card-header">
-                                <h4 class="card-title w-100">
-                                    <a class="d-block w-100" data-toggle="collapse" data-target="#proprietes_codesbarres" href="#proprietes_codesbarres"><i class="fa fa-fw fa-barcode margin-r-5"></i>Code-barres</a>
-                                </h4>
+                            {# QR code #}
+                            <div id="prop_qrcode" class="prop-section">
+                                <div class="prop-titre">QR code</div>
+                                <label class="small text-muted mb-1" for="objet_qr_contenu">Contenu : texte ou URL, champs acceptés</label>
+                                <textarea id="objet_qr_contenu" class="form-control form-control-sm prop-qr-contenu" rows="3" placeholder="https://portail.exemple.fr"></textarea>
+                                <div class="small text-warning mt-1" id="qr_vide"><i class="fa fa-exclamation-triangle margin-r-5"></i>Contenu vide : rien ne sera imprimé.</div>
+                                <div class="prop-ligne mt-2">
+                                    <span class="small text-muted text-nowrap">Correction d'erreur</span>
+                                    <select id="objet_qr_correction" class="form-control form-control-sm" title="Plus le niveau est élevé, plus le code reste lisible s'il est abîmé, mais plus il est dense">
+                                        <option value="L">L · 7 %</option>
+                                        <option value="M">M · 15 %</option>
+                                        <option value="Q">Q · 25 %</option>
+                                        <option value="H">H · 30 %</option>
+                                    </select>
+                                </div>
+                                <div class="small text-muted mt-2">Un clic sur un champ de l'onglet Champs l'insère au curseur. Laissez une marge blanche autour du code pour faciliter sa lecture.</div>
                             </div>
-                            <div id="proprietes_codesbarres" class="collapse" data-parent="#accordion_proprietes">
-                                <div class="card-body">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">Norme</span>
-                                        </div>
-                                        <select id="objet_cb_norme" class="form-control">
-                                            <option value="Codabar">Codabar</option>
-                                            <option value="Code11">Code11</option>
-                                            <option value="I2of5">I2of5</option>
-                                            <option value="MSI">MSI</option>
-                                            <option value="Code128">Code128</option>
-                                            <option value="Ean13BarcodeWidget">Ean13BarcodeWidget</option>
-                                            <option value="Ean8BarcodeWidget">Ean8BarcodeWidget</option>
-                                            <option value="Extended39">Extended39</option>
-                                            <option value="Standard39">Standard39</option>
-                                            <option value="Extended93">Extended93</option>
-                                            <option value="Standard93">Standard93</option>
-                                            <option value="FIM">FIM</option>
-                                            <option value="POSTNET">POSTNET</option>
-                                            <option value="USPS_4State">USPS_4State</option>
-                                            <option value="datamatrix">Datamatrix</option>
-                                        </select>
-                                    </div>
-                                    <input type="checkbox" id="codes_barres_numero">
-                                    <label for="codes_barres_numero">Afficher le numéro</label>
+
+                            {# Alignement #}
+                            <div id="prop_alignement" class="prop-section">
+                                <div class="prop-titre">Alignement</div>
+                                <div class="prop-alignements">
+                                    <button type="button" class="btn btn-outil" data-aligner="gauche" title="Aligner à gauche"><svg viewBox="0 0 16 16"><path d="M1.5 1v14"/><rect x="3" y="3" width="10" height="3"/><rect x="3" y="9" width="6" height="3"/></svg></button>
+                                    <button type="button" class="btn btn-outil" data-aligner="centre_h" title="Centrer horizontalement"><svg viewBox="0 0 16 16"><path d="M8 1v14"/><rect x="2" y="3" width="12" height="3"/><rect x="4.5" y="9" width="7" height="3"/></svg></button>
+                                    <button type="button" class="btn btn-outil" data-aligner="droite" title="Aligner à droite"><svg viewBox="0 0 16 16"><path d="M14.5 1v14"/><rect x="3" y="3" width="10" height="3"/><rect x="7" y="9" width="6" height="3"/></svg></button>
+                                    <button type="button" class="btn btn-outil" data-aligner="repartir_h" title="Répartir horizontalement (3 objets minimum)"><svg viewBox="0 0 16 16"><path d="M1 1v14M15 1v14"/><rect x="3.5" y="4" width="3" height="8"/><rect x="9.5" y="4" width="3" height="8"/></svg></button>
+                                    <button type="button" class="btn btn-outil" data-aligner="haut" title="Aligner en haut"><svg viewBox="0 0 16 16"><path d="M1 1.5h14"/><rect x="3" y="3" width="3" height="10"/><rect x="9" y="3" width="3" height="6"/></svg></button>
+                                    <button type="button" class="btn btn-outil" data-aligner="centre_v" title="Centrer verticalement"><svg viewBox="0 0 16 16"><path d="M1 8h14"/><rect x="3" y="2" width="3" height="12"/><rect x="9" y="4.5" width="3" height="7"/></svg></button>
+                                    <button type="button" class="btn btn-outil" data-aligner="bas" title="Aligner en bas"><svg viewBox="0 0 16 16"><path d="M1 14.5h14"/><rect x="3" y="3" width="3" height="10"/><rect x="9" y="7" width="3" height="6"/></svg></button>
+                                    <button type="button" class="btn btn-outil" data-aligner="repartir_v" title="Répartir verticalement (3 objets minimum)"><svg viewBox="0 0 16 16"><path d="M1 1h14M1 15h14"/><rect x="4" y="3.5" width="8" height="3"/><rect x="4" y="9.5" width="8" height="3"/></svg></button>
+                                </div>
+                                <div class="prop-ligne mt-2">
+                                    <span class="small text-muted text-nowrap">Par rapport à</span>
+                                    <select id="alignement_reference" class="form-control form-control-sm">
+                                        <option value="selection">la sélection</option>
+                                        <option value="page">la page</option>
+                                        <option value="marges">les marges</option>
+                                    </select>
                                 </div>
                             </div>
+
                         </div>
 
+                        {# ---------- Calques ---------- #}
+                        <div class="tab-pane fade" id="panneau_calques" role="tabpanel">
+                            <div class="panneau-entete">
+                                <span id="calques_nombre"></span>
+                                <i class="fa fa-question-circle-o panneau-aide" title="Glisser une ligne pour changer l'ordre. Double-clic pour renommer. Un objet masqué n'est pas imprimé."></i>
+                            </div>
+                            <ul id="liste_calques" class="editeur-calques"></ul>
+                            <div id="calques_fond" class="panneau-note"></div>
+                        </div>
+
+                        {# ---------- Champs ---------- #}
+                        <div class="tab-pane fade" id="panneau_champs" role="tabpanel">
+                            <div class="panneau-entete">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-search"></i></span></div>
+                                    <input type="search" id="champs_recherche" class="form-control" placeholder="Rechercher un champ" aria-label="Rechercher un champ">
+                                </div>
+                                <i class="fa fa-question-circle-o panneau-aide" title="Clic : insère le champ dans le texte sélectionné (au curseur s'il est en cours d'édition), sinon crée un nouveau texte. Glisser sur la page : crée un texte à cet endroit."></i>
+                            </div>
+                            <div id="liste_champs" class="editeur-champs"></div>
+                        </div>
 
                     </div>
                 </div>
@@ -316,1045 +390,65 @@
 
         </div>
 
-        {% block canvas %}
-            <div class="col-md-9">
-
-                <div class="card-body p-0">
-
-                    <div class="btn-group">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-success btn-flat dropdown-toggle" data-toggle="dropdown" title="Ajouter un élément"><i class="fa fa-plus"></i> Ajouter</button>
-                            <ul class="dropdown-menu">
-                                <h6 class="dropdown-header"><strong>Formes</strong></h6>
-                                <li class="dropdown-item"><a href="#" onclick="ajouter_texte()" title="Ajouter un texte">Texte</a></li>
-                                <li class="dropdown-item"><a href="#" onclick="ajouter_rect()" title="Ajouter un rectangle">Rectangle</a></li>
-                                <li class="dropdown-item"><a href="#" onclick="ajouter_cercle()" title="Ajouter un cercle">Cercle</a></li>
-                                <li class="dropdown-item"><a href="#" onclick="ajouter_ligne()" title="Ajouter une ligne">Ligne</a></li>
-                                <li class="dropdown-divider"></li>
-                                <h6 class="dropdown-header"><strong>Images</strong></h6>
-                                <li class="dropdown-item"><a href="#" onclick="ajouter_image()" title="Ajouter une image">Image</a></li>
-                                <li class="dropdown-item"><a href="#" onclick="ajouter_logo()" title="Ajouter le logo de l'organisateur">Logo de l'organisateur</a></li>
-                                {% if photos_individuelles %}
-                                    <li class="dropdown-item"><a href="#" onclick="ajouter_photo()" title="Ajouter une photo individuelle">Photo individuelle</a></li>
-                                {% endif %}
-                                {% if codes_barres %}
-                                    <li class="dropdown-divider"></li>
-                                    <h6 class="dropdown-header"><strong>Codes-barres</strong></h6>
-                                    {% for code_barre in codes_barres %}
-                                        <li class="dropdown-item"><a href="#" onclick='ajouter_codebarres(nom="{{ code_barre.0 }}", champ="{{ code_barre.2 }}")' title="Ajouter un code-barres">{{ code_barre.0 }}</a></li>
-                                    {% endfor %}
-                                {% endif %}
-                                {% if speciaux %}
-                                    <li class="dropdown-divider"></li>
-                                    <h6 class="dropdown-header"><strong>Objets spéciaux</strong></h6>
-                                    {% for special in speciaux %}
-                                        <li class="dropdown-item"><a href="#" onclick="ajouter_special(nom='{{ special.nom }}', champ='{{ special.champ }}', largeur={{ special.largeur }}, hauteur={{ special.hauteur }})" title="Ajouter un élément spécial">{{ special.nom }}</a></li>
-                                    {% endfor %}
-                                {% endif %}
-                            </ul>
-                        </div>
-                        <button type="button" id="inserer_champ" class="btn btn-primary btn-flat fonctions_edition" onclick="inserer_champ()" title="Insérer un champ dans le texte" style="display: none;"><i class="fa fa-pencil-square-o"></i> Insérer un champ</button>
-                        <button type="button" id="zoom_plus" class="btn btn-default btn-flat" title="Zoom avant (ou molette de la souris)"><i class="fa fa-search-plus"></i></button>
-                        <button type="button" id="zoom_moins" class="btn btn-default btn-flat" title="Zoom arrière (ou molette de la souris)"><i class="fa fa-search-minus"></i></button>
-                        <button type="button" id="zoom_reset" class="btn btn-default btn-flat" title="Centrer l'affichage sur la page (bouton droit de la souris pour se déplacer)"><i class="fa fa-crosshairs"></i></button>
-                        <button type="button" id="pdf" class="btn btn-default btn-flat" onclick="pdf()" title="Aperçu PDF"><i class="fa fa-file-pdf-o"></i></button>
-                        <button type="button" id="undo" class="btn btn-default btn-flat" onclick="undo()" title="Annuler"><i class="fa fa-mail-reply"></i></button>
-                        <button type="button" id="redo" class="btn btn-default btn-flat" onclick="redo()" title="Rétablir"><i class="fa fa-mail-forward"></i></button>
-                        <button type="button" id="objet_avancer" class="btn btn-default btn-flat fonctions_objet" onclick="avancer()" title="Avancer l'objet"><i class="fa  fa-angle-up"></i></button>
-                        <button type="button" id="objet_reculer" class="btn btn-default btn-flat fonctions_objet" onclick="reculer()" title="Reculer l'objet"><i class="fa fa-angle-down"></i></button>
-                        <button type="button" id="objet_devant" class="btn btn-default btn-flat fonctions_objet" onclick="devant()" title="Mettre à l'avant-plan l'objet"><i class="fa fa-angle-double-up"></i></button>
-                        <button type="button" id="objet_derriere" class="btn btn-default btn-flat fonctions_objet" onclick="derriere()" title="Mettre à l'arrière-plan l'objet"><i class="fa fa-angle-double-down"></i></button>
-                        <button type="button" id="objet_dupliquer" class="btn btn-default btn-flat fonctions_objet" onclick="dupliquer()" title="Dupliquer l'objet"><i class="fa fa-copy"></i></button>
-                        <button type="button" id="objet_supprimer" class="btn btn-default btn-flat fonctions_objet" onclick="supprimer()" title="Supprimer l'objet (ou touche Suppr)"><i class="fa fa-trash"></i></button>
-                    </div>
-
-                    {% comment %}
-                    <div class="pull-right">
-                        <div class="btn-group">
-                            <label style="padding: 5px 5px;">
-                                <input type="radio" title="mode sélection" name="mode_souris" id="mode_selection" checked> Sélection
-                            </label>
-                            <label style="padding: 5px 5px;">
-                                <input type="radio" title="mode déplacement" name="mode_souris" id="mode_deplacement"> Déplacement
-                            </label>
-                        </div>
-                    </div>
-                    {% endcomment %}
-
-                    <div id="div_canvas">
-                        <canvas id="canvas"></canvas>
-                    </div>
-
-                    <img id="facture" style="display:none;" src="{% static "images/facture.png" %}">
-
-
-                    <script type="text/javascript">
-
-                        {% include 'core/csrftoken.html' %}
-
-                        // ########################## INITIALISATION CANVAS ########################
-
-                        // Préparation des variables
-                        var historique = [];
-                        var mods = 1;
-                        var feuille = null;
-                        var image_facture = null;
-                        try {
-                            var objets_json = JSON.parse($('#id_objets').val());
-                        } catch (e) {
-                            var objets_json = [];
-                        }
-
-                        // Création du canvas
-                        var canvas = new fabric.Canvas('canvas');
-                        canvas.preserveObjectStacking = true;
-                        canvas.setDimensions({width: parseInt($('#id_largeur').val()), height: parseInt($('#id_hauteur').val())});
-                        canvas.lockScalingFlip = true;
-                        canvas.stopContextMenu = true;
-                        canvas.fireRightClick = true;
-
-                        // Personnalisation du sélecteur
-                        fabric.Object.prototype.set({
-                            transparentCorners: false,
-                            cornerColor: 'white',
-                            cornerStrokeColor: 'red',
-                            borderColor: 'red',
-                            cornerSize: 6,
-                            padding: 0,
-                            cornerStyle: 'circle',
-                            borderDashArray: [1, 5],
-                            lockScalingFlip: true,
-                            hasRotatingPoint: true,
-                            snapAngle: 15
-                        });
-
-                        // Dessin du fond
-                        function draw_fond(objets_modele_fond=[]) {
-                            var objets_fond = [];
-                            canvas.backgroundColor="grey";
-
-                            // create a rectangle object
-                            feuille = new fabric.Rect({
-                                left: 0,
-                                top: 0,
-                                fill: 'white',
-                                width: parseInt($('#id_largeur').val()),
-                                height: parseInt($('#id_hauteur').val()),
-                                selectable: false,
-                                evented: false,
-                                excludeFromExport: true
-                            });
-                            feuille.setShadow("5px 5px 5px rgba(0, 0, 0, 0.5)");
-                            objets_fond.push(feuille);
-                            canvas.setBackgroundImage(feuille, canvas.renderAll.bind(canvas));
-
-                            var group = new fabric.Group(objets_fond);
-                            canvas.setBackgroundImage(group);
-                            canvas.requestRenderAll();
-
-                            // Ajoute les objets du fond sélectionné
-                            fabric.util.enlivenObjects(objets_modele_fond, function (objets) {
-                                objets.forEach(function (objet) {
-                                    if(objet.categorie === "logo") {
-                                        charger_logo(objet);
-                                    };
-                                    group.addWithUpdate(objet);
-                                    canvas.requestRenderAll();
-                                });
-                            });
-                            canvas.requestRenderAll();
-
-                        }
-                        draw_fond();
-                        updatePanelProprietes();
-
-                        // Remplace l'image d'un objet logo par le logo de l'organisateur en conservant la hauteur définie dans le modèle
-                        function charger_logo(objet) {
-                            var url_logo = "{% if organisateur.logo %}{{ organisateur.logo.url }}{% endif %}";
-                            if (!url_logo) {
-                                return;
-                            };
-                            var hauteur = objet.height * objet.scaleY;
-                            objet.setSrc(url_logo, function(img) {
-                                if (img.height) {
-                                    img.scaleX = img.scaleY = hauteur / img.height;
-                                    img.setCoords();
-                                };
-                                canvas.requestRenderAll();
-                            });
-                        };
-
-                        fabric.Object.prototype.toObject = (function (toObject) {
-                            return function (propertiesToInclude) {
-                                propertiesToInclude = (propertiesToInclude || []).concat(
-                                    ['nom','categorie', 'champ', 'type_image', 'cb_norme', 'cb_affiche_numero',]
-                                );
-                                return toObject.apply(this, [propertiesToInclude]);
-                            };
-                        })(fabric.Object.prototype.toObject);
-
-                        // Importation du JSON
-                        fabric.util.enlivenObjects(objets_json, function (objets) {
-                            objets.forEach(function (objet) {
-                                if(objet.categorie === "logo") {
-                                    charger_logo(objet);
-                                };
-                                canvas.add(objet);
-                            });
-                            canvas.renderAll();
-                            save_history(true);
-                        });
-                        canvas.renderAll();
-
-                        // Redimensionnement du canvas lors du resize window
-                        new ResizeSensor(jQuery('#div_canvas'), function(){
-                            largeur = $('#div_canvas').width();
-                            hauteur = $('#div_canvas').height();
-                            canvas.setWidth(largeur);
-                            canvas.setHeight(window.innerHeight-200);
-                            zoom_reset();
-                        });
-
-                        // Interactions avec touches du clavier
-                        function maj_coords_objet(objet, event) {
-                            objet.dirty = true;
-                            objet.setCoords();
-                            updatePanelProprietes();
-                            canvas.requestRenderAll();
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-
-                        $(document).keydown(function(event){
-                            // console.log(event.which);
-                            if (canvas.getActiveObject()) {
-                                var objet = canvas.getActiveObject();
-                                // Supprimer un objet avec les touche DEL ou SUPPR
-                                if ((event.which == 8 || event.which == 46) && (objet.type != 'textbox' || objet.isEditing == false)) {
-                                    supprimer();
-                                };
-                                // Déplacer l'objet avec les flèches du clavier
-                                if (event.which == 40) {
-                                    objet.top = objet.top + 1;
-                                    maj_coords_objet(objet, event);
-                                };
-                                if (event.which == 38) {
-                                    objet.top = objet.top - 1;
-                                    maj_coords_objet(objet, event);
-                                };
-                                if (event.which == 37) {
-                                    objet.left = objet.left - 1;
-                                    maj_coords_objet(objet, event);
-                                };
-                                if (event.which == 39) {
-                                    objet.left = objet.left + 1;
-                                    maj_coords_objet(objet, event);
-                                };
-                            }
-                        });
-
-                        // ########################## ZOOM ET PANORAMIQUE ########################
-
-                        // Zoom avec la souris
-                        canvas.on('mouse:wheel', function(opt) {
-                            var delta = opt.e.deltaY;
-                            var pointer = canvas.getPointer(opt.e);
-                            var zoom = canvas.getZoom();
-                            zoom = zoom - delta/200;
-                            if (zoom > 20) zoom = 20;
-                            if (zoom < 0.5) zoom = 0.5;
-                            canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
-                            opt.e.preventDefault();
-                            opt.e.stopPropagation();
-                        });
-
-                        // Pano avec la souris
-                        canvas.on('mouse:down', function(opt) {
-                            var evt = opt.e;
-                            if (evt.altKey === true || $('#mode_deplacement').prop("checked") == true || opt.button == 3 ) {
-                                this.isDragging = true;
-                                this.selection = false;
-                                this.lastPosX = evt.clientX;
-                                this.lastPosY = evt.clientY;
-                            }
-                        });
-                        canvas.on('mouse:move', function(opt) {
-                            if (this.isDragging) {
-                                var e = opt.e;
-                                this.viewportTransform[4] += e.clientX - this.lastPosX;
-                                this.viewportTransform[5] += e.clientY - this.lastPosY;
-                                this.requestRenderAll();
-                                this.lastPosX = e.clientX;
-                                this.lastPosY = e.clientY;
-                            }
-                        });
-                        canvas.on('mouse:up', function(opt) {
-                            if (this.isDragging) {
-                                this.isDragging = false;
-                                this.selection = true;
-                                canvas.forEachObject(function (object) {
-                                    object.setCoords();
-                                });
-                                canvas.requestRenderAll();
-                            };
-                        });
-
-
-                        // ########################## BARRE OUTILS ########################
-
-                        $('#zoom_plus').click(function(){
-                            zoom = canvas.getZoom() * 1.1;
-                            if (zoom > 20) zoom = 20;
-                            canvas.setZoom(zoom);
-                        });
-
-                        $('#zoom_moins').click(function(){
-                            zoom = canvas.getZoom() / 1.1;
-                            if (zoom < 0.5) zoom = 0.5;
-                            canvas.setZoom(zoom);
-                        });
-
-                        $('#zoom_reset').click(function(){
-                            zoom_reset();
-                        });
-
-                        function zoom_reset() {
-                            canvas.setZoom(1);
-                            x = -((canvas.width - feuille.width) / 2);
-                            y = -((canvas.height - feuille.height) / 2);
-                            canvas.absolutePan({x:x, y:y});
-                            zoom = (canvas.height-20) / feuille.height;
-                            canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), zoom);
-                        }
-
-
-
-                        // Ajouter objets
-                        function ajouter_rect() {
-                            var objet = new fabric.Rect({
-                                left: 0,
-                                top: 0,
-                                fill: 'rgba(122,156,255,1)',
-                                width: 50,
-                                height: 50,
-                                nom: "Rectangle",
-                                categorie: "rectangle",
-                                strokeWidth: 0,
-                                stroke: 'rgba(0,0,0,1)',
-                            });
-                            canvas.add(objet);
-                            canvas.viewportCenterObject(objet);
-                            canvas.setActiveObject(objet);
-                        }
-
-                        function ajouter_cercle() {
-                            var objet = new fabric.Circle({
-                                left: 0,
-                                top: 0,
-                                radius: 50,
-                                fill: 'rgba(122,156,255,1)',
-                                nom: "Cercle",
-                                categorie: "cercle",
-                                strokeWidth: 0,
-                                stroke: 'rgba(0,0,0,1)',
-                            });
-                            canvas.add(objet);
-                            canvas.viewportCenterObject(objet);
-                            canvas.setActiveObject(objet);
-                        }
-
-                        function ajouter_texte() {
-                            var objet = new fabric.Textbox('Tapez votre texte ici', {
-                                left: 0,
-                                top: 0,
-                                nom: "Texte",
-                                categorie: "texte",
-                                fontFamily: "Arial",
-                                fontSize: 10,
-                                width: 100,
-                                height: 100,
-                                scaleX: 0.33,
-                                scaleY: 0.33,
-                            });
-                            canvas.add(objet);
-                            canvas.viewportCenterObject(objet);
-                            canvas.setActiveObject(objet);
-                            // objet.selectAll();
-                            // objet.enterEditing();
-                        }
-
-                        function ajouter_ligne() {
-                            var objet = new fabric.Line([0, 0, 100, 0], {
-                                left: 0,
-                                top: 0,
-                                nom: "Ligne",
-                                categorie: "ligne",
-                                stroke: 'rgba(0,0,0,1)',
-                                strokeWidth: 0.5,
-                            });
-                            canvas.add(objet);
-                            canvas.viewportCenterObject(objet);
-                            canvas.setActiveObject(objet);
-                        }
-
-                        function ajouter_logo() {
-                            {% if not organisateur.logo %}
-                                toastr.warning("Aucun logo n'est défini pour l'organisateur. Vous pouvez l'ajouter dans Paramétrage > Organisateur.");
-                                return;
-                            {% endif %}
-                            // /media/organisateur/logo.png
-                            fabric.Image.fromURL("{% if organisateur.logo %}{{ organisateur.logo.url }}{% endif %}", function(objet) {
-                                objet.set({
-                                    nom: "Logo organisateur",
-                                    stroke: 'rgba(0,0,0,0)',
-                                    categorie: "logo",
-                                });
-                                proportion = canvas.width * 0.5 / canvas.getZoom() / objet.width;
-                                if (proportion < 1) {
-                                    objet.scaleX = objet.scaleY = proportion;
-                                }
-                                canvas.add(objet);
-                                canvas.viewportCenterObject(objet);
-                                canvas.setActiveObject(objet);
-                            });
-                        }
-
-                        function ajouter_image() {
-                            $('#modal_selection_image').modal('show');
-                        }
-
-                        function ajouter_photo() {
-                            fabric.Image.fromURL("/static/images/femme.png", function(objet) {
-                                objet.set({
-                                    nom: "Photo individuelle",
-                                    stroke: 'rgba(0,0,0,0)',
-                                    categorie: "photo",
-                                });
-                                canvas.add(objet);
-                                canvas.viewportCenterObject(objet);
-                                canvas.setActiveObject(objet);
-                            });
-                        }
-
-                        function inserer_champ() {
-                            $('#modal_inserer_champ').modal('show');
-                        }
-
-                        function ajouter_codebarres(label=null, champ=null) {
-                            fabric.Image.fromURL("/static/images/codebarres.png", function(objet) {
-                                objet.set({
-                                    "nom": "Code-barres " + label,
-                                    "champ": champ,
-                                    "categorie": "barcode",
-                                    "cb_norme": "Extended39",
-                                    "cb_affiche_numero": false,
-                                    "scaleX": 0.09,
-                                    "scaleY": 0.05,
-                                    "stroke": 'rgba(0,0,0,0)',
-                                });
-                                if (champ.indexOf("DATAMATRIX") >= 0) {
-                                    objet.cb_norme = "datamatrix";
-                                    objet.scaleX = 1;
-                                    objet.scaleY = 1;
-                                    objet.width = 22;
-                                    objet.height = 22;
-                                }
-                                canvas.add(objet);
-                                canvas.viewportCenterObject(objet);
-                                canvas.setActiveObject(objet);
-                            });
-                        }
-
-                        function ajouter_special(label=null, champ=null, largeur=50, hauteur=50) {
-                            var objet = new fabric.Rect({
-                                "nom": label,
-                                "champ": champ,
-                                "categorie": "special",
-                                "width": largeur,
-                                "height": hauteur,
-                                "fill": "#f4ff99",
-                                "stroke": 'rgba(0,0,0,0)',
-                            });
-                            canvas.add(objet);
-                            canvas.viewportCenterObject(objet);
-                            canvas.setActiveObject(objet);
-                        };
-
-
-
-                        // ########################## PROPRIETES MODELE ########################
-
-                        // Dimensions
-                        $('#id_largeur').on("keyup keydown change",function(event){
-                            feuille.set('width', parseInt(this.value, 10)).setCoords();
-                            canvas.requestRenderAll();
-                        });
-                        $('#id_hauteur').on("keyup keydown change",function(event){
-                            feuille.set('height', parseInt(this.value, 10)).setCoords();
-                            canvas.requestRenderAll();
-                        });
-
-
-
-                        // ########################## PROPRIETES OBJETS ########################
-
-                        function on_selection(event) {
-                            updatePanelProprietes();
-                        };
-
-                        function on_deselection(event) {
-                            updatePanelProprietes();
-                        };
-
-                        function on_moving(event) {
-                            // console.log("on_moving");
-                            var objet = event.target;
-                            objet.set({
-                                'left': Math.round(objet.left),
-                                'top': Math.round(objet.top),
-                            });
-                            objet.dirty = true;
-                            objet.setCoords();
-                            updatePanelProprietes();
-                        };
-
-                        function on_scaling(event) {
-                            // console.log("on_scaling");
-                            var objet = event.target;
-                            if (!objet || objet.type !== 'rect') {
-                                return;
-                            }
-                            $("#objet_x").val(Math.round(objet.left));
-                            $("#objet_y").val(Math.round(objet.top));
-                            $("#objet_largeur").val(Math.round(objet.width * objet.scaleX));
-                            $("#objet_hauteur").val(Math.round(objet.height * objet.scaleY));
-                        };
-
-                        function on_scaled(event) {
-                            // console.log("on_scaled", event.target.scaleX, event.target.scaleY);
-                            var objet = event.target;
-                            if (!objet || objet.type !== 'rect') {
-                                return;
-                            }
-                            objet.set({
-                                'left': Math.round(objet.left),
-                                'top': Math.round(objet.top),
-                                'width': Math.round(objet.width * objet.scaleX),
-                                'height': Math.round(objet.height * objet.scaleY),
-                                'scaleX': 1,
-                                'scaleY': 1
-                            });
-                            objet.dirty = true;
-                            objet.setCoords();
-                            //canvas.requestRenderAll();
-                            //updatePanelProprietes();
-                        };
-
-                        function set_active(ctrl_active, etat=false, ctrl=null) {
-                            if (ctrl_active) {
-                                if (etat == true) {
-                                    ctrl_active.addClass("active");
-                                } else {
-                                    ctrl_active.removeClass("active");
-                                }
-                                ;
-                            };
-                            if (ctrl) {
-                                ctrl.prop('disabled', etat);
-                            };
-                        }
-
-                        // Nom
-                        $('#objet_nom').on("change",function(event){
-                            canvas.getActiveObject().set('nom', this.value);
-                            save_history(true);
-                        });
-
-                        // Position
-                        $('#objet_x').on("keyup keydown change",function(event){
-                            canvas.getActiveObject().set('left', parseInt(this.value, 10)).setCoords();
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_y').on("keyup keydown change",function(event){
-                            canvas.getActiveObject().set('top', parseInt(this.value, 10)).setCoords();
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_lock_x').on("click",function(event){
-                            var etat = ! $(this).hasClass('active');
-                            set_active(null, etat, $('#objet_x'));
-                            canvas.getActiveObject().set('lockMovementX', etat);
-                            save_history(true);
-                        });
-                        $('#objet_lock_y').on("click",function(event){
-                            var etat = ! $(this).hasClass('active');
-                            set_active(null, etat, $('#objet_y'));
-                            canvas.getActiveObject().set('lockMovementY', etat);
-                            save_history(true);
-                        });
-
-                        // Dimensions
-                        $('#objet_largeur').on("keyup keydown change",function(event){
-                            canvas.getActiveObject().set('width', parseInt(this.value, 10)).setCoords();
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_hauteur').on("keyup keydown change",function(event){
-                            canvas.getActiveObject().set('height', parseInt(this.value, 10)).setCoords();
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_lock_largeur').on("click",function(event){
-                            var etat = ! $(this).hasClass('active');
-                            set_active(null, etat, $('#objet_largeur'));
-                            canvas.getActiveObject().set('lockScalingX', etat);
-                            save_history(true);
-                        });
-                        $('#objet_lock_hauteur').on("click",function(event){
-                            var etat = ! $(this).hasClass('active');
-                            set_active(null, etat, $('#objet_hauteur'));
-                            canvas.getActiveObject().set('lockScalingY', etat);
-                            save_history(true);
-                        });
-
-                        // Trait
-                        $('#objet_trait_couleur').colorpicker().on("changeColor",function(event){
-                            couleur = event.color.toString('rgba');
-                            canvas.getActiveObject().set('stroke', couleur);
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_trait_epaisseur').on("keyup keydown change",function(event){
-                            canvas.getActiveObject().set('strokeWidth', parseFloat(this.value, 10));
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_trait_style').on("keyup keydown change",function(event){
-                            var valeur = JSON.parse(this.value);
-                            canvas.getActiveObject().set('strokeDashArray', valeur);
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-
-                        // Remplissage
-                        $('#objet_remplissage_couleur').colorpicker().on("changeColor",function(event){
-                            couleur = event.color.toString('rgba');
-                            canvas.getActiveObject().set('fill', couleur);
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-
-                        // Texte
-                        $('#objet_texte_couleur').colorpicker().on("changeColor",function(event){
-                            couleur = event.color.toString('rgba');
-                            canvas.getActiveObject().set('fill', couleur);
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_texte_taille').on("keyup keydown change",function(event){
-                            canvas.getActiveObject().set('fontSize', parseInt(this.value, 10));
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_texte_alignement').on("keyup keydown change",function(event){
-                            canvas.getActiveObject().set('textAlign', this.value);
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_texte_gras').on("click",function(event){
-                            if ($(this).hasClass('active')) {
-                                canvas.getActiveObject().set('fontWeight', "normal");
-                            } else {
-                                canvas.getActiveObject().set('fontWeight', "bold");
-                            }
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#objet_texte_italique').on("click",function(event){
-                            if ($(this).hasClass('active')) {
-                                canvas.getActiveObject().set('fontStyle', "normal");
-                            } else {
-                                canvas.getActiveObject().set('fontStyle', "italic");
-                            }
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-
-                        // Code-barres
-                        $('#objet_cb_norme').on("keyup keydown change", function(event){
-                            canvas.getActiveObject().set('cb_norme', this.value);
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-                        $('#codes_barres_numero').on("ifToggled", function(event){
-                            canvas.getActiveObject().set('cb_affiche_numero', $(this).is(':checked'));
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-
-
-
-
-                        function updatePanelProprietes() {
-                            if (!canvas.getActiveObject()) {
-                                $("#proprietes_objet").hide();
-                                $("#aide").show();
-                                $(".fonctions_objet").prop('disabled', true);
-                                return;
-                            } else {
-                                $("#proprietes_objet").show();
-                                $("#aide").hide();
-                                $(".fonctions_objet").prop('disabled', false);
-                            }
-
-                            // Nom
-                            $("#objet_nom").val(canvas.getActiveObject().nom);
-
-                            // Position
-                            $("#objet_x").val(canvas.getActiveObject().left);
-                            $("#objet_y").val(canvas.getActiveObject().top);
-                            set_active($("#objet_lock_x"), canvas.getActiveObject().lockMovementX, $("#objet_x"));
-                            set_active($("#objet_lock_y"), canvas.getActiveObject().lockMovementY, $("#objet_y"));
-
-                            // Dimensions
-                            if ($.inArray(canvas.getActiveObject().categorie, ['rectangle', 'cercle', 'image', 'logo', 'photo', 'special', 'barcode'])>=0) {
-                                $("#panel_taille").show();
-                                $("#objet_largeur").val(canvas.getActiveObject().width);
-                                $("#objet_hauteur").val(canvas.getActiveObject().height);
-                                set_active($("#objet_lock_largeur"), canvas.getActiveObject().lockScalingX, $("#objet_largeur"));
-                                set_active($("#objet_lock_hauteur"), canvas.getActiveObject().lockScalingY, $("#objet_hauteur"));
-                            } else {
-                                $("#panel_taille").hide();
-                            };
-
-                            // Trait
-                            if ($.inArray(canvas.getActiveObject().categorie, ['rectangle', 'cercle', 'ligne'])>=0) {
-                                $("#panel_trait").show();
-                                $("#objet_trait_couleur").val(canvas.getActiveObject().stroke).trigger('change');
-                                $("#objet_trait_epaisseur").val(canvas.getActiveObject().strokeWidth);
-                                $("#objet_trait_style").val(JSON.stringify(canvas.getActiveObject().strokeDashArray));
-                            } else {
-                                $("#panel_trait").hide();
-                            };
-
-                            // Remplissage
-                            if ($.inArray(canvas.getActiveObject().categorie, ['rectangle', 'cercle'])>=0) {
-                                $("#panel_remplissage").show();
-                                $("#objet_remplissage_couleur").val(canvas.getActiveObject().fill).trigger('change');
-                            } else {
-                                $("#panel_remplissage").hide();
-                            };
-
-                            // Texte
-                            if ($.inArray(canvas.getActiveObject().categorie, ['texte'])>=0) {
-                                $("#panel_texte").show();
-                                $("#objet_texte_couleur").val(canvas.getActiveObject().fill).trigger('change');
-                                $("#objet_texte_taille").val(canvas.getActiveObject().fontSize);
-                                $("#objet_texte_alignement").val(canvas.getActiveObject().textAlign);
-                                set_active($('#objet_texte_gras'), (canvas.getActiveObject().fontWeight == "bold"));
-                                set_active($('#objet_texte_italique'), (canvas.getActiveObject().fontStyle == "italic"));
-                            } else {
-                                $("#panel_texte").hide();
-                            };
-
-                            // Codes-barres
-                            if ($.inArray(canvas.getActiveObject().categorie, ['barcode'])>=0) {
-                                $("#panel_cb").show();
-                                $("#objet_cb_norme").val(canvas.getActiveObject().cb_norme);
-                                if (canvas.getActiveObject().cb_affiche_numero) {
-                                    $('#codes_barres_numero').prop("checked", true);
-                                } else {
-                                    $('#codes_barres_numero').prop("checked", false);
-                                }
-
-
-
-                            } else {
-                                $("#panel_cb").hide();
-                            };
-
-                        }
-
-                        canvas.on({
-                            'selection:created': on_selection,
-                            'selection:updated': on_selection,
-                            'selection:cleared': on_deselection,
-                            'object:moving': on_moving,
-                            'object:scaling': on_scaling,
-                            'object:scaled': on_scaled,
-                        });
-
-                        function avancer() {
-                            canvas.getActiveObject().bringForward();
-                            save_history(true);
-                        }
-
-                        function reculer() {
-                            canvas.getActiveObject().sendBackwards();
-                            save_history(true);
-                        }
-
-                        function devant() {
-                            canvas.getActiveObject().bringToFront();
-                            save_history(true);
-                        }
-
-                        function derriere() {
-                            canvas.getActiveObject().sendToBack();
-                            save_history(true);
-                        }
-
-                        function supprimer() {
-                            if (canvas.getActiveObject()) {
-                                canvas.remove(canvas.getActiveObject());
-                                save_history(true);
-                            }
-                        }
-
-                        $('#objet_remplissage').change(function(){
-                            canvas.getActiveObject().set('fill', this.value);
-                            canvas.requestRenderAll();
-                            save_history(true);
-                        });
-
-                        function dupliquer() {
-                            // Copier
-                            canvas.getActiveObject().clone(function(cloned) {
-                                _clipboard = cloned;
-                                // Coller
-                                _clipboard.clone(function(clonedObj) {
-                                    canvas.discardActiveObject();
-                                    clonedObj.set({
-                                        left: clonedObj.left + 10,
-                                        top: clonedObj.top + 10,
-                                        evented: true,
-                                    });
-                                    if (clonedObj.type === 'activeSelection') {
-                                        clonedObj.canvas = canvas;
-                                        clonedObj.forEachObject(function(obj) {
-                                            canvas.add(obj);
-                                        });
-                                        clonedObj.setCoords();
-                                    } else {
-                                        canvas.add(clonedObj);
-                                    }
-                                    _clipboard.top += 10;
-                                    _clipboard.left += 10;
-                                    canvas.setActiveObject(clonedObj);
-                                    canvas.requestRenderAll();
-                                    save_history(true);
-                                });
-                            });
-                        };
-
-                        // Lors de l'édition d'un texte, on affiche le bouton de sélection d'un champ
-                        canvas.on("text:editing:entered", function (e) {
-                            let objet = e.target;
-                            $(".fonctions_edition").show();
-                        });
-                        canvas.on("text:editing:exited", function (e) {
-                            let objet = e.target;
-                            $(".fonctions_edition").hide();
-                        });
-
-
-
-
-
-
-
-
-
-                        // ########################## HISTORIQUE ########################
-
-                        function save_history(savehistory) {
-                            if (savehistory === true) {
-                                historique.push(JSON.stringify(canvas));
-                            }
-                        };
-
-                        canvas.on(
-                            'object:modified', function () {
-                                save_history(true);
-                            },
-                            'object:added', function () {
-                                save_history(true);
-                            },
-                        );
-
-                        function undo() {
-                            if (mods < historique.length) {
-                                restaurer_historique(historique[historique.length - mods - 1]);
-                                mods += 1;
-                            }
-                        };
-
-                        function redo() {
-                            if (mods > 1) {
-                                restaurer_historique(historique[historique.length - mods + 1]);
-                                mods -= 1;
-                            }
-                        };
-
-                        function restaurer_historique(donnees) {
-                            canvas.getObjects().forEach(function (objet) {
-                                canvas.remove(objet);
-                            });
-                            fabric.util.enlivenObjects(JSON.parse(donnees).objects, function (objets) {
-                                objets.forEach(function (objet) {
-                                    canvas.add(objet);
-                                });
-                                canvas.renderAll();
-                            });
-                        };
-
-                        // ########################## EXPORTATION ########################
-
-                        // Envoi des objets au format json vers le form
-                        $("#modeles_documents_form").on('submit', function(event) {
-                            canvas.includeDefaultValues = true;
-                            var objets_json = JSON.stringify(canvas.getObjects());
-                            $('#id_objets').val(objets_json);
-                            return true;
-                        });
-
-
-                        // ########################## PDF ########################
-
-                        // Envoi des objets au format json vers le form
-                        function pdf() {
-                            json_data = JSON.stringify(canvas.getObjects());
-                            $.ajax({
-                                type: "POST",
-                                url: "{% url 'ajax_export_svg' %}",
-                                data: {
-                                    "objets_json": json_data,
-                                    "id_fond": $("#id_fond").val(),
-                                    "largeur": $("#id_largeur").val(),
-                                    "hauteur": $("#id_hauteur").val(),
-                                    "nom": $("#id_nom").val(),
-                                    },
-                                datatype: "json",
-                                success: function(data){
-                                    charge_pdf(data);
-                                },
-                                error: function(data) {
-                                    toastr.error(data.responseJSON.erreur);
-                                }
-                            })
-                        };
-
-                    </script>
-
-                </div>
-            </div>
-        {% endblock %}
-
     </div>
 
+    <img id="facture" style="display:none;" src="{% static "images/facture.png" %}" alt="">
 
 
     {# ------------ Modal Charger une image -------------- #}
-
     {% embed 'core/modal.html' %}
         {% block modal_id %}modal_selection_image{% endblock %}
         {% block modal_titre %}Charger une image{% endblock %}
         {% block modal_body %}
-            <div id="modal_erreurs" class="text-red"></div>
-            <input type="file" id="image_loader">
+            <div id="erreurs_image" class="text-red"></div>
+            <input type="file" id="image_loader" accept="image/png, image/jpeg">
         {% endblock %}
     {% endembed %}
 
-    <script>
-    document.getElementById('image_loader').onchange = function handleImage(e) {
-        var reader = new FileReader();
-        reader.onload = function (event) {
-            var imgObj = new Image();
-            imgObj.src = event.target.result;
-            imgObj.onload = function () {
-                var objet = new fabric.Image(imgObj);
-                objet.set({
-                    left: 0,
-                    top: 0,
-                    nom: "Image",
-                    stroke: 'rgba(0,0,0,0)',
-                    categorie: 'image',
-                });
-                proportion = canvas.width * 0.5 / canvas.getZoom() / objet.width;
-                if (proportion < 1) {
-                    objet.scaleX = objet.scaleY = proportion;
-                }
-                canvas.add(objet);
-                canvas.viewportCenterObject(objet)
-                canvas.setActiveObject(objet);
-            }
-        }
-        reader.readAsDataURL(e.target.files[0]);
-        $('#modal_selection_image').modal('hide');
-    }
-
-
-    // Choix fond
-    $('#id_fond').on('change', function (e) {
-        if ($(this).val() == '') {
-            draw_fond();
-        } else {
-            $.ajax({
-                type: "POST",
-                url: "{% url 'ajax_get_fond_modele' %}",
-                data: {
-                    "id_fond": $(this).val(),
-                    },
-                datatype: "json",
-                success:function(data){
-                    draw_fond(objets_modele_fond=JSON.parse(data.objets));
-                }
-            })
-        }
-    });
-
-
-    $(document).ready(function() {
-        $("#id_fond").trigger('change');
-    });
-
-    </script>
-
-
-
-    {# ------------ Modal Insérer un champ -------------- #}
-
+    {# ------------ Modal Raccourcis clavier -------------- #}
     {% embed 'core/modal.html' %}
-        {% block modal_id %}modal_inserer_champ{% endblock %}
-        {% block modal_titre %}Insérer un champ{% endblock %}
+        {% block modal_id %}modal_raccourcis{% endblock %}
+        {% block modal_titre %}Raccourcis clavier{% endblock %}
         {% block modal_body %}
-            <div id="modal_erreurs" class="text-red"></div>
-            <form method="post">
-                {% crispy formulaire_champs %}
-            </form>
+            <table class="table table-sm editeur-raccourcis mb-0">
+                <tr><td>Annuler / rétablir</td><td><kbd>Ctrl</kbd> <kbd>Z</kbd> / <kbd>Ctrl</kbd> <kbd>Y</kbd></td></tr>
+                <tr><td>Couper / copier / coller</td><td><kbd>Ctrl</kbd> <kbd>X</kbd> / <kbd>C</kbd> / <kbd>V</kbd></td></tr>
+                <tr><td>Dupliquer</td><td><kbd>Ctrl</kbd> <kbd>D</kbd></td></tr>
+                <tr><td>Tout sélectionner</td><td><kbd>Ctrl</kbd> <kbd>A</kbd></td></tr>
+                <tr><td>Désélectionner</td><td><kbd>Échap</kbd></td></tr>
+                <tr><td>Supprimer</td><td><kbd>Suppr</kbd></td></tr>
+                <tr><td>Déplacer de 1 mm / 10 mm</td><td><kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> / avec <kbd>Maj</kbd></td></tr>
+                <tr><td>Ajouter à la sélection</td><td><kbd>Maj</kbd> + clic</td></tr>
+                <tr><td>Menu contextuel</td><td>Clic droit, ou <kbd>Maj</kbd> <kbd>F10</kbd></td></tr>
+                <tr><td>Se déplacer dans la page</td><td><kbd>Espace</kbd> + glisser, ou glisser avec le clic droit</td></tr>
+                <tr><td>Zoomer</td><td>Molette, <kbd>Ctrl</kbd> <kbd>+</kbd> / <kbd>Ctrl</kbd> <kbd>-</kbd></td></tr>
+                <tr><td>Ajuster à la page</td><td><kbd>Ctrl</kbd> <kbd>0</kbd></td></tr>
+                <tr><td>Désactiver le magnétisme</td><td>Maintenir <kbd>Ctrl</kbd> pendant le déplacement</td></tr>
+                <tr><td>Enregistrer</td><td><kbd>Ctrl</kbd> <kbd>S</kbd></td></tr>
+                <tr><td>Afficher cette aide</td><td><kbd>?</kbd></td></tr>
+            </table>
         {% endblock %}
     {% endembed %}
-
-    <script>
-
-    // Modal : Insertion du champ après sélection du champ
-    $(document).on('submit', 'div.modal-body form', function(e) {
-        e.preventDefault();
-        var objet = canvas.getActiveObject();
-        var texte = $('#id_champs').val();
-        objet.insertChars(texte, null, objet.selectionStart, objet.selectionEnd);
-        objet.setSelectionStart(objet.selectionStart + texte.length);
-        objet.setSelectionEnd(objet.selectionStart + texte.length);
-        $('#modal_inserer_champ').modal('hide');
-        objet.exitEditing();
-        canvas.renderAll();
-        objet.enterEditing();
-    });
-
-    </script>
 
     {# Modal aperçu PDF #}
     {% include 'core/modal_pdf.html' %}
+
+    {# ------------ Configuration et script de l'éditeur -------------- #}
+    {{ liste_champs|json_script:"donnees_champs" }}
+    <script type="text/javascript">
+        {% include 'core/csrftoken.html' %}
+
+        window.EDITEUR_CONFIG = {
+            url_logo: "{% if organisateur.logo %}{{ organisateur.logo.url|escapejs }}{% endif %}",
+            url_export_pdf: "{% url 'ajax_export_svg' %}",
+            url_fond: "{% url 'ajax_get_fond_modele' %}",
+            url_photo: "{% static 'images/femme.png' %}",
+            url_codebarres: "{% static 'images/codebarres.png' %}",
+            url_qrcode: "{% static 'images/qrcode.png' %}",
+            url_datamatrix: "{% static 'images/datamatrix.png' %}",
+            champs: JSON.parse(document.getElementById("donnees_champs").textContent || "[]"),
+        };
+    </script>
+    <script src="{% static 'js/editeur_modeles_documents.js' %}"></script>
 
 {% endblock contenu_page %}
