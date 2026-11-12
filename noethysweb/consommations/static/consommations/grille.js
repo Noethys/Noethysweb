@@ -502,7 +502,14 @@ class Case_base {
             if (mode === "portail" && this.dela === "False") {label += " — Modification impossible : hors délai";}
         }
 
-        $("#" + this.key).attr("aria-label", label);
+        var $case = $("#" + this.key);
+        $case.attr("aria-label", label);
+
+        // RGAA 7.1 : la case est un contrôle activable (Entrée / Espace) -> rôle bouton + état
+        if ($case.attr("tabindex") === "0") {
+            $case.attr("role", "button");
+            $case.attr("aria-pressed", this.consommations.length > 0 ? "true" : "false");
+        }
     }
 
 };

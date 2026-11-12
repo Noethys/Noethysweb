@@ -191,7 +191,7 @@
 
                                     {# Création de la case #}
                                     {% if unite in data.liste_unites_visibles %}
-                                        <td {% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}tabindex="0" aria-label="{{ date_longue }} - {{ unite.nom }}"{% endif %}
+                                        <td {% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}tabindex="0" role="button" aria-pressed="false" aria-label="{{ date_longue }} - {{ unite.nom }}"{% endif %}
                                             class="case {{ unite.type|lower }} {% if unite.type|is_in_list:"Unitaire;Horaire;Quantite" %}ouvert{% endif %} {% if not ajout_allowed %}blocked{% endif %}"
                                             id="{{ key_case }}"
                                         ></td>
