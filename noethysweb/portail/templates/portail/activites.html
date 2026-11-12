@@ -45,17 +45,18 @@
 
             <!-- Nom de l'individu -->
             <div class="user-block m-0" style="padding: .6rem 1rem;">
-                <span class=""><b><i class="fa fa-hourglass-half margin-r-5"></i> Demandes d'inscription en attente de traitement</b></span>
+                <span class=""><b><i class="fa fa-hourglass-half margin-r-5" aria-hidden="true"></i> Demandes d'inscription en attente de traitement</b></span>
             </div>
 
             <div class="p-2 bg-warning">
                 <div>
                     <div class="table-responsive">
                     <table class="table table-bordered table-sm mb-0 table-warning">
+                        <caption class="caption-top visually-hidden">{% trans "Demandes d'inscription en attente de traitement" %}</caption>
                         <thead>
                             <tr class="text-center">
-                                <th>Individu à inscrire</th>
-                                <th>Activité souhaitée</th>
+                                <th scope="col">Individu à inscrire</th>
+                                <th scope="col">Activité souhaitée</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -94,6 +95,7 @@
                 <div>
                     <div class="table-responsive">
                     <table class="table table-bordered table-sm mb-0"  style="background-color: #FFFFFF;">
+                        <caption class="caption-top visually-hidden">{% blocktrans with prenom=individu.prenom %}Activités auxquelles {{ prenom }} est inscrit(e){% endblocktrans %}</caption>
                         <thead>
                             <tr class="text-center">
                                 <th>{% trans "Activité" %}</th>
