@@ -121,13 +121,13 @@ class FormulaireBase():
         else:
             texte_kwargs = ""
         if self.mode == "CONSULTATION":
-            self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{{% url 'portail_{nom_page}_modifier' {texte_kwargs} %}}" title="{title}"><i class="fa fa-pencil margin-r-5"></i>{label}</a>""".format(
-                nom_page=self.nom_page, texte_kwargs=texte_kwargs, title=_("Modifier"), label=_("Modifier cette page"))
+            self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{{% url 'portail_{nom_page}_modifier' {texte_kwargs} %}}" title="{title}"><i class="fa fa-pencil margin-r-5" aria-hidden="true"></i>{label}</a>""".format(
+                nom_page=self.nom_page, texte_kwargs=texte_kwargs, title=_("Modifier cette page"), label=_("Modifier cette page"))
             ), css_class="pull-right"))
 
         if self.mode == "EDITION":
             self.helper.layout.append(ButtonHolder(
-                    StrictButton('<i class=\'fa fa-check margin-r-5\' aria-hidden=\'true\'></i>%s' % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
+                    StrictButton('<i class=\'fa fa-check margin-r-5\' aria-hidden=\'true\'></i>%s' % _("Enregistrer les modifications"), title=_("Enregistrer les modifications"), name="enregistrer", type="submit", css_class="btn-primary"),
                     HTML("""<a class="btn btn-danger" href='{{% url 'portail_{nom_page}' {texte_kwargs} %}}' title="{title}"><i class="fa fa-ban margin-r-5" aria-hidden="true"></i>{label}</a>""".format(
                         nom_page=self.nom_page, texte_kwargs=texte_kwargs, title=_("Annuler"), label=_("Annuler"))
                     ), css_class="pull-right"))

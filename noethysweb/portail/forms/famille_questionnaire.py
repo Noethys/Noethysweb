@@ -75,7 +75,7 @@ class Formulaire(FormulaireBase, forms.Form):
         else:
             # Ajout des commandes
             if mode == "CONSULTATION":
-                self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{{% url 'portail_famille_questionnaire_modifier' %}}" title="{title}"><i class="fa fa-pencil margin-r-5"></i>{label}</a>""".format(title=_("Modifier"), label=_("Modifier cette page"))), css_class="pull-right"))
+                self.helper.layout.append(ButtonHolder(HTML("""<a class="btn btn-primary" href="{{% url 'portail_famille_questionnaire_modifier' %}}" title="{title}"><i class="fa fa-pencil margin-r-5" aria-hidden="true"></i>{label}</a>""".format(title=_("Modifier cette page"), label=_("Modifier cette page"))), css_class="pull-right"))
             if mode == "EDITION":
                 self.helper.layout.append(ButtonHolder(
                         StrictButton("<i class='fa fa-check margin-r-5' aria-hidden='true'></i>%s" % _("Enregistrer les modifications"), title=_("Enregistrer"), name="enregistrer", type="submit", css_class="btn-primary"),
