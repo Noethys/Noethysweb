@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging
+import logging, importlib
 logger = logging.getLogger(__name__)
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
@@ -22,5 +22,12 @@ def Get_declaration_accessibilite(context, request):
 
     # Insertion de l'URL principale du portail
     texte = texte.replace("{URL_PORTAIL}", str(get_current_site(request)))
+
+    # Recherche un texte complémentaire dans le répertoire site-packages de python
+    try:
+        module = importlib.import_module("noethysweb_declaration_accessibilite_custom")
+        texte += module.Get_html()
+    except:
+        pass
 
     return texte

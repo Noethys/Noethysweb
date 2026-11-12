@@ -4,6 +4,15 @@
 {% load static %}
 {% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .declaration-accessibilite h3 {
+            font-size: 1.1rem;
+            margin: 1.25rem 0 .5rem;
+        }
+    </style>
+{% endblock styles %}
 
 {% block contenu_page %}
 
@@ -20,7 +29,9 @@
             Déclaration d'accessibilité
         {% endblocktrans %}{% endblock %}
         {% block box_contenu %}
-            {{ texte_declaration_accessibilite|safe }}
+            <div class="declaration-accessibilite">
+                {{ texte_declaration_accessibilite|safe }}
+            </div>
         {% endblock box_contenu %}
         {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}
     {% endembed %}
