@@ -6,7 +6,7 @@
 from django.urls import reverse_lazy
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import ImageFond
+from core.models import ImageFond, PortailParametre
 from parametrage.forms.images_fond import Formulaire
 
 
@@ -59,4 +59,8 @@ class Modifier(Page, crud.Modifier):
     form_class = Formulaire
 
 class Supprimer(Page, crud.Supprimer):
-    pass
+    def Check_protections(self, objet=None):
+        protections = []
+        if PortailParametre.objects.filter(code="connexion_image_fond", valeur=str(objet.pk)).exists():
+            protections.append("Cette image est utilisée comme image de fond du portail. Sélectionnez une autre image dans les paramètres du portail avant de la supprimer")
+        return protections

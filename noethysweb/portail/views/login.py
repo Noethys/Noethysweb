@@ -43,11 +43,12 @@ class ClassCommuneLogin:
         context['parametres_portail'] = parametres_portail
 
         # Recherche de l'image de fond
+        context['url_image_fond'] = static("images/portail.jpg")
         idimage_fond = parametres_portail.get("connexion_image_fond", None)
-        if idimage_fond:
-            context['url_image_fond'] = ImageFond.objects.filter(pk=idimage_fond).first().image.url
-        else:
-            context['url_image_fond'] = static("images/portail.jpg")
+        if idimage_fond and str(idimage_fond).isdigit():
+            image_fond = ImageFond.objects.filter(pk=int(idimage_fond)).first()
+            if image_fond and image_fond.image:
+                context['url_image_fond'] = image_fond.image.url
 
         # Formulaire accessibilité
         context["form_accessibilite"] = FormulaireAccessibilite()
