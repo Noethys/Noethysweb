@@ -387,3 +387,37 @@
         demarrer();
     }
 })();
+
+/* ---------------------------------------------------------------------- */
+/* RGAA 7.1 / 8.2 — Fenêtres modales : chaque fenêtre doit être nommée    */
+/* par son propre titre. Corrige les aria-labelledby vides ou pointant    */
+/* vers un id dupliqué (ex. « myModalLabel » de core/modal.html).         */
+/* ---------------------------------------------------------------------- */
+(function () {
+    "use strict";
+
+    function nommer_modales() {
+        document.querySelectorAll(".modal[role='dialog']").forEach(function (modal, index) {
+            var titre = modal.querySelector(".modal-title");
+            if (!titre) { return; }
+            var id = titre.id;
+            var duplique = id && document.querySelectorAll("[id='" + id + "']").length > 1;
+            if (!id || duplique) {
+                id = (modal.id || "modal_" + index) + "_titre";
+                titre.id = id;
+            }
+            if (modal.getAttribute("aria-labelledby") !== id) {
+                modal.setAttribute("aria-labelledby", id);
+            }
+            if (!modal.hasAttribute("aria-modal")) {
+                modal.setAttribute("aria-modal", "true");
+            }
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", nommer_modales);
+    } else {
+        nommer_modales();
+    }
+})();
