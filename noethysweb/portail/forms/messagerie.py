@@ -33,7 +33,7 @@ class SummernoteInplaceWidgetBS5(SummernoteInplaceWidget):
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    texte = SummernoteTextFormField(label=_("Poster un message"), attrs={'summernote': {'width': '100%', 'height': '200px', 'toolbar': [
+    texte = SummernoteTextFormField(label=_("Poster un message"), attrs={'summernote': {'width': '100%', 'height': '200px', 'tabDisable': True, 'toolbar': [
         ['font', ['bold', 'underline', 'clear']],
         # ['color', ['color']],
         # ['para', ['ul', 'ol', 'paragraph']],

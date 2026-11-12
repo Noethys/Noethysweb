@@ -93,6 +93,7 @@
 
         {% endblock box_contenu %}
         {% block box_conclusion %}
+            <p class="small text-body-secondary mb-2">{% trans "Les champs marqués d'un astérisque (*) sont obligatoires." %}</p>
             {% crispy form %}
         {% endblock %}
     {% endembed %}
@@ -100,6 +101,29 @@
     <script>
         {# Scroll jusqu'en bas de la liste des messages #}
         $("#div_messages").scrollTop($("#div_messages").get(0).scrollHeight);
+
+        {# RGAA 1.2 / 7.1 / 7.3 / 11.1 / 11.10 : accessibilité de l'éditeur Summernote #}
+        function rendre_summernote_accessible() {
+            var $editeur = $(".note-editor");
+            if (!$editeur.length) { return false; }
+            var label = document.querySelector('label[for="id_texte"]');
+            if (label && !label.id) { label.id = "label_id_texte"; }
+            $editeur.find(".note-editable").attr({
+                "aria-labelledby": label ? label.id : null,
+                "aria-required": "true"
+            });
+            $editeur.find(".note-toolbar").attr({"role": "toolbar", "aria-label": "{% trans "Mise en forme du message" %}"});
+            $editeur.find(".note-toolbar .note-btn").removeAttr("tabindex");
+            $editeur.find(".note-toolbar i, .note-icon-caret").attr("aria-hidden", "true");
+            $(".note-modal").attr("aria-modal", "true");
+            return true;
+        }
+        $(function () {
+            var essais = 0;
+            (function essayer() {
+                if (!rendre_summernote_accessible() && essais++ < 20) { setTimeout(essayer, 250); }
+            })();
+        });
     </script>
 
 {% endblock contenu_page %}
