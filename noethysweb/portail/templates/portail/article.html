@@ -95,7 +95,7 @@
                         {% blocktrans %}Lancer la vidéo{% endblocktrans %}
                     </button>
                 </small>
-                {% embed 'core/accueil/video.html' with id=article.pk %}{% endembed %}
+                {% embed 'core/accueil/video.html' with id=article.pk titre=article.titre %}{% endembed %}
             {% endif %}
 
         </div>
