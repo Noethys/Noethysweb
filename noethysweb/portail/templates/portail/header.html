@@ -59,10 +59,11 @@
 
             {# Utilisateur en cours #}
             <li class="nav-item dropdown user-menu" role="listitem">
-                <a href="{% url 'portail_profil' %}" class="nav-link" title="{% trans "Paramètres du compte" %}">
+                <a href="{% url 'portail_profil' %}" class="nav-link" title="{{ request.user.famille }} – {% trans "Paramètres du compte" %}">
                     <span class="d-none d-sm-inline">
                         {{ request.user.famille }}
                     </span>
+                    <span class="visually-hidden"> – {% trans "Paramètres du compte" %}</span>
                 </a>
             </li>
 
