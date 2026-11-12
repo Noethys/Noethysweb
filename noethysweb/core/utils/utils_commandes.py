@@ -37,7 +37,7 @@ def Commandes(enregistrer=True, enregistrer_label="<i class='fa fa-check margin-
 
     # Annuler
     if annuler:
-        liste_commandes.append(HTML("""<a class="btn btn-danger" href='%s' title="%s"><i class="fa fa-ban margin-r-5"></i>%s</a> """ % (annuler_url, _("Annuler"), _("Annuler"))))
+        liste_commandes.append(HTML("""<a class="btn btn-danger" href='%s' title="%s"><i class="fa fa-ban margin-r-5" aria-hidden="true"></i>%s</a> """ % (annuler_url, _("Annuler"), _("Annuler"))))
 
     # Autres commandes
     if autres_commandes:

@@ -62,5 +62,5 @@ class Formulaire(FormulaireBase, ModelForm):
             Hidden('famille', value=self.request.user.famille.pk),
             Hidden('structure', value=idstructure),
             Field('texte'),
-            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5'></i>%s" % _("Envoyer"), annuler_url="{% url 'portail_contact' %}", ajouter=False, aide=False, css_class="pull-right"),
+            Commandes(enregistrer_label="<i class='fa fa-send margin-r-5' aria-hidden='true'></i>%s" % _("Envoyer"), annuler_url="{% url 'portail_contact' %}", ajouter=False, aide=False, css_class="pull-right"),
         )
