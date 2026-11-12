@@ -127,19 +127,16 @@
                                     <td>{{ facture.Get_regle_actuel|montant }}</td>
                                     <td>
                                         {% if facture.en_cours_paiement %}
-                                            <span class="badge rounded-pill text-bg-warning"
-                                                  aria-label="{% blocktrans with m=facture.solde_actuel|montant %}Paiement en cours : {{ m }}{% endblocktrans %}">
-                                                {{ facture.solde_actuel|montant }}
+                                            <span class="badge rounded-pill text-bg-warning">
+                                                <span class="visually-hidden">{% trans "Paiement en cours :" %} </span>{{ facture.solde_actuel|montant }}
                                             </span>
                                         {% elif facture.solde_actuel > 0.0 %}
-                                            <span class="badge rounded-pill text-bg-danger"
-                                                  aria-label="{% blocktrans with m=facture.solde_actuel|montant %}Reste à régler : {{ m }}{% endblocktrans %}">
-                                                {{ facture.solde_actuel|montant }}
+                                            <span class="badge rounded-pill text-bg-danger">
+                                                <span class="visually-hidden">{% trans "Reste à régler :" %} </span>{{ facture.solde_actuel|montant }}
                                             </span>
                                         {% else %}
-                                            <span class="badge rounded-pill text-bg-success"
-                                                  aria-label="{% trans "Soldée" %}">
-                                                {{ facture.solde_actuel|montant }}
+                                            <span class="badge rounded-pill text-bg-success">
+                                                <span class="visually-hidden">{% trans "Soldée" %} : </span>{{ facture.solde_actuel|montant }}
                                             </span>
                                         {% endif %}
                                     </td>
@@ -153,14 +150,12 @@
                                     <td>{{ periode.regle|montant }}</td>
                                     <td>
                                         {% if periode.solde > 0.0 %}
-                                            <span class="badge rounded-pill text-bg-danger"
-                                                  aria-label="{% blocktrans with m=periode.solde|montant %}Reste à régler : {{ m }}{% endblocktrans %}">
-                                                {{ periode.solde|montant }}
+                                            <span class="badge rounded-pill text-bg-danger">
+                                                <span class="visually-hidden">{% trans "Reste à régler :" %} </span>{{ periode.solde|montant }}
                                             </span>
                                         {% else %}
-                                            <span class="badge rounded-pill text-bg-success"
-                                                  aria-label="{% trans "Soldée" %}">
-                                                {{ periode.solde|montant }}
+                                            <span class="badge rounded-pill text-bg-success">
+                                                <span class="visually-hidden">{% trans "Soldée" %} : </span>{{ periode.solde|montant }}
                                             </span>
                                         {% endif %}
                                     </td>
@@ -174,14 +169,12 @@
                                     <td>{{ prestation_cotisation.regle|montant }}</td>
                                     <td>
                                         {% if prestation_cotisation.solde > 0.0 %}
-                                            <span class="badge rounded-pill text-bg-danger"
-                                                  aria-label="{% blocktrans with m=prestation_cotisation.solde|montant %}Reste à régler : {{ m }}{% endblocktrans %}">
-                                                {{ prestation_cotisation.solde|montant }}
+                                            <span class="badge rounded-pill text-bg-danger">
+                                                <span class="visually-hidden">{% trans "Reste à régler :" %} </span>{{ prestation_cotisation.solde|montant }}
                                             </span>
                                         {% else %}
-                                            <span class="badge rounded-pill text-bg-success"
-                                                  aria-label="{% trans "Soldée" %}">
-                                                {{ prestation_cotisation.solde|montant }}
+                                            <span class="badge rounded-pill text-bg-success">
+                                                <span class="visually-hidden">{% trans "Soldée" %} : </span>{{ prestation_cotisation.solde|montant }}
                                             </span>
                                         {% endif %}
                                     </td>
@@ -249,14 +242,12 @@
                                         {% if parametres_portail.facturation_afficher_solde_facture %}
                                             <td>
                                                 {% if facture.solde_actuel %}
-                                                    <span class="badge rounded-pill text-bg-danger"
-                                                          aria-label="{% blocktrans with montant=facture.solde_actuel|montant %}Reste à régler : {{ montant }}{% endblocktrans %}">
-                                                        {{ facture.solde_actuel|montant }}
+                                                    <span class="badge rounded-pill text-bg-danger">
+                                                        <span class="visually-hidden">{% trans "Reste à régler :" %} </span>{{ facture.solde_actuel|montant }}
                                                     </span>
                                                 {% else %}
-                                                    <span class="badge rounded-pill text-bg-success"
-                                                          aria-label="{% trans "Facture soldée" %}">
-                                                        {{ facture.solde_actuel|montant }}
+                                                    <span class="badge rounded-pill text-bg-success">
+                                                        <span class="visually-hidden">{% trans "Facture soldée" %} : </span>{{ facture.solde_actuel|montant }}
                                                     </span>
                                                 {% endif %}
                                             </td>
@@ -296,7 +287,7 @@
                 {% endif %}
             </div>
 
-            <a id="download" download aria-hidden="true" tabindex="-1"></a>
+            <a id="download" href="#" download aria-hidden="true" tabindex="-1" hidden></a>
 
         {% endblock box_contenu %}
         {% block box_conclusion %}{{ box_conclusion|safe }}{% endblock %}

@@ -6,7 +6,7 @@
     <nav class="container-fluid" aria-label="{% trans "Barre de navigation supérieure" %}">
 
         <ul class="navbar-nav" role="list">
-            <li class="nav-item css-dependent" hidden role="listitem">
+            <li class="nav-item css-dependent" hidden>
                 <button type="button" class="nav-link btn btn-link border-0"
                         data-lte-toggle="sidebar"
                         title="Réduire ou agrandir le menu latéral"
@@ -15,7 +15,7 @@
                 </button>
             </li>
 
-            <li class="nav-item" role="listitem">
+            <li class="nav-item">
                 <button class="nav-link btn btn-link border-0 p-0 px-3"
                         type="button"
                         data-bs-toggle="modal"
@@ -27,7 +27,7 @@
                 </button>
             </li>
 
-            <li class="nav-item" role="listitem">
+            <li class="nav-item">
                 <button class="nav-link btn btn-link border-0 p-0 px-3"
                         type="button"
                         data-bs-toggle="modal"
@@ -39,7 +39,7 @@
                 </button>
             </li>
 
-            <li class="nav-item" role="listitem">
+            <li class="nav-item">
                 <button class="nav-link btn btn-link border-0 p-0 px-3"
                         type="button"
                         data-bs-toggle="modal"
@@ -55,7 +55,7 @@
         <ul class="navbar-nav ml-auto" role="list">
 
             {# Utilisateur en cours #}
-            <li class="nav-item dropdown user-menu" role="listitem">
+            <li class="nav-item dropdown user-menu">
                 <a href="{% url 'portail_profil' %}" class="nav-link" title="{{ request.user.famille }} – {% trans "Paramètres du compte" %}">
                     <span class="d-none d-sm-inline">
                         {{ request.user.famille }}
@@ -65,7 +65,7 @@
             </li>
 
             {# Bouton de déconnexion #}
-            <li class="nav-item" role="listitem">
+            <li class="nav-item">
                 <form action="{% url 'portail_deconnexion' %}" method="post" aria-label="Déconnexion">
                     {% csrf_token %}
                     <button class="btn btn-danger" type="submit" title="{% trans "Se déconnecter" %}">

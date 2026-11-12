@@ -148,7 +148,7 @@
 
         <div class="d-flex justify-content-between align-items-center p-3 bg-body-secondary rounded mt-2" aria-live="polite" aria-atomic="true">
             <span class="">{% blocktrans %}Montant du règlement{% endblocktrans %} :</span>
-            <strong class="fs-5 me-4 total" id="total" aria-label="{% blocktrans with symbole=SYMBOLE_MONNAIE %}Montant total sélectionné : 0.00 {{ symbole }}{% endblocktrans %}">0.00 {{ SYMBOLE_MONNAIE }}</strong>
+            <strong class="fs-5 me-4" id="total"><span class="visually-hidden">{% trans "Montant total sélectionné" %} : </span><span class="total">0.00 {{ SYMBOLE_MONNAIE }}</span></strong>
         </div>
 
 
@@ -193,7 +193,6 @@
         });
         const formatted = parseFloat(montant_reglement).toFixed(2) + " {{ SYMBOLE_MONNAIE }}";
         $('.total').html(formatted);
-        document.getElementById('total').setAttribute('aria-label', '{% trans "Montant total sélectionné" %} : ' + formatted);
     }
 
     function toggleAll(cb) {

@@ -69,14 +69,12 @@
                                         {% if parametres_portail.reglements_afficher_encaissement %}
                                             <td>
                                                 {% if reglement.depot %}
-                                                    <span class="badge rounded-pill text-bg-success"
-                                                          aria-label="{% blocktrans with d=reglement.depot.date|date:'d/m/Y' %}Encaissé le {{ d }}{% endblocktrans %}">
-                                                        {{ reglement.depot.date|date:'d/m/Y' }}
+                                                    <span class="badge rounded-pill text-bg-success">
+                                                        <span class="visually-hidden">{% trans "Encaissé le" %} </span>{{ reglement.depot.date|date:'d/m/Y' }}
                                                     </span>
                                                 {% else %}
-                                                    <span class="badge rounded-pill text-bg-danger"
-                                                          aria-label="{% trans "Non encaissé" %}">
-                                                        {% trans "Non" %}
+                                                    <span class="badge rounded-pill text-bg-danger">
+                                                        <span class="visually-hidden">{% trans "Non encaissé" %} : </span>{% trans "Non" %}
                                                     </span>
                                                 {% endif %}
                                             </td>

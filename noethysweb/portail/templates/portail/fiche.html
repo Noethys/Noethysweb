@@ -81,7 +81,7 @@
                 <div class="card-footer p-0 bg-white border-top-0">
                     <ul class="list-group list-group-flush" role="list" style="list-style: none; padding-left: 0;">
                         {% for onglet in liste_onglets %}
-                            <li role="listitem">
+                            <li>
                                 <a class="list-group-item list-group-item-action {% if onglet_actif == onglet.code %}item_actif{% endif %}"
                                    href="{% if rattachement %}{% url onglet.url idrattachement=rattachement.pk %}{% else %}{% url onglet.url %}{% endif %}"
                                    {% if onglet_actif == onglet.code %}aria-current="page"{% endif %}

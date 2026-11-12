@@ -44,6 +44,10 @@ CHOIX_AGRANDIR_CURSEUR = [
 
 
 class FormulaireAccessibilite(forms.Form):
+    # RGAA 8.2 : les listes ont toujours une valeur sélectionnée ; l'attribut HTML required
+    # est inutile et rend le code invalide (1re option non vide). Validation conservée côté serveur.
+    use_required_attribute = False
+
 
     # ── Vision ───────────────────────────────────────────────────────────────
 

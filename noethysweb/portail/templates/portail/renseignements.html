@@ -133,7 +133,7 @@
                                 {% endembed %}
                             </td>
                             <td class="project-state">
-                                <small>
+                                <div class="small">
                                     <ul class="list-unstyled" aria-label="{% trans "État de la fiche famille" %}">
                                         {% with request.user.famille.certification_date|get_etat_certification:parametres_portail.renseignements_duree_certification as etat_certification %}
                                             {% if etat_certification == "VALIDE" %}
@@ -148,7 +148,7 @@
                                             <li class="text-danger"><i class="fa fa-remove margin-r-5" aria-hidden="true"></i>{{ renseignement }}</li>
                                         {% endfor %}
                                     </ul>
-                                </small>
+                                </div>
                             </td>
                             <td class="text-right">
                                 {% if url_fiche_famille %}
@@ -181,7 +181,7 @@
                                     {% endembed %}
                                 </td>
                                 <td class="project-state">
-                                    <small>
+                                    <div class="small">
                                         <ul class="list-unstyled" aria-label="{% blocktrans %}État de la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}">
                                             {% with rattachement.certification_date|get_etat_certification:parametres_portail.renseignements_duree_certification as etat_certification %}
                                                 {% if etat_certification == "VALIDE" %}
@@ -196,7 +196,7 @@
                                                 <li class="text-danger"><i class="fa fa-remove margin-r-5" aria-hidden="true"></i>{{ renseignement }}</li>
                                             {% endfor %}
                                         </ul>
-                                    </small>
+                                    </div>
                                 </td>
                                 <td class="text-right">
                                     <a href="{% url 'portail_individu_identite' idrattachement=rattachement.pk %}" class="btn btn-sm btn-primary" title="{% blocktrans %}Ouvrir la fiche de{% endblocktrans %} {{ rattachement.individu.Get_nom }}">

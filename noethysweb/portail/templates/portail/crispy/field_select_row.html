@@ -30,7 +30,7 @@
             name="{{ field.html_name }}"
             class="form-select form-select-sm"
             {% if field.help_text %}aria-describedby="hint_{{ field.html_name }}"{% endif %}
-            {% if field.field.required %}required{% endif %}>
+            {% if field.field.required and field.form.use_required_attribute %}required{% endif %}>
       {% for val, txt in field.field.choices %}
         <option value="{{ val }}"
                 {% if field.value == val|stringformat:"s" %}selected{% endif %}>
