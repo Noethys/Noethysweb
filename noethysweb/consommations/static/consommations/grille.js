@@ -596,7 +596,7 @@ class Case_standard extends Case_base {
             if (conso.etat === "absenti") {texte_icones += " <i class='fa fa-times-circle-o text-red' title='Absence injustifiée'></i>"};
             if (conso.etat === "absentj") {texte_icones += " <i class='fa fa-times-circle-o text-green' title='Absence justifiée'></i>"};
             if (conso.forfait === 2) {texte_icones += " <i class='fa fa-lock text-red' title='Cette consommation est non supprimable car elle est associée à un forfait daté'></i>"};
-            if (conso.facture) {texte_icones += " <i class='fa fa-file-text-o text-black-50' title='La prestation associée apparaît sur une facture'></i>"};
+            if (conso.facture) {texte_icones += " <i class='fa fa-file-text-o text-black-50' title='La prestation associée apparaît sur une facture' aria-hidden='true'></i>"};
             if ((mode === "portail") && (conso.dels === "False") && (!(conso.etat === "demande"))) {texte_icones += " <i class='fa fa-lock text-red' title='Suppression impossible : Hors délai'></i>"};
 
             // Pour les tests, affiche l'id de la prestation
