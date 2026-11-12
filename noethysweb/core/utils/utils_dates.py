@@ -16,7 +16,7 @@ LISTE_MOIS_ABREGES = ("janv.", "fév.", "mars", "avril", "mai", "juin", "juil.",
 
 def EstEnVacances(date=None, liste_vacances=None):
     for vacance in liste_vacances:
-        if isinstance(vacance, list):
+        if isinstance(vacance, (list, tuple)):
             if vacance[0] <= str(date) <= vacance[1]:
                 return vacance
         else:
