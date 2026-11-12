@@ -24,7 +24,7 @@ def Get_gps_organisateur(organisateur=None):
     # Récupération et enregistrement des coordonnées auprès de api adresse
     if organisateur and organisateur.cp and organisateur.ville:
         q = "%s %s" % (organisateur.cp, organisateur.ville)
-        r = requests.get("http://api-adresse.data.gouv.fr/search/", params={"q": q, "limit": 1, "autocomplete": 0, "type": "municipality"})
+        r = requests.get("https://data.geopf.fr/geocodage/search/", params={"q": q, "limit": 1, "autocomplete": 0, "type": "municipality"})
         r.raise_for_status()
         for feature in r.json().get("features"):
             lon, lat = feature.get("geometry").get("coordinates")
@@ -39,7 +39,7 @@ def Get_gps_ville(cp=None, ville=None):
     """ Récupération de coordonnées GPS à partir d'un CP et d'une ville """
     if cp and ville:
         q = "%s %s" % (cp, ville)
-        r = requests.get("http://api-adresse.data.gouv.fr/search/", params={"q": q, "limit": 1, "autocomplete": 0, "type": "municipality"})
+        r = requests.get("https://data.geopf.fr/geocodage/search/", params={"q": q, "limit": 1, "autocomplete": 0, "type": "municipality"})
         r.raise_for_status()
         for feature in r.json().get("features"):
             lon, lat = feature.get("geometry").get("coordinates")
@@ -51,7 +51,7 @@ def Get_code_insee_ville(cp=None, ville=None):
     """ Récupération d'un code INSEE commune partir d'un CP et d'une ville """
     if cp and ville:
         try:
-            req = requests.get("http://api-adresse.data.gouv.fr/search/", params={"q": "%s %s" % (cp, ville), "limit": 1, "autocomplete": 0, "type": "municipality"})
+            req = requests.get("https://data.geopf.fr/geocodage/search/", params={"q": "%s %s" % (cp, ville), "limit": 1, "autocomplete": 0, "type": "municipality"})
             resultat = json.loads(req.content.decode("unicode_escape"))
             return resultat["features"][0]["properties"]["citycode"]
         except:
@@ -65,7 +65,7 @@ def Get_adresse_structuree(gps_organisateur=None, rue=None, cp=None, ville=None)
     if gps_organisateur:
         params.update({"lat": gps_organisateur["lat"], "lon": gps_organisateur["lon"]})
     try:
-        req = requests.get("http://api-adresse.data.gouv.fr/search/", params=params)
+        req = requests.get("https://data.geopf.fr/geocodage/search/", params=params)
         resultat = json.loads(req.content)["features"][0]["properties"]
     except:
         return None

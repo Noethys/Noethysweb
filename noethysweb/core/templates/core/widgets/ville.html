@@ -63,7 +63,7 @@
         $("#{{ id }}").autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: "https://api-adresse.data.gouv.fr/search/?city="+$("input[id={{ id }}]").val()+"&type=municipality&limit=7",
+                    url: "https://data.geopf.fr/geocodage/search/?city="+$("input[id={{ id }}]").val()+"&type=municipality&limit=7",
                     data: { q: request.term },
                     dataType: "json",
                     success: function (data) {

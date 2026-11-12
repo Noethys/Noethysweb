@@ -294,7 +294,7 @@ LOGGING = {
 
 CSP_DEFAULT_SRC = (
     "'self'",
-    "https://api-adresse.data.gouv.fr/",
+    "https://data.geopf.fr/",
     "https://particulier.api.gouv.fr/",
 )
 
@@ -302,7 +302,7 @@ CSP_IMG_SRC = (
     "'self'",
     "data:",
     "https://*.openstreetmap.org",
-    "https://api-adresse.data.gouv.fr/",
+    "https://data.geopf.fr/",
     "https://particulier.api.gouv.fr/",
 )
 

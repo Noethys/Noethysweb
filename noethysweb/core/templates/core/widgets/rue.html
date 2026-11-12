@@ -8,8 +8,8 @@
         $("#{{ id }}").autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: "https://api-adresse.data.gouv.fr/search/?q="+$("input[id={{ id }}]").val()+"&type=housenumber&autocomplete=1&limit=10{% if gps_organisateur %}&lat={{ gps_organisateur.lat }}&lon={{ gps_organisateur.lon }}{% endif %}",
-                    data: {q: request.term},
+                    url: "https://data.geopf.fr/geocodage/search/",
+                    data: {q: request.term, type: "housenumber", autocomplete: 1, limit: 10{% if gps_organisateur %}, lat: "{{ gps_organisateur.lat }}", lon: "{{ gps_organisateur.lon }}"{% endif %}},
                     dataType: "json",
                     success: function (data) {
                         response($.map(data.features, function (item) {

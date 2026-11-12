@@ -18,7 +18,7 @@ def Get_coords_gps(request):
     ville = request.POST.get("ville")
     try:
         adresse = "%s %s %s" % (rue, cp, ville)
-        req = requests.get("https://api-adresse.data.gouv.fr/search/?q=" + urllib.parse.quote(adresse))
+        req = requests.get("https://data.geopf.fr/geocodage/search/?q=" + urllib.parse.quote(adresse))
         resultat = json.loads(req.content.decode('unicode_escape'))
         coords = resultat["features"][0]["geometry"]["coordinates"]
         coords = {"lon": coords[0], "lat": coords[1]}
