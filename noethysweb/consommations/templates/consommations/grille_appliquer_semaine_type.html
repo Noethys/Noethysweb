@@ -57,9 +57,9 @@
                 }
             </style>
 
-            <div id="modal_erreurs" class="text-danger" role="alert" aria-live="assertive" aria-atomic="true"></div>
+            <div id="modal_appliquer_semaine_type_erreurs" class="text-danger" role="alert" aria-live="assertive" aria-atomic="true"></div>
 
-            <form id="form_appliquer_semaine_type" method="post" aria-describedby="modal_erreurs">
+            <form id="form_appliquer_semaine_type" method="post" aria-describedby="modal_appliquer_semaine_type_erreurs">
                 {% csrf_token %}
                 {% crispy form_appliquer_semaine_type %}
 
