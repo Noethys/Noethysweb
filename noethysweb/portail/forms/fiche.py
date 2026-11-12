@@ -106,6 +106,10 @@ class FormulaireBase():
             if champs:
                 self.helper.layout.append(Fieldset(dict_rubrique["titre"], *champs))
 
+        # RGAA 11.10 : explication de l'astérisque des champs obligatoires (mode édition)
+        if self.mode == "EDITION" and any(field.required and not field.disabled for field in self.fields.values()):
+            self.helper.layout.insert(0, HTML("""<p class='small text-body-secondary mb-3'>%s</p>""" % _("Les champs marqués d'un astérisque (*) sont obligatoires.")))
+
         # Affichage des renseignements manquants en haut du formulaire
         if liste_renseignements_manquants:
             self.helper.layout.insert(0, HTML("""<div class='alerte bg-body-secondary'><i class='icon fa fa-warning text-danger me-1' aria-hidden='true'></i> <b>Renseignements manquants : %s</b></div>""" % ", ".join(liste_renseignements_manquants)))
