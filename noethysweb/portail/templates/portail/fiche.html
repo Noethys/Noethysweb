@@ -69,7 +69,7 @@
                         <img class="img-fluid rounded-circle shadow mb-2"
                              src="{% if rattachement %}{{ rattachement.individu.Get_photo }}{% else %}{% static 'images/personne.png' %}{% endif %}"
                              style="max-height: 80px"
-                             alt="Photo de {{ rattachement.individu.prenom }}"
+                             alt="{% if rattachement and rattachement.individu.photo %}{% blocktrans with prenom=rattachement.individu.prenom %}Photo de {{ prenom }}{% endblocktrans %}{% endif %}"
                         >
                     </div>
                     <div class="titre_fiche">

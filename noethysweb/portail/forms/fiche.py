@@ -108,7 +108,7 @@ class FormulaireBase():
 
         # Affichage des renseignements manquants en haut du formulaire
         if liste_renseignements_manquants:
-            self.helper.layout.insert(0, HTML("""<div class='alerte bg-body-secondary'><i class='icon fa fa-warning text-danger me-1'></i> <b>Renseignements manquants : %s</b></div>""" % ", ".join(liste_renseignements_manquants)))
+            self.helper.layout.insert(0, HTML("""<div class='alerte bg-body-secondary'><i class='icon fa fa-warning text-danger me-1' aria-hidden='true'></i> <b>Renseignements manquants : %s</b></div>""" % ", ".join(liste_renseignements_manquants)))
 
         # Désactive les champs en mode consultation
         if self.mode == "CONSULTATION":
