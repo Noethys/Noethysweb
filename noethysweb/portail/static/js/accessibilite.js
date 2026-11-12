@@ -351,3 +351,39 @@
     });
 
 }());
+
+/* ---------------------------------------------------------------------- */
+/* RGAA 8.7 — AdminLTE 4 ajoute « (required) » en anglais dans les        */
+/* étiquettes des champs obligatoires : on le traduit en français.        */
+/* ---------------------------------------------------------------------- */
+(function () {
+    "use strict";
+
+    var TEXTE = " (obligatoire)";
+
+    function traduire(racine) {
+        (racine || document).querySelectorAll(".required-indicator").forEach(function (el) {
+            if (el.textContent !== TEXTE) { el.textContent = TEXTE; }
+        });
+    }
+
+    function demarrer() {
+        traduire();
+        /* AdminLTE peut ajouter l'indicateur après nous (formulaires chargés dynamiquement) */
+        new MutationObserver(function (mutations) {
+            mutations.forEach(function (m) {
+                m.addedNodes.forEach(function (n) {
+                    if (n.nodeType !== 1) { return; }
+                    if (n.classList.contains("required-indicator")) { n.textContent = TEXTE; }
+                    else { traduire(n); }
+                });
+            });
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", demarrer);
+    } else {
+        demarrer();
+    }
+})();
