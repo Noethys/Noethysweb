@@ -245,6 +245,7 @@ COMMANDES = {
     "types_qualifications_collaborateurs_liste": ("certificate", "a", "Définir les qualifications (BAFA, PSC1...)."),
     "types_pieces_collaborateurs_liste": ("file-o", "a", "Définir les pièces demandées aux collaborateurs."),
     "types_evenements_collaborateurs_liste": ("calendar-check-o", "a", "Définir les catégories d'évènements du planning."),
+    "affectations_collaborateurs_liste": ("sitemap", "a", "Définir l'arborescence des affectations des évènements (structures, groupes...)."),
     "types_postes_collaborateurs_liste": ("briefcase", "a", "Définir les postes occupés par les collaborateurs."),
     "modeles_plannings_collaborateurs_liste": ("calendar", "a", "Créer des plannings types réutilisables."),
     "groupes_collaborateurs_liste": ("users", "a", "Regrouper les collaborateurs."),
@@ -523,10 +524,11 @@ COMMANDES = {
     "fusionner_contrats_word": ("file-word-o", "e", "Générer les contrats à partir d'un modèle Word."),
     "appliquer_modele_planning": ("calendar-plus-o", "a", "Appliquer un planning type à des collaborateurs."),
     "planning_collaborateurs": ("calendar", "a", "Voir et saisir les évènements sur un planning."),
+    "planning_equipe": ("tasks", "a", "Gérer les plannings des collaborateurs par date ou par collaborateur."),
 }
 
 
-DUREE_NOUVEAUTE = 60
+DUREE_NOUVEAUTE = 90
 
 NOUVEAUTES = {
     "export_ecritures_sage": "2026-09-07",
@@ -542,6 +544,7 @@ NOUVEAUTES = {
     "inscriptions_assistant_lot": "2026-10-13",
     "assistant_traitement_lot": "2026-10-13",
     "statistiques_locations": "2026-11-08",
+    "planning_equipe": "2026-11-11",
 }
 
 

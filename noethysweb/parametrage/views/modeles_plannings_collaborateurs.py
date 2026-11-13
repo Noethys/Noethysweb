@@ -45,6 +45,7 @@ def Get_form_ligne(request):
         "heure_fin": str(form.cleaned_data["heure_fin"]),
         "type_evenement": form.cleaned_data["type_evenement"].pk,
         "titre": form.cleaned_data["titre"],
+        "affectation": form.cleaned_data["affectation"].pk if form.cleaned_data.get("affectation") else None,
     }
     return JsonResponse({"valeur": dict_retour, "index": form.cleaned_data["index"]})
 
@@ -84,7 +85,7 @@ class Page(crud.Page):
             idligne = ligne["idligne"] if ligne["idligne"] else None
             LigneModelePlanningCollaborateur.objects.update_or_create(pk=idligne, defaults={"modele": self.object,
                 "jour": ligne["jour"], "periode": ligne["periode"], "heure_debut": ligne["heure_debut"], "heure_fin": ligne["heure_fin"],
-                "type_evenement_id": ligne["type_evenement"], "titre": ligne["titre"]})
+                "type_evenement_id": ligne["type_evenement"], "titre": ligne["titre"], "affectation_id": ligne.get("affectation") or None})
 
         # Suppression des lignes supprimées
         for ligne in lignes_existantes:

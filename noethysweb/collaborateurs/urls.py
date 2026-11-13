@@ -10,7 +10,7 @@ from collaborateurs.views import collaborateur, collaborateur_identite, collabor
                                 collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, planning_collaborateurs, \
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
-                                fusionner_contrats_word, importer_collaborateurs
+                                fusionner_contrats_word, importer_collaborateurs, planning
 
 
 urlpatterns = [
@@ -77,6 +77,8 @@ urlpatterns = [
     # Gestion des évènements
     path('collaborateurs/appliquer_modele_planning', appliquer_modele_planning.View.as_view(), name='appliquer_modele_planning'),
     path('collaborateurs/planning_collaborateurs', planning_collaborateurs.View.as_view(), name='planning_collaborateurs'),
+    path('collaborateurs/planning', planning.View.as_view(), name='planning_equipe'),
+    path('collaborateurs/planning/ical/<str:token>.ics', planning.Ical, name='planning_equipe_ical'),
 
 
     # AJAX
@@ -88,6 +90,18 @@ urlpatterns = [
     path('collaborateurs/planning/supprimer_evenement', secure_ajax(planning_collaborateurs.Supprimer_evenement), name='ajax_planning_collaborateurs_supprimer_evenement'),
     path('collaborateurs/planning/get_form_appliquer_modele', secure_ajax(planning_collaborateurs.Get_form_appliquer_modele), name='ajax_planning_collaborateurs_get_form_appliquer_modele'),
     path('collaborateurs/planning/valid_form_appliquer_modele', secure_ajax(planning_collaborateurs.Valid_form_appliquer_modele), name='ajax_planning_collaborateurs_valid_form_appliquer_modele'),
+    path('collaborateurs/planning_equipe/get_donnees', secure_ajax(planning.Get_donnees), name='ajax_planning_equipe_get_donnees'),
+    path('collaborateurs/planning_equipe/get_evenements', secure_ajax(planning.Get_evenements), name='ajax_planning_equipe_get_evenements'),
+    path('collaborateurs/planning_equipe/enregistrer', secure_ajax(planning.Enregistrer), name='ajax_planning_equipe_enregistrer'),
+    path('collaborateurs/planning_equipe/appliquer_modele', secure_ajax(planning.Appliquer_modele), name='ajax_planning_equipe_appliquer_modele'),
+    path('collaborateurs/planning_equipe/copier_periode', secure_ajax(planning.Copier_periode), name='ajax_planning_equipe_copier_periode'),
+    path('collaborateurs/planning_equipe/enregistrer_note', secure_ajax(planning.Enregistrer_note), name='ajax_planning_equipe_enregistrer_note'),
+    path('collaborateurs/planning_equipe/memoriser_affichage', secure_ajax(planning.Memoriser_affichage), name='ajax_planning_equipe_memoriser_affichage'),
+    path('collaborateurs/planning_equipe/memoriser_reglages', secure_ajax(planning.Memoriser_reglages), name='ajax_planning_equipe_memoriser_reglages'),
+    path('collaborateurs/planning_equipe/imprimer', secure_ajax(planning.Imprimer), name='ajax_planning_equipe_imprimer'),
+    path('collaborateurs/planning_equipe/envoyer_emails', secure_ajax(planning.Envoyer_emails), name='ajax_planning_equipe_envoyer_emails'),
+    path('collaborateurs/planning_equipe/exporter_recapitulatif', secure_ajax(planning.Exporter_recapitulatif), name='ajax_planning_equipe_exporter_recapitulatif'),
+    path('collaborateurs/planning_equipe/get_lien_ical', secure_ajax(planning.Get_lien_ical), name='ajax_planning_equipe_get_lien_ical'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrat', secure_ajax(collaborateur_voir_contrat.Fusionner), name='ajax_collaborateur_fusionner_contrat'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrats', secure_ajax(fusionner_contrats_word.Fusionner), name='ajax_collaborateur_fusionner_contrats'),
     path('collaborateurs/importer_collaborateurs/importer', secure_ajax(importer_collaborateurs.Importer), name='ajax_importer_collaborateurs_importer'),

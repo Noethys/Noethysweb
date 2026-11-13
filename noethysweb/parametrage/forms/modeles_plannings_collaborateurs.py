@@ -11,7 +11,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset
 from crispy_forms.bootstrap import Field
 from core.utils.utils_commandes import Commandes
-from core.models import ModelePlanningCollaborateur, TypeEvenementCollaborateur, LigneModelePlanningCollaborateur, JOURS_COMPLETS_SEMAINE
+from core.models import ModelePlanningCollaborateur, TypeEvenementCollaborateur, LigneModelePlanningCollaborateur, AffectationCollaborateur, JOURS_COMPLETS_SEMAINE
+from collaborateurs.utils.utils_affectations import Arbre
 from parametrage.widgets import Ligne_modele_planning
 
 
@@ -41,15 +42,17 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.field_class = 'col-md-10'
 
         # Lignes
+        arbre_affectations = Arbre()
         self.fields["lignes"].widget.request = self.request
         self.fields["lignes"].widget.attrs.update({
             "types_evenements": json.dumps({type_evenement.pk: type_evenement.nom for type_evenement in TypeEvenementCollaborateur.objects.all()}),
             "jours_semaine": json.dumps({num_jour: nom_jour for num_jour, nom_jour in JOURS_COMPLETS_SEMAINE}),
+            "affectations": json.dumps({idaffectation: arbre_affectations.Get_chemin(idaffectation) for idaffectation in arbre_affectations.affectations}),
         })
         lignes = LigneModelePlanningCollaborateur.objects.select_related("type_evenement").filter(modele_id=self.instance.pk if self.instance else 0)
         self.fields["lignes"].initial = json.dumps([{
             "idligne": ligne.pk, "jour": ligne.jour, "periode": ligne.periode, "heure_debut": str(ligne.heure_debut),
-            "heure_fin": str(ligne.heure_fin), "type_evenement": ligne.type_evenement_id, "titre": ligne.titre}
+            "heure_fin": str(ligne.heure_fin), "type_evenement": ligne.type_evenement_id, "titre": ligne.titre, "affectation": ligne.affectation_id}
             for ligne in lignes])
 
         # Affichage

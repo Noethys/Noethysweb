@@ -46,7 +46,7 @@ def Generation_evenements(idcollaborateur=None, modeles=[], date_debut=None, dat
                 evenement = EvenementCollaborateur(collaborateur_id=idcollaborateur, type_evenement=evenement_modele.type_evenement,
                                                    date_debut=datetime.datetime.combine(date, evenement_modele.heure_debut),
                                                    date_fin=datetime.datetime.combine(date, evenement_modele.heure_fin),
-                                                   titre=evenement_modele.titre)
+                                                   titre=evenement_modele.titre, affectation_id=evenement_modele.affectation_id)
 
                 liste_evenements.append(evenement)
 

@@ -1,0 +1,410 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .aff-toolbar {display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px;}
+        .aff-toolbar .aff-recherche {flex: 1 1 200px; max-width: 280px; margin-left: auto;}
+        .aff-arbre {list-style: none; margin: 0; padding: 0;}
+        .aff-noeud {display: flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 8px; border-radius: 8px; cursor: pointer; position: relative; user-select: none;}
+        .aff-noeud:hover {background: rgba(0, 0, 0, 0.035);}
+        .aff-noeud.selection {background: rgba(var(--couleur-principale-rgb, 60, 141, 188), 0.12); box-shadow: inset 0 0 0 1.5px rgba(var(--couleur-principale-rgb, 60, 141, 188), 0.55);}
+        .aff-noeud.inactif .aff-nom {text-decoration: line-through; opacity: 0.6;}
+        .aff-poignee {color: #9aa3af; cursor: grab; width: 16px; text-align: center;}
+        .aff-guide {width: 22px; align-self: stretch; flex-shrink: 0; background: linear-gradient(#dfe4ea, #dfe4ea) center / 1px 100% no-repeat;}
+        .aff-plier {width: 22px; height: 22px; border: 0; background: transparent; color: #5b6472; padding: 0; border-radius: 4px;}
+        .aff-plier.vide {visibility: hidden;}
+        .aff-pastille {width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;}
+        .aff-nom {font-weight: 600;}
+        .aff-noeud.niveau-0 .aff-nom {font-weight: 700;}
+        .aff-abrege {font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 5px; background: rgba(0,0,0,0.06); color: #5b6472;}
+        .aff-lien {font-size: 11.5px; font-weight: 600; padding: 1px 8px; border-radius: 10px; background: #e8f1fa; color: #1d5f8a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px;}
+        .aff-lien i {margin-right: 4px;}
+        .aff-fieldset-lien {border: 1px solid #dfe3e8; border-radius: 10px; padding: 4px 14px 0; margin: 0 0 14px; background: rgba(0,0,0,0.015);}
+        .aff-fieldset-lien legend {width: auto; font-size: 13px; font-weight: 700; padding: 0 6px; margin: 0; text-transform: none;}
+        .aff-fieldset-lien #div_id_unites_remplissage {margin-bottom: 10px;}
+        .aff-fieldset-lien #div_id_unites_remplissage > label {margin-bottom: 2px;}
+        .aff-fieldset-lien #div_id_unites_remplissage .custom-control-inline {margin-bottom: 2px;}
+        #aff_modal .form-group {margin-bottom: 12px;}
+        #aff_modal .form-text {margin-top: 2px; font-size: 11.5px;}
+        #aff_modal .aff-label-couleur {display: block;}
+        #aff_modal .aff-ligne-couleur {display: flex; align-items: center; gap: 12px; min-height: calc(2.25rem + 2px);}
+        #aff_modal .aff-ligne-couleur .form-group {margin-bottom: 0;}
+        #aff_modal .aff-ligne-couleur label[for="id_couleur"] {display: none;}
+        #aff_modal #id_couleur {width: 56px; height: 32px; padding: 2px; border-radius: 6px;}
+        .dark-mode .aff-lien {background: rgba(60,141,188,0.25); color: #cfe6f7;}
+        .dark-mode .aff-fieldset-lien {border-color: #4b545c;}
+        .aff-nbre {margin-left: auto; font-size: 12px; color: #5b6472; white-space: nowrap;}
+        .aff-noeud.drop-avant::before, .aff-noeud.drop-apres::after {content: ""; position: absolute; left: 30px; right: 8px; height: 0; border-top: 2px solid var(--couleur-principale, #3c8dbc);}
+        .aff-noeud.drop-avant::before {top: -1px;}
+        .aff-noeud.drop-apres::after {bottom: -1px;}
+        .aff-noeud.drop-dans {box-shadow: inset 0 0 0 2px var(--couleur-principale, #3c8dbc);}
+        .aff-vide {padding: 24px; text-align: center; color: #5b6472;}
+        .aff-aide {font-size: 13px; color: #5b6472; margin-top: 12px;}
+        .dark-mode .aff-noeud:hover {background: rgba(255, 255, 255, 0.05);}
+        .dark-mode .aff-abrege {background: rgba(255,255,255,0.1); color: #cbd5e1;}
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+<div class="row">
+    <div class="col-12">
+        <div class="card card-outline card-lightblue">
+            <div class="card-header"><h2 class="card-title">{{ box_titre }}</h2></div>
+            <div class="card-body">
+                <p>{{ box_introduction }}</p>
+                <div class="aff-toolbar" role="toolbar" aria-label="Actions sur les affectations">
+                    <button type="button" class="btn btn-success btn-sm" onclick="Ajouter_affectation(null)"><i class="fa fa-plus margin-r-5"></i>Ajouter une affectation</button>
+                    <button type="button" class="btn btn-default btn-sm" id="btn_ajouter_enfant" onclick="Ajouter_affectation(selection)" disabled><i class="fa fa-level-down margin-r-5"></i>Sous-affectation</button>
+                    <button type="button" class="btn btn-default btn-sm" id="btn_modifier" onclick="Modifier_affectation(selection)" disabled><i class="fa fa-pencil margin-r-5"></i>Modifier</button>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Déplacer l'affectation sélectionnée">
+                        <button type="button" class="btn btn-default btn-deplacer" onclick="Deplacer_clavier('haut')" title="Monter" aria-label="Monter" disabled><i class="fa fa-arrow-up"></i></button>
+                        <button type="button" class="btn btn-default btn-deplacer" onclick="Deplacer_clavier('bas')" title="Descendre" aria-label="Descendre" disabled><i class="fa fa-arrow-down"></i></button>
+                        <button type="button" class="btn btn-default btn-deplacer" onclick="Deplacer_clavier('gauche')" title="Remonter d'un niveau" aria-label="Remonter d'un niveau" disabled><i class="fa fa-outdent"></i></button>
+                        <button type="button" class="btn btn-default btn-deplacer" onclick="Deplacer_clavier('droite')" title="Placer sous l'affectation précédente" aria-label="Placer sous l'affectation précédente" disabled><i class="fa fa-indent"></i></button>
+                    </div>
+                    <button type="button" class="btn btn-default btn-sm" id="btn_supprimer" onclick="Supprimer_affectation()" disabled><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-default" onclick="Tout_plier(false)">Tout déplier</button>
+                        <button type="button" class="btn btn-default" onclick="Tout_plier(true)">Tout replier</button>
+                    </div>
+                    <div class="aff-recherche">
+                        <label for="aff_recherche" class="sr-only">Rechercher une affectation</label>
+                        <input type="search" id="aff_recherche" class="form-control form-control-sm" placeholder="Rechercher une affectation..." oninput="Dessiner_arbre()">
+                    </div>
+                </div>
+                <ul class="aff-arbre" id="aff_arbre" role="tree" aria-label="Arborescence des affectations"></ul>
+                <p class="aff-aide"><i class="fa fa-info-circle margin-r-5"></i>Double-cliquez sur une affectation (ou appuyez sur Entrée) pour la modifier. Glissez une affectation sur le haut ou le bas d'une autre pour la placer avant ou après, ou sur son centre pour la placer dessous. Une affectation utilisée par des évènements ne peut pas être supprimée : désactivez-la.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="aff_modal" tabindex="-1" role="dialog" aria-labelledby="aff_titre_form">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="aff_titre_form"><strong></strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-2" id="aff_chemin_form"></p>
+                <div id="aff_div_form"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="Valider_form()"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        var affectations = JSON.parse("{{ affectations_json|escapejs }}");
+        var selection = null;
+        var plies = {};
+        var drag_id = null;
+        try { plies = JSON.parse(localStorage.getItem("affectations_plies") || "{}"); } catch (e) {}
+
+        function Echapper(texte) {
+            return $("<div>").text(texte === null || texte === undefined ? "" : texte).html();
+        }
+
+        function Get(id) {
+            return affectations.find(function(a) { return a.id === id; });
+        }
+
+        function Enfants(id) {
+            return affectations.filter(function(a) { return a.parent === id; });
+        }
+
+        function Ancetre_plie(affectation) {
+            var parent = Get(affectation.parent);
+            while (parent) {
+                if (plies[parent.id]) { return true; }
+                parent = Get(parent.parent);
+            }
+            return false;
+        }
+
+        function Dessiner_arbre() {
+            var recherche = ($("#aff_recherche").val() || "").toLowerCase().trim();
+            var visibles = {};
+            if (recherche) {
+                // Affiche les affectations trouvées et leurs ancêtres
+                affectations.forEach(function(a) {
+                    if (a.chemin.toLowerCase().indexOf(recherche) >= 0) {
+                        var item = a;
+                        while (item) { visibles[item.id] = true; item = Get(item.parent); }
+                    }
+                });
+            }
+            var html = "";
+            affectations.forEach(function(a) {
+                if (recherche && !visibles[a.id]) { return; }
+                if (!recherche && Ancetre_plie(a)) { return; }
+                var enfants = Enfants(a.id).length > 0;
+                var guides = "";
+                for (var i = 0; i < a.niveau; i++) { guides += "<span class='aff-guide' aria-hidden='true'></span>"; }
+                var plie = plies[a.id] && !recherche;
+                html += "<li class='aff-noeud niveau-" + Math.min(a.niveau, 1) + (a.id === selection ? " selection" : "") + (a.actif ? "" : " inactif") + "'" +
+                    " role='treeitem' aria-level='" + (a.niveau + 1) + "' aria-selected='" + (a.id === selection) + "'" + (enfants ? " aria-expanded='" + !plie + "'" : "") +
+                    " tabindex='" + (a.id === selection || (!selection && a === affectations[0]) ? 0 : -1) + "' draggable='true' data-id='" + a.id + "'>" +
+                    "<span class='aff-poignee' aria-hidden='true'><i class='fa fa-ellipsis-v'></i><i class='fa fa-ellipsis-v'></i></span>" + guides +
+                    "<button type='button' class='aff-plier" + (enfants ? "" : " vide") + "' tabindex='-1' aria-label='" + (plie ? "Déplier" : "Replier") + "' data-plier='" + a.id + "'><i class='fa fa-chevron-" + (plie ? "right" : "down") + "'></i></button>" +
+                    (a.couleur ? "<span class='aff-pastille' style='background:" + Echapper(a.couleur) + "' aria-hidden='true'></span>" : "") +
+                    "<span class='aff-nom'>" + Echapper(a.nom) + "</span>" +
+                    (a.abrege ? "<span class='aff-abrege'>" + Echapper(a.abrege) + "</span>" : "") +
+                    (a.lien ? "<span class='aff-lien' title='Consommations affichées : " + Echapper(a.lien) + "'><i class='fa fa-link' aria-hidden='true'></i>" + Echapper(a.lien) + "</span>" : "") +
+                    (a.actif ? "" : "<span class='badge badge-secondary'>Inactive</span>") +
+                    "<span class='aff-nbre'>" + a.nbre_evenements + " évènement" + (a.nbre_evenements > 1 ? "s" : "") + "</span></li>";
+            });
+            if (!html) {
+                html = "<li class='aff-vide'>" + (recherche ? "Aucune affectation ne correspond à la recherche." : "Aucune affectation. Cliquez sur « Ajouter une affectation » pour commencer.") + "</li>";
+            }
+            $("#aff_arbre").html(html);
+            $("#btn_ajouter_enfant, #btn_modifier, #btn_supprimer, .btn-deplacer").prop("disabled", !selection);
+        }
+
+        function Ancetres_deplier(id) {
+            var item = Get(id);
+            while (item) { delete plies[item.id]; item = Get(item.parent); }
+            Memoriser_plies();
+        }
+
+        function Memoriser_plies() {
+            try { localStorage.setItem("affectations_plies", JSON.stringify(plies)); } catch (e) {}
+        }
+
+        function Tout_plier(etat) {
+            plies = {};
+            if (etat) { affectations.forEach(function(a) { if (Enfants(a.id).length) { plies[a.id] = true; } }); }
+            Memoriser_plies();
+            Dessiner_arbre();
+        }
+
+        function Selectionner(id, focus) {
+            // Mise à jour sans redessiner l'arbre (sinon le double-clic serait perdu)
+            selection = id;
+            $("#aff_arbre .aff-noeud").each(function() {
+                var actif = parseInt($(this).data("id")) === id;
+                $(this).toggleClass("selection", actif).attr("aria-selected", String(actif)).attr("tabindex", actif ? 0 : -1);
+            });
+            $("#btn_ajouter_enfant, #btn_modifier, #btn_supprimer, .btn-deplacer").prop("disabled", !selection);
+            if (focus) { $("#aff_arbre [data-id='" + id + "']").focus(); }
+        }
+
+        // Formulaire
+        function Charger_form(idaffectation, idparent) {
+            var affectation = Get(idaffectation);
+            $("#aff_titre_form strong").text(affectation ? "Modifier l'affectation" : (idparent ? "Nouvelle sous-affectation" : "Nouvelle affectation"));
+            $("#aff_chemin_form").text(affectation ? affectation.chemin : (idparent ? "Sous " + Get(idparent).chemin : ""));
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_affectations_collaborateurs_get_form' %}",
+                data: {idaffectation: idaffectation || "", idparent: idparent || "", csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function(data) {
+                    $("#aff_div_form").html(data.form_html);
+                    Maj_couleur();
+                    $("#id_avec_couleur").on("change", Maj_couleur);
+                    Maj_lien(true);
+                    $("#id_activite").on("change", function() { Maj_lien(false); });
+                    $("#aff_modal").modal("show");
+                }
+            });
+        }
+
+        function Maj_lien(initial) {
+            // Groupes et unités de remplissage de l'activité sélectionnée
+            var liens = $("#aff_liens_activites").data("liens") || {};
+            var idactivite = $("#id_activite").val();
+            var lien = liens[idactivite] || {groupes: [], unites: []};
+            var $groupe = $("#id_groupe"), groupe_actuel = $groupe.val();
+            $groupe.html("<option value=''>Tous les groupes</option>" + lien.groupes.map(function(g) {
+                return "<option value='" + g[0] + "'" + (String(g[0]) === groupe_actuel ? " selected" : "") + ">" + Echapper(g[1]) + "</option>";
+            }).join(""));
+            var unites = lien.unites.map(function(u) { return String(u[0]); });
+            $("#div_id_unites_remplissage input[type='checkbox']").each(function() {
+                var visible = unites.indexOf(this.value) >= 0;
+                $(this).closest(".custom-control, .form-check").toggle(visible);
+                if (!visible) { this.checked = false; }
+            });
+            $("#div_id_groupe").toggle(!!idactivite);
+            $("#aff_bloc_unites").toggle(!!idactivite && unites.length > 0);
+        }
+
+        function Maj_couleur() {
+            $("#div_id_couleur").toggle($("#id_avec_couleur").is(":checked"));
+        }
+
+        function Ajouter_affectation(idparent) {
+            if (idparent) { plies[idparent] = false; Memoriser_plies(); }
+            selection = null;
+            Dessiner_arbre();
+            Charger_form(null, idparent);
+        }
+
+        function Modifier_affectation(id) {
+            if (Get(id)) { Charger_form(id, null); }
+        }
+
+        function Valider_form() {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_affectations_collaborateurs_valid_form' %}",
+                data: $("#affectations_collaborateurs_form").serialize(),
+                success: function(data) {
+                    affectations = data.affectations;
+                    $("#aff_modal").modal("hide");
+                    toastr.success("L'affectation a été enregistrée");
+                    // Déplie le parent pour que l'affectation enregistrée soit visible, puis redessine l'arbre
+                    var enregistree = Get(data.idaffectation);
+                    if (enregistree && enregistree.parent) { Ancetres_deplier(enregistree.parent); }
+                    selection = data.idaffectation;
+                    Dessiner_arbre();
+                    Selectionner(data.idaffectation, true);
+                },
+                error: function(data) { toastr.error(data.responseJSON ? data.responseJSON.erreur : "Erreur lors de l'enregistrement"); }
+            });
+        }
+
+        $(document).on("submit", "#affectations_collaborateurs_form", function(e) { e.preventDefault(); Valider_form(); });
+
+        function Supprimer_affectation() {
+            var affectation = Get(selection);
+            if (!affectation) { return; }
+            bootbox.confirm({
+                title: "Supprimer une affectation",
+                message: "Confirmez-vous la suppression de l'affectation <strong>" + Echapper(affectation.chemin) + "</strong> ?",
+                buttons: {confirm: {label: "<i class='fa fa-trash'></i> Supprimer", className: "btn-danger"}, cancel: {label: "Annuler", className: "btn-default"}},
+                callback: function(ok) {
+                    if (!ok) { return; }
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'ajax_affectations_collaborateurs_supprimer' %}",
+                        data: {idaffectation: affectation.id, csrfmiddlewaretoken: "{{ csrf_token }}"},
+                        success: function(data) { affectations = data.affectations; selection = null; Dessiner_arbre(); toastr.success("L'affectation a été supprimée"); },
+                        error: function(data) { toastr.error(data.responseJSON ? data.responseJSON.erreur : "Erreur lors de la suppression"); }
+                    });
+                }
+            });
+        }
+
+        // Déplacement
+        function Envoyer_deplacement(idaffectation, idparent, position) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_affectations_collaborateurs_deplacer' %}",
+                data: {idaffectation: idaffectation, idparent: idparent || "", position: position, csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function(data) {
+                    affectations = data.affectations;
+                    if (idparent) { plies[idparent] = false; Memoriser_plies(); }
+                    selection = idaffectation;
+                    Dessiner_arbre();
+                    $("#aff_arbre [data-id='" + idaffectation + "']").focus();
+                },
+                error: function(data) { toastr.error(data.responseJSON ? data.responseJSON.erreur : "Déplacement impossible"); Dessiner_arbre(); }
+            });
+        }
+
+        function Deplacer_clavier(direction) {
+            var a = Get(selection);
+            if (!a) { return; }
+            var soeurs = Enfants(a.parent);
+            var index = soeurs.indexOf(a);
+            if (direction === "haut" && index > 0) { Envoyer_deplacement(a.id, a.parent, index - 1); }
+            if (direction === "bas" && index < soeurs.length - 1) { Envoyer_deplacement(a.id, a.parent, index + 1); }
+            if (direction === "gauche" && a.parent) {
+                var parent = Get(a.parent);
+                Envoyer_deplacement(a.id, parent.parent, Enfants(parent.parent).indexOf(parent) + 1);
+            }
+            if (direction === "droite" && index > 0) {
+                var precedente = soeurs[index - 1];
+                Envoyer_deplacement(a.id, precedente.id, Enfants(precedente.id).length);
+            }
+        }
+
+        $(function() {
+            Dessiner_arbre();
+            $("#aff_modal").on("shown.bs.modal", function() { $("#id_nom").focus(); });
+            $("#aff_modal").on("hidden.bs.modal", function() { $("#aff_div_form").empty(); if (selection) { $("#aff_arbre [data-id='" + selection + "']").focus(); } });
+
+            var $arbre = $("#aff_arbre");
+            $arbre.on("click", ".aff-plier", function(e) {
+                e.stopPropagation();
+                var id = parseInt($(this).data("plier"));
+                plies[id] = !plies[id];
+                Memoriser_plies();
+                Dessiner_arbre();
+            });
+            $arbre.on("click", ".aff-noeud", function() { Selectionner(parseInt($(this).data("id")), true); });
+            $arbre.on("dblclick", ".aff-noeud", function() { Modifier_affectation(parseInt($(this).data("id"))); });
+
+            // Navigation au clavier dans l'arbre
+            $arbre.on("keydown", ".aff-noeud", function(e) {
+                var noeuds = $arbre.find(".aff-noeud");
+                var index = noeuds.index(this);
+                var id = parseInt($(this).data("id"));
+                if (e.altKey || e.ctrlKey) {
+                    var directions = {ArrowUp: "haut", ArrowDown: "bas", ArrowLeft: "gauche", ArrowRight: "droite"};
+                    if (directions[e.key]) { e.preventDefault(); selection = id; Deplacer_clavier(directions[e.key]); }
+                    return;
+                }
+                if (e.key === "ArrowDown" && index < noeuds.length - 1) { e.preventDefault(); noeuds.eq(index + 1).focus(); }
+                if (e.key === "ArrowUp" && index > 0) { e.preventDefault(); noeuds.eq(index - 1).focus(); }
+                if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                    e.preventDefault();
+                    plies[id] = e.key === "ArrowLeft";
+                    Memoriser_plies(); Dessiner_arbre();
+                    $arbre.find("[data-id='" + id + "']").focus();
+                }
+                if (e.key === " ") { e.preventDefault(); Selectionner(id, true); }
+                if (e.key === "Enter") { e.preventDefault(); Selectionner(id, true); Modifier_affectation(id); }
+                if (e.key === "Delete") { selection = id; Supprimer_affectation(); }
+            });
+
+            // Glisser-déposer
+            $arbre.on("dragstart", ".aff-noeud", function(e) {
+                drag_id = parseInt($(this).data("id"));
+                e.originalEvent.dataTransfer.effectAllowed = "move";
+                e.originalEvent.dataTransfer.setData("text/plain", String(drag_id));
+            });
+            $arbre.on("dragover", ".aff-noeud", function(e) {
+                if (!drag_id) { return; }
+                e.preventDefault();
+                var id = parseInt($(this).data("id"));
+                var interdits = [drag_id];
+                (function ajouter(parent) { Enfants(parent).forEach(function(enfant) { interdits.push(enfant.id); ajouter(enfant.id); }); })(drag_id);
+                $arbre.find(".aff-noeud").removeClass("drop-avant drop-apres drop-dans");
+                if (interdits.indexOf(id) >= 0) { e.originalEvent.dataTransfer.dropEffect = "none"; return; }
+                var rect = this.getBoundingClientRect();
+                var y = (e.originalEvent.clientY - rect.top) / rect.height;
+                $(this).addClass(y < 0.28 ? "drop-avant" : (y > 0.72 ? "drop-apres" : "drop-dans"));
+            });
+            $arbre.on("dragleave", ".aff-noeud", function() { $(this).removeClass("drop-avant drop-apres drop-dans"); });
+            $arbre.on("drop", ".aff-noeud", function(e) {
+                e.preventDefault();
+                var cible = Get(parseInt($(this).data("id")));
+                var classe = this.className;
+                $arbre.find(".aff-noeud").removeClass("drop-avant drop-apres drop-dans");
+                if (!drag_id || !cible || cible.id === drag_id) { drag_id = null; return; }
+                var deplace = drag_id;
+                drag_id = null;
+                if (classe.indexOf("drop-dans") >= 0) {
+                    Envoyer_deplacement(deplace, cible.id, Enfants(cible.id).filter(function(a) { return a.id !== deplace; }).length);
+                } else if (classe.indexOf("drop-avant") >= 0 || classe.indexOf("drop-apres") >= 0) {
+                    var soeurs = Enfants(cible.parent).filter(function(a) { return a.id !== deplace; });
+                    var position = soeurs.indexOf(cible) + (classe.indexOf("drop-apres") >= 0 ? 1 : 0);
+                    Envoyer_deplacement(deplace, cible.parent, position);
+                }
+            });
+            $arbre.on("dragend", ".aff-noeud", function() { drag_id = null; $arbre.find(".aff-noeud").removeClass("drop-avant drop-apres drop-dans"); });
+        });
+    </script>
+{% endblock scripts %}

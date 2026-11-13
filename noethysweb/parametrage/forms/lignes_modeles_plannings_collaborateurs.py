@@ -8,6 +8,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
 from core.models import LigneModelePlanningCollaborateur, TypeEvenementCollaborateur
+from collaborateurs.utils.utils_affectations import Arbre
 
 
 class Formulaire(forms.ModelForm):
@@ -38,6 +39,10 @@ class Formulaire(forms.ModelForm):
         self.fields["type_evenement"].choices = [(None, "---------")] + [(type_evenement.pk, type_evenement.nom) for type_evenement in types_evenements]
         self.fields["type_evenement"].required = True
 
+        # Affectation
+        self.fields["affectation"].choices = [(None, "---------")] + Arbre(actives_seulement=True).Get_choix()
+        self.fields["affectation"].required = False
+
         self.helper.layout = Layout(
             Field("idligne"),
             Field("index"),
@@ -47,4 +52,5 @@ class Formulaire(forms.ModelForm):
             Field("heure_fin"),
             Field("type_evenement"),
             Field("titre"),
+            Field("affectation"),
         )

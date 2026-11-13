@@ -4233,6 +4233,7 @@ class Collaborateur(models.Model):
     photo = models.ImageField(verbose_name="Photo", upload_to=get_uuid_path, blank=True, null=True)
     qualifications = models.ManyToManyField(TypeQualificationCollaborateur, verbose_name="Qualifications", related_name="collaborateur_qualifications", blank=True)
     groupes = models.ManyToManyField(GroupeCollaborateurs, verbose_name="Groupes associés", related_name="collaborateur_groupes", blank=True)
+    token_ical = models.CharField(verbose_name="Jeton de l'agenda iCal", max_length=64, blank=True, null=True, unique=True)
 
     class Meta:
         db_table = "collaborateurs"
@@ -4293,6 +4294,33 @@ class TypeEvenementCollaborateur(models.Model):
         return self.nom
 
 
+class AffectationCollaborateur(models.Model):
+    """ Arborescence d'affectations (structure, groupe, sous-groupe...) sans limite de niveaux """
+    idaffectation = models.AutoField(verbose_name="ID", db_column="IDaffectation", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    abrege = models.CharField(verbose_name="Abréviation", max_length=50, blank=True, null=True)
+    parent = models.ForeignKey("self", verbose_name="Affectation parente", related_name="enfants", on_delete=models.PROTECT, blank=True, null=True)
+    ordre = models.IntegerField(verbose_name="Ordre", default=0)
+    couleur = models.CharField(verbose_name="Couleur", max_length=100, blank=True, null=True)
+    actif = models.BooleanField(verbose_name="Active", default=True)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    activite = models.ForeignKey(Activite, verbose_name="Activité", related_name="affectations_collaborateurs", on_delete=models.SET_NULL, blank=True, null=True,
+                                 help_text="Activité dont les consommations prévues sont affichées sur le planning des collaborateurs.")
+    groupe = models.ForeignKey(Groupe, verbose_name="Groupe", related_name="affectations_collaborateurs", on_delete=models.SET_NULL, blank=True, null=True)
+    unites_remplissage = models.ManyToManyField(UniteRemplissage, verbose_name="Unités de remplissage", related_name="affectations_collaborateurs", blank=True)
+    seuil_encadrement = models.PositiveSmallIntegerField(verbose_name="Taux d'encadrement maximal", blank=True, null=True,
+                                                         help_text="Nombre maximal de consommations par collaborateur (ex : 8 pour 1 adulte pour 8 enfants).")
+
+    class Meta:
+        db_table = "affectations_collaborateurs"
+        verbose_name = "affectation"
+        verbose_name_plural = "affectations"
+        ordering = ["ordre", "nom"]
+
+    def __str__(self):
+        return self.nom if self.idaffectation else "Nouvelle affectation"
+
+
 class EvenementCollaborateur(models.Model):
     idevenement = models.AutoField(verbose_name="ID", db_column="IDevenement", primary_key=True)
     collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", on_delete=models.PROTECT, blank=True, null=True)
@@ -4300,11 +4328,16 @@ class EvenementCollaborateur(models.Model):
     date_debut = models.DateTimeField(verbose_name="Début", blank=True, null=True)
     date_fin = models.DateTimeField(verbose_name="Fin", blank=True, null=True)
     titre = models.CharField(verbose_name="Titre", max_length=200, blank=True, null=True)
+    affectation = models.ForeignKey(AffectationCollaborateur, verbose_name="Affectation", on_delete=models.PROTECT, blank=True, null=True)
+    realise_debut = models.DateTimeField(verbose_name="Début réalisé", blank=True, null=True)
+    realise_fin = models.DateTimeField(verbose_name="Fin réalisée", blank=True, null=True)
+    version = models.PositiveIntegerField(verbose_name="Version", default=1)
 
     class Meta:
         db_table = "evenements_collaborateur"
         verbose_name = "évènement d'un collaborateur"
         verbose_name_plural = "évènements d'un collaborateur"
+        indexes = [models.Index(fields=["collaborateur", "date_debut"], name="evt_collab_date_idx")]
 
     def __str__(self):
         return "Evenement ID%d" % self.idevenement if self.idevenement else "Nouvel évènement"
@@ -4316,6 +4349,7 @@ class ContratCollaborateur(models.Model):
     type_poste = models.ForeignKey(TypePosteCollaborateur, verbose_name="Poste", on_delete=models.PROTECT)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
+    heures_hebdo = models.DecimalField(verbose_name="Volume horaire hebdomadaire", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Nombre d'heures prévues par semaine (exemple : 35). Utilisé par le planning pour calculer l'écart avec les heures planifiées.")
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
 
     class Meta:
@@ -4351,6 +4385,7 @@ class LigneModelePlanningCollaborateur(models.Model):
     heure_fin = models.TimeField(verbose_name="Fin")
     type_evenement = models.ForeignKey(TypeEvenementCollaborateur, verbose_name="Catégorie", on_delete=models.PROTECT, blank=True, null=True)
     titre = models.CharField(verbose_name="Titre", max_length=200, blank=True, null=True)
+    affectation = models.ForeignKey(AffectationCollaborateur, verbose_name="Affectation", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         db_table = "lignes_modeles_planning_collaborateur"
@@ -4359,6 +4394,24 @@ class LigneModelePlanningCollaborateur(models.Model):
 
     def __str__(self):
         return "Ligne de modèle ID%d" % self.idligne if self.idligne else "Nouvelle ligne de modèle"
+
+
+class NotePlanningCollaborateur(models.Model):
+    """ Note attachée à une journée du planning des collaborateurs (générale ou pour une affectation) """
+    idnote = models.AutoField(verbose_name="ID", db_column="IDnote", primary_key=True)
+    date = models.DateField(verbose_name="Date", db_index=True)
+    affectation = models.ForeignKey(AffectationCollaborateur, verbose_name="Affectation", on_delete=models.CASCADE, blank=True, null=True)
+    texte = models.TextField(verbose_name="Texte")
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", on_delete=models.SET_NULL, blank=True, null=True)
+    date_modification = models.DateTimeField(verbose_name="Date de modification", auto_now=True)
+
+    class Meta:
+        db_table = "notes_planning_collaborateurs"
+        verbose_name = "note du planning"
+        verbose_name_plural = "notes du planning"
+
+    def __str__(self):
+        return "Note du %s" % self.date
 
 
 class TransportLigne(models.Model):

@@ -57,6 +57,9 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("date_debut"),
                 Field("date_fin"),
             ),
+            Fieldset("Temps de travail",
+                Field("heures_hebdo"),
+            ),
         )
 
         # Création des champs des questionnaires

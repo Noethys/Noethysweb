@@ -1,0 +1,549 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/planning_equipe.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+<div id="pl_app" class="pl-app">
+    <div class="pl-layout">
+
+        {# ------------------------------ Panneau latéral ------------------------------ #}
+        <aside class="pl-side" id="pl_side" aria-label="Paramètres du planning">
+            <button type="button" class="pl-side-bascule" id="pl_side_bascule" aria-expanded="true" aria-controls="pl_side_contenu">
+                <i class="fa fa-sliders" aria-hidden="true"></i> Dates, collaborateurs et filtres <i class="fa fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div id="pl_side_contenu" class="pl-side-contenu pl-card pl-accordeon">
+
+                <section class="pl-acc-item" data-panneau="dates">
+                    <h2 class="pl-acc-titre">
+                        <button type="button" class="pl-acc-tete" id="pl_acc_tete_dates" data-panneau="dates" aria-expanded="false" aria-controls="pl_acc_corps_dates">
+                            <span class="pl-acc-icone" aria-hidden="true"><i class="fa fa-calendar"></i></span>
+                            <span class="pl-acc-textes"><span class="pl-acc-nom">Dates<span class="pl-acc-badge" id="pl_acc_badge_dates" hidden></span></span><span class="pl-acc-resume" id="pl_acc_resume_dates"></span></span>
+                            <i class="fa fa-chevron-right pl-acc-chevron" aria-hidden="true"></i>
+                        </button>
+                    </h2>
+                    <div class="pl-acc-corps" id="pl_acc_corps_dates" role="region" aria-labelledby="pl_acc_tete_dates" hidden>
+                        <div class="pl-acc-actions"><button type="button" class="pl-lien" id="pl_cal_effacer">Aujourd'hui</button></div>
+                        <div class="pl-cal-nav">
+                            <button type="button" class="pl-btn pl-btn-sm pl-btn-icone" id="pl_cal_prec" aria-label="Mois précédent"><i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+                            <span id="pl_cal_mois" class="pl-cal-mois" aria-live="polite"></span>
+                            <button type="button" class="pl-btn pl-btn-sm pl-btn-icone" id="pl_cal_suiv" aria-label="Mois suivant"><i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+                        </div>
+                        <div id="pl_cal" class="pl-cal" role="grid" aria-label="Calendrier de sélection des dates"></div>
+                        <div class="pl-chips">
+                            <button type="button" class="pl-chip" data-raccourci="semaine">Cette semaine</button>
+                            <button type="button" class="pl-chip" data-raccourci="semaine_suivante">Semaine suivante</button>
+                            <button type="button" class="pl-chip" data-raccourci="mois">Ce mois</button>
+                            <button type="button" class="pl-chip" data-raccourci="mois_suivant">Mois suivant</button>
+                        </div>
+                        <div class="pl-info" id="pl_cal_info"></div>
+                    </div>
+                </section>
+
+                <section class="pl-acc-item" data-panneau="collabs">
+                    <h2 class="pl-acc-titre">
+                        <button type="button" class="pl-acc-tete" id="pl_acc_tete_collabs" data-panneau="collabs" aria-expanded="false" aria-controls="pl_acc_corps_collabs">
+                            <span class="pl-acc-icone" aria-hidden="true"><i class="fa fa-users"></i></span>
+                            <span class="pl-acc-textes"><span class="pl-acc-nom">Collaborateurs<span class="pl-acc-badge" id="pl_acc_badge_collabs" hidden></span></span><span class="pl-acc-resume" id="pl_collabs_compte"></span></span>
+                            <i class="fa fa-chevron-right pl-acc-chevron" aria-hidden="true"></i>
+                        </button>
+                    </h2>
+                    <div class="pl-acc-corps" id="pl_acc_corps_collabs" role="region" aria-labelledby="pl_acc_tete_collabs" hidden>
+                        <label for="pl_collabs_ajout" class="sr-only">Ajouter un collaborateur ou un groupe</label>
+                        <select id="pl_collabs_ajout" style="width: 100%;"></select>
+                        <ul id="pl_collabs_liste" class="pl-collabs-liste"></ul>
+                        <div class="pl-ligne-actions">
+                            <button type="button" class="pl-lien" id="pl_collabs_tout_afficher">Tout afficher</button>
+                            <button type="button" class="pl-lien" id="pl_collabs_vider">Tout retirer</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="pl-acc-item" data-panneau="filtres">
+                    <h2 class="pl-acc-titre">
+                        <button type="button" class="pl-acc-tete" id="pl_acc_tete_filtres" data-panneau="filtres" aria-expanded="false" aria-controls="pl_acc_corps_filtres">
+                            <span class="pl-acc-icone" aria-hidden="true"><i class="fa fa-filter"></i></span>
+                            <span class="pl-acc-textes"><span class="pl-acc-nom">Filtres<span class="pl-acc-badge" id="pl_acc_badge_filtres" hidden></span></span><span class="pl-acc-resume" id="pl_acc_resume_filtres"></span></span>
+                            <i class="fa fa-chevron-right pl-acc-chevron" aria-hidden="true"></i>
+                        </button>
+                    </h2>
+                    <div class="pl-acc-corps" id="pl_acc_corps_filtres" role="region" aria-labelledby="pl_acc_tete_filtres" hidden>
+                        <div class="pl-acc-actions"><button type="button" class="pl-lien" id="pl_filtres_reinit">Réinitialiser</button></div>
+                        <fieldset>
+                            <legend class="pl-label">Catégories</legend>
+                            <div id="pl_filtre_cats" class="pl-filtre-cats"></div>
+                        </fieldset>
+                        <label for="pl_filtre_aff" class="pl-label">Affectation</label>
+                        <select id="pl_filtre_aff" class="form-control form-control-sm"></select>
+                        <label for="pl_filtre_qualif" class="pl-label">Qualification des collaborateurs</label>
+                        <select id="pl_filtre_qualif" class="form-control form-control-sm"></select>
+                    </div>
+                </section>
+
+                <section class="pl-acc-item" data-panneau="legende">
+                    <h2 class="pl-acc-titre">
+                        <button type="button" class="pl-acc-tete" id="pl_acc_tete_legende" data-panneau="legende" aria-expanded="false" aria-controls="pl_acc_corps_legende">
+                            <span class="pl-acc-icone" aria-hidden="true"><i class="fa fa-pie-chart"></i></span>
+                            <span class="pl-acc-textes"><span class="pl-acc-nom">Légende et totaux<span class="pl-acc-badge" id="pl_acc_badge_legende" hidden></span></span><span class="pl-acc-resume" id="pl_acc_resume_legende"></span></span>
+                            <i class="fa fa-chevron-right pl-acc-chevron" aria-hidden="true"></i>
+                        </button>
+                    </h2>
+                    <div class="pl-acc-corps" id="pl_acc_corps_legende" role="region" aria-labelledby="pl_acc_tete_legende" hidden>
+                        <div class="pl-seg pl-seg-plein" role="tablist" aria-label="Totaux par">
+                            <button type="button" role="tab" class="pl-seg-btn" data-legende="cat" aria-selected="true">Catégories</button>
+                            <button type="button" role="tab" class="pl-seg-btn" data-legende="aff" aria-selected="false">Affectations</button>
+                        </div>
+                        <div id="pl_legende" role="tabpanel"></div>
+                    </div>
+                </section>
+            </div>
+        </aside>
+
+        {# ------------------------------ Planning ------------------------------ #}
+        <main class="pl-main" id="pl_main">
+            <div class="pl-card pl-card-planning">
+                <div class="pl-toolbar" role="toolbar" aria-label="Outils du planning">
+                    <div class="pl-groupe">
+                        <button type="button" class="pl-btn pl-btn-icone" id="pl_annuler" aria-label="Annuler (Ctrl+Z)" title="Annuler (Ctrl+Z)" disabled><i class="fa fa-undo" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pl_retablir" aria-label="Rétablir (Ctrl+Y)" title="Rétablir (Ctrl+Y)" disabled><i class="fa fa-repeat" aria-hidden="true"></i></button>
+                    </div>
+                    <span class="pl-sep" aria-hidden="true"></span>
+                    <div class="pl-seg" role="group" aria-label="Regrouper par">
+                        <button type="button" class="pl-seg-btn" data-mode="date" aria-pressed="true"><i class="fa fa-calendar" aria-hidden="true"></i><span class="pl-lbl">Par date</span></button>
+                        <button type="button" class="pl-seg-btn" data-mode="collab" aria-pressed="false"><i class="fa fa-users" aria-hidden="true"></i><span class="pl-lbl">Par collaborateur</span></button>
+                    </div>
+                    <label class="pl-inline"><span class="pl-lbl">puis par</span>
+                        <select id="pl_sous" class="pl-select" aria-label="Sous-regroupement">
+                            <option value="aucun">Aucun</option>
+                            <option value="aff">Affectation</option>
+                        </select>
+                    </label>
+                    <span class="pl-sep" aria-hidden="true"></span>
+                    <div class="pl-groupe">
+                        <div class="pl-split">
+                            <button type="button" class="pl-btn pl-btn-primaire pl-split-principal" id="pl_ajouter"><i class="fa fa-plus" aria-hidden="true"></i><span class="pl-lbl">Évènement</span></button>
+                            <button type="button" class="pl-btn pl-btn-primaire pl-split-fleche" id="pl_cat_defaut_btn" aria-haspopup="true" aria-expanded="false" aria-label="Catégorie utilisée pour le cliquer-glisser" title="Catégorie utilisée pour le cliquer-glisser"><i class="fa fa-caret-down" aria-hidden="true"></i></button>
+                            <div class="pl-pop pl-pop-menu" id="pl_cat_defaut_menu" hidden></div>
+                        </div>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pl_dupliquer" aria-label="Dupliquer la sélection (Ctrl+D)" title="Dupliquer la sélection (Ctrl+D)" disabled><i class="fa fa-clone" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-btn pl-btn-icone pl-btn-danger" id="pl_supprimer" aria-label="Supprimer la sélection (Suppr)" title="Supprimer la sélection (Suppr)" disabled><i class="fa fa-trash" aria-hidden="true"></i></button>
+                    </div>
+                    <span class="pl-sep" aria-hidden="true"></span>
+                    <div class="pl-groupe">
+                        <button type="button" class="pl-btn" id="pl_modele" title="Appliquer un modèle de planning"><i class="fa fa-th-list" aria-hidden="true"></i><span class="pl-lbl pl-lbl-opt">Appliquer un modèle</span></button>
+                        <button type="button" class="pl-btn" id="pl_copie" title="Copier une période"><i class="fa fa-files-o" aria-hidden="true"></i><span class="pl-lbl pl-lbl-opt">Copier une période</span></button>
+                    </div>
+                    <span class="pl-espace"></span>
+                    <div class="pl-groupe pl-zoom">
+                        <button type="button" class="pl-btn pl-btn-sm pl-btn-icone" id="pl_zoom_moins" aria-label="Élargir la plage horaire" title="Élargir la plage horaire"><i class="fa fa-search-minus" aria-hidden="true"></i></button>
+                        <div class="pl-split">
+                            <button type="button" class="pl-btn pl-btn-sm" id="pl_plage_btn" aria-haspopup="dialog" aria-expanded="false" aria-label="Plage horaire affichée"><span class="pl-badge-auto" id="pl_plage_auto">AUTO</span><span id="pl_plage_texte">07h – 19h</span><i class="fa fa-caret-down" aria-hidden="true"></i></button>
+                            <div class="pl-pop pl-pop-plage" id="pl_plage_pop" role="dialog" aria-label="Plage horaire affichée" hidden>
+                                <h3>Plage horaire affichée</h3>
+                                <label class="pl-radio-carte"><input type="radio" name="pl_plage_mode" value="auto"><span><strong>Automatique</strong><small>S'adapte aux évènements affichés.</small>
+                                    <span class="pl-inline-champs">Marge <input type="number" id="pl_plage_marge" min="0" max="240" step="15" class="pl-input-num"> min · Plage mini <input type="number" id="pl_plage_min" min="1" max="24" step="1" class="pl-input-num"> h</span></span></label>
+                                <label class="pl-radio-carte"><input type="radio" name="pl_plage_mode" value="perso"><span><strong>Personnalisée</strong><small>Plage fixe ; les évènements hors plage sont signalés par une flèche.</small>
+                                    <span class="pl-inline-champs">De <input type="time" id="pl_plage_debut" step="900"> à <input type="time" id="pl_plage_fin" step="900"></span></span></label>
+                                <div class="pl-pop-actions">
+                                    <button type="button" class="pl-lien" id="pl_plage_memoriser">Mémoriser comme réglage par défaut</button>
+                                    <button type="button" class="pl-btn pl-btn-sm pl-btn-primaire" id="pl_plage_appliquer">Appliquer</button>
+                                </div>
+                                <p class="pl-muted pl-petit">Astuce : Ctrl + molette sur le planning pour zoomer.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="pl-btn pl-btn-sm pl-btn-icone" id="pl_zoom_plus" aria-label="Resserrer la plage horaire" title="Resserrer la plage horaire"><i class="fa fa-search-plus" aria-hidden="true"></i></button>
+                    </div>
+                    <label class="pl-inline" title="Pas de déplacement et de redimensionnement"><i class="fa fa-magnet" aria-hidden="true"></i><span class="sr-only">Pas de déplacement</span>
+                        <select id="pl_pas" class="pl-select">
+                            <option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 h</option>
+                        </select>
+                    </label>
+                    <div class="pl-groupe pl-switches">
+                        <label class="pl-switch"><input type="checkbox" id="pl_opt_titres"><span class="pl-switch-piste" aria-hidden="true"></span>Titres</label>
+                        <label class="pl-switch"><input type="checkbox" id="pl_opt_affs"><span class="pl-switch-piste" aria-hidden="true"></span>Affectations</label>
+                        <label class="pl-switch"><input type="checkbox" id="pl_opt_realise"><span class="pl-switch-piste" aria-hidden="true"></span>Réalisé</label>
+                    </div>
+                    <span class="pl-sep" aria-hidden="true"></span>
+                    <div class="pl-seg" role="group" aria-label="Vue">
+                        <button type="button" class="pl-seg-btn" data-vue="frise" aria-pressed="true"><i class="fa fa-align-left" aria-hidden="true"></i><span class="pl-lbl">Frise</span></button>
+                        <button type="button" class="pl-seg-btn" data-vue="synthese" aria-pressed="false"><i class="fa fa-table" aria-hidden="true"></i><span class="pl-lbl">Synthèse</span></button>
+                    </div>
+                    <div class="pl-seg" role="group" aria-label="Densité d'affichage">
+                        <button type="button" class="pl-seg-btn" data-densite="auto" aria-pressed="true" title="Densité automatique">Auto</button>
+                        <button type="button" class="pl-seg-btn" data-densite="confortable" aria-pressed="false" title="Confortable" aria-label="Densité confortable"><i class="fa fa-bars" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-seg-btn" data-densite="compact" aria-pressed="false" title="Compacte" aria-label="Densité compacte"><i class="fa fa-align-justify" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-seg-btn" data-densite="mini" aria-pressed="false" title="Minimale" aria-label="Densité minimale"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
+                    </div>
+                    <span class="pl-sep" aria-hidden="true"></span>
+                    <div class="pl-groupe">
+                        <div class="pl-split">
+                            <button type="button" class="pl-btn pl-btn-icone" id="pl_diffusion_btn" aria-haspopup="true" aria-expanded="false" aria-label="Imprimer et diffuser" title="Imprimer et diffuser"><i class="fa fa-print" aria-hidden="true"></i></button>
+                            <div class="pl-pop pl-pop-menu pl-pop-droite" id="pl_diffusion_menu" role="menu" hidden>
+                                <button type="button" role="menuitem" data-diffusion="imprimer"><i class="fa fa-file-pdf-o" aria-hidden="true"></i>Imprimer en PDF…</button>
+                                <button type="button" role="menuitem" data-diffusion="email"><i class="fa fa-envelope-o" aria-hidden="true"></i>Envoyer par email…</button>
+                                <button type="button" role="menuitem" data-diffusion="excel"><i class="fa fa-file-excel-o" aria-hidden="true"></i>Récapitulatif des heures (Excel)…</button>
+                            </div>
+                        </div>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pl_actualiser" aria-label="Actualiser" title="Actualiser"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pl_plein_ecran" aria-label="Plein écran" title="Plein écran"><i class="fa fa-expand" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pl_reglages_btn" aria-label="Réglages d'affichage" title="Réglages d'affichage"><i class="fa fa-cog" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+
+                <div id="pl_banniere" class="pl-banniere" hidden></div>
+
+                <div class="pl-corps" id="pl_corps">
+                    <div class="pl-scroll" id="pl_scroll" tabindex="-1">
+                        <div class="pl-axe" id="pl_axe"></div>
+                        <div class="pl-sticky" id="pl_sticky" aria-hidden="true"></div>
+                        <div class="pl-canvas" id="pl_canvas" role="grid" aria-label="Planning général"></div>
+                        <div class="pl-vide" id="pl_vide" hidden></div>
+                    </div>
+                    <nav class="pl-minimap" id="pl_minimap" aria-label="Navigation rapide" hidden></nav>
+                </div>
+                <div class="pl-synthese" id="pl_synthese" hidden></div>
+
+                <div class="pl-footer">
+                    <span id="pl_statut" aria-live="polite"></span>
+                    <span class="pl-muted pl-aide-courte">Glisser sur une ligne vide : créer · Double-clic : modifier · Clic droit : actions · Alt + glisser : copier</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    {# Menu contextuel #}
+    <div class="pl-menu" id="pl_menu" role="menu" hidden></div>
+    <div class="pl-tooltip" id="pl_tooltip" role="tooltip" hidden></div>
+</div>
+
+{# ------------------------------ Modales ------------------------------ #}
+
+<div class="modal fade" id="pl_modal_evt" tabindex="-1" role="dialog" aria-labelledby="pl_modal_evt_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_evt_titre"><strong>Évènement</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="pl-alerte pl-alerte-info" id="pl_evt_lecture" hidden><i class="fa fa-lock" aria-hidden="true"></i> Vous pouvez consulter cet évènement mais pas le modifier.</div>
+                <div class="form-row">
+                    <div class="form-group col-md-6"><label for="pl_evt_collab">Collaborateur</label><select id="pl_evt_collab" class="form-control"></select></div>
+                    <div class="form-group col-md-6"><label for="pl_evt_cat">Catégorie</label><select id="pl_evt_cat" class="form-control"></select></div>
+                    <div class="form-group col-md-4"><label for="pl_evt_date">Date</label><input type="date" id="pl_evt_date" class="form-control"></div>
+                    <div class="form-group col-md-4"><label for="pl_evt_debut">Heure de début</label><input type="time" id="pl_evt_debut" class="form-control" step="300"></div>
+                    <div class="form-group col-md-4"><label for="pl_evt_fin">Heure de fin</label><input type="time" id="pl_evt_fin" class="form-control" step="300"></div>
+                    <div class="form-group col-md-4" id="pl_evt_date_fin_div" hidden><label for="pl_evt_date_fin">Date de fin</label><input type="date" id="pl_evt_date_fin" class="form-control"></div>
+                    <div class="form-group col-12"><label for="pl_evt_titre">Titre <span class="pl-muted">(facultatif)</span></label><input type="text" id="pl_evt_titre" class="form-control" maxlength="200"></div>
+                    <div class="form-group col-12"><label for="pl_evt_aff">Affectation</label><select id="pl_evt_aff" class="form-control"></select></div>
+                </div>
+                <fieldset class="pl-fieldset">
+                    <legend>Heures réalisées <span class="pl-muted">(facultatif)</span></legend>
+                    <div class="form-row align-items-end">
+                        <div class="form-group col-md-4"><label for="pl_evt_rdebut">Début réalisé</label><input type="time" id="pl_evt_rdebut" class="form-control" step="300"></div>
+                        <div class="form-group col-md-4"><label for="pl_evt_rfin">Fin réalisée</label><input type="time" id="pl_evt_rfin" class="form-control" step="300"></div>
+                        <div class="form-group col-md-4"><button type="button" class="btn btn-default btn-block" id="pl_evt_realise_copier">Réalisé = prévu</button></div>
+                    </div>
+                </fieldset>
+                <div class="pl-alerte" id="pl_evt_info" aria-live="polite"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger mr-auto" id="pl_evt_supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
+                <button type="button" class="btn btn-default" id="pl_evt_dupliquer"><i class="fa fa-clone margin-r-5"></i>Dupliquer</button>
+                <button type="button" class="btn btn-primary" id="pl_evt_enregistrer"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pl_modal_lot" tabindex="-1" role="dialog" aria-labelledby="pl_modal_lot_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_lot_titre"><strong>Modifier par lot</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p id="pl_lot_intro"></p>
+                <div class="form-group"><label for="pl_lot_cat">Catégorie</label><select id="pl_lot_cat" class="form-control"></select></div>
+                <div class="form-group"><label for="pl_lot_aff">Affectation</label><select id="pl_lot_aff" class="form-control"></select></div>
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="pl_lot_titre_coche"><label class="custom-control-label" for="pl_lot_titre_coche">Remplacer le titre par :</label></div>
+                    <label for="pl_lot_titre" class="sr-only">Nouveau titre</label><input type="text" id="pl_lot_titre" class="form-control mt-1" maxlength="200" disabled>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-6"><label for="pl_lot_decalage">Décaler de (minutes)</label><input type="number" id="pl_lot_decalage" class="form-control" step="5" value="0"></div>
+                    <div class="form-group col-6"><label for="pl_lot_duree">Modifier la durée de (minutes)</label><input type="number" id="pl_lot_duree" class="form-control" step="5" value="0"></div>
+                </div>
+                <p class="pl-muted pl-petit">Les évènements qui entreraient en chevauchement avec un autre évènement ne sont pas modifiés.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="pl_lot_valider"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pl_modal_dupliquer" tabindex="-1" role="dialog" aria-labelledby="pl_modal_dupliquer_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_dupliquer_titre"><strong>Dupliquer</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p id="pl_dup_intro"></p>
+                <div id="pl_dup_dates_div">
+                    <div class="pl-label">Vers les dates</div>
+                    <div id="pl_dup_dates" class="pl-grille-coches"></div>
+                    <div class="form-inline mt-2"><label for="pl_dup_date_autre" class="mr-2">Autre date</label><input type="date" id="pl_dup_date_autre" class="form-control form-control-sm mr-2"><button type="button" class="btn btn-default btn-sm" id="pl_dup_date_ajouter"><i class="fa fa-plus"></i> Ajouter</button></div>
+                </div>
+                <div id="pl_dup_collabs_div">
+                    <div class="pl-label">Vers les collaborateurs</div>
+                    <div id="pl_dup_collabs" class="pl-grille-coches"></div>
+                </div>
+                <p class="pl-muted pl-petit mt-2">Les copies qui chevaucheraient un évènement existant ne sont pas créées.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="pl_dup_valider"><i class="fa fa-clone margin-r-5"></i>Dupliquer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pl_modal_lot_serveur" tabindex="-1" role="dialog" aria-labelledby="pl_modal_lot_serveur_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_lot_serveur_titre"><strong id="pl_ls_titre"></strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="pl_ls_modele_div">
+                    <div class="pl-label">Modèles de planning</div>
+                    <div id="pl_ls_modeles" class="pl-grille-coches"></div>
+                </div>
+                <div id="pl_ls_copie_div" class="form-row">
+                    <div class="form-group col-md-4"><label for="pl_ls_source_debut">Copier du</label><input type="date" id="pl_ls_source_debut" class="form-control"></div>
+                    <div class="form-group col-md-4"><label for="pl_ls_source_fin">au</label><input type="date" id="pl_ls_source_fin" class="form-control"></div>
+                    <div class="form-group col-md-4"><label for="pl_ls_destination">Vers la période commençant le</label><input type="date" id="pl_ls_destination" class="form-control"></div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-6" id="pl_ls_dates_div">
+                        <div class="pl-label">Dates</div>
+                        <label class="pl-radio-carte"><input type="radio" name="pl_ls_dates" value="selection" checked><span><strong>Dates sélectionnées</strong><small id="pl_ls_dates_info"></small></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pl_ls_dates" value="periode"><span><strong>Période</strong>
+                            <span class="pl-inline-champs">du <input type="date" id="pl_ls_periode_debut" aria-label="Début de la période"> au <input type="date" id="pl_ls_periode_fin" aria-label="Fin de la période"></span></span></label>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pl-label">Collaborateurs</div>
+                        <label class="pl-radio-carte"><input type="radio" name="pl_ls_collabs" value="affiches" checked><span><strong>Collaborateurs affichés</strong><small id="pl_ls_collabs_info"></small></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pl_ls_collabs" value="choix"><span><strong>Choisir…</strong><small>Parmi les collaborateurs affichés</small></span></label>
+                        <div id="pl_ls_collabs_choix" class="pl-grille-coches" hidden></div>
+                    </div>
+                </div>
+                <div class="pl-label mt-2">Si un évènement existe déjà</div>
+                <div class="pl-grille-3">
+                    <label class="pl-radio-carte"><input type="radio" name="pl_ls_conflit" value="ignorer" checked><span><strong>Ignorer</strong><small>Rien n'est écrasé</small></span></label>
+                    <label class="pl-radio-carte"><input type="radio" name="pl_ls_conflit" value="remplacer"><span><strong>Remplacer</strong><small>Supprime les évènements en conflit</small></span></label>
+                    <label class="pl-radio-carte"><input type="radio" name="pl_ls_conflit" value="effacer"><span><strong>Tout effacer</strong><small>Vide d'abord les dates concernées</small></span></label>
+                </div>
+                <div class="pl-alerte mt-3" id="pl_ls_apercu" aria-live="polite" hidden></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default mr-auto" id="pl_ls_btn_apercu"><i class="fa fa-eye margin-r-5"></i>Aperçu</button>
+                <button type="button" class="btn btn-primary" id="pl_ls_valider"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pl_modal_note" tabindex="-1" role="dialog" aria-labelledby="pl_modal_note_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_note_titre"><strong>Note</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="font-weight-bold mb-2" id="pl_note_date"></p>
+                <div class="form-group">
+                    <label for="pl_note_aff">Concerne</label>
+                    <select id="pl_note_aff" class="form-control"></select>
+                </div>
+                <label for="pl_note_texte">Note</label>
+                <textarea id="pl_note_texte" class="form-control" rows="5" maxlength="5000" placeholder="Consignes, sortie prévue, remarques..."></textarea>
+                <div class="pl-alerte mt-3" id="pl_note_autres" hidden></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger mr-auto" id="pl_note_supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
+                <button type="button" class="btn btn-primary" id="pl_note_valider"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pl_modal_diffusion" tabindex="-1" role="dialog" aria-labelledby="pl_modal_diffusion_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_diffusion_titre"><strong id="pl_diff_titre"></strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p id="pl_diff_intro"></p>
+                <div id="pl_diff_types_bloc">
+                    <div class="pl-label">Document</div>
+                    <div class="pl-types-doc" role="radiogroup" aria-label="Type de document">
+                    <label class="pl-type-doc" data-type="individuel"><input type="radio" name="pl_diff_type" value="individuel" checked><i class="fa fa-user" aria-hidden="true"></i><span><strong>Planning individuel</strong><small>Une page par collaborateur : liste détaillée des évènements et totaux.</small><em>A4 portrait</em></span></label>
+                    <label class="pl-type-doc" data-type="calendrier"><input type="radio" name="pl_diff_type" value="calendrier"><i class="fa fa-calendar" aria-hidden="true"></i><span><strong>Calendrier mensuel</strong><small>Une grille mensuelle par collaborateur, idéale à afficher ou à remettre.</small><em>A4 paysage</em></span></label>
+                    <label class="pl-type-doc" data-type="equipe"><input type="radio" name="pl_diff_type" value="equipe"><i class="fa fa-table" aria-hidden="true"></i><span><strong>Planning d'équipe</strong><small>Tableau collaborateurs × jours, une page par semaine, avec écart au contrat.</small><em>A4 paysage</em></span></label>
+                    <label class="pl-type-doc" data-type="frise"><input type="radio" name="pl_diff_type" value="frise"><i class="fa fa-align-left" aria-hidden="true"></i><span><strong>Frise de la journée</strong><small>Les barres horaires de chaque collaborateur, une page par jour.</small><em>A4 paysage</em></span></label>
+                    <label class="pl-type-doc" data-type="affectation"><input type="radio" name="pl_diff_type" value="affectation"><i class="fa fa-sitemap" aria-hidden="true"></i><span><strong>Planning par affectation</strong><small>Qui intervient, où et quand : une section par affectation.</small><em>A4 portrait</em></span></label>
+                    <label class="pl-type-doc" data-type="emargement"><input type="radio" name="pl_diff_type" value="emargement"><i class="fa fa-pencil-square-o" aria-hidden="true"></i><span><strong>Feuille d'émargement</strong><small>Horaires prévus avec colonnes arrivée, départ et signature, une page par jour.</small><em>A4 portrait</em></span></label>
+                    <label class="pl-type-doc" data-type="recapitulatif"><input type="radio" name="pl_diff_type" value="recapitulatif"><i class="fa fa-calculator" aria-hidden="true"></i><span><strong>Récapitulatif des heures</strong><small>Synthèse mensuelle des heures par jour, totaux et écarts, zone de visa.</small><em>A4 paysage</em></span></label>
+                    </div>
+                </div>
+                <div class="pl-diff-colonnes">
+                    <div>
+                        <div class="pl-label">Collaborateurs</div>
+                        <label class="pl-radio-carte"><input type="radio" name="pl_diff_collabs" value="affiches" checked><span><strong>Collaborateurs affichés</strong><small id="pl_diff_collabs_info"></small></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pl_diff_collabs" value="selection"><span><strong>Collaborateurs des évènements sélectionnés</strong><small id="pl_diff_sel_info"></small></span></label>
+                    </div>
+                    <div id="pl_diff_options">
+                        <div class="pl-label">Options</div>
+                        <div class="custom-control custom-checkbox" data-option="affs"><input type="checkbox" class="custom-control-input" id="pl_diff_affs" checked><label class="custom-control-label" for="pl_diff_affs">Afficher les affectations</label></div>
+                        <div class="custom-control custom-checkbox" data-option="realise"><input type="checkbox" class="custom-control-input" id="pl_diff_realise"><label class="custom-control-label" for="pl_diff_realise">Afficher les heures réalisées</label></div>
+                        <div class="custom-control custom-checkbox" data-option="notes"><input type="checkbox" class="custom-control-input" id="pl_diff_notes" checked><label class="custom-control-label" for="pl_diff_notes">Afficher les notes du jour</label></div>
+                        <div class="custom-control custom-checkbox" data-option="grouper"><input type="checkbox" class="custom-control-input" id="pl_diff_grouper"><label class="custom-control-label" for="pl_diff_grouper">Regrouper par affectation</label></div>
+                        <p class="pl-muted pl-petit mb-0" id="pl_diff_sans_option" hidden>Aucune option pour ce document.</p>
+                        <p class="pl-diff-avert" id="pl_diff_avert" hidden></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="pl_diff_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pl_modal_ical" tabindex="-1" role="dialog" aria-labelledby="pl_modal_ical_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_ical_titre"><strong>Agenda en ligne (iCal)</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p id="pl_ical_intro"></p>
+                <label for="pl_ical_url" class="sr-only">Lien de l'agenda</label>
+                <div class="input-group">
+                    <input type="text" id="pl_ical_url" class="form-control" readonly>
+                    <div class="input-group-append"><button type="button" class="btn btn-default" id="pl_ical_copier"><i class="fa fa-copy margin-r-5"></i>Copier</button></div>
+                </div>
+                <p class="pl-muted pl-petit mt-2">Ce lien secret donne accès aux évènements du collaborateur (60 jours passés et 12 mois à venir) sans identifiant. Régénérez-le si vous pensez qu'il a été diffusé à tort : l'ancien lien cessera de fonctionner.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger mr-auto" id="pl_ical_revoquer">Désactiver le lien</button>
+                <button type="button" class="btn btn-default" id="pl_ical_regenerer"><i class="fa fa-refresh margin-r-5"></i>Régénérer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pl_modal_reglages" tabindex="-1" role="dialog" aria-labelledby="pl_modal_reglages_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_reglages_titre"><strong>Réglages d'affichage</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body pl-reglages">
+                <p class="pl-muted mb-2">Seuils d'adaptation du planning pour les longues périodes.</p>
+                <div class="pl-reglages-grille">
+                    <section class="pl-reglage-carte">
+                        <label class="pl-switch pl-switch-titre"><input type="checkbox" data-reglage="compact_auto"><span class="pl-switch-piste" aria-hidden="true"></span>Densité réduite automatique</label>
+                        <div class="pl-reglage-ligne"><label for="rg_compact_jours">Au-delà de</label><span><input type="number" id="rg_compact_jours" data-reglage="compact_jours" min="1" max="366" class="pl-input-num"> jours</span></div>
+                        <div class="pl-reglage-ligne"><label for="rg_compact_lignes">ou de</label><span><input type="number" id="rg_compact_lignes" data-reglage="compact_lignes" min="5" max="5000" class="pl-input-num"> lignes</span></div>
+                        <div class="pl-reglage-ligne"><label for="rg_densite_auto">Densité</label><select id="rg_densite_auto" data-reglage="densite_auto" class="pl-select"><option value="compact">Compacte</option><option value="mini">Minimale</option></select></div>
+                    </section>
+                    <section class="pl-reglage-carte">
+                        <label class="pl-switch pl-switch-titre"><input type="checkbox" data-reglage="repli_auto"><span class="pl-switch-piste" aria-hidden="true"></span>Repli automatique des groupes</label>
+                        <div class="pl-reglage-ligne"><label for="rg_repli_jours">Au-delà de</label><span><input type="number" id="rg_repli_jours" data-reglage="repli_jours" min="1" max="366" class="pl-input-num"> jours</span></div>
+                        <div class="pl-reglage-ligne"><label for="rg_garder">Garder dépliés</label><select id="rg_garder" data-reglage="garder_deplies" class="pl-select"><option value="aucune">Aucun</option><option value="premiere">Le premier</option><option value="aujourdhui_premieres">Aujourd'hui + 2 premiers</option></select></div>
+                        <div class="pl-reglage-ligne"><label for="rg_courbe">Courbe de charge</label><input type="checkbox" id="rg_courbe" data-reglage="courbe_charge"></div>
+                    </section>
+                    <section class="pl-reglage-carte">
+                        <label class="pl-switch pl-switch-titre"><input type="checkbox" data-reglage="synthese_auto"><span class="pl-switch-piste" aria-hidden="true"></span>Vue synthèse automatique</label>
+                        <div class="pl-reglage-ligne"><label for="rg_synthese_jours">Au-delà de</label><span><input type="number" id="rg_synthese_jours" data-reglage="synthese_jours" min="7" max="732" class="pl-input-num"> jours</span></div>
+                        <div class="pl-reglage-ligne"><label for="rg_synthese_mode">Comportement</label><select id="rg_synthese_mode" data-reglage="synthese_mode" class="pl-select"><option value="proposer">Proposer</option><option value="basculer">Basculer</option></select></div>
+                    </section>
+                    <section class="pl-reglage-carte">
+                        <span class="pl-reglage-titre">Barres et chargement</span>
+                        <div class="pl-reglage-ligne"><label for="rg_largeur_titre">Titre masqué sous</label><span><input type="number" id="rg_largeur_titre" data-reglage="largeur_titre" min="0" max="600" class="pl-input-num"> px</span></div>
+                        <div class="pl-reglage-ligne"><label for="rg_largeur_horaires">Horaires masqués sous</label><span><input type="number" id="rg_largeur_horaires" data-reglage="largeur_horaires" min="0" max="600" class="pl-input-num"> px</span></div>
+                        <div class="pl-reglage-ligne"><label for="rg_tranche">Chargement par tranches de</label><span><input type="number" id="rg_tranche" data-reglage="tranche_jours" min="1" max="92" class="pl-input-num"> jours</span></div>
+                    </section>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="pl-reglage-portee mr-auto" id="pl_reglages_portee">
+                    <span class="pl-label">Enregistrer pour</span>
+                    <div class="pl-seg" role="radiogroup" aria-label="Portée des réglages">
+                        <button type="button" class="pl-seg-btn" data-portee="utilisateur" role="radio" aria-checked="true">Moi uniquement</button>
+                        <button type="button" class="pl-seg-btn" data-portee="tous" role="radio" aria-checked="false">Tous les utilisateurs</button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-default" id="pl_reglages_reinit" title="Rétablir les valeurs par défaut" aria-label="Rétablir les valeurs par défaut"><i class="fa fa-undo" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-primary" id="pl_reglages_valider"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'core/modal_pdf.html' %}
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static 'lib/select2/js/select2.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'lib/select2/js/i18n/fr.js' %}" type="text/javascript"></script>
+    <script>
+        var PLANNING_CONFIG = {
+            csrf: "{{ csrf_token }}",
+            media_url: "{{ MEDIA_URL }}",
+            url_fiche: "{% url 'collaborateur_resume' idcollaborateur=0 %}",
+            urls: {
+                donnees: "{% url 'ajax_planning_equipe_get_donnees' %}",
+                evenements: "{% url 'ajax_planning_equipe_get_evenements' %}",
+                suivi_consommations: "{% if perms.core.suivi_consommations %}{% url 'suivi_consommations' %}{% endif %}",
+                enregistrer: "{% url 'ajax_planning_equipe_enregistrer' %}",
+                modele: "{% url 'ajax_planning_equipe_appliquer_modele' %}",
+                copie: "{% url 'ajax_planning_equipe_copier_periode' %}",
+                note: "{% url 'ajax_planning_equipe_enregistrer_note' %}",
+                affichage: "{% url 'ajax_planning_equipe_memoriser_affichage' %}",
+                reglages: "{% url 'ajax_planning_equipe_memoriser_reglages' %}",
+                imprimer: "{% url 'ajax_planning_equipe_imprimer' %}",
+                emails: "{% url 'ajax_planning_equipe_envoyer_emails' %}",
+                excel: "{% url 'ajax_planning_equipe_exporter_recapitulatif' %}",
+                ical: "{% url 'ajax_planning_equipe_get_lien_ical' %}"
+            }
+        };
+    </script>
+    <script src="{% static 'js/planning_equipe.js' %}"></script>
+{% endblock scripts %}

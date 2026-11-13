@@ -10,6 +10,7 @@
             <th>Fin</th>
             <th>Catégorie</th>
             <th>Titre</th>
+            <th>Affectation</th>
             <th style="width: 90px;">Actions</th>
         </tr>
     </thead>
@@ -45,6 +46,7 @@
     var valeurs = JSON.parse("{{ value|escapejs }}");
     var dict_types_evenements = JSON.parse("{{ types_evenements|escapejs }}");
     var dict_jours_semaine = JSON.parse("{{ jours_semaine|escapejs }}");
+    var dict_affectations = JSON.parse("{{ affectations|default:'{}'|escapejs }}");
 
     $(document).ready(function() {
         maj_tableau();
@@ -61,6 +63,7 @@
             colonnes.push("<td>" + dict_ligne["heure_fin"].slice(0, -3) + "</td>");
             colonnes.push("<td>" + dict_types_evenements[dict_ligne["type_evenement"]] + "</td>");
             colonnes.push("<td>" + (dict_ligne["titre"] ? dict_ligne["titre"]: "") + "</td>");
+            colonnes.push("<td>" + (dict_ligne["affectation"] && dict_affectations[dict_ligne["affectation"]] ? dict_affectations[dict_ligne["affectation"]] : "") + "</td>");
             html += "<tr class='text-center'>" + colonnes.join() + "<td>";
             html += "<a type='button' class='btn btn-default btn-xs' onclick='Modifier_ligne(" + index + ")' title='Modifier'><i class='fa fa-fw fa-pencil'></i></a> ";
             html += "<a type='button' class='btn btn-default btn-xs' onclick='Supprimer_ligne(" + index + ")' title='Supprimer'><i class='fa fa-fw fa-trash'></i></a>";

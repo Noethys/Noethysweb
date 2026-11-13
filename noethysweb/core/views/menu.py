@@ -150,6 +150,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_collaborateurs.Add(code="types_qualifications_collaborateurs_liste", titre="Types de qualifications", icone="file-text-o")
     menu_collaborateurs.Add(code="types_pieces_collaborateurs_liste", titre="Types de pièces", icone="file-text-o")
     menu_collaborateurs.Add(code="types_evenements_collaborateurs_liste", titre="Catégories d'évènements", icone="file-text-o")
+    menu_collaborateurs.Add(code="affectations_collaborateurs_liste", titre="Affectations", icone="file-text-o")
     menu_collaborateurs.Add(code="types_postes_collaborateurs_liste", titre="Types de postes", icone="file-text-o")
     menu_collaborateurs.Add(code="modeles_plannings_collaborateurs_liste", titre="Modèles de plannings", icone="file-text-o")
     menu_collaborateurs.Add(code="groupes_collaborateurs_liste", titre="Groupes de collaborateurs", icone="file-text-o")
@@ -506,8 +507,9 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
 
     # Gestion des évènements
     menu_gestion_evenements_collaborateurs = menu_collaborateurs.Add(titre="Gestion des évènements")
+    menu_gestion_evenements_collaborateurs.Add(code="planning_equipe", titre="Planning général", icone="file-text-o")
     menu_gestion_evenements_collaborateurs.Add(code="appliquer_modele_planning", titre="Appliquer un modèle de planning", icone="file-text-o")
-    menu_gestion_evenements_collaborateurs.Add(code="planning_collaborateurs", titre="Planning des évènements", icone="file-text-o")
+    menu_gestion_evenements_collaborateurs.Add(code="planning_collaborateurs", titre="Agenda", icone="file-text-o")
 
 
 

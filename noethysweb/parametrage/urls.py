@@ -24,7 +24,7 @@ from parametrage.views import organisateur, structures, \
     types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
-    types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, \
+    types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, affectations_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
     modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes, \
     activites_evenements_categories, activites_import_export, api_particulier, activites_controle_ia, activites_tarifs_formule, activites_evenements_import, modeles_documents_import_export
@@ -636,6 +636,9 @@ urlpatterns = [
     path('parametrage/types_evenements_collaborateurs/modifier/<int:pk>', types_evenements_collaborateurs.Modifier.as_view(), name='types_evenements_collaborateurs_modifier'),
     path('parametrage/types_evenements_collaborateurs/supprimer/<int:pk>', types_evenements_collaborateurs.Supprimer.as_view(), name='types_evenements_collaborateurs_supprimer'),
 
+    # Affectations des collaborateurs
+    path('parametrage/affectations_collaborateurs/liste', affectations_collaborateurs.Liste.as_view(), name='affectations_collaborateurs_liste'),
+
     # Types de postes collaborateurs
     path('parametrage/types_postes_collaborateurs/liste', types_postes_collaborateurs.Liste.as_view(), name='types_postes_collaborateurs_liste'),
     path('parametrage/types_postes_collaborateurs/ajouter', types_postes_collaborateurs.Ajouter.as_view(), name='types_postes_collaborateurs_ajouter'),
@@ -715,6 +718,11 @@ urlpatterns = [
     path('parametrage/adresses_mail/envoyer_mail_test', secure_ajax(adresses_mail.Envoyer_mail_test), name='ajax_envoyer_mail_test'),
     path('parametrage/configurations_sms/envoyer_sms_test', secure_ajax(configurations_sms.Envoyer_sms_test), name='ajax_envoyer_sms_test'),
     path('parametrage/albums/importer_photos_album', secure_ajax(albums.Importer_photos_album), name="ajax_importer_photos_album"),
+    path('parametrage/affectations_collaborateurs/get_arbre', secure_ajax(affectations_collaborateurs.Get_arbre), name='ajax_affectations_collaborateurs_get_arbre'),
+    path('parametrage/affectations_collaborateurs/get_form', secure_ajax(affectations_collaborateurs.Get_form), name='ajax_affectations_collaborateurs_get_form'),
+    path('parametrage/affectations_collaborateurs/valid_form', secure_ajax(affectations_collaborateurs.Valid_form), name='ajax_affectations_collaborateurs_valid_form'),
+    path('parametrage/affectations_collaborateurs/deplacer', secure_ajax(affectations_collaborateurs.Deplacer), name='ajax_affectations_collaborateurs_deplacer'),
+    path('parametrage/affectations_collaborateurs/supprimer', secure_ajax(affectations_collaborateurs.Supprimer), name='ajax_affectations_collaborateurs_supprimer'),
     path('parametrage/modeles_plannings_collaborateurs/get_form_ligne', secure_ajax(modeles_plannings_collaborateurs.Get_form_ligne), name='ajax_modeles_plannings_collaborateurs_form_ligne'),
     path('parametrage/transports/arrets/liste/bus/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_bus'),
     path('parametrage/transports/arrets/liste/car/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_car'),
