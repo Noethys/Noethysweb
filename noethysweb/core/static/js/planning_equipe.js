@@ -2444,7 +2444,7 @@
         $("#pl_ls_modele_div").prop("hidden", mode !== "modele");
         $("#pl_ls_copie_div").prop("hidden", mode !== "copie");
         $("#pl_ls_dates_div").prop("hidden", mode !== "modele");
-        $("#pl_ls_modeles").html(S.modeles.map(function(m) { return "<label><input type='checkbox' value='" + m.id + "'>" + Echapper(m.nom) + "</label>"; }).join(""));
+        Frise_ls().reinitialiser();
         $("#pl_ls_dates_info").text(V.dates.length + " date" + (V.dates.length > 1 ? "s" : "") + (V.dates.length ? " (du " + Texte_jour_fr(V.dates[0]) + " au " + Texte_jour_fr(V.dates[V.dates.length - 1]) + ")" : ""));
         $("#pl_ls_periode_debut").val(V.dates.length ? Iso_jour(V.dates[0]) : "");
         $("#pl_ls_periode_fin").val(V.dates.length ? Iso_jour(V.dates[V.dates.length - 1]) : "");
@@ -2462,7 +2462,50 @@
         $("input[name='pl_ls_conflit'][value='ignorer']").prop("checked", true);
         $("#pl_ls_apercu").prop("hidden", true).empty();
         $("#pl_ls_valider").html("<i class='fa fa-check margin-r-5'></i>" + (mode === "modele" ? "Appliquer" : "Copier"));
+        if (mode === "modele") { Selecteur_ls().reinitialiser(); }
         $("#pl_modal_lot_serveur").modal("show");
+    }
+
+    var selecteur_ls = null;
+    function Collabs_lot_serveur() {
+        return $("input[name='pl_ls_collabs']:checked").val() === "choix"
+            ? $("#pl_ls_collabs_choix input:checked").map(function() { return +this.value; }).get()
+            : Collabs_visibles().filter(Est_modifiable);
+    }
+    function Selecteur_ls() {
+        if (!selecteur_ls) {
+            selecteur_ls = SelecteurModelesPlanning({conteneur: "#pl_ls_modeles", url: CFG.urls.liste_modeles, csrf: CFG.csrf, parametres: function() {
+                var jours = Jours_lot_serveur();
+                return {collaborateurs: Collabs_lot_serveur(), date: jours.erreur ? "" : Iso_jour(jours[0])};
+            }, change: function() { $("#pl_ls_apercu").prop("hidden", true); Frise_ls().maj(); }});
+        }
+        return selecteur_ls;
+    }
+
+    var frise_ls = null;
+    function Frise_ls() {
+        if (!frise_ls) {
+            frise_ls = FriseModelesPlanning({conteneur: "#pl_ls_frise", url: CFG.urls.frise, csrf: CFG.csrf, parametres: function() {
+                if (LS_mode !== "modele") { return null; }
+                var jours = Jours_lot_serveur();
+                if (jours.erreur) { return null; }
+                return {modeles: Selecteur_ls().selection(), dates: jours.map(Iso_jour)};
+            }, change: function() { $("#pl_ls_apercu").prop("hidden", true); }});
+        }
+        return frise_ls;
+    }
+
+    function Jours_lot_serveur() {
+        var jours = V.dates.slice();
+        if ($("input[name='pl_ls_dates']:checked").val() === "periode") {
+            var d = $("#pl_ls_periode_debut").val(), f = $("#pl_ls_periode_fin").val();
+            if (!d || !f || f < d) { return {erreur: "Période incorrecte"}; }
+            jours = [];
+            for (var j = Parse_jour(d); j <= Parse_jour(f); j++) { jours.push(j); }
+        }
+        if (!jours.length) { return {erreur: "Aucune date sélectionnée"}; }
+        if (jours.length > 400) { return {erreur: "La période ne peut pas dépasser 400 jours"}; }
+        return jours;
     }
 
     function Parametres_lot_serveur() {
@@ -2472,18 +2515,13 @@
         if (!collabs.length) { return {erreur: "Aucun collaborateur modifiable sélectionné"}; }
         var p = {collaborateurs: JSON.stringify(collabs), conflit: $("input[name='pl_ls_conflit']:checked").val()};
         if (LS_mode === "modele") {
-            var modeles = $("#pl_ls_modeles input:checked").map(function() { return +this.value; }).get();
+            var modeles = Selecteur_ls().selection();
             if (!modeles.length) { return {erreur: "Cochez au moins un modèle"}; }
-            var jours = V.dates.slice();
-            if ($("input[name='pl_ls_dates']:checked").val() === "periode") {
-                var d = $("#pl_ls_periode_debut").val(), f = $("#pl_ls_periode_fin").val();
-                if (!d || !f || f < d) { return {erreur: "Période incorrecte"}; }
-                jours = [];
-                for (var j = Parse_jour(d); j <= Parse_jour(f); j++) { jours.push(j); }
-            }
-            if (!jours.length) { return {erreur: "Aucune date sélectionnée"}; }
-            if (jours.length > 400) { return {erreur: "La période ne peut pas dépasser 400 jours"}; }
+            var jours = Jours_lot_serveur();
+            if (jours.erreur) { return jours; }
             p.modeles = JSON.stringify(modeles);
+            p.departs = JSON.stringify(Frise_ls().departs());
+            p.forcer = Selecteur_ls().forcer() ? "true" : "false";
             p.dates = JSON.stringify(jours.map(Iso_jour));
             p.jours = jours;
         } else {
@@ -2512,6 +2550,7 @@
             if (data.nbre_ignores) { texte += ", " + data.nbre_ignores + " ignoré" + (data.nbre_ignores > 1 ? "s" : "") + " (chevauchement)"; }
             if (data.nbre_hors_contrat) { texte += ", " + data.nbre_hors_contrat + " hors contrat"; }
             texte += ".";
+            (data.messages_restriction || []).forEach(function(message) { texte += "<br><i class='fa fa-exclamation-triangle margin-r-5'></i>" + Echapper(message) + "."; });
             if (apercu) {
                 $("#pl_ls_apercu").html(texte + " L'opération pourra être annulée (Ctrl+Z).").attr("class", "pl-alerte mt-3" + (data.nbre_supprimes ? " attention" : "")).prop("hidden", false);
                 return;
@@ -2817,6 +2856,8 @@
 
         $("input[name='pl_ls_collabs']").on("change", function() { $("#pl_ls_collabs_choix").prop("hidden", this.value !== "choix"); });
         $("#pl_modal_lot_serveur").on("change", "input", function() { $("#pl_ls_apercu").prop("hidden", true); });
+        $("#pl_modal_lot_serveur").on("change", "input[name='pl_ls_dates'], #pl_ls_periode_debut, #pl_ls_periode_fin", function() { if (LS_mode === "modele") { Frise_ls().maj(); Selecteur_ls().maj(); } });
+        $("#pl_modal_lot_serveur").on("change", "input[name='pl_ls_collabs'], #pl_ls_collabs_choix input", function() { if (LS_mode === "modele") { Selecteur_ls().maj(); } });
         $("#pl_ls_btn_apercu").on("click", function() { Executer_lot_serveur(true); });
         $("#pl_ls_valider").on("click", function() { Executer_lot_serveur(false); });
 

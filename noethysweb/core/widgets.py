@@ -788,3 +788,17 @@ class IbanWidget(TextInput):
 
 class BicWidget(TextInput):
     template_name = "core/widgets/champ_bic.html"
+
+
+class SelecteurModelesPlanningWidget(SelectMultiple):
+    """ Sélecteur compact de modèles de planning des collaborateurs (recherche, récents, restrictions) """
+    template_name = "core/widgets/selecteur_modeles_planning.html"
+
+    def use_required_attribute(self, initial):
+        return False
+
+    def get_context(self, name, value, attrs=None):
+        context = super().get_context(name, value, attrs)
+        context["collaborateurs_selector"] = self.attrs.get("collaborateurs_selector", "")
+        context["idcollaborateur"] = self.attrs.get("idcollaborateur", 0) or 0
+        return context

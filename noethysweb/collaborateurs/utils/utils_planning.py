@@ -342,38 +342,28 @@ def Creer_par_lot(nouveaux=[], collaborateurs=[], dates=[], conflit="ignorer", a
     return resultat
 
 
-def Generer_depuis_modeles(modeles=[], collaborateurs=[], dates=[]):
-    """ Evènements (non enregistrés) issus de modèles de planning, en respectant fériés, périodes et contrats """
-    from core.models import LigneModelePlanningCollaborateur
+def Generer_depuis_modeles(modeles=[], collaborateurs=[], dates=[], departs={}, generateur=None, repartition=None):
+    """ Evènements (non enregistrés) issus de modèles de planning, en respectant cycles, fériés, périodes et contrats.
+        repartition = {idmodele: [idcollaborateurs]} pour n'appliquer un modèle qu'à certains collaborateurs """
     from collaborateurs.utils.utils_evenements import Is_evenement_in_contrat
-    liste_vacances = list(Vacance.objects.all())
-    liste_feries = list(Ferie.objects.all())
+    from collaborateurs.utils.utils_modeles_planning import Generateur
     contrats = {}
     for contrat in ContratCollaborateur.objects.filter(collaborateur_id__in=collaborateurs):
         contrats.setdefault(contrat.collaborateur_id, []).append(contrat)
-    lignes = list(LigneModelePlanningCollaborateur.objects.select_related("modele").filter(modele__in=modeles))
+    generateur = generateur or Generateur(modeles=modeles, dates=dates, departs=departs)
 
     nouveaux, hors_contrat = [], 0
-    for date in sorted(set(dates)):
-        est_ferie = utils_dates.EstFerie(date, liste_feries)
-        est_vacances = utils_dates.EstEnVacances(date=date, liste_vacances=liste_vacances)
-        for ligne in lignes:
-            if ligne.jour != date.weekday():
+    for date, ligne in generateur.Get_lignes_par_date():
+        date_fin = datetime.datetime.combine(date, ligne.heure_fin)
+        if ligne.heure_fin <= ligne.heure_debut:
+            date_fin += datetime.timedelta(days=1)
+        for idcollaborateur in (repartition.get(ligne.modele_id, []) if repartition is not None else collaborateurs):
+            evenement = EvenementCollaborateur(collaborateur_id=idcollaborateur, type_evenement_id=ligne.type_evenement_id, titre=ligne.titre,
+                                               affectation_id=ligne.affectation_id, date_debut=datetime.datetime.combine(date, ligne.heure_debut), date_fin=date_fin)
+            if not Is_evenement_in_contrat(evenement=evenement, contrats=contrats.get(idcollaborateur, [])):
+                hors_contrat += 1
                 continue
-            if est_ferie and not ligne.modele.inclure_feries:
-                continue
-            if (ligne.periode == "SCOLAIRES" and est_vacances) or (ligne.periode == "VACANCES" and not est_vacances):
-                continue
-            date_fin = datetime.datetime.combine(date, ligne.heure_fin)
-            if ligne.heure_fin <= ligne.heure_debut:
-                date_fin += datetime.timedelta(days=1)
-            for idcollaborateur in collaborateurs:
-                evenement = EvenementCollaborateur(collaborateur_id=idcollaborateur, type_evenement_id=ligne.type_evenement_id, titre=ligne.titre,
-                                                   affectation_id=ligne.affectation_id, date_debut=datetime.datetime.combine(date, ligne.heure_debut), date_fin=date_fin)
-                if not Is_evenement_in_contrat(evenement=evenement, contrats=contrats.get(idcollaborateur, [])):
-                    hors_contrat += 1
-                    continue
-                nouveaux.append(evenement)
+            nouveaux.append(evenement)
     return nouveaux, hors_contrat
 
 

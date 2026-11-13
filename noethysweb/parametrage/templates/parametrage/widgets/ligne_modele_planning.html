@@ -1,26 +1,56 @@
 {% load static %}
 {% load embed %}
 
-<table class="table table-bordered">
-    <thead>
-        <tr class="text-center">
-            <th>Jour</th>
-            <th>Période</th>
-            <th>Début</th>
-            <th>Fin</th>
-            <th>Catégorie</th>
-            <th>Titre</th>
-            <th>Affectation</th>
-            <th style="width: 90px;">Actions</th>
-        </tr>
-    </thead>
-    <tbody id="contenu_tableau">
-    </tbody>
-</table>
+<style>
+    .mp-barre {display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; border-bottom: 1px solid #dee2e6; margin-bottom: 8px;}
+    .mp-onglet {border: 1px solid #dee2e6; border-bottom: 0; border-radius: 4px 4px 0 0; background: #f4f6f9; padding: 6px 12px; margin-bottom: -1px; color: #495057; cursor: pointer;}
+    .mp-onglet[aria-selected="true"] {background: #fff; font-weight: bold; color: #212529;}
+    .mp-onglet.mp-hors-cycle {color: #b02a37;}
+    .mp-onglet small {font-weight: normal; color: #6c757d; margin-left: 4px;}
+    .mp-outils {margin-left: auto; display: flex; gap: 6px; align-items: center; padding-bottom: 4px; flex-wrap: wrap;}
+    .mp-grille {display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px;}
+    .mp-jour {background: #f4f6f9; border-radius: 4px; padding: 6px; min-height: 140px; transition: background .1s;}
+    .mp-jour.mp-survol {background: #d6e9f8; outline: 2px dashed #3c8dbc;}
+    .mp-jour-titre {display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.85rem; margin-bottom: 6px;}
+    .mp-jour-titre small {font-weight: normal; color: #6c757d;}
+    .mp-evt {display: block; width: 100%; text-align: left; border: 1px solid #dee2e6; border-left: 4px solid #3c8dbc; background: #fff; border-radius: 4px; padding: 3px 6px; margin-bottom: 4px; font-size: 0.78rem; line-height: 1.3; cursor: grab; position: relative;}
+    .mp-evt:hover, .mp-evt:focus {border-color: #3c8dbc; outline: none; box-shadow: 0 0 0 2px rgba(60,141,188,.35);}
+    .mp-evt.mp-attenue {opacity: .45;}
+    .mp-evt .mp-heure {font-weight: bold;}
+    .mp-evt .mp-ligne1 {display: flex; justify-content: space-between; gap: 4px;}
+    .mp-evt .mp-icones {color: #6c757d; font-size: 0.7rem; white-space: nowrap;}
+    .mp-ajouter {display: block; width: 100%; border: 1px dashed #adb5bd; background: transparent; border-radius: 4px; color: #6c757d; font-size: 0.75rem; padding: 2px;}
+    .mp-ajouter:hover, .mp-ajouter:focus {background: #fff; color: #212529;}
+    .mp-pied {display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; border-top: 1px solid #dee2e6; padding-top: 6px; margin-top: 8px; font-size: 0.85rem; color: #495057;}
+    .mp-alerte {background: #fff3cd; color: #856404; border-radius: 4px; padding: 6px 10px; margin-bottom: 8px; font-size: 0.85rem;}
+    @media (max-width: 991px) {.mp-grille {grid-template-columns: repeat(2, minmax(0, 1fr));}}
+</style>
+
+<div id="mp_alerte" class="mp-alerte" role="alert" hidden></div>
+
+<div class="mp-barre">
+    <div id="mp_onglets" role="tablist" aria-label="Semaines du cycle" style="display: flex; gap: 4px; flex-wrap: wrap;"></div>
+    <div class="mp-outils">
+        <label for="mp_filtre" class="mb-0 small text-muted">Afficher</label>
+        <select id="mp_filtre" class="form-control form-control-sm" style="width: auto;">
+            <option value="TOUTES">Toutes les périodes</option>
+            <option value="SCOLAIRES">Une semaine scolaire</option>
+            <option value="VACANCES">Une semaine de vacances</option>
+        </select>
+        <button type="button" class="btn btn-default btn-sm" id="mp_dupliquer"><i class="fa fa-clone margin-r-5"></i>Dupliquer la semaine…</button>
+    </div>
+</div>
+
+<div class="mp-grille" id="mp_grille" role="tabpanel"></div>
+
+<div class="mp-pied">
+    <span id="mp_totaux" aria-live="polite"></span>
+    <span class="text-muted small"><i class="fa fa-arrows margin-r-5"></i>Glissez un créneau vers un autre jour pour le déplacer (Ctrl ou Alt pour le copier)</span>
+</div>
 
 <input type="text" id="lignes" name="lignes" hidden>
 
-<button type="button" class="btn btn-success btn-sm" onclick="Ajouter_ligne()"><i class="fa fa-plus"></i> Ajouter un évènement</button>
+<button type="button" class="btn btn-success btn-sm mt-2" onclick="Ajouter_ligne()"><i class="fa fa-plus"></i> Ajouter un évènement</button>
 
 {# Modal ligne de modèle #}
 {% embed 'core/modal.html' %}
@@ -43,44 +73,160 @@
 <script>
     {% include 'core/csrftoken.html' %}
 
-    var valeurs = JSON.parse("{{ value|escapejs }}");
+    var valeurs = JSON.parse("{{ value|escapejs }}" || "[]");
     var dict_types_evenements = JSON.parse("{{ types_evenements|escapejs }}");
     var dict_jours_semaine = JSON.parse("{{ jours_semaine|escapejs }}");
     var dict_affectations = JSON.parse("{{ affectations|default:'{}'|escapejs }}");
+    var dict_couleurs = JSON.parse("{{ couleurs|default:'{}'|escapejs }}");
+    var dict_types_temps = JSON.parse("{{ types_temps|default:'{}'|escapejs }}");
 
-    $(document).ready(function() {
-        maj_tableau();
-    })
+    var MP = {nb_semaines: 1, parite: false, semaine: 1, filtre: "TOUTES"};
 
-    function maj_tableau() {
-        var html = "";
-        $.each(valeurs, function (index, dict_ligne) {
-            var colonnes = [];
-            colonnes.push("<input name='ligne' value='" + JSON.stringify(dict_ligne) + "' hidden>");
-            colonnes.push("<td>" + dict_jours_semaine[dict_ligne["jour"]] + "</td>");
-            colonnes.push("<td>" + dict_ligne["periode"] + "</td>");
-            colonnes.push("<td>" + dict_ligne["heure_debut"].slice(0, -3) + "</td>");
-            colonnes.push("<td>" + dict_ligne["heure_fin"].slice(0, -3) + "</td>");
-            colonnes.push("<td>" + dict_types_evenements[dict_ligne["type_evenement"]] + "</td>");
-            colonnes.push("<td>" + (dict_ligne["titre"] ? dict_ligne["titre"]: "") + "</td>");
-            colonnes.push("<td>" + (dict_ligne["affectation"] && dict_affectations[dict_ligne["affectation"]] ? dict_affectations[dict_ligne["affectation"]] : "") + "</td>");
-            html += "<tr class='text-center'>" + colonnes.join() + "<td>";
-            html += "<a type='button' class='btn btn-default btn-xs' onclick='Modifier_ligne(" + index + ")' title='Modifier'><i class='fa fa-fw fa-pencil'></i></a> ";
-            html += "<a type='button' class='btn btn-default btn-xs' onclick='Supprimer_ligne(" + index + ")' title='Supprimer'><i class='fa fa-fw fa-trash'></i></a>";
-            html += "</td>";
-        })
-        $("#contenu_tableau").html(html)
-        $("#lignes").val(JSON.stringify(valeurs))
+    function Echapper(texte) {
+        return $("<div>").text(texte === null || texte === undefined ? "" : String(texte)).html();
     }
 
-    function Ajouter_ligne() {
+    function Minutes(heure) {
+        var morceaux = String(heure).split(":");
+        return parseInt(morceaux[0]) * 60 + parseInt(morceaux[1]);
+    }
+
+    function Duree(ligne) {
+        var duree = Minutes(ligne.heure_fin) - Minutes(ligne.heure_debut);
+        return duree <= 0 ? duree + 1440 : duree;
+    }
+
+    function Texte_duree(minutes) {
+        var signe = minutes < 0 ? "-" : "";
+        minutes = Math.abs(Math.round(minutes));
+        return signe + Math.floor(minutes / 60) + " h " + ("0" + (minutes % 60)).slice(-2);
+    }
+
+    function Nom_semaine(num) {
+        if (MP.parite) { return num === 1 ? "Semaine impaire" : "Semaine paire"; }
+        return "Semaine " + num;
+    }
+
+    function Nb_onglets() {
+        var maxi = MP.nb_semaines;
+        valeurs.forEach(function(ligne) { if (ligne.semaine && ligne.semaine > maxi) { maxi = ligne.semaine; } });
+        return maxi;
+    }
+
+    function Est_visible(ligne, semaine, filtre) {
+        if (ligne.semaine && MP.nb_semaines > 1 && ligne.semaine !== semaine) { return false; }
+        if (filtre === "SCOLAIRES" && ligne.periode === "VACANCES") { return false; }
+        if (filtre === "VACANCES" && ligne.periode === "SCOLAIRES") { return false; }
+        return true;
+    }
+
+    function Total_semaine(semaine, filtre) {
+        // Temps comptabilisé : catégories "temps comptabilisé" ajoutées, "temps soustrait" retirées
+        var total = 0;
+        valeurs.forEach(function(ligne) {
+            if (!Est_visible(ligne, semaine, filtre)) { return; }
+            var type = dict_types_temps[ligne.type_evenement];
+            if (type === "ADDITION") { total += Duree(ligne); }
+            if (type === "SOUSTRACTION") { total -= Duree(ligne); }
+        });
+        return total;
+    }
+
+    // Appelée par le formulaire du modèle quand la durée du cycle ou le repérage changent
+    function Maj_cycle_grille(nb_semaines, parite) {
+        MP.nb_semaines = nb_semaines;
+        MP.parite = parite;
+        if (MP.semaine > Nb_onglets()) { MP.semaine = 1; }
+        maj_tableau();
+    }
+
+    function maj_tableau() {
+        valeurs.forEach(function(ligne) { ligne.jour = parseInt(ligne.jour); ligne.semaine = ligne.semaine ? parseInt(ligne.semaine) : null; });
+        var nb_onglets = Nb_onglets();
+
+        // Onglets
+        var html_onglets = "";
+        if (nb_onglets > 1) {
+            for (var num = 1; num <= nb_onglets; num++) {
+                var hors = num > MP.nb_semaines;
+                html_onglets += "<button type='button' role='tab' class='mp-onglet" + (hors ? " mp-hors-cycle" : "") + "' data-semaine='" + num + "' aria-selected='" + (num === MP.semaine) + "'>"
+                    + Echapper(Nom_semaine(num)) + (hors ? " (hors cycle)" : "") + "<small>" + Texte_duree(Total_semaine(num, MP.filtre === "TOUTES" ? "SCOLAIRES" : MP.filtre)) + "</small></button>";
+            }
+        }
+        $("#mp_onglets").html(html_onglets);
+        $("#mp_dupliquer").toggle(MP.nb_semaines > 1);
+
+        // Alerte lignes hors cycle
+        var nbre_hors = valeurs.filter(function(ligne) { return ligne.semaine && ligne.semaine > MP.nb_semaines; }).length;
+        if (MP.nb_semaines > 1 && nbre_hors) {
+            $("#mp_alerte").html("<i class='fa fa-exclamation-triangle margin-r-5'></i>" + nbre_hors + " évènement(s) sont placés sur une semaine qui n'existe plus dans le cycle. Déplacez-les ou supprimez-les avant d'enregistrer.").prop("hidden", false);
+        } else if (MP.nb_semaines === 1 && valeurs.some(function(ligne) { return ligne.semaine; })) {
+            $("#mp_alerte").html("<i class='fa fa-info-circle margin-r-5'></i>Avec un cycle d'une semaine, tous les évènements s'appliqueront chaque semaine, quelle que soit la semaine du cycle sur laquelle ils avaient été placés.").prop("hidden", false);
+        } else {
+            $("#mp_alerte").prop("hidden", true);
+        }
+
+        // Grille
+        var html = "";
+        for (var jour = 0; jour < 7; jour++) {
+            var lignes_jour = [];
+            valeurs.forEach(function(ligne, index) { if (ligne.jour === jour && Est_visible(ligne, MP.semaine, "TOUTES")) { lignes_jour.push(index); } });
+            lignes_jour.sort(function(a, b) { return Minutes(valeurs[a].heure_debut) - Minutes(valeurs[b].heure_debut); });
+            var total_jour = 0, html_jour = "";
+            lignes_jour.forEach(function(index) {
+                var ligne = valeurs[index];
+                var attenue = !Est_visible(ligne, MP.semaine, MP.filtre);
+                if (Est_visible(ligne, MP.semaine, MP.filtre === "TOUTES" ? "SCOLAIRES" : MP.filtre)) {
+                    var type_temps = dict_types_temps[ligne.type_evenement];
+                    if (type_temps === "ADDITION") { total_jour += Duree(ligne); }
+                    if (type_temps === "SOUSTRACTION") { total_jour -= Duree(ligne); }
+                }
+                var debut = String(ligne.heure_debut).slice(0, 5), fin = String(ligne.heure_fin).slice(0, 5);
+                var lendemain = Minutes(ligne.heure_fin) <= Minutes(ligne.heure_debut);
+                var icones = "";
+                if (ligne.periode === "SCOLAIRES") { icones += "<i class='fa fa-graduation-cap' title='Période scolaire uniquement'></i> "; }
+                if (ligne.periode === "VACANCES") { icones += "<i class='fa fa-sun-o' title='Vacances uniquement'></i> "; }
+                if (MP.nb_semaines > 1 && !ligne.semaine) { icones += "<i class='fa fa-link' title='Toutes les semaines du cycle'></i>"; }
+                var libelle_periode = {SCOLAIRES: ", période scolaire uniquement", VACANCES: ", vacances uniquement"}[ligne.periode] || "";
+                var aria = dict_jours_semaine[jour] + " de " + debut + " à " + fin + ", " + (dict_types_evenements[ligne.type_evenement] || "") + (ligne.titre ? ", " + ligne.titre : "") + libelle_periode
+                    + (MP.nb_semaines > 1 && !ligne.semaine ? ", toutes les semaines du cycle" : "") + ". Modifier";
+                html_jour += "<button type='button' class='mp-evt" + (attenue ? " mp-attenue" : "") + "' draggable='true' data-index='" + index + "' style='border-left-color:" + Echapper(dict_couleurs[ligne.type_evenement] || "#3c8dbc") + "' aria-label='" + Echapper(aria) + "'>"
+                    + "<span class='mp-ligne1'><span class='mp-heure'>" + debut + "–" + fin + (lendemain ? " (+1j)" : "") + "</span><span class='mp-icones'>" + icones + "</span></span>"
+                    + Echapper(dict_types_evenements[ligne.type_evenement] || "")
+                    + (ligne.titre ? "<br><em>" + Echapper(ligne.titre) + "</em>" : "")
+                    + (ligne.affectation && dict_affectations[ligne.affectation] ? "<br><span class='text-muted'>" + Echapper(dict_affectations[ligne.affectation]) + "</span>" : "")
+                    + "</button>";
+            });
+            html += "<div class='mp-jour' data-jour='" + jour + "'><div class='mp-jour-titre'><span>" + Echapper(dict_jours_semaine[jour]) + "</span><small>" + (total_jour ? Texte_duree(total_jour) : "") + "</small></div>"
+                + html_jour + "<button type='button' class='mp-ajouter' data-jour='" + jour + "' aria-label='Ajouter un évènement le " + Echapper(dict_jours_semaine[jour]).toLowerCase() + "'><i class='fa fa-plus'></i></button></div>";
+        }
+        $("#mp_grille").html(html);
+
+        // Totaux
+        var textes = [];
+        if (MP.nb_semaines > 1) {
+            var somme_scol = 0, somme_vac = 0;
+            for (var s = 1; s <= MP.nb_semaines; s++) { somme_scol += Total_semaine(s, "SCOLAIRES"); somme_vac += Total_semaine(s, "VACANCES"); }
+            textes.push(Echapper(Nom_semaine(MP.semaine)) + " : <strong>" + Texte_duree(Total_semaine(MP.semaine, "SCOLAIRES")) + "</strong> en période scolaire, <strong>" + Texte_duree(Total_semaine(MP.semaine, "VACANCES")) + "</strong> en vacances");
+            textes.push("Moyenne du cycle : <strong>" + Texte_duree(somme_scol / MP.nb_semaines) + "</strong> / semaine scolaire, <strong>" + Texte_duree(somme_vac / MP.nb_semaines) + "</strong> / semaine de vacances");
+        } else {
+            textes.push("Total : <strong>" + Texte_duree(Total_semaine(1, "SCOLAIRES")) + "</strong> en période scolaire, <strong>" + Texte_duree(Total_semaine(1, "VACANCES")) + "</strong> en vacances");
+        }
+        $("#mp_totaux").html(textes.join(" · "));
+        $("#lignes").val(JSON.stringify(valeurs));
+    }
+
+    function Ajouter_ligne(jour) {
         $('#modal_ligne .modal-title').html("Ajouter un évènement");
-        get_form_ligne("ajouter", null)
+        var initial = {};
+        if (jour !== undefined) { initial.jour = jour; }
+        if (MP.nb_semaines > 1) { initial.semaine = MP.semaine <= MP.nb_semaines ? MP.semaine : null; }
+        get_form_ligne("ajouter", null, initial);
     }
 
     function Modifier_ligne(index) {
         $('#modal_ligne .modal-title').html("Modifier un évènement");
-        get_form_ligne("modifier", index)
+        get_form_ligne("modifier", index, valeurs[index]);
     }
 
     function Supprimer_ligne(index) {
@@ -104,19 +250,27 @@
         });
     }
 
-    function get_form_ligne(action, index) {
+    function get_form_ligne(action, index, valeur) {
         $.ajax({
             url: "{% url 'ajax_modeles_plannings_collaborateurs_form_ligne' %}",
             type: "POST",
             data: {
                 csrfmiddlewaretoken: "{{ csrf_token }}",
                 action: action,
-                valeur: JSON.stringify(valeurs[index]),
-                index: index,
+                valeur: JSON.stringify(valeur || {}),
+                index: index === null ? "" : index,
+                nb_semaines: MP.nb_semaines,
+                parite: MP.parite ? "1" : "",
             },
             success: function (data) {
                 $("#ligne_form").remove();
                 $("#id_div_form_ligne").append(data['form_html']);
+                // Bouton supprimer dans la fenêtre de modification
+                $("#modal_ligne .mp-supprimer").remove();
+                if (action === "modifier") {
+                    $("#modal_ligne .modal-footer").prepend("<button type='button' class='btn btn-default mr-auto mp-supprimer'><i class='fa fa-trash margin-r-5'></i>Supprimer</button>");
+                    $("#modal_ligne .mp-supprimer").on("click", function() { $("#modal_ligne").modal("hide"); Supprimer_ligne(index); });
+                }
                 $("#modal_ligne").modal("show");
             }
         });
@@ -130,11 +284,12 @@
             datatype: "json",
             success: function(data){
                 $("#modal_ligne").modal("hide");
-                if (data.index) {
-                    valeurs[data.index] = data.valeur;
+                if (data.index !== null && data.index !== undefined && data.index !== "") {
+                    valeurs[parseInt(data.index)] = data.valeur;
                 } else {
                     valeurs.push(data.valeur);
                 }
+                if (data.valeur.semaine && data.valeur.semaine !== MP.semaine) { MP.semaine = data.valeur.semaine; }
                 maj_tableau();
             },
             error: function(data) {
@@ -143,4 +298,84 @@
         });
     }
 
+    function Dupliquer_semaine() {
+        var source = MP.semaine;
+        var lignes_source = valeurs.filter(function(ligne) { return ligne.semaine === source; });
+        if (!lignes_source.length) {
+            toastr.warning("La " + Nom_semaine(source).toLowerCase() + " ne contient aucun évènement propre à cette semaine.");
+            return;
+        }
+        var options = [];
+        for (var num = 1; num <= MP.nb_semaines; num++) {
+            if (num !== source) { options.push({text: Nom_semaine(num), value: String(num)}); }
+        }
+        bootbox.prompt({
+            title: "Dupliquer la " + Echapper(Nom_semaine(source).toLowerCase()) + " (" + lignes_source.length + " évènement" + (lignes_source.length > 1 ? "s" : "") + ")",
+            inputType: "checkbox",
+            inputOptions: options,
+            value: options.map(function(option) { return option.value; }),
+            message: "Vers quelles semaines ? Les évènements propres aux semaines cochées seront remplacés.",
+            callback: function(resultat) {
+                if (!resultat || !resultat.length) { return; }
+                var cibles = resultat.map(function(valeur) { return parseInt(valeur); });
+                valeurs = valeurs.filter(function(ligne) { return !(ligne.semaine && cibles.indexOf(ligne.semaine) >= 0); });
+                cibles.forEach(function(cible) {
+                    lignes_source.forEach(function(ligne) { valeurs.push($.extend({}, ligne, {idligne: null, semaine: cible})); });
+                });
+                maj_tableau();
+                toastr.success("Semaine dupliquée");
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        // Si le formulaire du modèle n'a pas encore initialisé le cycle
+        maj_tableau();
+
+        $("#mp_onglets").on("click", ".mp-onglet", function() { MP.semaine = parseInt($(this).data("semaine")); maj_tableau(); });
+        $("#mp_onglets").on("keydown", ".mp-onglet", function(e) {
+            if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") { return; }
+            var nb = Nb_onglets();
+            MP.semaine = e.key === "ArrowRight" ? MP.semaine % nb + 1 : (MP.semaine + nb - 2) % nb + 1;
+            maj_tableau();
+            $("#mp_onglets .mp-onglet[data-semaine='" + MP.semaine + "']").focus();
+        });
+        $("#mp_filtre").on("change", function() { MP.filtre = this.value; maj_tableau(); });
+        $("#mp_dupliquer").on("click", Dupliquer_semaine);
+        $("#mp_grille").on("click", ".mp-evt", function() { Modifier_ligne(parseInt($(this).data("index"))); });
+        $("#mp_grille").on("click", ".mp-ajouter", function() { Ajouter_ligne(parseInt($(this).data("jour"))); });
+        $("#mp_grille").on("keydown", ".mp-evt", function(e) {
+            if (e.key === "Delete") { e.preventDefault(); Supprimer_ligne(parseInt($(this).data("index"))); }
+        });
+
+        // Glisser-déposer : déplacer (ou copier avec Ctrl/Alt) un créneau vers un autre jour
+        var index_glisse = null;
+        $("#mp_grille").on("dragstart", ".mp-evt", function(e) {
+            index_glisse = parseInt($(this).data("index"));
+            e.originalEvent.dataTransfer.effectAllowed = "copyMove";
+            e.originalEvent.dataTransfer.setData("text/plain", String(index_glisse));
+        });
+        $("#mp_grille").on("dragover", ".mp-jour", function(e) {
+            if (index_glisse === null) { return; }
+            e.preventDefault();
+            e.originalEvent.dataTransfer.dropEffect = (e.ctrlKey || e.altKey) ? "copy" : "move";
+            $(this).addClass("mp-survol");
+        });
+        $("#mp_grille").on("dragleave", ".mp-jour", function() { $(this).removeClass("mp-survol"); });
+        $("#mp_grille").on("drop", ".mp-jour", function(e) {
+            e.preventDefault();
+            $(this).removeClass("mp-survol");
+            if (index_glisse === null) { return; }
+            var jour = parseInt($(this).data("jour"));
+            var ligne = valeurs[index_glisse];
+            if (e.ctrlKey || e.altKey) {
+                valeurs.push($.extend({}, ligne, {idligne: null, jour: jour}));
+            } else if (ligne.jour !== jour) {
+                ligne.jour = jour;
+            }
+            index_glisse = null;
+            maj_tableau();
+        });
+        $("#mp_grille").on("dragend", ".mp-evt", function() { index_glisse = null; $(".mp-jour").removeClass("mp-survol"); });
+    })
 </script>

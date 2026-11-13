@@ -1100,23 +1100,48 @@
         var portee = jours.length ? (jours.length === 1 ? Texte_jour_long(jours[0]) : "Du " + Texte_jour_court(jours[0]) + " au " + Texte_jour_court(jours[jours.length - 1]) + " (" + Pluriel(jours.length, "jour") + ")")
                                   : "Toute la période " + S.periode.libelle;
         $("#pi_mod_intro").text(portee);
-        $("#pi_mod_modeles").html(S.modeles.map(function(m) { return "<label><input type='checkbox' value='" + m.id + "'> " + Echapper(m.nom) + "</label>"; }).join("") || "<p class='pl-muted'>Aucun modèle de planning.</p>");
+        Frise_modele().reinitialiser();
+        Selecteur_modele().reinitialiser();
         $("input[name='pi_mod_conflit'][value='ignorer']").prop("checked", true);
         $("#pi_mod_apercu").prop("hidden", true).text("");
         $("#pi_modal_modele").modal("show");
     }
-    function Envoyer_modele(apercu) {
-        var modeles = $("#pi_mod_modeles input:checked").map(function() { return +this.value; }).get();
-        if (!modeles.length) { $("#pi_mod_apercu").prop("hidden", false).text("Cochez au moins un modèle."); return; }
+    var selecteur_modele = null;
+    function Selecteur_modele() {
+        if (!selecteur_modele) {
+            selecteur_modele = SelecteurModelesPlanning({conteneur: "#pi_mod_modeles", url: CFG.urls.liste_modeles, csrf: CFG.csrf, parametres: function() {
+                return {collaborateurs: [CFG.idcollaborateur || (S.collab && S.collab.id)].filter(Boolean), date: Iso_jour(Jours_modele()[0])};
+            }, change: function() { Frise_modele().maj(); $("#pi_mod_apercu").prop("hidden", true); }});
+        }
+        return selecteur_modele;
+    }
+    var frise_modele = null;
+    function Jours_modele() {
         var jours = Jours_selectionnes();
         if (!jours.length) { for (var j = Debut_periode(); j <= Fin_periode(); j++) { jours.push(j); } }
+        return jours;
+    }
+    function Frise_modele() {
+        if (!frise_modele) {
+            frise_modele = FriseModelesPlanning({conteneur: "#pi_mod_frise", url: CFG.urls.frise, csrf: CFG.csrf, parametres: function() {
+                return {modeles: Selecteur_modele().selection(), dates: Jours_modele().map(Iso_jour)};
+            }, change: function() { $("#pi_mod_apercu").prop("hidden", true); }});
+        }
+        return frise_modele;
+    }
+    function Envoyer_modele(apercu) {
+        var modeles = Selecteur_modele().selection();
+        if (!modeles.length) { $("#pi_mod_apercu").prop("hidden", false).text("Cochez au moins un modèle."); return; }
+        var jours = Jours_modele();
         if (!apercu && (envoi_en_cours || File_envoi.length)) { toastr.info("Enregistrement en cours, réessayez dans un instant"); return; }
         Ajax(CFG.urls.modele, {idcollaborateur: CFG.idcollaborateur, modeles: JSON.stringify(modeles), dates: JSON.stringify(jours.map(Iso_jour)),
-                               conflit: $("input[name='pi_mod_conflit']:checked").val(), apercu: apercu ? "true" : "false"}).done(function(data) {
+                               conflit: $("input[name='pi_mod_conflit']:checked").val(), apercu: apercu ? "true" : "false",
+                               departs: JSON.stringify(Frise_modele().departs()), forcer: Selecteur_modele().forcer() ? "true" : "false"}).done(function(data) {
             var texte = Pluriel(data.nbre_crees, "évènement") + (apercu ? " sera créé" + (data.nbre_crees > 1 ? "s" : "") : " créé" + (data.nbre_crees > 1 ? "s" : "")) +
                         (data.nbre_supprimes ? ", " + Pluriel(data.nbre_supprimes, "évènement") + " supprimé" + (data.nbre_supprimes > 1 ? "s" : "") : "") +
                         (data.nbre_ignores ? ", " + Pluriel(data.nbre_ignores, "ignoré") + " (chevauchement)" : "") +
                         (data.nbre_hors_contrat ? ", " + data.nbre_hors_contrat + " hors contrat" : "") + ".";
+            (data.messages_restriction || []).forEach(function(message) { texte += " " + message + "."; });
             if (apercu) { $("#pi_mod_apercu").prop("hidden", false).text(texte); return; }
             $("#pi_modal_modele").modal("hide");
             toastr.success(texte);
@@ -1515,6 +1540,7 @@
 
         // Modale modèle
         $("#pi_mod_btn_apercu").on("click", function() { Envoyer_modele(true); });
+
         $("#pi_mod_valider").on("click", function() { Envoyer_modele(false); });
 
         // Objectif et ajustements

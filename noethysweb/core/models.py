@@ -4402,6 +4402,18 @@ class ModelePlanningCollaborateur(models.Model):
     nom = models.CharField(verbose_name="Nom", max_length=300)
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
     inclure_feries = models.BooleanField(verbose_name="Inclure les jours fériés", default=False)
+    nb_semaines = models.IntegerField(verbose_name="Durée du cycle", choices=[(1, "1 semaine"), (2, "2 semaines"), (3, "3 semaines")], default=1)
+    reperage = models.CharField(verbose_name="Repérage du cycle", max_length=20, default="APPLICATION", choices=[
+        ("PARITE", "Semaines impaires / paires"), ("REFERENCE", "Date de référence"), ("APPLICATION", "Choisir au moment de l'application")])
+    date_reference = models.DateField(verbose_name="Date de référence", blank=True, null=True)
+    vacances_cycle = models.CharField(verbose_name="Vacances", max_length=20, default="CONTINU", choices=[
+        ("CONTINU", "Les vacances comptent dans le cycle"), ("PAUSE", "Le cycle se met en pause pendant les vacances"),
+        ("RESTART", "Le cycle repart en semaine 1 après chaque période de vacances")])
+    ancrage_date = models.DateField(verbose_name="Date de la dernière application", blank=True, null=True)
+    ancrage_semaine = models.IntegerField(verbose_name="Semaine de la dernière application", blank=True, null=True)
+    groupes = models.ManyToManyField(GroupeCollaborateurs, verbose_name="Groupes", related_name="modeles_planning", blank=True)
+    postes = models.ManyToManyField(TypePosteCollaborateur, verbose_name="Postes", related_name="modeles_planning", blank=True)
+    collaborateurs = models.ManyToManyField(Collaborateur, verbose_name="Collaborateurs", related_name="modeles_planning", blank=True)
 
     class Meta:
         db_table = "modeles_planning_collaborateur"
@@ -4411,10 +4423,33 @@ class ModelePlanningCollaborateur(models.Model):
     def __str__(self):
         return self.nom
 
+    def Get_libelle_cycle(self):
+        if self.nb_semaines <= 1:
+            return "1 sem."
+        if self.reperage == "PARITE":
+            return "2 sem. · impaire / paire"
+        texte = "%d sem." % self.nb_semaines
+        if self.reperage == "REFERENCE" and self.date_reference:
+            texte += " · réf. %s" % self.date_reference.strftime("%d/%m/%Y")
+        else:
+            texte += " · départ au choix"
+        if self.vacances_cycle == "PAUSE":
+            texte += " · pause vacances"
+        elif self.vacances_cycle == "RESTART":
+            texte += " · S1 après vacances"
+        return texte
+
+    def Get_noms_semaines(self):
+        """ Libellés des semaines du cycle """
+        if self.nb_semaines == 2 and self.reperage == "PARITE":
+            return {1: "Semaine impaire", 2: "Semaine paire"}
+        return {num: "Semaine %d" % num for num in range(1, self.nb_semaines + 1)}
+
 
 class LigneModelePlanningCollaborateur(models.Model):
     idligne = models.AutoField(verbose_name="ID", db_column="IDligne", primary_key=True)
     modele = models.ForeignKey(ModelePlanningCollaborateur, verbose_name="Modèle de planning", on_delete=models.CASCADE)
+    semaine = models.IntegerField(verbose_name="Semaine du cycle", blank=True, null=True, help_text="Vide = toutes les semaines du cycle")
     jour = models.IntegerField(verbose_name="Jour", choices=JOURS_COMPLETS_SEMAINE)
     periode = models.CharField(verbose_name="Période", max_length=50, choices=[("TOUTES", "Toutes les périodes"), ("SCOLAIRES", "Période scolaire"), ("VACANCES", "Période de vacances")], default="TOUTES")
     heure_debut = models.TimeField(verbose_name="Début")

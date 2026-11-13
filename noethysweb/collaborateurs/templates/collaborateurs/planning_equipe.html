@@ -330,7 +330,7 @@
             <div class="modal-body">
                 <div id="pl_ls_modele_div">
                     <div class="pl-label">Modèles de planning</div>
-                    <div id="pl_ls_modeles" class="pl-grille-coches"></div>
+                    <div id="pl_ls_modeles"></div>
                 </div>
                 <div id="pl_ls_copie_div" class="form-row">
                     <div class="form-group col-md-4"><label for="pl_ls_source_debut">Copier du</label><input type="date" id="pl_ls_source_debut" class="form-control"></div>
@@ -351,6 +351,7 @@
                         <div id="pl_ls_collabs_choix" class="pl-grille-coches" hidden></div>
                     </div>
                 </div>
+                <div id="pl_ls_frise" aria-live="polite" hidden></div>
                 <div class="pl-label mt-2">Si un évènement existe déjà</div>
                 <div class="pl-grille-3">
                     <label class="pl-radio-carte"><input type="radio" name="pl_ls_conflit" value="ignorer" checked><span><strong>Ignorer</strong><small>Rien n'est écrasé</small></span></label>
@@ -534,6 +535,8 @@
                 suivi_consommations: "{% if perms.core.suivi_consommations %}{% url 'suivi_consommations' %}{% endif %}",
                 enregistrer: "{% url 'ajax_planning_equipe_enregistrer' %}",
                 modele: "{% url 'ajax_planning_equipe_appliquer_modele' %}",
+                frise: "{% url 'ajax_modeles_planning_get_frise' %}",
+                liste_modeles: "{% url 'ajax_modeles_planning_get_liste' %}",
                 copie: "{% url 'ajax_planning_equipe_copier_periode' %}",
                 note: "{% url 'ajax_planning_equipe_enregistrer_note' %}",
                 affichage: "{% url 'ajax_planning_equipe_memoriser_affichage' %}",
@@ -545,5 +548,7 @@
             }
         };
     </script>
+    <script src="{% static 'js/frise_modeles_planning.js' %}"></script>
+    <script src="{% static 'js/selecteur_modeles_planning.js' %}"></script>
     <script src="{% static 'js/planning_equipe.js' %}"></script>
 {% endblock scripts %}

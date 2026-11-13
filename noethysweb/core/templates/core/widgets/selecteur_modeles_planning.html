@@ -1,0 +1,31 @@
+{% load static %}
+<select name="{{ widget.name }}" id="{{ widget.attrs.id }}" multiple hidden aria-hidden="true" tabindex="-1">{% for group_name, group_choices, group_index in widget.optgroups %}{% for option in group_choices %}<option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>{% endfor %}{% endfor %}</select>
+<input type="hidden" name="forcer_modeles" id="{{ widget.attrs.id }}_forcer" value="">
+<div id="{{ widget.attrs.id }}_selecteur"></div>
+<script src="{% static 'js/selecteur_modeles_planning.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        var $select = $("#{{ widget.attrs.id }}");
+        function Collaborateurs() {
+            {% if idcollaborateur %}return [{{ idcollaborateur }}];{% elif collaborateurs_selector %}return ($("{{ collaborateurs_selector|escapejs }}").val() || []).map(Number);{% else %}return [];{% endif %}
+        }
+        function Date_debut() {
+            var texte = ($("#id_periode").val() || "").split(" - ")[0];
+            var date = moment(texte, "DD/MM/YYYY", true);
+            return date.isValid() ? date.format("YYYY-MM-DD") : "";
+        }
+        var selecteur = SelecteurModelesPlanning({
+            conteneur: "#{{ widget.attrs.id }}_selecteur", url: "{% url 'ajax_modeles_planning_get_liste' %}",
+            csrf: $("input[name='csrfmiddlewaretoken']").first().val(),
+            selection: $select.val() || [],
+            parametres: function() { return {collaborateurs: Collaborateurs(), date: Date_debut()}; },
+            change: function(ids, forcer) {
+                $select.val(ids.map(String)).trigger("change");
+                $("#{{ widget.attrs.id }}_forcer").val(forcer ? "true" : "");
+            }
+        });
+        {% if collaborateurs_selector %}$("{{ collaborateurs_selector|escapejs }}").on("change", selecteur.maj);{% endif %}
+        $("#id_periode").on("change apply.daterangepicker", selecteur.maj);
+        selecteur.maj();
+    });
+</script>

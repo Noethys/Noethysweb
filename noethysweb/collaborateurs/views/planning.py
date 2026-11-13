@@ -71,7 +71,7 @@ def Get_donnees(request):
         "collaborateurs": collaborateurs,
         "groupes": [{"id": groupe.pk, "nom": groupe.nom} for groupe in GroupeCollaborateurs.objects.all().order_by("nom")],
         "qualifications": [{"id": qualification.pk, "nom": qualification.nom} for qualification in TypeQualificationCollaborateur.objects.all().order_by("nom")],
-        "modeles": [{"id": modele.pk, "nom": modele.nom} for modele in ModelePlanningCollaborateur.objects.all().order_by("nom")],
+        "modeles": [{"id": modele.pk, "nom": modele.nom, "nb_semaines": modele.nb_semaines, "cycle": modele.Get_libelle_cycle()} for modele in ModelePlanningCollaborateur.objects.all().order_by("nom")],
         "reglages": utils_planning.Get_reglages(request.user),
         "peut_regler_tous": utils_planning.Peut_regler_pour_tous(request.user),
         "affichage": affichage,
@@ -161,11 +161,18 @@ def Appliquer_modele(request):
     if len(dates) > 400:
         return JsonResponse({"erreur": "La période est trop longue"}, status=400)
     apercu = request.POST.get("apercu") == "true"
-    nouveaux, hors_contrat = utils_planning.Generer_depuis_modeles(modeles=modeles, collaborateurs=collaborateurs, dates=dates)
+    from collaborateurs.utils.utils_modeles_planning import Generateur, Get_departs, Repartir, Memoriser_recents
+    generateur = Generateur(modeles=modeles, dates=dates, departs=Get_departs(request))
+    repartition, messages_restriction = Repartir(modeles=modeles, collaborateurs=collaborateurs, date=dates[0], forcer=request.POST.get("forcer") == "true")
+    nouveaux, hors_contrat = utils_planning.Generer_depuis_modeles(generateur=generateur, repartition=repartition, modeles=modeles, collaborateurs=collaborateurs, dates=dates)
     with transaction.atomic():
         resultat = utils_planning.Creer_par_lot(nouveaux=nouveaux, collaborateurs=collaborateurs, dates=dates, conflit=request.POST.get("conflit", "ignorer"),
                                                 apercu=apercu, user=request.user, libelle="modèle de planning")
+        if not apercu:
+            generateur.Memoriser_ancrages()
+            Memoriser_recents(request.user, modeles)
     resultat["nbre_hors_contrat"] = hors_contrat
+    resultat["messages_restriction"] = messages_restriction
     return JsonResponse(resultat)
 
 

@@ -4,9 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import datetime
-from dateutil import rrule
-from core.utils import utils_dates
-from core.models import LigneModelePlanningCollaborateur, EvenementCollaborateur, ContratCollaborateur, Vacance, Ferie
+from core.models import EvenementCollaborateur, ContratCollaborateur
 
 
 def Is_evenement_in_contrat(evenement=None, contrats=[]):
@@ -19,36 +17,24 @@ def Is_evenement_in_contrat(evenement=None, contrats=[]):
     return False
 
 
-def Generation_evenements(idcollaborateur=None, modeles=[], date_debut=None, date_fin=None):
+def Generation_evenements(idcollaborateur=None, modeles=[], date_debut=None, date_fin=None, departs={}, generateur=None, modeles_autorises=None):
     """ Application de modèles de planning à un collaborateur """
-    # Importation des données diverses
-    liste_vacances = Vacance.objects.all()
-    liste_feries = Ferie.objects.all()
-    jours_rrule = [rrule.MO, rrule.TU, rrule.WE, rrule.TH, rrule.FR, rrule.SA, rrule.SU]
+    from collaborateurs.utils.utils_modeles_planning import Generateur
+    if not generateur:
+        dates = [date_debut + datetime.timedelta(days=n) for n in range((date_fin - date_debut).days + 1)]
+        generateur = Generateur(modeles=modeles, dates=dates, departs=departs)
 
     # Recherche des évènements à créer
     liste_evenements = []
-    for modele in modeles:
-        for evenement_modele in LigneModelePlanningCollaborateur.objects.select_related("type_evenement").filter(modele=modele):
-            for date in list(rrule.rrule(rrule.WEEKLY, wkst=rrule.MO, byweekday=[jours_rrule[evenement_modele.jour]], dtstart=date_debut, until=date_fin)):
-                date = date.date()
-
-                # Validation des fériés
-                if not modele.inclure_feries and utils_dates.EstFerie(date, liste_feries):
-                    continue
-
-                # Validation des périodes de vacances ou scolaires
-                est_vacances = utils_dates.EstEnVacances(date=date, liste_vacances=liste_vacances)
-                if evenement_modele.periode == "SCOLAIRES" and est_vacances: continue
-                if evenement_modele.periode == "VACANCES" and not est_vacances: continue
-
-                # Mémorisation de l'évènement à créer
-                evenement = EvenementCollaborateur(collaborateur_id=idcollaborateur, type_evenement=evenement_modele.type_evenement,
-                                                   date_debut=datetime.datetime.combine(date, evenement_modele.heure_debut),
-                                                   date_fin=datetime.datetime.combine(date, evenement_modele.heure_fin),
-                                                   titre=evenement_modele.titre, affectation_id=evenement_modele.affectation_id)
-
-                liste_evenements.append(evenement)
+    for date, ligne in generateur.Get_lignes_par_date():
+        if modeles_autorises is not None and ligne.modele_id not in modeles_autorises:
+            continue
+        date_fin_evenement = datetime.datetime.combine(date, ligne.heure_fin)
+        if ligne.heure_fin <= ligne.heure_debut:
+            date_fin_evenement += datetime.timedelta(days=1)
+        liste_evenements.append(EvenementCollaborateur(collaborateur_id=idcollaborateur, type_evenement=ligne.type_evenement,
+                                                       date_debut=datetime.datetime.combine(date, ligne.heure_debut), date_fin=date_fin_evenement,
+                                                       titre=ligne.titre, affectation_id=ligne.affectation_id))
 
     # S'il n'y a aucun évènement à générer
     if not liste_evenements:

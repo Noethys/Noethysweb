@@ -21,9 +21,12 @@ def Get_form_ligne(request):
     index = request.POST.get("index", None)
 
     initial_data = {}
-    if "valeur" in request.POST:
+    if request.POST.get("valeur"):
         initial_data = json.loads(request.POST["valeur"])
-        initial_data["index"] = index
+    if action in ("ajouter", "modifier"):
+        initial_data["index"] = index if action == "modifier" else ""
+        initial_data["nb_semaines"] = request.POST.get("nb_semaines", 1)
+        initial_data["parite"] = request.POST.get("parite", "")
 
     # Création et rendu html du formulaire
     if action in ("ajouter", "modifier"):
@@ -39,6 +42,7 @@ def Get_form_ligne(request):
     # Transformation en chaîne
     dict_retour = {
         "idligne": form.cleaned_data["idligne"],
+        "semaine": form.cleaned_data["semaine"] if int(form.cleaned_data.get("nb_semaines") or 1) > 1 else None,
         "jour": form.cleaned_data["jour"],
         "periode": form.cleaned_data["periode"],
         "heure_debut": str(form.cleaned_data["heure_debut"]),
@@ -56,7 +60,7 @@ class Page(crud.Page):
     url_ajouter = "modeles_plannings_collaborateurs_ajouter"
     url_modifier = "modeles_plannings_collaborateurs_modifier"
     url_supprimer = "modeles_plannings_collaborateurs_supprimer"
-    description_liste = "Les modèles de plannings sont des semaines types d'événements (horaires de travail, réunions...) que vous pouvez appliquer en une seule fois au planning d'un ou plusieurs collaborateurs."
+    description_liste = "Les modèles de plannings sont des semaines types d'événements (horaires de travail, réunions...), ou des roulements de 2 ou 3 semaines, que vous pouvez appliquer en une seule fois au planning d'un ou plusieurs collaborateurs."
     description_saisie = "Saisissez le nom du modèle et ajoutez les événements qui le composent puis cliquez sur le bouton Enregistrer."
     objet_singulier = "un modèle de planning"
     objet_pluriel = "des modèles de planning"
@@ -84,7 +88,7 @@ class Page(crud.Page):
         for ligne in lignes:
             idligne = ligne["idligne"] if ligne["idligne"] else None
             LigneModelePlanningCollaborateur.objects.update_or_create(pk=idligne, defaults={"modele": self.object,
-                "jour": ligne["jour"], "periode": ligne["periode"], "heure_debut": ligne["heure_debut"], "heure_fin": ligne["heure_fin"],
+                "semaine": (ligne.get("semaine") or None) if self.object.nb_semaines > 1 else None, "jour": ligne["jour"], "periode": ligne["periode"], "heure_debut": ligne["heure_debut"], "heure_fin": ligne["heure_fin"],
                 "type_evenement_id": ligne["type_evenement"], "titre": ligne["titre"], "affectation_id": ligne.get("affectation") or None})
 
         # Suppression des lignes supprimées
@@ -110,12 +114,21 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idmodele", "nom", "observations"]
+        cycle = columns.TextColumn("Cycle", sources=None, processor='Get_cycle')
+        disponibilite = columns.TextColumn("Disponible pour", sources=None, processor='Get_disponibilite')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_standard')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idmodele", "nom", "observations"]
+            columns = ["idmodele", "nom", "cycle", "disponibilite", "observations"]
             ordering = ["nom"]
+
+        def Get_cycle(self, instance, *args, **kwargs):
+            return instance.Get_libelle_cycle()
+
+        def Get_disponibilite(self, instance, *args, **kwargs):
+            from collaborateurs.utils.utils_modeles_planning import Get_texte_restriction
+            return Get_texte_restriction(instance) or "Tous"
 
 
 class Ajouter(Page, crud.Ajouter):
