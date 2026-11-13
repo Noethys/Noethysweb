@@ -16,15 +16,32 @@
                     {# Boutons de commandes #}
                     <div class="buttonHolder">
                         <a class="btn btn-danger" href="{% url 'lots_prelevements_liste' %}"><i class='fa fa-times margin-r-5'></i>Fermer</a>
-                        <button type="button" class="btn btn-default" data-toggle="dropdown"><i class='fa fa-plus margin-r-5'></i>Ajouter des prélèvements</button>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'lots_prelevements_ajouter_piece' idlot=lot.pk %}">Ajouter des factures</a>
-                            <a class="dropdown-item" href="{% url 'lots_prelevements_ajouter_piece_manuelle' idlot=lot.pk %}">Ajouter un prélèvement manuel</a>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default" data-toggle="dropdown"><i class='fa fa-plus margin-r-5'></i>Ajouter des prélèvements</button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{% url 'lots_prelevements_ajouter_piece' idlot=lot.pk %}">Ajouter des factures</a>
+                                <a class="dropdown-item" href="{% url 'lots_prelevements_ajouter_piece_manuelle' idlot=lot.pk %}">Ajouter un prélèvement manuel</a>
+                            </div>
                         </div>
                         <a class="btn btn-default" href="{% url 'lots_prelevements_modifier' pk=lot.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
                         <button class="btn btn-default" id="bouton_adresses"><i class='fa fa-search margin-r-5'></i>Vérifier les adresses</button>
                         <button class="btn btn-default" id="bouton_exporter"><i class='fa fa-bolt margin-r-5'></i>Générer le fichier d'export</button>
-                        <button class="btn btn-default" onclick="impression_pdf()" title="Aperçu PDF"><i class='fa fa-file-pdf-o margin-r-5'></i>Aperçu PDF</button>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Imprimer un document PDF"><i class='fa fa-print margin-r-5'></i>Imprimer</button>
+                            <div class="dropdown-menu">
+                                <h6 class="dropdown-header">Documents du lot</h6>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('liste'); return false;"><i class="fa fa-fw fa-list-alt margin-r-5"></i>Liste des prélèvements</a>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('etat_nominatif'); return false;"><i class="fa fa-fw fa-users margin-r-5"></i>État nominatif détaillé</a>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('recap_activites'); return false;"><i class="fa fa-fw fa-pie-chart margin-r-5"></i>Récapitulatif par activité</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Bordereaux de remise</h6>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('bordereau_banque'); return false;"><i class="fa fa-fw fa-university margin-r-5"></i>Bordereau de remise à la banque{% if lot.modele.format == "prive" %} <span class="badge badge-info">Secteur privé</span>{% endif %}</a>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('bordereau_public'); return false;"><i class="fa fa-fw fa-institution margin-r-5"></i>Bordereau de remise au comptable public{% if lot.modele.format == "public_dft" %} <span class="badge badge-info">Secteur public</span>{% endif %}</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Familles</h6>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('avis_familles'); return false;"><i class="fa fa-fw fa-envelope-o margin-r-5"></i>Avis de prélèvement aux familles</a>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="alert alert-warning alert-dismissible mt-3">
@@ -153,12 +170,13 @@
         });
 
         // Impression du PDF
-        function impression_pdf() {
+        function impression_pdf(type_document) {
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_lots_prelevements_impression_pdf' %}",
                 data: {
                     idlot: {{ lot.pk }},
+                    type_document: type_document || "liste",
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                 },
                 datatype: "json",

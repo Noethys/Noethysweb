@@ -329,7 +329,11 @@ def Exporter(request):
 def Impression_pdf(request):
     """ Impression du lot """
     from facturation.utils import utils_impression_lot_pes
-    impression = utils_impression_lot_pes.Impression(titre="Edition d'un export", dict_donnees={"idlot": int(request.POST.get("idlot"))})
+    type_document = request.POST.get("type_document", "liste")
+    if type_document not in utils_impression_lot_pes.DOCUMENTS:
+        return JsonResponse({"erreur": "Type de document inconnu"}, status=401)
+    classe, titre = utils_impression_lot_pes.DOCUMENTS[type_document]
+    impression = classe(titre=titre, dict_donnees={"idlot": int(request.POST.get("idlot"))}, request=request)
     if impression.erreurs:
         return JsonResponse({"erreur": impression.erreurs[0]}, status=401)
     nom_fichier = impression.Get_nom_fichier()

@@ -19,7 +19,21 @@
                         <a class="btn btn-default" href="{% url 'lots_pes_ajouter_piece' idlot=lot.pk %}"><i class='fa fa-plus margin-r-5'></i>Ajouter des pièces</a>
                         <a class="btn btn-default" href="{% url 'lots_pes_modifier' pk=lot.pk %}"><i class="fa fa-pencil margin-r-5"></i>Modifier les paramètres</a>
                         <button class="btn btn-default" id="bouton_exporter"><i class='fa fa-bolt margin-r-5'></i>Générer le fichier d'export</button>
-                        <button class="btn btn-default" onclick="impression_pdf()" title="Aperçu PDF"><i class='fa fa-file-pdf-o margin-r-5'></i>Aperçu PDF</button>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Imprimer un document PDF"><i class='fa fa-print margin-r-5'></i>Imprimer</button>
+                            <div class="dropdown-menu">
+                                <h6 class="dropdown-header">Documents de l'export</h6>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('liste'); return false;"><i class="fa fa-fw fa-list-alt margin-r-5"></i>Liste détaillée des pièces</a>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('recap_imputations'); return false;"><i class="fa fa-fw fa-pie-chart margin-r-5"></i>Récapitulatif par imputation</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Pour l'ordonnateur et le comptable</h6>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('bordereau_titres'); return false;"><i class="fa fa-fw fa-certificate margin-r-5"></i>Bordereau des titres de recettes <span class="badge badge-info">À signer</span></a>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('etat_prelevements'); return false;"><i class="fa fa-fw fa-credit-card margin-r-5"></i>État des prélèvements</a>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Avant l'envoi</h6>
+                                <a class="dropdown-item" href="#" onclick="impression_pdf('controle'); return false;"><i class="fa fa-fw fa-warning margin-r-5"></i>Rapport de contrôle</a>
+                            </div>
+                        </div>
                     </div>
 
                     {# Paramètres du lot #}
@@ -112,12 +126,13 @@
         });
 
         // Impression du PDF
-        function impression_pdf() {
+        function impression_pdf(type_document) {
             $.ajax({
                 type: "POST",
                 url: "{% url 'ajax_lots_pes_impression_pdf' %}",
                 data: {
                     idlot: {{ lot.pk }},
+                    type_document: type_document || "liste",
                     csrfmiddlewaretoken: '{{ csrf_token }}',
                 },
                 datatype: "json",

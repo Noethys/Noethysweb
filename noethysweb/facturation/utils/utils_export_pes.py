@@ -546,9 +546,9 @@ class Exporter(ExporterBase):
             if xsd.validate(doc):
                 return True
 
-            # Affichage des erreurs
-            for error in xsd.error_log:
-                self.erreurs.append("Ligne %d : %s" % (error.line, error.message))
+            # Affichage des erreurs traduites pour l'utilisateur
+            from facturation.utils import utils_erreurs_xsd
+            self.erreurs.extend(utils_erreurs_xsd.Traduire_erreurs(error_log=xsd.error_log, doc=doc, format="pes"))
             return False
 
         except Exception as err:

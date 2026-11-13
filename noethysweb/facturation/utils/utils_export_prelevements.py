@@ -3,13 +3,20 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import decimal, os, calendar, datetime, uuid, zipfile, time
+import decimal, os, calendar, datetime, uuid, zipfile, time, re, unicodedata
 from io import BytesIO
 from urllib.request import urlretrieve
 from xml.dom.minidom import Document
 from django.conf import settings
 from core.models import PrelevementsLot, Prelevements, Organisateur
 from core.utils import utils_texte, utils_fichiers, utils_adresse, utils_preferences
+
+
+def Formate_identifiant_sepa(texte="", longueur=35):
+    """ Rend un texte conforme au pattern SEPA RestrictedIdentificationSEPA1 (sans accents, 35 caractères max) """
+    texte = unicodedata.normalize("NFKD", texte or "").encode("ascii", "ignore").decode("ascii")
+    texte = re.sub(r"[^A-Za-z0-9+?/\-:().,' ]", "", texte)
+    return texte[:longueur].strip()
 
 
 class Exporter():
@@ -189,7 +196,7 @@ class Exporter():
             # PmtInfId
             PmtInfId = doc.createElement("PmtInfId")
             PmtInf.appendChild(PmtInfId)
-            PmtInfId.appendChild(doc.createTextNode("%s %s" % (self.lot.nom, dict_lot["sequence"])))
+            PmtInfId.appendChild(doc.createTextNode(Formate_identifiant_sepa("%s %s" % (self.lot.nom[:30], dict_lot["sequence"]))))
 
             # PmtMtd
             PmtMtd = doc.createElement("PmtMtd")
@@ -675,9 +682,9 @@ class Exporter():
             if xsd.validate(doc):
                 return True
 
-            # Affichage des erreurs
-            for error in xsd.error_log:
-                self.erreurs.append("Ligne %d : %s" % (error.line, error.message))
+            # Affichage des erreurs traduites pour l'utilisateur
+            from facturation.utils import utils_erreurs_xsd
+            self.erreurs.extend(utils_erreurs_xsd.Traduire_erreurs(error_log=xsd.error_log, doc=doc, format="sepa"))
             return False
 
         except Exception as err:
