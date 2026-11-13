@@ -1,0 +1,225 @@
+/*  Copyright (c) 2019-2026 Ivan LUCAS.
+    Noethysweb, application de gestion multi-activités.
+    Distribué sous licence GNU GPL.
+    Planning individuel des collaborateurs (complète planning_equipe.css) */
+
+.pi-app {--pi-cellule: 34px;}
+.pi-app .pl-side {max-width: 320px;}
+.pi-app .pl-acc-corps .pl-label:first-child {margin-top: 0;}
+.pi-titre-periode {font-size: 16px; font-weight: 700; min-width: 92px; text-align: center; font-variant-numeric: tabular-nums;}
+.pi-corps {position: relative; outline: none; user-select: none; -webkit-user-select: none;}
+.pi-corps:focus-visible {box-shadow: inset 0 0 0 2px var(--pl-primaire);}
+.pi-chargement {padding: 60px 20px; text-align: center; color: var(--pl-muted);}
+.pi-legende-bas {display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 8px 14px 10px; font-size: 12px; color: var(--pl-muted);}
+.pi-legende-bas .pl-badge {font-size: 11px;}
+.pi-lecture-seule {display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--pl-muted);}
+
+/* Etats communs des jours */
+.pi-j {position: relative; cursor: pointer;}
+.pi-j.we {background-color: var(--pl-fond-doux);}
+.pi-j.ferie {background-color: var(--pl-ferie-fond) !important;}
+.pi-j.hors {background-image: repeating-linear-gradient(135deg, rgba(148, 163, 184, 0.2) 0 4px, transparent 4px 8px);}
+.pi-j.auj {box-shadow: inset 0 0 0 2px var(--pl-primaire);}
+.pi-j.sel {background-color: rgba(var(--pl-primaire-rgb), 0.2) !important; box-shadow: inset 0 0 0 2px var(--pl-primaire);}
+.pi-j.curseur {outline: 2px dashed var(--pl-texte); outline-offset: -3px;}
+.pi-j.filtre {opacity: 0.55;}
+.pi-pile {display: flex; height: 4px; border-radius: 2px; overflow: hidden;}
+.pi-pile i {display: block; height: 100%;}
+
+/* ---------------- Vue calendrier ---------------- */
+.pi-cal-grille {display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 14px; padding: 14px;}
+.pi-cal-mois {border: 1px solid var(--pl-bordure); border-radius: 10px; padding: 10px 10px 8px; background: var(--pl-carte);}
+.pi-cal-mois.courant {border-color: rgba(var(--pl-primaire-rgb), 0.6); box-shadow: 0 0 0 1px rgba(var(--pl-primaire-rgb), 0.35);}
+.pi-cal-tete {display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 6px;}
+.pi-cal-tete h3 {font-size: 14px; font-weight: 700; margin: 0; text-transform: capitalize;}
+.pi-cal-tete span {font-size: 12px; font-weight: 700; color: var(--pl-muted); font-variant-numeric: tabular-nums;}
+.pi-cal-jours {display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px;}
+.pi-cal-jl {font-size: 10px; font-weight: 700; color: var(--pl-muted); text-align: center; padding-bottom: 2px;}
+.pi-cal-c {height: var(--pi-cellule); border-radius: 6px; display: flex; flex-direction: column; align-items: center; padding-top: 4px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--pl-texte);}
+.pi-cal-c.vide {cursor: default; background: transparent;}
+.pi-cal-c.we {color: #8a94a3;}
+.pi-cal-c.ferie {color: var(--pl-ferie-texte);}
+.pi-cal-c.ferie::before {content: ""; position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: 3px; background: var(--pl-ferie);}
+.pi-cal-c.vac::after {content: ""; position: absolute; left: 3px; right: 3px; top: 0; height: 3px; border-radius: 2px; background: var(--pl-vacances);}
+.pi-cal-c .pi-pile {width: 72%; margin-top: auto; margin-bottom: 5px;}
+
+/* ---------------- Vue colonnes (un mois par colonne) ---------------- */
+.pi-tableau-box {overflow: auto; max-height: calc(100vh - 260px); min-height: 360px;}
+.pi-app:fullscreen .pi-tableau-box {max-height: calc(100vh - 150px);}
+.pi-co {border-collapse: separate; border-spacing: 0; width: 100%; min-width: 980px; table-layout: fixed; font-size: 12px;}
+.pi-co th, .pi-co td {padding: 0; border-bottom: 1px solid var(--pl-bordure-legere); border-left: 1px solid var(--pl-bordure-legere);}
+.pi-co th:first-child, .pi-co td:first-child {border-left: 0;}
+.pi-co thead th {position: sticky; top: 0; z-index: 2; background: var(--pl-fond-doux); height: 42px; border-bottom: 1px solid var(--pl-bordure); text-align: left; padding: 0 6px;
+    font-size: 13px; font-weight: 700; line-height: 1.15; text-transform: capitalize;}
+.pi-co thead th small {display: block; font-size: 11px; font-weight: 600; color: var(--pl-muted); font-variant-numeric: tabular-nums; text-transform: none;}
+.pi-co thead th.courant {color: var(--pl-primaire); box-shadow: inset 0 -2px 0 var(--pl-primaire);}
+.pi-co td {height: 27px;}
+.pi-co td.nx {background: repeating-linear-gradient(135deg, rgba(148, 163, 184, 0.16) 0 4px, transparent 4px 8px); cursor: default;}
+.pi-co td.vac {box-shadow: inset 3px 0 0 var(--pl-vacances);}
+.pi-co td.vac.sel {box-shadow: inset 3px 0 0 var(--pl-vacances), inset 0 0 0 2px var(--pl-primaire);}
+.pi-co td.lundi {border-top: 1px solid #cfd6df;}
+.pi-co-c {display: flex; align-items: center; gap: 4px; height: 100%; padding: 0 4px; min-width: 0;}
+.pi-co-jl {width: 9px; font-size: 9.5px; font-weight: 700; color: var(--pl-muted); text-align: center; flex-shrink: 0;}
+.pi-co-n {width: 15px; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0;}
+.pi-co td.we .pi-co-jl, .pi-co td.we .pi-co-n {color: #8a94a3;}
+.pi-co td.ferie .pi-co-jl, .pi-co td.ferie .pi-co-n {color: var(--pl-ferie-texte);}
+.pi-pastille-jour {flex: 1 1 0; min-width: 0; height: 19px; line-height: 19px; border-radius: 5px; color: #fff; font-size: 11px; font-weight: 700; display: block; text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 3px; box-shadow: 0 1px 1px rgba(15, 23, 42, 0.12); font-variant-numeric: tabular-nums;}
+.pi-pastille-jour.ferie {background: transparent; color: var(--pl-ferie-texte); box-shadow: none;}
+.pi-pastille-jour.multi {background-image: linear-gradient(90deg, transparent 0 calc(100% - 6px), rgba(255, 255, 255, 0.45) calc(100% - 6px));}
+.pi-co tfoot td {position: sticky; bottom: 0; z-index: 1; background: var(--pl-fond-doux); height: 40px; border-top: 2px solid var(--pl-bordure); padding: 0 6px; font-weight: 700;
+    font-variant-numeric: tabular-nums; font-size: 13px; line-height: 1.15;}
+.pi-co tfoot td small {display: block; font-size: 11px; font-weight: 600; color: var(--pl-muted);}
+
+/* ---------------- Vue mois x jours ---------------- */
+.pi-mj {border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1050px; font-size: 12px;}
+.pi-mj th, .pi-mj td {border-bottom: 1px solid var(--pl-bordure-legere); padding: 0; text-align: center;}
+.pi-mj thead th {position: sticky; top: 0; z-index: 2; background: var(--pl-fond-doux); height: 34px; font-size: 11px; font-weight: 700; color: var(--pl-muted);
+    font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--pl-bordure);}
+.pi-mj .pi-mj-nom {position: sticky; left: 0; z-index: 1; text-align: left; padding: 0 10px 0 14px; font-weight: 700; font-size: 13px; white-space: nowrap; width: 96px;
+    background: var(--pl-carte); text-transform: capitalize;}
+.pi-mj thead .pi-mj-nom {z-index: 3; background: var(--pl-fond-doux); text-transform: uppercase; font-size: 11px; color: var(--pl-muted);}
+.pi-mj tr.courant .pi-mj-nom {color: var(--pl-primaire);}
+.pi-mj .pi-mj-total {text-align: right; padding: 0 14px 0 8px; white-space: nowrap; font-weight: 700; font-variant-numeric: tabular-nums; width: 108px; border-left: 1px solid var(--pl-bordure);}
+.pi-mj .pi-mj-total small {display: block; font-size: 11px; font-weight: 600; color: var(--pl-muted);}
+.pi-mj td.pi-j {height: 44px; min-width: 29px; vertical-align: top; border-left: 1px solid var(--pl-bordure-legere);}
+.pi-mj td.pi-j.lundi {border-left: 2px solid #cfd6df;}
+.pi-mj td.nx {background: repeating-linear-gradient(135deg, rgba(148, 163, 184, 0.16) 0 4px, transparent 4px 8px); border-left: 1px solid var(--pl-bordure-legere);}
+.pi-mj .pi-mj-jl {display: block; font-size: 9px; font-weight: 700; color: var(--pl-muted); padding-top: 4px; line-height: 1;}
+.pi-mj .pi-mj-v {display: block; font-size: 10.5px; font-weight: 700; line-height: 1.5; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden;}
+.pi-mj td.ferie .pi-mj-jl, .pi-mj td.ferie .pi-mj-v {color: var(--pl-ferie-texte);}
+.pi-mj td.vac::after {content: ""; position: absolute; left: 2px; right: 2px; top: 0; height: 3px; background: var(--pl-vacances); border-radius: 0 0 2px 2px;}
+.pi-mj td .pi-pile {margin: 0 4px;}
+.pi-mj tfoot td {background: var(--pl-fond-doux); font-weight: 700; height: 38px; border-top: 2px solid var(--pl-bordure);}
+
+/* ---------------- Barre d'actions de la sélection ---------------- */
+.pi-actions {position: fixed; bottom: 12px; left: 50%; z-index: 1030; width: max-content; max-width: calc(100vw - 16px); display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    padding: 6px 8px 6px 12px; background: #0f172a; color: #fff; border-radius: 10px; box-shadow: 0 12px 28px rgba(15, 23, 42, 0.35); font-size: 13px; font-weight: 600;}
+.pi-actions .pl-btn {height: 30px; background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.28); font-size: 12px;}
+.pi-actions .pl-btn:hover:not(:disabled) {background: rgba(255, 255, 255, 0.12);}
+.pi-actions .pl-btn.pl-btn-primaire {background: var(--pl-primaire); border-color: var(--pl-primaire);}
+.pi-actions .pl-btn:focus-visible {outline-color: #fff;}
+
+/* ---------------- Popover du jour et menu contextuel ---------------- */
+.pi-pop {position: fixed; z-index: 1035; width: 330px; max-width: calc(100vw - 16px); background: var(--pl-carte); border: 1px solid var(--pl-bordure); border-radius: 12px;
+    box-shadow: var(--pl-ombre); padding: 12px;}
+.pi-pop h3 {font-size: 14px; font-weight: 700; margin: 0 26px 2px 0;}
+.pi-pop .pi-pop-sous {font-size: 12px; color: var(--pl-muted); margin-bottom: 6px; display: flex; flex-wrap: wrap; gap: 6px;}
+.pi-pop-fermer {position: absolute; top: 8px; right: 8px;}
+.pi-evt {display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--pl-bordure-legere); font-size: 13px;}
+.pi-evt-txt {flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; line-height: 1.25;}
+.pi-evt-txt b {font-variant-numeric: tabular-nums;}
+.pi-evt-txt small {color: var(--pl-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.pi-pop-actions {display: flex; align-items: center; gap: 6px; margin-top: 10px;}
+.pi-pop-actions .pl-espace {flex: 1 1 0;}
+.pi-menu-pose {display: flex; align-items: center; gap: 6px; padding: 2px 6px 2px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;}
+.pi-menu-pose:hover {background: var(--pl-fond-doux);}
+.pi-menu-pose span.nom {flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+.pl-menu .pi-menu-pose button {width: auto; min-height: 26px; padding: 0 7px; font-size: 11px; border: 1px solid var(--pl-bordure); background: var(--pl-carte);}
+.pl-menu .pi-menu-titre {font-size: 11px; font-weight: 700; color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.03em; padding: 6px 10px 2px;}
+.pl-menu hr {border: 0; border-top: 1px solid var(--pl-bordure-legere); margin: 4px 0;}
+.pl-menu kbd {margin-left: auto; padding: 0; background: transparent; color: var(--pl-muted); font: inherit; font-size: 11px; font-weight: 600; box-shadow: none;}
+.pi-app .pl-menu {position: fixed; z-index: 1065; min-width: 270px; background: var(--pl-carte); border: 1px solid var(--pl-bordure); border-radius: 10px; box-shadow: var(--pl-ombre); padding: 6px; max-height: calc(100vh - 16px); overflow: auto;}
+
+/* ---------------- Collaborateur ---------------- */
+.pi-collab {display: flex; align-items: center; gap: 8px;}
+.pi-collab select {flex: 1 1 0; min-width: 0;}
+.pi-contrats {list-style: none; margin: 8px 0 0; padding: 0; font-size: 12px; color: var(--pl-muted);}
+.pi-contrats li {padding: 2px 0;}
+.pi-contrats strong {color: var(--pl-texte);}
+
+/* ---------------- Objectif ---------------- */
+.pi-obj-chiffres {display: flex; align-items: baseline; justify-content: space-between; gap: 8px;}
+.pi-obj-chiffres strong {font-size: 22px; color: var(--pl-primaire); font-variant-numeric: tabular-nums;}
+.pi-obj-chiffres span {font-size: 13px; color: var(--pl-muted); font-variant-numeric: tabular-nums;}
+.pi-jauge {position: relative; height: 10px; border-radius: 5px; background: var(--pl-fond-groupe); overflow: hidden; margin: 8px 0 4px;}
+.pi-jauge i {position: absolute; top: 0; bottom: 0; left: 0; background: var(--pl-primaire); border-radius: 5px;}
+.pi-jauge i.depasse {background: #c2410c;}
+.pi-jauge b {position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--pl-texte); opacity: 0.55;}
+.pi-jauge-txt {display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--pl-muted);}
+.pi-obj-ligne {display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--pl-bordure-legere); font-size: 13px;}
+.pi-obj-ligne > span:first-child {color: var(--pl-muted);}
+.pi-obj-ligne strong {font-variant-numeric: tabular-nums;}
+.pi-detail {margin-top: 8px; font-size: 12px; color: var(--pl-muted);}
+.pi-detail summary {cursor: pointer; font-weight: 700; color: var(--pl-primaire);}
+.pi-detail ul {padding-left: 16px; margin: 6px 0 0;}
+.pi-detail li {margin-bottom: 4px;}
+.pi-avert {margin-top: 8px; padding: 7px 10px; border-radius: 8px; background: #fff7ed; color: #9a3412; font-size: 12px;}
+.dark-mode .pi-avert {background: #43260f; color: #fdba74;}
+.pi-ajust {display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--pl-bordure-legere); font-size: 12px;}
+.pi-ajust-txt {flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; line-height: 1.25;}
+.pi-ajust-txt small {color: var(--pl-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+.pi-ajust-val {font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap;}
+.pi-ajust .pl-badge {height: 18px; font-size: 10px;}
+.pi-obj-actions {display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between; margin-top: 10px;}
+
+/* Bandeau (fiche collaborateur) */
+.pi-bandeau {display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 14px 0;}
+.pi-bandeau-carte {flex: 1 1 170px; border: 1px solid var(--pl-bordure); border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0;}
+.pi-bandeau-carte small {font-size: 11px; font-weight: 700; color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.03em;}
+.pi-bandeau-carte strong {font-size: 18px; font-variant-numeric: tabular-nums;}
+.pi-bandeau-carte span {font-size: 12px; color: var(--pl-muted);}
+.pi-bandeau-carte .pi-jauge {margin: 4px 0 0;}
+.pi-bandeau-carte.action {justify-content: center; align-items: flex-start; flex: 0 1 auto;}
+.pi-legende-chips {display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px 0;}
+
+/* Légende */
+.pi-leg {display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 4px; border: 0; border-bottom: 1px solid var(--pl-bordure-legere); background: transparent; color: var(--pl-texte); text-align: left; cursor: pointer; border-radius: 0;}
+.pi-leg:hover {background: var(--pl-fond-doux);}
+.pi-leg[aria-pressed="false"] {opacity: 0.45;}
+.pi-leg[aria-pressed="false"] .pl-leg-nom span:first-child {text-decoration: line-through;}
+.pi-chip {height: 26px; padding: 0 10px; border-radius: 13px; border: 1px solid var(--pl-bordure); background: var(--pl-carte); color: var(--pl-texte); font-size: 12px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;}
+.pi-chip[aria-pressed="false"] {opacity: 0.45; text-decoration: line-through;}
+.pi-chip b {font-variant-numeric: tabular-nums;}
+
+/* Modales */
+.pi-modes {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;}
+.pi-modes .pl-radio-carte {margin: 0;}
+.pi-apercu {margin-top: 10px; padding: 8px 10px; border-radius: 8px; background: var(--pl-fond-doux); font-size: 13px;}
+.pi-app .pl-alerte, .modal .pl-alerte {padding: 8px 10px; border-radius: 8px; font-size: 13px;}
+.modal .pl-alerte-info {background: #e0f2fe; color: #075985;}
+.modal .pl-alerte-erreur {background: #fee2e2; color: #991b1b;}
+
+/* Mode fiche : le panneau latéral est remplacé par le bandeau */
+.pi-mode-fiche .pl-side {display: none;}
+.pi-mode-fiche .pi-tableau-box {max-height: calc(100vh - 330px);}
+
+@media print {
+    .pi-app .pl-side, .pi-app .pl-toolbar, .pi-app .pl-footer, .pi-actions {display: none !important;}
+    .pi-tableau-box {max-height: none !important; overflow: visible !important;}
+}
+
+/* Variables pour les modales (affichées hors de .pl-app) */
+.pi-modal {--pl-primaire-rgb: var(--couleur-principale-rgb, 60, 141, 188); --pl-primaire: rgb(var(--pl-primaire-rgb)); --pl-carte: #fff; --pl-bordure: #e2e6ec; --pl-bordure-legere: #eef0f3;
+    --pl-texte: #1f2937; --pl-muted: #5b6472; --pl-fond-doux: #f6f8fb; --pl-fond-groupe: #f1f4f8; --pl-danger: #b91c1c;}
+.dark-mode .pi-modal {--pl-carte: #343a40; --pl-bordure: #4b545c; --pl-bordure-legere: #3f474e; --pl-texte: #e5e7eb; --pl-muted: #b6bec8; --pl-fond-doux: #3a4047; --pl-fond-groupe: #3d444b;}
+.pi-modal .pl-radio-carte small {color: var(--pl-muted);}
+.pi-modal .pi-liste-coches {display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 12px; max-height: 220px; overflow: auto; padding: 2px;}
+.pi-modal .pi-liste-coches label {display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 500; font-size: 13px;}
+
+/* Listes avec recherche (select2) */
+.pi-s2-cat {display: inline-flex; align-items: center; gap: 8px;}
+.pi-collab .select2-container {flex: 1 1 0; min-width: 0;}
+.pi-actions.pi-masque {display: none !important;}
+
+/* Ligne de titre de l'objectif (fiche collaborateur) */
+.pi-entete-objectif {display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 12px 14px 0; font-size: 12px; min-width: 0;}
+.pi-entete-titre {margin: 0; font-size: 11px; font-weight: 700; color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap;}
+.pi-entete-sep {width: 1px; height: 14px; background: var(--pl-bordure);}
+.pi-entete-contrat {color: var(--pl-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 45%;}
+.pi-entete-liens {display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 16px;}
+.pi-entete-liens .pl-lien {display: inline-flex; align-items: center; gap: 5px; font-size: 12px;}
+.pi-badge-nb {display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--pl-primaire); color: #fff; font-size: 11px; font-weight: 700;}
+
+/* Menu et fenêtre de diffusion */
+.pi-menu-diffusion {min-width: 300px;}
+.pl-pop-menu.pi-menu-diffusion button {min-height: 44px; align-items: center;}
+.pi-menu-diffusion button > span {display: flex; flex-direction: column; line-height: 1.25;}
+.pi-menu-diffusion button small {font-size: 11px; font-weight: 500; color: var(--pl-muted);}
+.pi-diff-colonnes {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;}
+.pi-diff-colonnes fieldset {min-width: 0;}
+.pi-diff-dest {display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--pl-fond-doux); font-size: 13px; word-break: break-all;}
+.pi-diff-dest.erreur {background: #fee2e2; color: #991b1b;}
+@media (max-width: 767px) {.pi-diff-colonnes {grid-template-columns: 1fr;}}
+.pi-diff-colonnes legend.pl-label {width: auto; padding: 0; margin: 10px 0 6px; background: none; border: 0; font-size: 12px;}

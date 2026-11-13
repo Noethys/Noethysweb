@@ -7,6 +7,12 @@ html {
     scrollbar-gutter: stable;
 }
 
+/* La barre de défilement de la page étant toujours présente (ci-dessus), la compensation ajoutée
+   par Bootstrap à l'ouverture d'une fenêtre modale crée un écart à droite : on l'annule. */
+body.modal-open {
+    padding-right: 0 !important;
+}
+
 .card-chips {
     border-radius: 0.25rem;
     overflow: hidden;

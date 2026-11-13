@@ -1,0 +1,27 @@
+{% load static %}
+<script>
+    window.PLANNING_INDIVIDUEL = {
+        csrf: "{{ csrf_token }}",
+        mode: "{{ pi_mode }}",
+        idcollaborateur: {{ pi_collaborateur.pk|default:0 }},
+        url_fiche: "{% url 'collaborateur_resume' idcollaborateur=0 %}",
+        urls: {
+            donnees: "{% url 'ajax_planning_individuel_get_donnees' %}",
+            objectif: "{% url 'ajax_planning_individuel_get_objectif' %}",
+            preferences: "{% url 'ajax_planning_individuel_memoriser_preferences' %}",
+            parametres: "{% url 'ajax_planning_individuel_enregistrer_parametres' %}",
+            enregistrer: "{% url 'ajax_planning_individuel_enregistrer' %}",
+            modele: "{% url 'ajax_planning_individuel_appliquer_modele' %}",
+            ajustement: "{% url 'ajax_planning_individuel_enregistrer_ajustement' %}",
+            supprimer_ajustement: "{% url 'ajax_planning_individuel_supprimer_ajustement' %}",
+            reporter: "{% url 'ajax_planning_individuel_reporter_solde' %}",
+            imprimer: "{% url 'ajax_planning_individuel_imprimer' %}",
+            email: "{% url 'ajax_planning_individuel_envoyer_email' %}",
+            excel: "{% url 'ajax_planning_individuel_exporter_excel' %}",
+            ical: "{% url 'ajax_planning_individuel_get_lien_ical' %}"
+        }
+    };
+</script>
+<script src="{% static 'lib/select2/js/select2.min.js' %}"></script>
+<script src="{% static 'lib/select2/js/i18n/fr.js' %}"></script>
+<script src="{% static 'js/planning_individuel.js' %}"></script>

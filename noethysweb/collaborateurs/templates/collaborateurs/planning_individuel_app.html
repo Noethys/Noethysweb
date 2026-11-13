@@ -1,0 +1,411 @@
+{# Planning individuel : application partagée entre la page du menu (pi_mode = "page") et la fiche collaborateur (pi_mode = "fiche") #}
+<div id="pi_app" class="pl-app pi-app pi-mode-{{ pi_mode }}">
+    <div class="pl-layout">
+
+        {# ------------------------------ Panneau latéral (page du menu) ------------------------------ #}
+        {% if pi_mode == "page" %}
+        <aside class="pl-side" aria-label="Collaborateur, objectif et légende">
+            <div class="pl-side-contenu pl-card pl-accordeon">
+                <section class="pl-acc-item">
+                    <h2 class="pl-acc-titre">
+                        <button type="button" class="pl-acc-tete" id="pi_acc_tete_collab" aria-expanded="true" aria-controls="pi_acc_corps_collab">
+                            <span class="pl-acc-icone" aria-hidden="true"><i class="fa fa-user"></i></span>
+                            <span class="pl-acc-textes"><span class="pl-acc-nom">Collaborateur</span><span class="pl-acc-resume" id="pi_acc_resume_collab"></span></span>
+                            <i class="fa fa-chevron-right pl-acc-chevron" aria-hidden="true"></i>
+                        </button>
+                    </h2>
+                    <div class="pl-acc-corps" id="pi_acc_corps_collab" role="region" aria-labelledby="pi_acc_tete_collab">
+                        <div class="pi-collab">
+                            <label for="pi_collab_select" class="sr-only">Collaborateur affiché</label>
+                            <select id="pi_collab_select" class="form-control form-control-sm" style="width: 100%;">
+                                {% for c in pi_collaborateurs %}<option value="{{ c.id }}"{% if c.id == pi_collaborateur.pk %} selected{% endif %}>{{ c.nom }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <ul class="pi-contrats" id="pi_contrats" aria-label="Contrats"></ul>
+                        <div class="pl-ligne-actions">
+                            <a class="pl-lien" id="pi_lien_fiche" href="#"><i class="fa fa-external-link" aria-hidden="true"></i> Ouvrir la fiche</a>
+                            <span class="pi-lecture-seule" id="pi_lecture" hidden><i class="fa fa-lock" aria-hidden="true"></i> Consultation seule</span>
+                        </div>
+                    </div>
+                </section>
+                <section class="pl-acc-item">
+                    <h2 class="pl-acc-titre">
+                        <button type="button" class="pl-acc-tete" id="pi_acc_tete_objectif" aria-expanded="true" aria-controls="pi_acc_corps_objectif">
+                            <span class="pl-acc-icone" aria-hidden="true"><i class="fa fa-bullseye"></i></span>
+                            <span class="pl-acc-textes"><span class="pl-acc-nom">Objectif</span><span class="pl-acc-resume" id="pi_acc_resume_objectif"></span></span>
+                            <i class="fa fa-chevron-right pl-acc-chevron" aria-hidden="true"></i>
+                        </button>
+                    </h2>
+                    <div class="pl-acc-corps" id="pi_acc_corps_objectif" role="region" aria-labelledby="pi_acc_tete_objectif">
+                        <div id="pi_objectif" aria-live="polite"></div>
+                    </div>
+                </section>
+                <section class="pl-acc-item">
+                    <h2 class="pl-acc-titre">
+                        <button type="button" class="pl-acc-tete" id="pi_acc_tete_legende" aria-expanded="true" aria-controls="pi_acc_corps_legende">
+                            <span class="pl-acc-icone" aria-hidden="true"><i class="fa fa-pie-chart"></i></span>
+                            <span class="pl-acc-textes"><span class="pl-acc-nom">Légende et totaux</span><span class="pl-acc-resume" id="pi_acc_resume_legende"></span></span>
+                            <i class="fa fa-chevron-right pl-acc-chevron" aria-hidden="true"></i>
+                        </button>
+                    </h2>
+                    <div class="pl-acc-corps" id="pi_acc_corps_legende" role="region" aria-labelledby="pi_acc_tete_legende">
+                        <p class="pl-muted pl-petit mb-1">Cliquez sur une catégorie pour la masquer ou l'afficher.</p>
+                        <div id="pi_legende"></div>
+                    </div>
+                </section>
+            </div>
+        </aside>
+        {% endif %}
+
+        {# ------------------------------ Planning ------------------------------ #}
+        <main class="pl-main">
+            <div class="pl-card pl-card-planning">
+                <div class="pl-toolbar" role="toolbar" aria-label="Outils du planning individuel">
+                    <div class="pl-groupe pi-edition" hidden>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pi_annuler" aria-label="Annuler (Ctrl+Z)" title="Annuler (Ctrl+Z)" disabled><i class="fa fa-undo" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pi_retablir" aria-label="Rétablir (Ctrl+Y)" title="Rétablir (Ctrl+Y)" disabled><i class="fa fa-repeat" aria-hidden="true"></i></button>
+                    </div>
+                    <span class="pl-sep pi-edition" aria-hidden="true" hidden></span>
+                    <div class="pl-groupe">
+                        <button type="button" class="pl-btn pl-btn-icone" id="pi_prec" aria-label="Période précédente" title="Période précédente"><i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+                        <span class="pi-titre-periode" id="pi_periode_titre" aria-live="polite"></span>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pi_suiv" aria-label="Période suivante" title="Période suivante"><i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-btn" id="pi_aujourdhui">Aujourd'hui</button>
+                    </div>
+                    <div class="pl-seg" role="group" aria-label="Période de référence">
+                        <button type="button" class="pl-seg-btn" data-type-periode="CIVILE" aria-pressed="true">Année civile</button>
+                        <button type="button" class="pl-seg-btn" data-type-periode="SCOLAIRE" aria-pressed="false">Année scolaire</button>
+                    </div>
+                    <span class="pl-sep pi-edition" aria-hidden="true" hidden></span>
+                    <button type="button" class="pl-btn pl-btn-primaire pi-edition" id="pi_ajouter" hidden><i class="fa fa-plus" aria-hidden="true"></i><span class="pl-lbl">Évènement</span></button>
+                    <span class="pl-espace"></span>
+                    <div class="pl-seg" role="group" aria-label="Vue">
+                        <button type="button" class="pl-seg-btn" data-vue="calendrier" aria-pressed="true"><i class="fa fa-calendar" aria-hidden="true"></i><span class="pl-lbl">Calendrier</span></button>
+                        <button type="button" class="pl-seg-btn" data-vue="colonnes" aria-pressed="false"><i class="fa fa-columns" aria-hidden="true"></i><span class="pl-lbl">Colonnes</span></button>
+                        <button type="button" class="pl-seg-btn" data-vue="mois" aria-pressed="false"><i class="fa fa-th" aria-hidden="true"></i><span class="pl-lbl">Mois × jours</span></button>
+                    </div>
+                    <span class="pl-sep" aria-hidden="true"></span>
+                    <div class="pl-groupe">
+                        <div class="pl-split">
+                            <button type="button" class="pl-btn" id="pi_diffusion_btn" aria-haspopup="true" aria-expanded="false" aria-controls="pi_diffusion_menu" aria-label="Imprimer et diffuser" title="Imprimer et diffuser"><i class="fa fa-print" aria-hidden="true"></i><i class="fa fa-caret-down" aria-hidden="true"></i></button>
+                            <div class="pl-pop pl-pop-menu pl-pop-droite pi-menu-diffusion" id="pi_diffusion_menu" role="menu" aria-label="Imprimer et diffuser" hidden>
+                                <button type="button" role="menuitem" data-diffusion="imprimer"><i class="fa fa-file-pdf-o" aria-hidden="true"></i><span>Imprimer en PDF…<small>Calendrier annuel, bilan de l'objectif…</small></span></button>
+                                <button type="button" role="menuitem" data-diffusion="email"><i class="fa fa-envelope-o" aria-hidden="true"></i><span>Envoyer par email…<small>Au collaborateur, avec le PDF en pièce jointe</small></span></button>
+                                <button type="button" role="menuitem" data-diffusion="excel"><i class="fa fa-file-excel-o" aria-hidden="true"></i><span>Exporter vers Excel…<small>Bilan annuel ou récapitulatif paie</small></span></button>
+                                <div class="pl-menu-sep" role="separator"></div>
+                                <button type="button" role="menuitem" data-diffusion="ical" class="pi-edition"><i class="fa fa-link" aria-hidden="true"></i><span>Agenda en ligne (iCal)…<small>Lien à ajouter au téléphone du collaborateur</small></span></button>
+                                <button type="button" role="menuitem" data-diffusion="ecran"><i class="fa fa-desktop" aria-hidden="true"></i><span>Imprimer l'écran<small>Impression rapide de la vue affichée</small></span></button>
+                            </div>
+                        </div>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pi_actualiser" aria-label="Actualiser" title="Actualiser"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pi_plein_ecran" aria-label="Plein écran" title="Plein écran"><i class="fa fa-expand" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pi_parametres_btn" aria-label="Paramètres des objectifs" title="Paramètres des objectifs" hidden><i class="fa fa-cog" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+
+                {% if pi_mode == "fiche" %}
+                    <div class="pi-entete-objectif" id="pi_entete_objectif"></div>
+                    <div class="pi-bandeau" id="pi_bandeau" aria-live="polite"></div>
+                    <div class="pi-legende-chips" id="pi_legende_chips" aria-label="Catégories (cliquez pour masquer ou afficher)"></div>
+                {% endif %}
+
+                <div class="pi-corps" id="pi_corps" tabindex="0" aria-label="Planning de l'année : flèches pour se déplacer, Maj + flèches pour sélectionner, Entrée pour voir la journée, menu contextuel pour les actions">
+                    <div class="pi-chargement"><i class="fa fa-refresh fa-spin" aria-hidden="true"></i> Chargement du planning…</div>
+                </div>
+
+                <div class="pi-actions" id="pi_actions" role="toolbar" aria-label="Actions sur la sélection" hidden>
+                    <span id="pi_actions_texte" aria-live="polite"></span>
+                    <button type="button" class="pl-btn pl-btn-primaire" id="pi_act_periode"><i class="fa fa-calendar-plus-o" aria-hidden="true"></i>Créer une période</button>
+                    <button type="button" class="pl-btn" id="pi_act_modele"><i class="fa fa-th-list" aria-hidden="true"></i>Modèle</button>
+                    <button type="button" class="pl-btn" id="pi_act_copier" title="Ctrl+C"><i class="fa fa-copy" aria-hidden="true"></i>Copier</button>
+                    <button type="button" class="pl-btn" id="pi_act_coller" title="Ctrl+V" disabled><i class="fa fa-paste" aria-hidden="true"></i>Coller</button>
+                    <button type="button" class="pl-btn pl-btn-icone" id="pi_act_effacer" aria-label="Effacer les évènements de la sélection (Suppr)" title="Effacer les évènements (Suppr)"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                    <button type="button" class="pl-btn pl-btn-icone" id="pi_act_fermer" aria-label="Désélectionner (Échap)" title="Désélectionner (Échap)"><i class="fa fa-times" aria-hidden="true"></i></button>
+                </div>
+
+                <div class="pi-legende-bas">
+                    <span class="pl-badge pl-badge-vacances">Vacances scolaires</span>
+                    <span class="pl-badge pl-badge-ferie">Jour férié</span>
+                    <span class="pl-badge pl-badge-contrat">Hachuré : hors contrat</span>
+                    <span>Fond coloré : catégorie principale du jour · Barre : répartition des heures</span>
+                </div>
+
+                <div class="pl-footer">
+                    <span id="pi_statut" aria-live="polite"></span>
+                    <span class="pl-muted pl-aide-courte">Glisser : sélectionner plusieurs jours · Double-clic : voir et modifier la journée · Clic droit : actions · Ctrl+C / Ctrl+V : copier-coller · Suppr : effacer</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="pi-pop" id="pi_pop" role="dialog" aria-labelledby="pi_pop_titre" hidden></div>
+    <div class="pl-menu" id="pi_menu" role="menu" aria-label="Actions" hidden></div>
+</div>
+
+{# ------------------------------ Modales ------------------------------ #}
+
+<div class="modal fade pi-modal" id="pi_modal_evt" tabindex="-1" role="dialog" aria-labelledby="pi_modal_evt_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title"><strong id="pi_modal_evt_titre">Évènement</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col-md-6"><label for="pi_evt_cat">Catégorie</label><select id="pi_evt_cat" class="form-control"></select></div>
+                    <div class="form-group col-md-6"><label for="pi_evt_aff">Affectation</label><select id="pi_evt_aff" class="form-control"></select></div>
+                    <div class="form-group col-md-4"><label for="pi_evt_date">Date</label><input type="date" id="pi_evt_date" class="form-control"></div>
+                    <div class="form-group col-md-4"><label for="pi_evt_debut">Heure de début</label><input type="time" id="pi_evt_debut" class="form-control" step="300"></div>
+                    <div class="form-group col-md-4"><label for="pi_evt_fin">Heure de fin</label><input type="time" id="pi_evt_fin" class="form-control" step="300"></div>
+                    <div class="form-group col-md-4">
+                        <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="pi_evt_multi"><label class="custom-control-label" for="pi_evt_multi">Se termine un autre jour</label></div>
+                    </div>
+                    <div class="form-group col-md-4" hidden><label for="pi_evt_date_fin">Date de fin</label><input type="date" id="pi_evt_date_fin" class="form-control"></div>
+                    <div class="form-group col-12"><label for="pi_evt_titre">Titre <span class="pl-muted">(facultatif)</span></label><input type="text" id="pi_evt_titre" class="form-control" maxlength="200"></div>
+                </div>
+                <fieldset class="pl-fieldset">
+                    <legend>Heures réalisées <span class="pl-muted">(facultatif)</span></legend>
+                    <div class="form-row align-items-end">
+                        <div class="form-group col-md-4"><label for="pi_evt_rdebut">Début réalisé</label><input type="time" id="pi_evt_rdebut" class="form-control" step="300"></div>
+                        <div class="form-group col-md-4"><label for="pi_evt_rfin">Fin réalisée</label><input type="time" id="pi_evt_rfin" class="form-control" step="300"></div>
+                        <div class="form-group col-md-4"><button type="button" class="btn btn-default btn-block" id="pi_evt_realise_copier">Réalisé = prévu</button></div>
+                    </div>
+                </fieldset>
+                <div class="pl-alerte" id="pi_evt_info" role="alert" aria-live="assertive"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger mr-auto" id="pi_evt_supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
+                <button type="button" class="btn btn-primary" id="pi_evt_valider"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade pi-modal" id="pi_modal_periode" tabindex="-1" role="dialog" aria-labelledby="pi_modal_periode_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pi_modal_periode_titre"><strong>Créer une période</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="font-weight-bold" id="pi_per_intro"></p>
+                <div class="form-row">
+                    <div class="form-group col-md-6"><label for="pi_per_cat">Catégorie</label><select id="pi_per_cat" class="form-control"></select></div>
+                    <div class="form-group col-md-6"><label for="pi_per_aff">Affectation</label><select id="pi_per_aff" class="form-control"></select></div>
+                </div>
+                <fieldset>
+                    <legend class="pl-label">Sur chaque jour</legend>
+                    <div class="pi-modes">
+                        <label class="pl-radio-carte"><input type="radio" name="pi_per_mode" value="journee"><span><strong>Journée entière</strong>
+                            <span class="pl-inline-champs">De <input type="time" id="pi_per_journee_debut" step="300" aria-label="Début de la journée"> à <input type="time" id="pi_per_journee_fin" step="300" aria-label="Fin de la journée"></span></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_per_mode" value="journee_coupee"><span><strong>Journée avec pause</strong><small>Un évènement le matin et un l'après-midi, selon les horaires ci-dessous</small></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_per_mode" value="matin"><span><strong>Matin</strong>
+                            <span class="pl-inline-champs">De <input type="time" id="pi_per_matin_debut" step="300" aria-label="Début du matin"> à <input type="time" id="pi_per_matin_fin" step="300" aria-label="Fin du matin"></span></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_per_mode" value="am"><span><strong>Après-midi</strong>
+                            <span class="pl-inline-champs">De <input type="time" id="pi_per_am_debut" step="300" aria-label="Début de l'après-midi"> à <input type="time" id="pi_per_am_fin" step="300" aria-label="Fin de l'après-midi"></span></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_per_mode" value="perso"><span><strong>Horaires personnalisés</strong>
+                            <span class="pl-inline-champs">De <input type="time" id="pi_per_perso_debut" step="300" aria-label="Début personnalisé"> à <input type="time" id="pi_per_perso_fin" step="300" aria-label="Fin personnalisée"></span></span></label>
+                    </div>
+                </fieldset>
+                <div class="form-group mt-3"><label for="pi_per_titre">Titre <span class="pl-muted">(facultatif)</span></label><input type="text" id="pi_per_titre" class="form-control" maxlength="200"></div>
+                <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="pi_per_non_ouvres"><label class="custom-control-label" for="pi_per_non_ouvres">Ignorer les week-ends et les jours fériés</label></div>
+                <fieldset class="mt-2">
+                    <legend class="pl-label">Si un jour a déjà des évènements</legend>
+                    <div class="pi-modes">
+                        <label class="pl-radio-carte"><input type="radio" name="pi_per_conflit" value="ignorer"><span><strong>Conserver l'existant</strong><small>Les plages en chevauchement ne sont pas créées</small></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_per_conflit" value="remplacer"><span><strong>Remplacer</strong><small>Supprime les évènements des jours concernés (congés, absence…)</small></span></label>
+                    </div>
+                </fieldset>
+                <div class="pi-apercu" id="pi_per_apercu" aria-live="polite"></div>
+            </div>
+            <div class="modal-footer">
+                <div class="custom-control custom-checkbox mr-auto"><input type="checkbox" class="custom-control-input" id="pi_per_memoriser"><label class="custom-control-label" for="pi_per_memoriser">Mémoriser ces horaires par défaut</label></div>
+                <button type="button" class="btn btn-primary" id="pi_per_valider"><i class="fa fa-check margin-r-5"></i>Créer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade pi-modal" id="pi_modal_modele" tabindex="-1" role="dialog" aria-labelledby="pi_modal_modele_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pi_modal_modele_titre"><strong>Appliquer un modèle de planning</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="font-weight-bold" id="pi_mod_intro"></p>
+                <fieldset><legend class="pl-label">Modèles</legend><div class="pi-liste-coches" id="pi_mod_modeles"></div></fieldset>
+                <fieldset class="mt-2">
+                    <legend class="pl-label">Si un évènement existe déjà</legend>
+                    <div class="pl-grille-3">
+                        <label class="pl-radio-carte"><input type="radio" name="pi_mod_conflit" value="ignorer"><span><strong>Ignorer</strong><small>Rien n'est écrasé</small></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_mod_conflit" value="remplacer"><span><strong>Remplacer</strong><small>Supprime les évènements en conflit</small></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_mod_conflit" value="effacer"><span><strong>Tout effacer</strong><small>Vide d'abord les dates concernées</small></span></label>
+                    </div>
+                </fieldset>
+                <div class="pi-apercu" id="pi_mod_apercu" aria-live="polite" hidden></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default mr-auto" id="pi_mod_btn_apercu"><i class="fa fa-eye margin-r-5"></i>Aperçu</button>
+                <button type="button" class="btn btn-primary" id="pi_mod_valider"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade pi-modal" id="pi_modal_ajust" tabindex="-1" role="dialog" aria-labelledby="pi_modal_ajust_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title"><strong id="pi_modal_ajust_titre">Ajustement</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="pi_aju_id">
+                <div class="form-group"><label for="pi_aju_date">Date d'effet</label><input type="date" id="pi_aju_date" class="form-control"></div>
+                <div class="form-group"><label for="pi_aju_valeur">Valeur ajoutée à l'objectif</label><input type="text" id="pi_aju_valeur" class="form-control" inputmode="decimal" aria-describedby="pi_aju_aide">
+                    <small class="form-text text-muted" id="pi_aju_aide">En <span id="pi_aju_unite">heures</span>. Saisissez une valeur négative pour réduire l'objectif (ex. -7 pour un jour de fractionnement, -14 pour un don de jours).</small></div>
+                <div class="form-group"><label for="pi_aju_motif">Motif</label><input type="text" id="pi_aju_motif" class="form-control" maxlength="300" placeholder="Ex. : jours de fractionnement, compte épargne-temps…"></div>
+                <div class="pl-alerte" id="pi_aju_info" role="alert" aria-live="assertive"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="pi_aju_valider"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade pi-modal" id="pi_modal_objectif" tabindex="-1" role="dialog" aria-labelledby="pi_modal_objectif_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pi_modal_objectif_titre"><strong>Objectif et ajustements</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" id="pi_modal_objectif_corps"></div>
+            <div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade pi-modal" id="pi_modal_parametres" tabindex="-1" role="dialog" aria-labelledby="pi_modal_parametres_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pi_modal_parametres_titre"><strong>Paramètres des objectifs</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="pl-muted">Valeurs par défaut pour tous les collaborateurs. Elles peuvent être remplacées contrat par contrat (champ « Volume de référence » et « Période de référence » du contrat).</p>
+                <div class="form-group"><label for="pi_par_volume">Volume annuel d'un temps plein (mode annualisé)</label><input type="text" id="pi_par_volume" class="form-control" inputmode="decimal"><small class="form-text text-muted">En heures, en général 1607.</small></div>
+                <div class="form-group"><label for="pi_par_temps_plein">Durée hebdomadaire d'un temps plein</label><input type="text" id="pi_par_temps_plein" class="form-control" inputmode="decimal"><small class="form-text text-muted">Sert à calculer la quotité : volume hebdomadaire du contrat ÷ cette durée.</small></div>
+                <div class="form-group"><label for="pi_par_forfait">Nombre de jours d'un forfait jours</label><input type="text" id="pi_par_forfait" class="form-control" inputmode="decimal"><small class="form-text text-muted">En général 218.</small></div>
+                <div class="form-row">
+                    <div class="form-group col-md-6"><label for="pi_par_periode">Période de référence par défaut</label><select id="pi_par_periode" class="form-control"><option value="CIVILE">Année civile</option><option value="SCOLAIRE">Année scolaire</option></select></div>
+                    <div class="form-group col-md-6"><label for="pi_par_mois">Début de l'année scolaire</label>
+                        <select id="pi_par_mois" class="form-control">
+                            <option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option>
+                            <option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
+                        </select></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="pi_par_valider"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade pi-modal" id="pi_modal_diffusion" tabindex="-1" role="dialog" aria-labelledby="pi_diff_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title"><strong id="pi_diff_titre">Imprimer</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="pi_diff_types_bloc">
+                    <div class="pl-label" id="pi_diff_types_label">Document</div>
+                    <div class="pl-types-doc" role="radiogroup" aria-labelledby="pi_diff_types_label">
+                        <label class="pl-type-doc" data-type="annuel"><input type="radio" name="pi_diff_type" value="annuel" checked><i class="fa fa-calendar" aria-hidden="true"></i><span><strong>Calendrier annuel</strong><small>Les 12 mois sur une page : couleur de la catégorie principale de chaque jour, totaux mensuels et objectif.</small><em>A4 paysage · 1 page</em></span></label>
+                        <label class="pl-type-doc" data-type="bilan"><input type="radio" name="pi_diff_type" value="bilan"><i class="fa fa-bullseye" aria-hidden="true"></i><span><strong>Bilan de l'objectif</strong><small>Composition de l'objectif, tableau mois par mois (planifié, attendu, écarts), répartition par catégorie et signatures.</small><em>A4 portrait</em></span></label>
+                        <label class="pl-type-doc" data-type="calendrier"><input type="radio" name="pi_diff_type" value="calendrier"><i class="fa fa-th" aria-hidden="true"></i><span><strong>Calendrier mensuel</strong><small>Une grille par mois avec le détail des horaires, idéale à afficher ou à remettre.</small><em>A4 paysage · 1 page par mois</em></span></label>
+                        <label class="pl-type-doc" data-type="individuel"><input type="radio" name="pi_diff_type" value="individuel"><i class="fa fa-list" aria-hidden="true"></i><span><strong>Planning détaillé</strong><small>Liste chronologique des évènements : horaires, durée, catégorie, affectation.</small><em>A4 portrait</em></span></label>
+                        <label class="pl-type-doc" data-type="recapitulatif"><input type="radio" name="pi_diff_type" value="recapitulatif"><i class="fa fa-calculator" aria-hidden="true"></i><span><strong>Récapitulatif mensuel des heures</strong><small>Heures jour par jour, total, écart au contrat et zone de visa.</small><em>A4 paysage · 1 page par mois</em></span></label>
+                    </div>
+                </div>
+                <div id="pi_diff_excel_bloc">
+                    <div class="pl-label" id="pi_diff_excel_label">Export</div>
+                    <div class="pl-types-doc" role="radiogroup" aria-labelledby="pi_diff_excel_label">
+                        <label class="pl-type-doc"><input type="radio" name="pi_diff_export" value="bilan" checked><i class="fa fa-bullseye" aria-hidden="true"></i><span><strong>Bilan annuel</strong><small>Synthèse mensuelle avec l'objectif, détail des évènements et ajustements (3 feuilles).</small><em>Toute la période</em></span></label>
+                        <label class="pl-type-doc"><input type="radio" name="pi_diff_export" value="paie"><i class="fa fa-calculator" aria-hidden="true"></i><span><strong>Récapitulatif paie</strong><small>Heures attendues, planifiées, réalisées, dimanches, fériés, nuit et détail (format du planning général).</small><em>Période au choix</em></span></label>
+                    </div>
+                </div>
+                <div class="pi-diff-colonnes">
+                    <fieldset id="pi_diff_portee_bloc">
+                        <legend class="pl-label">Période</legend>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_diff_portee" value="periode" checked><span><strong id="pi_diff_portee_periode">Toute la période</strong><small id="pi_diff_portee_periode_info"></small></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_diff_portee" value="mois"><span><strong>Mois</strong>
+                            <span class="pl-inline-champs">de <select id="pi_diff_mois_debut" class="pl-select" aria-label="Premier mois"></select> à <select id="pi_diff_mois_fin" class="pl-select" aria-label="Dernier mois"></select></span></span></label>
+                        <label class="pl-radio-carte"><input type="radio" name="pi_diff_portee" value="selection"><span><strong>Jours sélectionnés</strong><small id="pi_diff_selection_info"></small></span></label>
+                        <p class="pl-muted pl-petit mb-0" id="pi_diff_portee_fixe" hidden>Ce document porte toujours sur toute la période.</p>
+                    </fieldset>
+                    <div>
+                        <div id="pi_diff_options">
+                            <div class="pl-label">Options</div>
+                            <div class="custom-control custom-checkbox" data-option="affs"><input type="checkbox" class="custom-control-input" id="pi_diff_affs" checked><label class="custom-control-label" for="pi_diff_affs">Afficher les affectations</label></div>
+                            <div class="custom-control custom-checkbox" data-option="realise"><input type="checkbox" class="custom-control-input" id="pi_diff_realise"><label class="custom-control-label" for="pi_diff_realise">Afficher les heures réalisées</label></div>
+                            <div class="custom-control custom-checkbox" data-option="notes"><input type="checkbox" class="custom-control-input" id="pi_diff_notes" checked><label class="custom-control-label" for="pi_diff_notes">Afficher les notes du jour</label></div>
+                            <p class="pl-muted pl-petit mb-0" id="pi_diff_sans_option" hidden>Aucune option pour ce document.</p>
+                        </div>
+                        <div id="pi_diff_email_bloc">
+                            <div class="pl-label">Destinataire</div>
+                            <div class="pi-diff-dest" id="pi_diff_dest"></div>
+                            <p class="pl-muted pl-petit mt-1 mb-0">L'email s'ouvre dans l'éditeur d'emails : vous pourrez relire le message avant l'envoi.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="pl-alerte attention mt-2" id="pi_diff_avert" role="alert" hidden></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="pi_diff_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade pi-modal" id="pi_modal_ical" tabindex="-1" role="dialog" aria-labelledby="pi_modal_ical_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pi_modal_ical_titre"><strong>Agenda en ligne (iCal)</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p id="pi_ical_intro"></p>
+                <label for="pi_ical_url" class="sr-only">Lien de l'agenda</label>
+                <div class="input-group">
+                    <input type="text" id="pi_ical_url" class="form-control" readonly>
+                    <div class="input-group-append"><button type="button" class="btn btn-default" id="pi_ical_copier"><i class="fa fa-copy margin-r-5"></i>Copier</button></div>
+                </div>
+                <p class="pl-muted pl-petit mt-2">Ce lien secret donne accès aux évènements du collaborateur (60 jours passés et 12 mois à venir) sans identifiant. Régénérez-le si vous pensez qu'il a été diffusé à tort : l'ancien lien cessera de fonctionner.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger mr-auto" id="pi_ical_revoquer">Désactiver le lien</button>
+                <button type="button" class="btn btn-default" id="pi_ical_regenerer"><i class="fa fa-refresh margin-r-5"></i>Régénérer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'core/modal_pdf.html' %}

@@ -1,0 +1,24 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/planning_equipe.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/planning_individuel.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+    {% if pi_collaborateur %}
+        {% include "collaborateurs/planning_individuel_app.html" %}
+    {% else %}
+        <div class="alert alert-info">Aucun collaborateur à afficher. Créez d'abord un collaborateur depuis le menu Collaborateurs.</div>
+    {% endif %}
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    {% if pi_collaborateur %}{% include "collaborateurs/planning_individuel_scripts.html" %}{% endif %}
+{% endblock scripts %}

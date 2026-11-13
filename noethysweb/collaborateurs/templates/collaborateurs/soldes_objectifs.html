@@ -1,0 +1,83 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block contenu_page %}
+<div class="card card-outline card-lightblue">
+    <div class="card-header"><h3 class="card-title">Soldes des objectifs de la période {{ periode.libelle }}</h3></div>
+    <div class="card-body">
+        <p>Le solde est la différence entre le temps planifié et l'objectif de la période (contrats, ajustements et reports compris). Reporter un solde crée un ajustement au {{ suivante.debut|date:"d/m/Y" }} sur la période {{ suivante.libelle }} : un excédent réduit l'objectif suivant, un déficit l'augmente. Un report déjà effectué est remplacé.</p>
+
+        <form method="get" class="form-inline mb-3" aria-label="Choix de la période">
+            <label for="so_type" class="mr-2">Période</label>
+            <select name="type_periode" id="so_type" class="form-control form-control-sm mr-2">
+                <option value="CIVILE"{% if type_periode == "CIVILE" %} selected{% endif %}>Année civile</option>
+                {% if parametres.mois_debut_scolaire != 1 %}<option value="SCOLAIRE"{% if type_periode == "SCOLAIRE" %} selected{% endif %}>Année scolaire</option>{% endif %}
+            </select>
+            <label for="so_annee" class="sr-only">Année</label>
+            <select name="annee" id="so_annee" class="form-control form-control-sm mr-2">
+                {% for annee in annees %}<option value="{{ annee }}"{% if annee == periode.annee %} selected{% endif %}>{% if type_periode == "SCOLAIRE" %}{{ annee }}-{{ annee|add:1 }}{% else %}{{ annee }}{% endif %}</option>{% endfor %}
+            </select>
+            <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-refresh margin-r-5"></i>Afficher</button>
+        </form>
+
+        {% if en_cours %}<div class="alert alert-warning">La période {{ periode.libelle }} n'est pas terminée : les soldes peuvent encore évoluer.</div>{% endif %}
+
+        {% if lignes %}
+        <div class="table-responsive">
+            <table class="table table-sm table-hover" id="so_table">
+                <caption class="sr-only">Soldes par collaborateur</caption>
+                <thead><tr>
+                    <th scope="col" style="width: 36px;"><input type="checkbox" id="so_tout" aria-label="Tout cocher"></th>
+                    <th scope="col">Collaborateur</th>
+                    <th scope="col" class="text-right">Objectif</th>
+                    <th scope="col" class="text-right">Planifié</th>
+                    <th scope="col" class="text-right">Solde</th>
+                    <th scope="col">Report sur {{ suivante.libelle }}</th>
+                    <th scope="col"></th>
+                </tr></thead>
+                <tbody>
+                {% for ligne in lignes %}
+                    <tr>
+                        <td>{% if ligne.modifiable %}<input type="checkbox" class="so_coche" value="{{ ligne.collaborateur.pk }}" aria-label="Reporter le solde de {{ ligne.collaborateur.Get_nom }}"{% if not ligne.report_a_jour %} checked{% endif %}>{% endif %}</td>
+                        <td>{{ ligne.collaborateur.Get_nom }}</td>
+                        <td class="text-right">{{ ligne.objectif }}</td>
+                        <td class="text-right">{{ ligne.planifie }}</td>
+                        <td class="text-right font-weight-bold {% if ligne.solde_valeur > 0 %}text-warning{% elif ligne.solde_valeur < 0 %}text-info{% endif %}">{% if ligne.solde_valeur > 0 %}+{% endif %}{{ ligne.solde }}</td>
+                        <td>{% if ligne.report %}{{ ligne.report }}{% if ligne.report_a_jour %} <span class="badge badge-success">à jour</span>{% else %} <span class="badge badge-warning">à mettre à jour</span>{% endif %}{% else %}<span class="text-muted">Aucun</span>{% endif %}</td>
+                        <td class="text-right"><a href="{% url 'planning_individuel' %}?idcollaborateur={{ ligne.collaborateur.pk }}" title="Ouvrir le planning individuel" aria-label="Ouvrir le planning individuel de {{ ligne.collaborateur.Get_nom }}"><i class="fa fa-calendar"></i></a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="button" class="btn btn-primary" id="so_reporter"><i class="fa fa-share margin-r-5"></i>Reporter les soldes cochés sur {{ suivante.libelle }}</button>
+        {% else %}
+            <div class="alert alert-info">Aucun collaborateur n'a d'objectif sur cette période.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(function() {
+            $("#so_tout").on("change", function() { $(".so_coche").prop("checked", this.checked); });
+            $("#so_reporter").on("click", function() {
+                var ids = $(".so_coche:checked").map(function() { return +this.value; }).get();
+                if (!ids.length) { toastr.warning("Cochez au moins un collaborateur"); return; }
+                bootbox.confirm({title: "Reporter les soldes", message: "Reporter le solde de " + ids.length + " collaborateur(s) sur la période {{ suivante.libelle }} ?",
+                    buttons: {confirm: {label: "Reporter"}, cancel: {label: "Annuler"}},
+                    callback: function(ok) {
+                        if (!ok) { return; }
+                        $.ajax({url: "{% url 'ajax_planning_individuel_reporter_soldes' %}", type: "POST", dataType: "json",
+                                data: {csrfmiddlewaretoken: "{{ csrf_token }}", collaborateurs: JSON.stringify(ids), annee: {{ periode.annee }}, type_periode: "{{ periode.type }}"}})
+                            .done(function(data) { toastr.success(data.nbre + " solde(s) reporté(s)"); setTimeout(function() { window.location.reload(); }, 800); })
+                            .fail(function(xhr) { toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Erreur lors du report"); });
+                    }});
+            });
+        });
+    </script>
+{% endblock scripts %}

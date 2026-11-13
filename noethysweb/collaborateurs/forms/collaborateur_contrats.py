@@ -60,6 +60,11 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Temps de travail",
                 Field("heures_hebdo"),
             ),
+            Fieldset("Objectif de temps de travail",
+                Field("objectif_mode"),
+                Field("objectif_volume"),
+                Field("objectif_periode"),
+            ),
         )
 
         # Création des champs des questionnaires
@@ -81,6 +86,14 @@ class Formulaire(FormulaireBase, ModelForm):
                     self.fields[key].initial = reponse.Get_reponse_for_ctrl()
 
     def clean(self):
+        # Objectif
+        if self.cleaned_data.get("objectif_mode") == "VOLUME" and not self.cleaned_data.get("objectif_volume"):
+            self.add_error("objectif_volume", "Saisissez le nombre d'heures prévues pour ce contrat")
+            return
+        if self.cleaned_data.get("objectif_volume") is not None and self.cleaned_data["objectif_volume"] <= 0:
+            self.add_error("objectif_volume", "Le volume de référence doit être supérieur à zéro")
+            return
+
         # Période
         if self.cleaned_data["date_fin"] and self.cleaned_data["date_fin"] < self.cleaned_data["date_debut"]:
             self.add_error("date_fin", "La date de fin doit être supérieure à la date de début de contrat")

@@ -44,6 +44,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Commandes(annuler_url="{% url 'types_evenements_collaborateurs_liste' %}"),
             Field("nom"),
             Field("type"),
+            Field("temps_travail_objectif"),
             Field("observations"),
             Field("couleur"),
         )

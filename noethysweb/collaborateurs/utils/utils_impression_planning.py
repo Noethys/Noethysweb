@@ -29,6 +29,8 @@ TYPES_DOCUMENTS = {
     "emargement": ("Feuille d'émargement", False, False),
     "recapitulatif": ("Récapitulatif mensuel des heures", True, False),
     "calendrier": ("Calendrier mensuel individuel", True, True),
+    "annuel": ("Calendrier annuel", True, True),
+    "bilan": ("Bilan de l'objectif", False, True),
 }
 
 GRIS_LIGNE = colors.HexColor("#b8c0cc")
@@ -584,3 +586,235 @@ class Impression(utils_impression.Impression):
                 tableau = Table(lignes, [largeur_jour] * 7, rowHeights=[16] + [hauteur_semaine] * len(semaines))
                 tableau.setStyle(TableStyle(styles))
                 self.story.append(tableau)
+
+
+    # ---------------------------------------------------------------- Planning individuel annuel
+    def Get_calcul_objectif(self, collaborateur=None):
+        """ Calcul de l'objectif de la période de référence transmise (planning individuel) """
+        from collaborateurs.utils import utils_objectif
+        periode = self.dict_donnees.get("periode")
+        if not periode:
+            return None
+        return utils_objectif.Calcul_objectif(idcollaborateur=collaborateur.pk, periode=periode, categories=self.categories, liste_feries=self.liste_feries)
+
+    def Texte_objectif(self, calcul=None):
+        from collaborateurs.utils import utils_objectif
+        if not calcul or not calcul.a_objectif:
+            return "Aucun objectif sur cette période"
+        valeur = lambda v: utils_objectif.Format_valeur(v, calcul.unite)
+        solde = calcul.planifie - calcul.objectif
+        return "Planifié %s sur un objectif de %s (%s)" % (valeur(calcul.planifie), valeur(calcul.objectif), "excédent %s" % valeur(solde) if solde >= 0 else "reste %s" % valeur(-solde))
+
+    def Contrats_texte(self, collaborateur=None):
+        periode = self.dict_donnees.get("periode")
+        textes = []
+        for contrat in self.contrats.get(collaborateur.pk, []):
+            if periode and (contrat.date_debut > periode["fin"] or (contrat.date_fin and contrat.date_fin < periode["debut"])):
+                continue
+            texte = contrat.get_objectif_mode_display()
+            if contrat.heures_hebdo:
+                texte += " %s h/sem." % ("%g" % float(contrat.heures_hebdo)).replace(".", ",")
+            textes.append(texte)
+        return " + ".join(textes)
+
+    # H. Calendrier annuel (les 12 mois sur une page par collaborateur)
+    def Draw_annuel(self):
+        from collaborateurs.utils import utils_objectif
+        mois_liste = []
+        for date in self.dates:
+            if (date.year, date.month) not in mois_liste:
+                mois_liste.append((date.year, date.month))
+        nbre_colonnes = 4 if len(mois_liste) > 6 else 3
+        largeur_mois = (self.largeur - (nbre_colonnes - 1) * 8) / nbre_colonnes
+        largeur_jour = largeur_mois / 7
+        s_jour = ParagraphStyle(name="jour", fontName=utils_polices.FONT_BOLD, fontSize=6.5, leading=7.5, alignment=1)
+        s_entete_mois = ParagraphStyle(name="entete_mois", fontName=utils_polices.FONT_BOLD, fontSize=8, leading=10)
+        s_total_mois = ParagraphStyle(name="total_mois", fontName=utils_polices.FONT_BOLD, fontSize=8, leading=10, alignment=2)
+
+        for index_collaborateur, collaborateur in enumerate(self.collaborateurs):
+            if index_collaborateur:
+                self.story.append(PageBreak())
+            calcul = self.Get_calcul_objectif(collaborateur)
+            par_jour = calcul.planifie_par_jour if calcul else {}
+            unite = calcul.unite if calcul else "heures"
+            detail = " · ".join(texte for texte in [self.Contrats_texte(collaborateur), self.Texte_objectif(calcul)] if texte)
+            self.Insert_header(titre="Calendrier %s - %s" % (self.dict_donnees.get("periode", {}).get("libelle", ""), collaborateur.Get_nom()), detail=detail, espace_apres=8)
+
+            # Totaux par catégorie (minutes) pour la légende
+            totaux_categories = {}
+            blocs = []
+            for annee, mois in mois_liste:
+                dates_mois = [datetime.date(annee, mois, jour) for jour in range(1, calendar.monthrange(annee, mois)[1] + 1)]
+                total_mois = sum(par_jour.get(date, 0) for date in dates_mois)
+                lignes = [[Paragraph("%s %d" % (MOIS[mois - 1].capitalize(), annee), s_entete_mois), "", "", "", "",
+                           Paragraph(utils_objectif.Format_valeur(total_mois, unite) if total_mois else "", s_total_mois), ""],
+                          [Paragraph(jour[0], s_jour) for jour in JOURS]]
+                styles = [("SPAN", (0, 0), (4, 0)), ("SPAN", (5, 0), (6, 0)), ("BACKGROUND", (0, 1), (-1, 1), GRIS_FOND),
+                          ("GRID", (0, 1), (-1, -1), 0.25, GRIS_LIGNE), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                          ("LEFTPADDING", (0, 0), (-1, -1), 1), ("RIGHTPADDING", (0, 0), (-1, -1), 1), ("TOPPADDING", (0, 0), (-1, -1), 1), ("BOTTOMPADDING", (0, 0), (-1, -1), 1)]
+                for index_semaine, semaine in enumerate(calendar.Calendar(firstweekday=0).monthdatescalendar(annee, mois), 2):
+                    ligne = []
+                    for index_jour, date in enumerate(semaine):
+                        if date.month != mois:
+                            ligne.append("")
+                            continue
+                        evenements = self.Evts(collaborateur.pk, date) if date in self.dates_set else []
+                        couleur_texte = "#1f2937"
+                        fond = None
+                        if evenements:
+                            par_categorie = {}
+                            for evenement in evenements:
+                                minutes = (evenement.date_fin - evenement.date_debut).total_seconds() / 60
+                                par_categorie[evenement.type_evenement_id] = par_categorie.get(evenement.type_evenement_id, 0) + minutes
+                                totaux_categories[evenement.type_evenement_id] = totaux_categories.get(evenement.type_evenement_id, 0) + minutes
+                            categorie = self.categories.get(max(par_categorie, key=par_categorie.get))
+                            if categorie:
+                                fond = Couleur(categorie.couleur)
+                                couleur_texte = "#ffffff"
+                        ferie = self.Ferie(date)
+                        if not fond:
+                            if ferie:
+                                fond, couleur_texte = colors.HexColor("#fde7ea"), "#a3172b"
+                            elif date.weekday() >= 5:
+                                fond, couleur_texte = GRIS_CLAIR, "#8a94a3"
+                        ligne.append(Paragraph("<font color='%s'>%d</font>%s" % (couleur_texte, date.day, "*" if ferie and evenements else ""), s_jour))
+                        if fond:
+                            styles.append(("BACKGROUND", (index_jour, index_semaine), (index_jour, index_semaine), fond))
+                        if self.Hors_contrat(collaborateur.pk, date):
+                            styles.append(("TEXTCOLOR", (index_jour, index_semaine), (index_jour, index_semaine), colors.HexColor("#9aa3af")))
+                    lignes.append(ligne)
+                while len(lignes) < 8:
+                    lignes.append([""] * 7)
+                tableau = Table(lignes, [largeur_jour] * 7, rowHeights=[13, 10] + [13] * (len(lignes) - 2))
+                tableau.setStyle(TableStyle(styles))
+                blocs.append(tableau)
+
+            # Grille des mois
+            grille = []
+            for index in range(0, len(blocs), nbre_colonnes):
+                ligne = blocs[index:index + nbre_colonnes]
+                ligne += [""] * (nbre_colonnes - len(ligne))
+                grille.append(ligne)
+            largeurs = []
+            for index in range(nbre_colonnes):
+                largeurs.append(largeur_mois)
+                if index < nbre_colonnes - 1:
+                    largeurs.append(8)
+            grille = [[cellule for index, bloc in enumerate(ligne) for cellule in ([bloc, ""] if index < nbre_colonnes - 1 else [bloc])] for ligne in grille]
+            tableau = Table(grille, largeurs)
+            tableau.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                                         ("BOTTOMPADDING", (0, 0), (-1, -1), 8)]))
+            self.story.append(tableau)
+
+            # Légende
+            elements = []
+            for idcategorie, minutes in sorted(totaux_categories.items(), key=lambda x: -x[1]):
+                categorie = self.categories.get(idcategorie)
+                if categorie:
+                    elements.append("<font color='%s'>&#9632;</font> %s %s" % (escape(categorie.couleur), escape(categorie.nom), utils_planning.Format_minutes(minutes)))
+            elements.append("<font color='#e0485a'>&#9632;</font> Jour férié (* : férié avec évènement)")
+            self.story.append(Paragraph(" &nbsp;&nbsp; ".join(elements), self.s_texte))
+            self.story.append(Spacer(0, 3))
+            self.story.append(Paragraph("Couleur : catégorie principale de la journée. Totaux mensuels : temps compté dans l'objectif (règles des catégories).", self.s_petit))
+
+    # I. Bilan de l'objectif (une page par collaborateur)
+    def Draw_bilan(self):
+        from collaborateurs.utils import utils_objectif
+        periode = self.dict_donnees.get("periode")
+        aujourdhui = datetime.date.today()
+        s_bloc = ParagraphStyle(name="bloc", fontName=utils_polices.FONT_NORMAL, fontSize=8, leading=11)
+        s_bloc_titre = ParagraphStyle(name="bloc_titre", fontName=utils_polices.FONT_BOLD, fontSize=7.5, leading=10, textColor=colors.HexColor("#5b6472"))
+        s_droite = ParagraphStyle(name="droite", fontName=utils_polices.FONT_NORMAL, fontSize=8, leading=10, alignment=2)
+        s_droite_gras = ParagraphStyle(name="droite_gras", fontName=utils_polices.FONT_BOLD, fontSize=8, leading=10, alignment=2)
+
+        def Bloc(titre, lignes, largeur):
+            contenu = [[Paragraph(titre.upper(), s_bloc_titre)], [Paragraph("<br/>".join(lignes), s_bloc)]]
+            tableau = Table(contenu, [largeur])
+            tableau.setStyle(TableStyle([("BOX", (0, 0), (-1, -1), 0.4, GRIS_LIGNE), ("VALIGN", (0, 0), (-1, -1), "TOP")]))
+            return tableau
+
+        for index_collaborateur, collaborateur in enumerate(self.collaborateurs):
+            if index_collaborateur:
+                self.story.append(PageBreak())
+            calcul = self.Get_calcul_objectif(collaborateur)
+            self.Insert_header(titre="Bilan de l'objectif %s - %s" % (periode["libelle"] if periode else "", collaborateur.Get_nom()),
+                               detail="Période %s" % self.Periode([periode["debut"], periode["fin"]]) if periode else "", espace_apres=10)
+            if not calcul or not calcul.a_objectif:
+                self.story.append(Paragraph("Aucun objectif n'est défini sur cette période (pas de contrat ou contrat en mode « Aucun »).", self.s_texte))
+                continue
+            unite = calcul.unite
+            valeur = lambda v: utils_objectif.Format_valeur(v, unite)
+            signe = lambda v: ("+" if v > 0 else "") + valeur(v)
+
+            # Composition et situation
+            composition = ["%s : <b>%s</b>" % (escape(ligne["texte"]), valeur(ligne["valeur"])) for ligne in calcul.detail if ligne["valeur"] is not None]
+            for ajustement in calcul.ajustements:
+                composition.append("%s %s : <b>%s</b>" % (ajustement.date.strftime("%d/%m/%Y"), escape(ajustement.motif or ajustement.get_type_display()), signe(float(ajustement.valeur))))
+            composition.append("<b>Objectif de la période : %s</b>" % valeur(calcul.objectif))
+            solde = calcul.planifie - calcul.objectif
+            situation = ["Planifié : <b>%s</b> (%d %%)" % (valeur(calcul.planifie), round(calcul.planifie / calcul.objectif * 100) if calcul.objectif else 0),
+                         ("Excédent : <b>%s</b>" % valeur(solde)) if solde >= 0 else ("Reste à planifier : <b>%s</b>" % valeur(-solde))]
+            if periode["debut"] <= aujourdhui <= periode["fin"]:
+                ecart = calcul.planifie_a_date - calcul.objectif_a_date
+                situation.append("Au %s : %s planifiées / %s attendues" % (aujourdhui.strftime("%d/%m/%Y"), valeur(calcul.planifie_a_date), valeur(calcul.objectif_a_date)))
+                situation.append("Écart à date : <b>%s</b>" % signe(ecart))
+            situation.append("Contrat : %s" % escape(self.Contrats_texte(collaborateur) or "aucun"))
+            demi = (self.largeur - 10) / 2
+            blocs = Table([[Bloc("Composition de l'objectif", composition, demi), "", Bloc("Situation", situation, demi)]], [demi, 10, demi])
+            blocs.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0)]))
+            self.story += [blocs, Spacer(0, 10)]
+
+            # Tableau mensuel : planifié, attendu (objectif des contrats réparti au prorata des jours + ajustements du mois), écarts
+            entetes = ["Mois", "Planifié", "Attendu", "Écart du mois", "Écart cumulé"]
+            lignes = [[Paragraph(entete, self.s_gras if index == 0 else s_droite_gras) for index, entete in enumerate(entetes)]]
+            styles = [("GRID", (0, 0), (-1, -1), 0.25, GRIS_LIGNE), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("BACKGROUND", (0, 0), (-1, 0), GRIS_FOND)]
+            nbre_jours_periode = (periode["fin"] - periode["debut"]).days + 1
+            cumul = 0.0
+            mois_liste = self.Mois([periode["debut"] + datetime.timedelta(days=n) for n in range(nbre_jours_periode)])
+            for dates_mois in mois_liste:
+                planifie = sum(calcul.planifie_par_jour.get(date, 0) for date in dates_mois)
+                ajustements_mois = sum(float(a.valeur) for a in calcul.ajustements if dates_mois[0] <= a.date <= dates_mois[-1])
+                attendu = calcul.objectif_contrats * len(dates_mois) / nbre_jours_periode + ajustements_mois
+                ecart = planifie - attendu
+                cumul += ecart
+                futur = dates_mois[0] > aujourdhui
+                lignes.append([Paragraph("%s %d" % (MOIS[dates_mois[0].month - 1].capitalize(), dates_mois[0].year), self.s_texte),
+                               Paragraph(valeur(planifie), s_droite), Paragraph(valeur(attendu), s_droite),
+                               Paragraph("" if futur else signe(ecart), s_droite), Paragraph("" if futur else signe(cumul), s_droite)])
+                if dates_mois[0] <= aujourdhui <= dates_mois[-1]:
+                    styles.append(("BACKGROUND", (0, len(lignes) - 1), (-1, len(lignes) - 1), colors.HexColor("#e8f1f8")))
+            lignes.append([Paragraph("<b>Total</b>", self.s_texte), Paragraph(valeur(calcul.planifie), s_droite_gras), Paragraph(valeur(calcul.objectif), s_droite_gras),
+                           Paragraph(signe(solde), s_droite_gras), ""])
+            styles.append(("BACKGROUND", (0, -1), (-1, -1), GRIS_FOND))
+            largeur_colonne = (self.largeur - 120) / 4
+            tableau = Table(lignes, [120] + [largeur_colonne] * 4, repeatRows=1)
+            tableau.setStyle(TableStyle(styles))
+            self.story += [tableau, Spacer(0, 4),
+                           Paragraph("Attendu : objectif des contrats réparti au prorata des jours du mois, plus les ajustements datés du mois. Les mois à venir n'affichent pas d'écart.", self.s_petit),
+                           Spacer(0, 10)]
+
+            # Répartition par catégorie
+            par_categorie = {}
+            for evenement in utils_planning.Get_evenements(periode["debut"], periode["fin"], [collaborateur.pk]):
+                debut, fin = max(evenement.date_debut, datetime.datetime.combine(periode["debut"], datetime.time(0))), min(evenement.date_fin, datetime.datetime.combine(periode["fin"] + datetime.timedelta(days=1), datetime.time(0)))
+                if fin > debut:
+                    stat = par_categorie.setdefault(evenement.type_evenement_id, {"minutes": 0, "jours": set()})
+                    stat["minutes"] += (fin - debut).total_seconds() / 60
+                    stat["jours"].add(debut.date())
+            lignes_categories = []
+            for idcategorie, stat in sorted(par_categorie.items(), key=lambda x: -x[1]["minutes"]):
+                categorie = self.categories.get(idcategorie)
+                if not categorie:
+                    continue
+                regle = {"DUREE": "compté comme travail", "FORFAIT": "compté au forfait"}.get(categorie.temps_travail_objectif) or {"ADDITION": "", "NEUTRE": "non comptabilisé", "SOUSTRACTION": "soustrait"}.get(categorie.type, "")
+                lignes_categories.append("<font color='%s'>&#9632;</font> %s : <b>%s</b> sur %d jour%s%s" % (escape(categorie.couleur), escape(categorie.nom), utils_planning.Format_minutes(stat["minutes"]),
+                                                                                            len(stat["jours"]), "s" if len(stat["jours"]) > 1 else "", " (%s)" % regle if regle else ""))
+            self.story.append(KeepTogether([Bloc("Répartition par catégorie", lignes_categories or ["Aucun évènement"], self.largeur)]))
+            if calcul.avertissements:
+                self.story += [Spacer(0, 6), Paragraph("<br/>".join(escape(texte) for texte in calcul.avertissements), self.s_petit)]
+
+            # Signatures
+            visa = Table([["Le collaborateur (date et signature)", "", "Le responsable (date et signature)"]], [demi, 10, demi], rowHeights=[56])
+            visa.setStyle(TableStyle([("BOX", (0, 0), (0, 0), 0.4, GRIS_LIGNE), ("BOX", (2, 0), (2, 0), 0.4, GRIS_LIGNE), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                                      ("FONT", (0, 0), (-1, -1), utils_polices.FONT_BOLD, 8)]))
+            self.story += [Spacer(0, 14), KeepTogether(visa)]

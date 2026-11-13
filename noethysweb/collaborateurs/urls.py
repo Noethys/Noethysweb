@@ -10,7 +10,7 @@ from collaborateurs.views import collaborateur, collaborateur_identite, collabor
                                 collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, planning_collaborateurs, \
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
-                                fusionner_contrats_word, importer_collaborateurs, planning
+                                fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel
 
 
 urlpatterns = [
@@ -60,6 +60,7 @@ urlpatterns = [
     path('collaborateurs/collaborateurs/evenements/appliquer_modele/<int:idcollaborateur>', collaborateur_appliquer_modele_planning.View.as_view(), name='collaborateur_appliquer_modele_planning'),
 
     path('collaborateurs/collaborateurs/outils/<int:idcollaborateur>', collaborateur_outils.View.as_view(), name='collaborateur_outils'),
+    path('collaborateurs/collaborateurs/planning/<int:idcollaborateur>', planning_individuel.Onglet_planning.as_view(), name='collaborateur_planning'),
     path('collaborateurs/collaborateurs/historique/<int:idcollaborateur>', collaborateur_historique.Liste.as_view(), name='collaborateur_historique'),
     path('collaborateurs/collaborateurs/emails/ajouter/<int:idcollaborateur>', collaborateur_emails.Ajouter.as_view(), name='collaborateur_emails_ajouter'),
     path('collaborateurs/collaborateurs/sms/ajouter/<int:idcollaborateur>', collaborateur_sms.Ajouter.as_view(), name='collaborateur_sms_ajouter'),
@@ -79,6 +80,8 @@ urlpatterns = [
     path('collaborateurs/planning_collaborateurs', planning_collaborateurs.View.as_view(), name='planning_collaborateurs'),
     path('collaborateurs/planning', planning.View.as_view(), name='planning_equipe'),
     path('collaborateurs/planning/ical/<str:token>.ics', planning.Ical, name='planning_equipe_ical'),
+    path('collaborateurs/planning_individuel', planning_individuel.View.as_view(), name='planning_individuel'),
+    path('collaborateurs/soldes_objectifs', planning_individuel.View_soldes.as_view(), name='soldes_objectifs_collaborateurs'),
 
 
     # AJAX
@@ -102,6 +105,20 @@ urlpatterns = [
     path('collaborateurs/planning_equipe/envoyer_emails', secure_ajax(planning.Envoyer_emails), name='ajax_planning_equipe_envoyer_emails'),
     path('collaborateurs/planning_equipe/exporter_recapitulatif', secure_ajax(planning.Exporter_recapitulatif), name='ajax_planning_equipe_exporter_recapitulatif'),
     path('collaborateurs/planning_equipe/get_lien_ical', secure_ajax(planning.Get_lien_ical), name='ajax_planning_equipe_get_lien_ical'),
+    path('collaborateurs/planning_individuel/get_donnees', secure_ajax(planning_individuel.Get_donnees), name='ajax_planning_individuel_get_donnees'),
+    path('collaborateurs/planning_individuel/get_objectif', secure_ajax(planning_individuel.Get_objectif), name='ajax_planning_individuel_get_objectif'),
+    path('collaborateurs/planning_individuel/memoriser_preferences', secure_ajax(planning_individuel.Memoriser_preferences), name='ajax_planning_individuel_memoriser_preferences'),
+    path('collaborateurs/planning_individuel/enregistrer_parametres', secure_ajax(planning_individuel.Enregistrer_parametres), name='ajax_planning_individuel_enregistrer_parametres'),
+    path('collaborateurs/planning_individuel/enregistrer', secure_ajax(planning_individuel.Enregistrer), name='ajax_planning_individuel_enregistrer'),
+    path('collaborateurs/planning_individuel/appliquer_modele', secure_ajax(planning_individuel.Appliquer_modele), name='ajax_planning_individuel_appliquer_modele'),
+    path('collaborateurs/planning_individuel/enregistrer_ajustement', secure_ajax(planning_individuel.Enregistrer_ajustement), name='ajax_planning_individuel_enregistrer_ajustement'),
+    path('collaborateurs/planning_individuel/supprimer_ajustement', secure_ajax(planning_individuel.Supprimer_ajustement), name='ajax_planning_individuel_supprimer_ajustement'),
+    path('collaborateurs/planning_individuel/reporter_solde', secure_ajax(planning_individuel.Reporter_solde), name='ajax_planning_individuel_reporter_solde'),
+    path('collaborateurs/planning_individuel/imprimer', secure_ajax(planning_individuel.Imprimer), name='ajax_planning_individuel_imprimer'),
+    path('collaborateurs/planning_individuel/envoyer_email', secure_ajax(planning_individuel.Envoyer_email), name='ajax_planning_individuel_envoyer_email'),
+    path('collaborateurs/planning_individuel/exporter_excel', secure_ajax(planning_individuel.Exporter_excel), name='ajax_planning_individuel_exporter_excel'),
+    path('collaborateurs/planning_individuel/get_lien_ical', secure_ajax(planning_individuel.Get_lien_ical), name='ajax_planning_individuel_get_lien_ical'),
+    path('collaborateurs/planning_individuel/reporter_soldes', secure_ajax(planning_individuel.Reporter_soldes), name='ajax_planning_individuel_reporter_soldes'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrat', secure_ajax(collaborateur_voir_contrat.Fusionner), name='ajax_collaborateur_fusionner_contrat'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrats', secure_ajax(fusionner_contrats_word.Fusionner), name='ajax_collaborateur_fusionner_contrats'),
     path('collaborateurs/importer_collaborateurs/importer', secure_ajax(importer_collaborateurs.Importer), name='ajax_importer_collaborateurs_importer'),

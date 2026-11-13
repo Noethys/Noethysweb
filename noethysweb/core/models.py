@@ -4284,6 +4284,10 @@ class TypeEvenementCollaborateur(models.Model):
     chevauchement_possible = models.BooleanField(verbose_name="Chevauchement possible", default=False)
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
     couleur = models.CharField(verbose_name="Couleur", max_length=100, default="#3c8dbc")
+    temps_travail_objectif = models.CharField(verbose_name="Prise en compte dans l'objectif", max_length=20, default="NON",
+                                              choices=[("NON", "Selon le type ci-dessus"), ("DUREE", "Compter comme temps de travail (durée planifiée)"),
+                                                       ("FORFAIT", "Compter comme temps de travail (durée forfaitaire journalière)")],
+                                              help_text="Utile pour les catégories en temps non comptabilisé (maladie, congés, absences justifiées) qui ne doivent créer ni dette ni crédit d'heures dans le suivi de l'objectif annuel. La durée forfaitaire est égale à l'objectif de la période divisé par le nombre de jours ouvrés (une demi-journée si l'évènement dure moins de 4 heures).")
 
     class Meta:
         db_table = "types_evenements_collaborateur"
@@ -4343,6 +4347,9 @@ class EvenementCollaborateur(models.Model):
         return "Evenement ID%d" % self.idevenement if self.idevenement else "Nouvel évènement"
 
 
+CHOIX_MODES_OBJECTIF = [("HEBDO", "Hebdomadaire"), ("ANNUALISE", "Annualisé"), ("VOLUME", "Volume fixe"), ("FORFAIT_JOURS", "Forfait jours"), ("AUCUN", "Aucun")]
+
+
 class ContratCollaborateur(models.Model):
     idcontrat = models.AutoField(verbose_name="ID", db_column="IDcontrat", primary_key=True)
     collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", on_delete=models.PROTECT)
@@ -4351,6 +4358,14 @@ class ContratCollaborateur(models.Model):
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)
     heures_hebdo = models.DecimalField(verbose_name="Volume horaire hebdomadaire", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Nombre d'heures prévues par semaine (exemple : 35). Utilisé par le planning pour calculer l'écart avec les heures planifiées.")
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    objectif_mode = models.CharField(verbose_name="Mode de calcul de l'objectif", max_length=20, default="HEBDO", choices=CHOIX_MODES_OBJECTIF,
+                                     help_text="Hebdomadaire : volume hebdomadaire / 5 par jour ouvré. Annualisé : volume annuel x quotité (volume hebdomadaire / durée d'un temps plein) x part de la période couverte par le contrat. "
+                                               "Volume fixe : nombre d'heures pour toute la durée du contrat. Forfait jours : nombre de jours travaillés par période. Aucun : pas d'objectif.")
+    objectif_volume = models.DecimalField(verbose_name="Volume de référence", max_digits=7, decimal_places=2, blank=True, null=True,
+                                          help_text="Annualisé : volume annuel d'un temps plein (laissez vide pour utiliser la valeur par défaut, en général 1607 h). Volume fixe : nombre d'heures prévues pour le contrat. "
+                                                    "Forfait jours : nombre de jours par période (laissez vide pour la valeur par défaut, en général 218).")
+    objectif_periode = models.CharField(verbose_name="Période de référence", max_length=20, blank=True, null=True, choices=[("CIVILE", "Année civile"), ("SCOLAIRE", "Année scolaire")],
+                                        help_text="Période affichée par défaut dans le planning individuel pour le suivi de l'objectif. Laissez vide pour utiliser le paramètre général.")
 
     class Meta:
         db_table = "contrats_collaborateur"
@@ -4359,6 +4374,27 @@ class ContratCollaborateur(models.Model):
 
     def __str__(self):
         return "Contrat ID%d" % self.idcontrat if self.idcontrat else "Nouveau contrat"
+
+
+class AjustementObjectifCollaborateur(models.Model):
+    idajustement = models.AutoField(verbose_name="ID", db_column="IDajustement", primary_key=True)
+    collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", on_delete=models.CASCADE)
+    date = models.DateField(verbose_name="Date d'effet", help_text="L'ajustement s'applique à la période de référence qui contient cette date.")
+    valeur = models.DecimalField(verbose_name="Valeur", max_digits=7, decimal_places=2, help_text="Heures (ou jours pour un forfait jours) ajoutées à l'objectif. Saisissez une valeur négative pour réduire l'objectif.")
+    type = models.CharField(verbose_name="Type", max_length=20, default="AJUSTEMENT", choices=[("AJUSTEMENT", "Ajustement"), ("REPORT", "Report de solde")])
+    motif = models.CharField(verbose_name="Motif", max_length=300, blank=True, null=True)
+    periode_origine = models.CharField(verbose_name="Période d'origine", max_length=50, blank=True, null=True)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.SET_NULL)
+    date_saisie = models.DateTimeField(verbose_name="Date de saisie", auto_now=True)
+
+    class Meta:
+        db_table = "ajustements_objectif_collaborateur"
+        verbose_name = "ajustement d'objectif"
+        verbose_name_plural = "ajustements d'objectif"
+        indexes = [models.Index(fields=["collaborateur", "date"], name="ajust_collab_date_idx")]
+
+    def __str__(self):
+        return "Ajustement ID%d" % self.idajustement if self.idajustement else "Nouvel ajustement"
 
 
 class ModelePlanningCollaborateur(models.Model):

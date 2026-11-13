@@ -101,10 +101,16 @@ class Onglet(CustomView):
     def get_context_data(self, **kwargs):
         context = super(Onglet, self).get_context_data(**kwargs)
         context['page_titre'] = "Fiche collaborateur"
-        context['liste_onglets'] = [dict_onglet for dict_onglet in self.liste_onglets if self.request.user.has_perm("core.collaborateur_%s" % dict_onglet["code"])]
+        context['liste_onglets'] = [dict_onglet for dict_onglet in self.liste_onglets if self.Onglet_autorise(dict_onglet["code"])]
         context['idcollaborateur'] = self.kwargs['idcollaborateur']
         context['collaborateur'] = Collaborateur.objects.get(pk=self.kwargs['idcollaborateur'])
         return context
+
+    def Onglet_autorise(self, code=""):
+        if code == "planning":
+            # Le planning individuel dépend des permissions du planning (individuel ou général)
+            return self.request.user.has_perm("core.planning_individuel") or self.request.user.has_perm("core.planning_equipe")
+        return self.request.user.has_perm("core.collaborateur_%s" % code)
 
     def test_func_page(self):
         # Vérifie que l'utilisateur a une permission d'accéder à ce collaborateur

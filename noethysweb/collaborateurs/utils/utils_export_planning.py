@@ -189,3 +189,128 @@ def Generer_ical(collaborateur=None):
         ])
     lignes.append("END:VCALENDAR")
     return "\r\n".join(Plier_ligne_ical(ligne) for ligne in lignes) + "\r\n"
+
+
+def Exporter_bilan(collaborateur=None, periode=None):
+    """ Bilan annuel d'un collaborateur (planning individuel) : synthèse mensuelle avec objectif, évènements, ajustements. Renvoie l'URL du fichier. """
+    import xlsxwriter
+    from collaborateurs.utils import utils_objectif
+
+    categories = {categorie.pk: categorie for categorie in TypeEvenementCollaborateur.objects.all()}
+    arbre = Arbre()
+    calcul = utils_objectif.Calcul_objectif(idcollaborateur=collaborateur.pk, periode=periode, categories=categories)
+    en_jours = calcul.unite == "jours"
+    evenements = list(utils_planning.Get_evenements(periode["debut"], periode["fin"], [collaborateur.pk]))
+
+    utils_fichiers.GetTempRep()
+    rep_base = os.path.join("temp", str(uuid.uuid4()))
+    os.makedirs(os.path.join(settings.MEDIA_ROOT, rep_base))
+    nom_fichier = "Bilan_planning_%s_%s.xlsx" % ("".join(c for c in collaborateur.Get_nom() if c.isalnum() or c in "-_") or collaborateur.pk, periode["libelle"])
+    classeur = xlsxwriter.Workbook(os.path.join(settings.MEDIA_ROOT, rep_base, nom_fichier))
+    f_titre = classeur.add_format({"bold": True, "font_size": 14})
+    f_entete = classeur.add_format({"bold": True, "bg_color": "#EEF1F5", "border": 1, "text_wrap": True, "valign": "vcenter"})
+    f_texte = classeur.add_format({"border": 1})
+    f_gras = classeur.add_format({"border": 1, "bold": True})
+    f_date = classeur.add_format({"num_format": "dd/mm/yyyy", "border": 1})
+    f_heure = classeur.add_format({"num_format": "hh:mm", "border": 1})
+    f_valeur = classeur.add_format({"num_format": "0.0" if en_jours else "[h]:mm;-[h]:mm", "border": 1})
+    f_valeur_gras = classeur.add_format({"num_format": "0.0" if en_jours else "[h]:mm;-[h]:mm", "border": 1, "bold": True})
+    f_duree = classeur.add_format({"num_format": "[h]:mm", "border": 1})
+    convertir = (lambda v: v) if en_jours else (lambda v: v / 24)   # heures -> fraction de jour pour Excel
+    unite = "jours" if en_jours else "heures"
+
+    # Synthèse mensuelle
+    feuille = classeur.add_worksheet("Synthèse")
+    feuille.write(0, 0, "Bilan de l'objectif %s - %s" % (periode["libelle"], collaborateur.Get_nom()), f_titre)
+    feuille.write(1, 0, "Valeurs en %s. Attendu : objectif des contrats réparti au prorata des jours du mois, plus les ajustements datés du mois." % unite)
+    colonnes = [("Mois", 18), ("Planifié", 12), ("Attendu", 12), ("Écart du mois", 12), ("Écart cumulé", 12)]
+    for index, (titre, largeur) in enumerate(colonnes):
+        feuille.write(3, index, titre, f_entete)
+        feuille.set_column(index, index, largeur)
+    nbre_jours = (periode["fin"] - periode["debut"]).days + 1
+    jours = [periode["debut"] + datetime.timedelta(days=n) for n in range(nbre_jours)]
+    mois = []
+    for jour in jours:
+        if not mois or (jour.year, jour.month) != (mois[-1][0].year, mois[-1][0].month):
+            mois.append([])
+        mois[-1].append(jour)
+    noms_mois = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
+    ligne, cumul = 4, 0.0
+    for dates_mois in mois:
+        planifie = sum(calcul.planifie_par_jour.get(date, 0) for date in dates_mois)
+        attendu = calcul.objectif_contrats * len(dates_mois) / nbre_jours + sum(float(a.valeur) for a in calcul.ajustements if dates_mois[0] <= a.date <= dates_mois[-1])
+        cumul += planifie - attendu
+        feuille.write(ligne, 0, "%s %d" % (noms_mois[dates_mois[0].month - 1], dates_mois[0].year), f_texte)
+        for colonne, valeur in enumerate((planifie, attendu, planifie - attendu, cumul), 1):
+            feuille.write(ligne, colonne, convertir(valeur), f_valeur)
+        ligne += 1
+    feuille.write(ligne, 0, "Total", f_gras)
+    for colonne, valeur in enumerate((calcul.planifie, calcul.objectif, calcul.planifie - calcul.objectif), 1):
+        feuille.write(ligne, colonne, convertir(valeur), f_valeur_gras)
+    feuille.write(ligne, 4, "", f_texte)
+    ligne += 2
+    feuille.write(ligne, 0, "Composition de l'objectif", f_gras)
+    ligne += 1
+    for detail in calcul.detail:
+        if detail["valeur"] is None:
+            continue
+        feuille.write(ligne, 0, detail["texte"])
+        feuille.write(ligne, 3, convertir(detail["valeur"]), f_valeur)
+        ligne += 1
+    for ajustement in calcul.ajustements:
+        feuille.write(ligne, 0, "%s - %s" % (ajustement.date.strftime("%d/%m/%Y"), ajustement.motif or ajustement.get_type_display()))
+        feuille.write(ligne, 3, convertir(float(ajustement.valeur)), f_valeur)
+        ligne += 1
+    feuille.write(ligne, 0, "Objectif de la période", f_gras)
+    feuille.write(ligne, 3, convertir(calcul.objectif), f_valeur_gras)
+    for texte in calcul.avertissements:
+        ligne += 1
+        feuille.write(ligne, 0, texte)
+
+    # Evènements
+    feuille = classeur.add_worksheet("Évènements")
+    colonnes = [("Date", 11), ("Jour", 10), ("Début", 8), ("Fin", 8), ("Durée", 9), ("Catégorie", 20), ("Prise en compte", 22), ("Affectation", 34), ("Titre", 30),
+                ("Début réalisé", 9), ("Fin réalisée", 9)]
+    for index, (titre, largeur) in enumerate(colonnes):
+        feuille.write(0, index, titre, f_entete)
+        feuille.set_column(index, index, largeur)
+    jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+    ligne = 1
+    for evenement in evenements:
+        categorie = categories.get(evenement.type_evenement_id)
+        regle = ""
+        if categorie:
+            regle = {"DUREE": "Compté comme travail", "FORFAIT": "Compté au forfait"}.get(categorie.temps_travail_objectif) or categorie.get_type_display()
+        feuille.write_datetime(ligne, 0, evenement.date_debut, f_date)
+        feuille.write(ligne, 1, jours_semaine[evenement.date_debut.weekday()], f_texte)
+        feuille.write_datetime(ligne, 2, evenement.date_debut, f_heure)
+        feuille.write_datetime(ligne, 3, evenement.date_fin, f_heure)
+        feuille.write(ligne, 4, (evenement.date_fin - evenement.date_debut).total_seconds() / 86400, f_duree)
+        feuille.write(ligne, 5, categorie.nom if categorie else "", f_texte)
+        feuille.write(ligne, 6, regle, f_texte)
+        feuille.write(ligne, 7, arbre.Get_chemin(evenement.affectation_id) if evenement.affectation_id else "", f_texte)
+        feuille.write(ligne, 8, evenement.titre or "", f_texte)
+        if evenement.realise_debut:
+            feuille.write_datetime(ligne, 9, evenement.realise_debut, f_heure)
+            feuille.write_datetime(ligne, 10, evenement.realise_fin, f_heure)
+        else:
+            feuille.write(ligne, 9, "", f_texte)
+            feuille.write(ligne, 10, "", f_texte)
+        ligne += 1
+    feuille.autofilter(0, 0, max(ligne - 1, 1), len(colonnes) - 1)
+    feuille.freeze_panes(1, 0)
+
+    # Ajustements et reports
+    feuille = classeur.add_worksheet("Ajustements")
+    colonnes = [("Date d'effet", 12), ("Type", 18), ("Valeur", 12), ("Motif", 50)]
+    for index, (titre, largeur) in enumerate(colonnes):
+        feuille.write(0, index, titre, f_entete)
+        feuille.set_column(index, index, largeur)
+    for ligne, ajustement in enumerate(calcul.ajustements, 1):
+        feuille.write_datetime(ligne, 0, datetime.datetime.combine(ajustement.date, datetime.time(0)), f_date)
+        feuille.write(ligne, 1, ajustement.get_type_display(), f_texte)
+        feuille.write(ligne, 2, convertir(float(ajustement.valeur)), f_valeur)
+        feuille.write(ligne, 3, ajustement.motif or "", f_texte)
+
+    classeur.close()
+    return os.path.join(settings.MEDIA_URL, rep_base, nom_fichier)
