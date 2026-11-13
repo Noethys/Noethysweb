@@ -7,10 +7,10 @@ from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
 from collaborateurs.views import collaborateur, collaborateur_identite, collaborateur_questionnaire, collaborateur_coords, collaborateur_qualifications, \
-                                collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, planning_collaborateurs, \
+                                collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, \
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
-                                fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel
+                                fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel, statistiques_evenements
 
 
 urlpatterns = [
@@ -77,22 +77,16 @@ urlpatterns = [
 
     # Gestion des évènements
     path('collaborateurs/appliquer_modele_planning', appliquer_modele_planning.View.as_view(), name='appliquer_modele_planning'),
-    path('collaborateurs/planning_collaborateurs', planning_collaborateurs.View.as_view(), name='planning_collaborateurs'),
     path('collaborateurs/planning', planning.View.as_view(), name='planning_equipe'),
     path('collaborateurs/planning/ical/<str:token>.ics', planning.Ical, name='planning_equipe_ical'),
     path('collaborateurs/planning_individuel', planning_individuel.View.as_view(), name='planning_individuel'),
     path('collaborateurs/soldes_objectifs', planning_individuel.View_soldes.as_view(), name='soldes_objectifs_collaborateurs'),
 
+    # Analyse
+    path('collaborateurs/statistiques_evenements', statistiques_evenements.View.as_view(), name='statistiques_evenements_collaborateurs'),
+
 
     # AJAX
-    path('collaborateurs/planning/get_collaborateurs', secure_ajax(planning_collaborateurs.Get_collaborateurs), name='ajax_planning_collaborateurs_get_collaborateurs'),
-    path('collaborateurs/planning/get_evenements', secure_ajax(planning_collaborateurs.Get_evenements), name='ajax_planning_collaborateurs_get_evenements'),
-    path('collaborateurs/planning/get_form_detail_evenement', secure_ajax(planning_collaborateurs.Get_form_detail_evenement), name='ajax_planning_collaborateurs_get_form_detail_evenement'),
-    path('collaborateurs/planning/valid_form_detail_evenement', secure_ajax(planning_collaborateurs.Valid_form_detail_evenement), name='ajax_planning_collaborateurs_valid_form_detail_evenement'),
-    path('collaborateurs/planning/modifier_evenement', secure_ajax(planning_collaborateurs.Modifier_evenement), name='ajax_planning_collaborateurs_modifier_evenement'),
-    path('collaborateurs/planning/supprimer_evenement', secure_ajax(planning_collaborateurs.Supprimer_evenement), name='ajax_planning_collaborateurs_supprimer_evenement'),
-    path('collaborateurs/planning/get_form_appliquer_modele', secure_ajax(planning_collaborateurs.Get_form_appliquer_modele), name='ajax_planning_collaborateurs_get_form_appliquer_modele'),
-    path('collaborateurs/planning/valid_form_appliquer_modele', secure_ajax(planning_collaborateurs.Valid_form_appliquer_modele), name='ajax_planning_collaborateurs_valid_form_appliquer_modele'),
     path('collaborateurs/planning_equipe/get_donnees', secure_ajax(planning.Get_donnees), name='ajax_planning_equipe_get_donnees'),
     path('collaborateurs/planning_equipe/get_evenements', secure_ajax(planning.Get_evenements), name='ajax_planning_equipe_get_evenements'),
     path('collaborateurs/planning_equipe/enregistrer', secure_ajax(planning.Enregistrer), name='ajax_planning_equipe_enregistrer'),
@@ -121,6 +115,8 @@ urlpatterns = [
     path('collaborateurs/planning_individuel/reporter_soldes', secure_ajax(planning_individuel.Reporter_soldes), name='ajax_planning_individuel_reporter_soldes'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrat', secure_ajax(collaborateur_voir_contrat.Fusionner), name='ajax_collaborateur_fusionner_contrat'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrats', secure_ajax(fusionner_contrats_word.Fusionner), name='ajax_collaborateur_fusionner_contrats'),
+    path('collaborateurs/statistiques_evenements/exporter_excel', secure_ajax(statistiques_evenements.Exporter_excel), name='ajax_statistiques_evenements_collaborateurs_exporter_excel'),
+    path('collaborateurs/statistiques_evenements/generer_pdf', secure_ajax(statistiques_evenements.Generer_pdf), name='ajax_statistiques_evenements_collaborateurs_generer_pdf'),
     path('collaborateurs/importer_collaborateurs/importer', secure_ajax(importer_collaborateurs.Importer), name='ajax_importer_collaborateurs_importer'),
 
 ]

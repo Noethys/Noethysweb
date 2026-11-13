@@ -523,8 +523,8 @@ COMMANDES = {
     "contrats_liste": ("file-text-o", "l", "Consulter les contrats des collaborateurs."),
     "fusionner_contrats_word": ("file-word-o", "e", "Générer les contrats à partir d'un modèle Word."),
     "appliquer_modele_planning": ("calendar-plus-o", "a", "Appliquer un planning type à des collaborateurs."),
-    "planning_collaborateurs": ("calendar", "a", "Voir et saisir les évènements sur un planning."),
     "planning_equipe": ("tasks", "a", "Gérer les plannings des collaborateurs par date ou par collaborateur."),
+    "statistiques_evenements_collaborateurs": ("bar-chart", "s", "Tableau de bord du temps de travail, des absences et des objectifs des collaborateurs."),
 }
 
 
@@ -545,6 +545,9 @@ NOUVEAUTES = {
     "assistant_traitement_lot": "2026-10-13",
     "statistiques_locations": "2026-11-08",
     "planning_equipe": "2026-11-11",
+    "planning_individuel": "2026-11-13",
+    "soldes_objectifs_collaborateurs": "2026-11-13",
+    "statistiques_evenements_collaborateurs": "2026-11-13",
 }
 
 

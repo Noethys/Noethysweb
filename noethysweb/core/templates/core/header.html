@@ -111,12 +111,11 @@
                     {% if perms.core.depots_reglements_liste %}
                         {% if perms.core.depots_reglements_liste %}<li class="dropdown-item"><a href="{% url 'depots_reglements_liste' %}">Déposer des règlements</a></li>{% endif %}
                     {% endif %}
-                    {% if perms.core.collaborateur_ajouter or perms.core.planning_collaborateurs or perms.core.planning_equipe %}
+                    {% if perms.core.collaborateur_ajouter or perms.core.planning_equipe %}
                         <li class="dropdown-divider"></li>
                         <h6 class="dropdown-header"><strong>Collaborateurs</strong></h6>
                         {% if perms.core.collaborateur_ajouter %}<li class="dropdown-item"><a href="{% url 'collaborateur_ajouter' %}">Ajouter un collaborateur</a></li>{% endif %}
                         {% if perms.core.planning_equipe %}<li class="dropdown-item"><a href="{% url 'planning_equipe' %}">Planning général</a></li>{% endif %}
-                        {% if perms.core.planning_collaborateurs %}<li class="dropdown-item"><a href="{% url 'planning_collaborateurs' %}">Agenda</a></li>{% endif %}
                     {% endif %}
                 </ul>
             </li>

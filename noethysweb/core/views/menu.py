@@ -511,7 +511,10 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_gestion_evenements_collaborateurs.Add(code="planning_individuel", titre="Planning individuel", icone="file-text-o")
     menu_gestion_evenements_collaborateurs.Add(code="soldes_objectifs_collaborateurs", titre="Soldes et reports des objectifs", icone="file-text-o")
     menu_gestion_evenements_collaborateurs.Add(code="appliquer_modele_planning", titre="Appliquer un modèle de planning", icone="file-text-o")
-    menu_gestion_evenements_collaborateurs.Add(code="planning_collaborateurs", titre="Agenda", icone="file-text-o")
+
+    # Analyse
+    menu_analyse_collaborateurs = menu_collaborateurs.Add(titre="Analyse")
+    menu_analyse_collaborateurs.Add(code="statistiques_evenements_collaborateurs", titre="Statistiques des évènements", icone="file-text-o")
 
 
 

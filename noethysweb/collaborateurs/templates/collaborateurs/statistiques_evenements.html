@@ -1,0 +1,470 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        /* Catégories d'évènements : deux colonnes */
+        .statistiques_categories > div {columns: 2; column-gap: 12px}
+        .statistiques_categories .form-check {break-inside: avoid; padding-top: 2px; padding-bottom: 2px}
+        .statistiques_categories input[type=checkbox] {accent-color: var(--couleur-principale, #3c8dbc)}
+
+        /* Indicateurs clés */
+        .statistiques_kpi {
+            height: 100%;
+            padding: 14px 16px;
+            border-radius: .25rem;
+            background: #ffffff;
+            box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+        }
+        .statistiques_kpi .libelle {display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #6c757d}
+        .statistiques_kpi .libelle i {color: var(--couleur-principale, #3c8dbc)}
+        .statistiques_kpi .valeur {margin-top: 4px; font-size: clamp(20px, 1.9vw, 28px); white-space: nowrap; font-weight: 700; line-height: 1.2; color: #1f2d3d; font-variant-numeric: tabular-nums}
+        .statistiques_kpi .detail {margin-top: 2px; font-size: 12px; color: #6c757d}
+        .statistiques_evolution {display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 600}
+        .statistiques_evolution.hausse {background: #e6f4ea; color: #2d6a1f}
+        .statistiques_evolution.baisse {background: #fdecee; color: #a8323e}
+        .statistiques_evolution.stable {background: #f1f3f5; color: #6c757d}
+        .statistiques_barre {height: 6px; margin-top: 8px; overflow: hidden; border-radius: 3px; background: #e9ecef}
+        .statistiques_barre > span {display: block; height: 100%; border-radius: 3px; background: var(--couleur-principale, #3c8dbc)}
+
+        /* Cartes */
+        .statistiques_page .card-title {font-size: 15px}
+        .statistiques_page .card-tools .badge {font-weight: 500}
+        .statistiques_graphe {position: relative; height: 250px}
+        .statistiques_remarque {margin-top: 6px; font-size: 11.5px; color: #8a96a3}
+        .statistiques_vide {display: flex; align-items: center; justify-content: center; height: 250px; color: #8a96a3; font-size: 13px; text-align: center}
+
+        /* Tableaux de détail */
+        .table_unites th {border-top: 0; font-size: 12px; font-weight: 600; color: #6c757d}
+        .table_unites td, .table_unites th {padding: .45rem .75rem}
+        .table_unites .nombre {text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap}
+        .table_unites tr.total td {font-weight: 700; background: #f8f9fa}
+        .table_unites .ecart_negatif {color: #a8323e}
+        .table_unites .ecart_positif {color: #2d6a1f}
+        .statistiques_pastille {display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; vertical-align: -1px}
+        .statistiques_detail .card-tools .btn {font-size: 12px}
+
+        /* Suivi administratif */
+        .statistiques_suivi_colonne li {display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 0; border-bottom: 1px solid #f1f3f5; font-size: 13.5px}
+        .statistiques_suivi_colonne li:last-child {border-bottom: 0}
+        .statistiques_suivi_colonne .nombre {white-space: nowrap; margin-right: 10px; font-size: 16px; font-weight: 700; color: #1f2d3d}
+        .statistiques_suivi_colonne a {font-size: 12px; white-space: nowrap}
+
+        /* Mode sombre */
+        .dark-mode .statistiques_kpi {background: #343a40}
+        .dark-mode .statistiques_kpi .valeur, .dark-mode .statistiques_suivi_colonne .nombre {color: #ffffff}
+        .dark-mode .statistiques_barre {background: #454d55}
+        .dark-mode .table_unites tr.total td {background: #3f474e}
+        .dark-mode .statistiques_suivi_colonne li {border-color: rgba(255, 255, 255, .07)}
+        .dark-mode .table_unites .ecart_negatif {color: #f1a1aa}
+        .dark-mode .table_unites .ecart_positif {color: #9fd49a}
+    </style>
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/chartjs/chart.umd.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+
+    <div class="row statistiques_page">
+        <div class="col-lg-3">
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button type="submit" form="form_statistiques_evenements" class="btn btn-primary btn-block" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser</button>
+                    {% if data.nbre_evenements %}
+                        <div class="d-flex mt-2" style="gap: 6px;">
+                            <button type="button" class="btn btn-default btn-sm flex-fill" id="bouton_excel" title="Exporter les statistiques au format Excel"><i class="fa fa-file-excel-o margin-r-5"></i> Excel</button>
+                            <button type="button" class="btn btn-default btn-sm flex-fill" id="bouton_pdf" title="Exporter les statistiques au format PDF"><i class="fa fa-file-pdf-o margin-r-5"></i> PDF</button>
+                        </div>
+                    {% endif %}
+                    <hr class="mt-3 mb-3">
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            {% if not data %}
+
+                <div class="callout callout-info">
+                    <p>Sélectionnez une période et les catégories d'évènements, puis cliquez sur <b>Actualiser</b>.</p>
+                </div>
+
+            {% elif not data.nbre_evenements %}
+
+                <div class="callout callout-warning">
+                    <p>Aucun évènement n'a été trouvé du {{ data.date_debut_str }} au {{ data.date_fin_str }} pour les paramètres sélectionnés.</p>
+                </div>
+
+            {% else %}
+
+                <!-- Indicateurs clés -->
+                <div class="row mb-3">
+                    <div class="col-md-6 col-xl-3 mb-3 mb-xl-0">
+                        <div class="statistiques_kpi">
+                            <div class="libelle"><i class="fa fa-calendar" aria-hidden="true"></i>Évènements</div>
+                            <div class="valeur">{{ data.nbre_evenements_str }}</div>
+                            <div class="detail">
+                                {% if data.comparer and data.evolution_evenements is not None %}
+                                    {% include "facturation/statistiques_prestations_evolution.html" with valeur=data.evolution_evenements unite="%" %}
+                                    vs période précédente{% if data.en_cours %} à date équivalente{% endif %}
+                                {% else %}
+                                    du {{ data.date_debut_str }} au {{ data.date_fin_str }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3 mb-3 mb-xl-0">
+                        <div class="statistiques_kpi">
+                            <div class="libelle"><i class="fa fa-users" aria-hidden="true"></i>Collaborateurs</div>
+                            <div class="valeur">{{ data.nbre_collaborateurs_str }}</div>
+                            <div class="detail">{{ data.evenements_par_collaborateur }} évènement{% if data.nbre_evenements > data.nbre_collaborateurs %}s{% endif %} par collaborateur</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3 mb-3 mb-md-0">
+                        <div class="statistiques_kpi" title="Durée des évènements en temps comptabilisé ({{ data.libelle_donnees }}). Taux de réalisation : temps réalisé saisi / temps planifié des évènements terminés.">
+                            <div class="libelle"><i class="fa fa-clock-o" aria-hidden="true"></i>Temps de travail</div>
+                            <div class="valeur">{{ data.travail_str }}</div>
+                            <div class="detail">
+                                {% if data.comparer and data.evolution_travail is not None %}
+                                    {% include "facturation/statistiques_prestations_evolution.html" with valeur=data.evolution_travail unite="%" %}
+                                {% endif %}
+                                {% if data.realise %}planifié {{ data.travail_planifie_str }}{% else %}réalisé {{ data.travail_realise_str }}{% endif %}{% if data.taux_realisation is not None %} · {{ data.taux_realisation }} %{% endif %}
+                            </div>
+                            {% if data.taux_realisation is not None %}
+                                <div class="statistiques_barre" role="img" aria-label="{{ data.taux_realisation }} % de réalisation"><span style="width: {% if data.taux_realisation > 100 %}100{% else %}{{ data.taux_realisation }}{% endif %}%;"></span></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="statistiques_kpi" title="Catégories en temps soustrait et catégories en temps non comptabilisé prises en compte dans l'objectif (congés, maladie...)">
+                            <div class="libelle"><i class="fa fa-plane" aria-hidden="true"></i>Absences</div>
+                            <div class="valeur">{{ data.absences_str }}</div>
+                            <div class="detail">{% if data.taux_absences_str %}{{ data.taux_absences_str }} % du temps total{% else %}Aucune absence{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques -->
+                <div class="row">
+                    <div class="col-xl-7">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">Heures par mois</h3></div>
+                            <div class="card-body">
+                                <div class="statistiques_graphe"><canvas id="graphique_mois" role="img" aria-label="Heures par mois"></canvas></div>
+                                <div class="statistiques_remarque">{% if data.realise %}Temps comptabilisé réalisé, autres catégories planifiées.{% else %}Horaires planifiés.{% endif %} Un évènement sur plusieurs mois est réparti entre eux.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">Répartition par catégorie</h3></div>
+                            <div class="card-body">
+                                {% if data.graphes.categories.valeurs %}
+                                    <div class="statistiques_graphe"><canvas id="graphique_categories" role="img" aria-label="Répartition par catégorie"></canvas></div>
+                                {% else %}
+                                    <div class="statistiques_vide">Aucune durée {{ data.libelle_donnees }}e sur la période.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-7">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">Heures par affectation</h3></div>
+                            <div class="card-body">
+                                {% if data.graphes.affectations.valeurs %}
+                                    <div class="statistiques_graphe"><canvas id="graphique_affectations" role="img" aria-label="Heures par affectation"></canvas></div>
+                                    <div class="statistiques_remarque">Durée de tous les évènements des catégories sélectionnées. Affectations les plus chargées.</div>
+                                {% else %}
+                                    <div class="statistiques_vide">Aucune durée {{ data.libelle_donnees }}e sur la période.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-5">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">Suivi administratif</h3></div>
+                            <div class="card-body py-2">
+                                <ul class="list-unstyled statistiques_suivi_colonne mb-0">
+                                    <li><span><span class="nombre">{{ data.suivi.en_cours }}</span>évènement{{ data.suivi.en_cours|pluralize }} en cours actuellement</span><a href="{% url 'planning_equipe' %}">Voir <i class="fa fa-angle-right"></i></a></li>
+                                    <li title="Évènements terminés en temps comptabilisé dont les horaires réalisés ne sont pas saisis"><span><span class="nombre">{{ data.suivi.realise_non_saisi }}</span>réalisé{{ data.suivi.realise_non_saisi|pluralize }} non saisi{{ data.suivi.realise_non_saisi|pluralize }}</span><a href="{% url 'planning_equipe' %}">Saisir <i class="fa fa-angle-right"></i></a></li>
+                                    <li><span><span class="nombre">{{ data.suivi.sans_categorie }}</span>évènement{{ data.suivi.sans_categorie|pluralize }} sans catégorie</span><a href="{% url 'planning_equipe' %}">Voir <i class="fa fa-angle-right"></i></a></li>
+                                    <li title="Évènements qui en chevauchent un autre du même collaborateur, hors catégories où le chevauchement est autorisé"><span><span class="nombre">{{ data.suivi.chevauchements }}</span>évènement{{ data.suivi.chevauchements|pluralize }} en chevauchement</span><a href="{% url 'planning_equipe' %}">Voir <i class="fa fa-angle-right"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détail -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card statistiques_detail">
+                            <div class="card-header">
+                                <h3 class="card-title" id="titre_detail">Détail par collaborateur</h3>
+                                <div class="card-tools">
+                                    <div class="btn-group btn-group-sm" role="group" aria-label="Niveau de détail">
+                                        <button type="button" class="btn btn-default active" data-detail="collaborateurs" aria-pressed="true">Collaborateur</button>
+                                        <button type="button" class="btn btn-default" data-detail="categories" aria-pressed="false">Catégorie</button>
+                                        <button type="button" class="btn btn-default" data-detail="affectations" aria-pressed="false">Affectation</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0 table-responsive">
+
+                                <!-- Par collaborateur -->
+                                <table class="table table_unites mb-0" data-table-detail="collaborateurs">
+                                    <thead>
+                                        <tr>
+                                            <th>Collaborateur</th><th class="nombre">Évènements</th>
+                                            <th class="nombre" title="Temps comptabilisé planifié">Planifié</th><th class="nombre" title="Temps comptabilisé réalisé">Réalisé</th>
+                                            <th class="nombre" title="Réalisé - planifié, sur les évènements dont le réalisé est saisi">Écart</th>
+                                            <th class="nombre">Absences</th>
+                                            <th class="nombre" title="Temps retenu pour l'objectif / objectif proratisé sur la période, selon les règles du planning individuel">Objectif</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ligne in data.lignes.collaborateurs %}
+                                            <tr>
+                                                <td><a href="{% url 'planning_individuel' %}?idcollaborateur={{ ligne.id }}" title="Ouvrir le planning individuel">{{ ligne.label }}</a></td>
+                                                <td class="nombre">{{ ligne.nbre_str }}</td>
+                                                <td class="nombre">{{ ligne.planifie_str }}</td>
+                                                <td class="nombre">{{ ligne.realise_str }}</td>
+                                                <td class="nombre {% if ligne.nbre_realises and ligne.ecart < 0 %}ecart_negatif{% elif ligne.nbre_realises and ligne.ecart > 0 %}ecart_positif{% endif %}">{{ ligne.ecart_str }}</td>
+                                                <td class="nombre">{{ ligne.absences_str }}</td>
+                                                <td class="nombre" {% if ligne.objectif %}title="{{ ligne.objectif.planifie_str }} / {{ ligne.objectif.objectif_str }}"{% endif %}>
+                                                    {% if ligne.objectif and ligne.objectif.taux is not None %}{{ ligne.objectif.taux }} %{% else %}-{% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr class="total">
+                                            <td>Total</td>
+                                            <td class="nombre">{{ data.total.nbre_str }}</td>
+                                            <td class="nombre">{{ data.total.travail_planifie_str }}</td>
+                                            <td class="nombre">{{ data.total.travail_realise_str }}</td>
+                                            <td class="nombre">{{ data.total.ecart_str }}</td>
+                                            <td class="nombre">{{ data.total.absences_str }}</td>
+                                            <td class="nombre" {% if data.total.objectif_taux is not None %}title="{{ data.total.objectif_planifie_str }} / {{ data.total.objectif_str }} (objectifs en heures)"{% endif %}>
+                                                {% if data.total.objectif_taux is not None %}{{ data.total.objectif_taux }} %{% else %}-{% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Par catégorie -->
+                                <table class="table table_unites mb-0 d-none" data-table-detail="categories">
+                                    <thead>
+                                        <tr>
+                                            <th>Catégorie</th><th>Type</th><th class="nombre">Évènements</th><th class="nombre">Collaborateurs</th>
+                                            <th class="nombre">Planifié</th><th class="nombre">Réalisé</th>
+                                            <th class="nombre" title="Réalisé - planifié, sur les évènements dont le réalisé est saisi">Écart</th><th class="nombre" title="Part de la durée planifiée">Part</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ligne in data.lignes.categories %}
+                                            <tr>
+                                                <td><span class="statistiques_pastille" style="background: {{ ligne.couleur }};"></span>{{ ligne.label }}</td>
+                                                <td>{{ ligne.type }}</td>
+                                                <td class="nombre">{{ ligne.nbre_str }}</td>
+                                                <td class="nombre">{{ ligne.nbre_collaborateurs_str }}</td>
+                                                <td class="nombre">{{ ligne.planifie_str }}</td>
+                                                <td class="nombre">{{ ligne.realise_str }}</td>
+                                                <td class="nombre {% if ligne.nbre_realises and ligne.ecart < 0 %}ecart_negatif{% elif ligne.nbre_realises and ligne.ecart > 0 %}ecart_positif{% endif %}">{{ ligne.ecart_str }}</td>
+                                                <td class="nombre">{{ ligne.part_str }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr class="total">
+                                            <td colspan="2">Total</td>
+                                            <td class="nombre">{{ data.total.nbre_str }}</td>
+                                            <td class="nombre">{{ data.total.nbre_collaborateurs_str }}</td>
+                                            <td class="nombre">{{ data.total.duree_str }}</td>
+                                            <td class="nombre">{{ data.total.realise_str }}</td>
+                                            <td class="nombre">{{ data.total.ecart_duree_str }}</td>
+                                            <td class="nombre">100 %</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Par affectation -->
+                                <table class="table table_unites mb-0 d-none" data-table-detail="affectations">
+                                    <thead>
+                                        <tr>
+                                            <th>Affectation</th><th class="nombre">Évènements</th><th class="nombre">Collaborateurs</th>
+                                            <th class="nombre">Planifié</th><th class="nombre">Réalisé</th>
+                                            <th class="nombre" title="Réalisé - planifié, sur les évènements dont le réalisé est saisi">Écart</th><th class="nombre" title="Part de la durée planifiée">Part</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ligne in data.lignes.affectations %}
+                                            <tr{% if ligne.sans %} class="text-muted"{% endif %}>
+                                                <td>{{ ligne.label }}</td>
+                                                <td class="nombre">{{ ligne.nbre_str }}</td>
+                                                <td class="nombre">{{ ligne.nbre_collaborateurs_str }}</td>
+                                                <td class="nombre">{{ ligne.planifie_str }}</td>
+                                                <td class="nombre">{{ ligne.realise_str }}</td>
+                                                <td class="nombre {% if ligne.nbre_realises and ligne.ecart < 0 %}ecart_negatif{% elif ligne.nbre_realises and ligne.ecart > 0 %}ecart_positif{% endif %}">{{ ligne.ecart_str }}</td>
+                                                <td class="nombre">{{ ligne.part_str }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr class="total">
+                                            <td>Total</td>
+                                            <td class="nombre">{{ data.total.nbre_str }}</td>
+                                            <td class="nombre">{{ data.total.nbre_collaborateurs_str }}</td>
+                                            <td class="nombre">{{ data.total.duree_str }}</td>
+                                            <td class="nombre">{{ data.total.realise_str }}</td>
+                                            <td class="nombre">{{ data.total.ecart_duree_str }}</td>
+                                            <td class="nombre">100 %</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{ data.graphes|json_script:"donnees_graphes" }}
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+        $(function () {
+            // ------------------- Niveau de détail -------------------
+            var titres_detail = {collaborateurs: "Détail par collaborateur", categories: "Détail par catégorie", affectations: "Détail par affectation"};
+            $("[data-detail]").on("click", function () {
+                var niveau = $(this).data("detail");
+                $("[data-detail]").removeClass("active").attr("aria-pressed", "false");
+                $(this).addClass("active").attr("aria-pressed", "true");
+                $("[data-table-detail]").addClass("d-none");
+                $("[data-table-detail='" + niveau + "']").removeClass("d-none");
+                $("#titre_detail").text(titres_detail[niveau]);
+            });
+
+            var element_donnees = document.getElementById("donnees_graphes");
+            if (!element_donnees) {return}
+            var graphes = JSON.parse(element_donnees.textContent);
+            var comparer = {{ data.comparer|yesno:"true,false" }};
+
+            var sombre = $("body").hasClass("dark-mode");
+            var couleurs_types = {ADDITION: Couleur_principale(), SOUSTRACTION: "#d0790a", NEUTRE: sombre ? "#6c757d" : "#b8c2cc"};
+            var couleur_grille = sombre ? "rgba(255, 255, 255, .08)" : "#eef0f2";
+            var couleur_fond = sombre ? "#343a40" : "#ffffff";
+            var couleur_neutre = sombre ? "#6c757d" : "#b8c2cc";
+            Chart.defaults.font.family = '"Source Sans Pro", -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = sombre ? "#adb5bd" : "#6c757d";
+            Chart.defaults.animation = false;
+            var nombre = new Intl.NumberFormat("fr-FR", {maximumFractionDigits: 1});
+            var legende = {position: "top", align: "end", labels: {boxWidth: 10, boxHeight: 10}};
+            function Heures(valeur) {return nombre.format(valeur) + " h"}
+            function Creer(id, config) {
+                var canvas = document.getElementById(id);
+                if (canvas) {new Chart(canvas, config)}
+            }
+
+            // Heures par mois (empilées par type de catégorie) et temps comptabilisé de la période précédente
+            var series_mois = graphes.mois.series.map(function (serie) {
+                return {type: "bar", label: serie.label, data: serie.valeurs, backgroundColor: couleurs_types[serie.code], stack: "periode", maxBarThickness: 22, order: 2};
+            });
+            if (comparer && graphes.mois.valeurs_precedentes.length) {
+                series_mois.push({type: "line", label: "Comptabilisé période précédente", data: graphes.mois.valeurs_precedentes, order: 1,
+                    borderColor: sombre ? "#8fa9b9" : "#1f2d3d", borderWidth: 1.5, borderDash: [4, 3], pointRadius: 2, pointBackgroundColor: sombre ? "#8fa9b9" : "#1f2d3d", fill: false, tension: 0});
+            }
+            Creer("graphique_mois", {data: {labels: graphes.mois.labels, datasets: series_mois},
+                options: {maintainAspectRatio: false,
+                    scales: {x: {stacked: true, grid: {display: false}, border: {display: false}},
+                             y: {stacked: true, grid: {color: couleur_grille}, border: {display: false}, beginAtZero: true, ticks: {callback: function (v) {return Heures(v)}}}},
+                    plugins: {legend: legende, tooltip: {mode: "index", callbacks: {label: function (c) {return " " + c.dataset.label + " : " + Heures(c.raw)}}}}}});
+
+            // Répartition par catégorie (couleurs des catégories, "Autres" en gris)
+            Creer("graphique_categories", {type: "doughnut",
+                data: {labels: graphes.categories.labels, datasets: [{data: graphes.categories.valeurs, backgroundColor: graphes.categories.couleurs, borderColor: couleur_fond, borderWidth: 2}]},
+                options: {maintainAspectRatio: false, cutout: "62%", plugins: {legend: {position: "bottom", labels: {boxWidth: 10, boxHeight: 10, padding: 8}},
+                    tooltip: {callbacks: {label: function (c) {
+                        var total = c.dataset.data.reduce(function (a, b) {return a + b}, 0);
+                        return " " + c.label + " : " + Heures(c.raw) + " (" + Math.round(100 * c.raw / total) + " %)";
+                    }}}}}});
+
+            // Heures par affectation ("Sans affectation" et "Autres" en gris)
+            Creer("graphique_affectations", {type: "bar",
+                data: {labels: graphes.affectations.labels, datasets: [{label: "Heures", data: graphes.affectations.valeurs, borderRadius: 4, maxBarThickness: 14,
+                    backgroundColor: graphes.affectations.neutres.map(function (neutre) {return neutre ? couleur_neutre : Couleur_principale()})}]},
+                options: {indexAxis: "y", maintainAspectRatio: false,
+                    scales: {x: {grid: {color: couleur_grille}, border: {display: false}, beginAtZero: true, ticks: {maxTicksLimit: 5, callback: function (v) {return Heures(v)}}},
+                             y: {grid: {display: false}, border: {display: false}, ticks: {autoSkip: false, callback: function (v) {
+                                 // Chemin trop long : on conserve la dernière affectation
+                                 var label = this.getLabelForValue(v);
+                                 if (label.length <= 28) {return label}
+                                 var noms = label.split(" › "), dernier = noms[noms.length - 1];
+                                 if (noms.length > 1 && dernier.length < 25) {return "… › " + dernier}
+                                 return label.substring(0, 27) + "…";
+                             }}}},
+                    plugins: {legend: {display: false}, tooltip: {callbacks: {label: function (c) {return " " + Heures(c.raw)}}}}}});
+
+            // ------------------- Exports -------------------
+            function Exporter(url, avec_graphiques, callback, bouton) {
+                var donnees = $("#form_statistiques_evenements").serializeArray();
+                if (avec_graphiques) {
+                    ["mois", "categories", "affectations"].forEach(function (nom) {
+                        var canvas = document.getElementById("graphique_" + nom);
+                        if (canvas) {
+                            var copie = document.createElement("canvas");
+                            copie.width = canvas.width; copie.height = canvas.height;
+                            var contexte = copie.getContext("2d");
+                            contexte.fillStyle = "#ffffff"; contexte.fillRect(0, 0, copie.width, copie.height);
+                            contexte.drawImage(canvas, 0, 0);
+                            donnees.push({name: "graphique_" + nom, value: copie.toDataURL("image/png")});
+                        }
+                    });
+                }
+                var icone = bouton.find("i"), classe_icone = icone.attr("class");
+                bouton.prop("disabled", true);
+                icone.attr("class", "fa fa-spinner fa-spin margin-r-5");
+                $.ajax({
+                    type: "POST", url: url, data: $.param(donnees), datatype: "json",
+                    success: callback,
+                    error: function (data) {
+                        toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue lors de l'export");
+                    },
+                    complete: function () {
+                        bouton.prop("disabled", false);
+                        icone.attr("class", classe_icone);
+                    }
+                });
+            }
+            $("#bouton_excel").on("click", function () {
+                Exporter("{% url 'ajax_statistiques_evenements_collaborateurs_exporter_excel' %}", false, function (data) {
+                    window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
+                }, $(this));
+            });
+            $("#bouton_pdf").on("click", function () {
+                Exporter("{% url 'ajax_statistiques_evenements_collaborateurs_generer_pdf' %}", true, function (data) {
+                    charge_pdf(data);
+                }, $(this));
+            });
+        });
+    </script>
+
+{% endblock contenu_page %}
