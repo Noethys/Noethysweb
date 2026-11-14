@@ -202,7 +202,7 @@ def Get_compteurs(request):
             return Erreur("Collaborateur introuvable", 404)
         types = list(TypeCongeCollaborateur.objects.select_related("categorie").order_by("ordre", "nom"))
         compteurs = utils_conges.Get_compteurs([collaborateur.pk], types, annee=annee)
-        lignes = [dict(compteurs[(collaborateur.pk, type_conge.pk)], actif=type_conge.actif, droits_detail=[
+        lignes = [dict(compteurs[(collaborateur.pk, type_conge.pk)], actif=type_conge.actif, couleur=type_conge.categorie.couleur, droits_detail=[
             {"id": droit.pk, "nature": droit.get_nature_display(), "valeur_txt": utils_conges.Format_valeur(droit.valeur, type_conge.unite), "motif": droit.motif or "",
              "date": droit.date_saisie.strftime("%d/%m/%Y")}
             for droit in DroitCongeCollaborateur.objects.filter(collaborateur=collaborateur, type_conge=type_conge, annee=compteurs[(collaborateur.pk, type_conge.pk)]["annee"]).order_by("pk")])
@@ -248,6 +248,111 @@ def Enregistrer_droits(request):
         for collaborateur in collaborateurs:
             DroitCongeCollaborateur.objects.create(collaborateur=collaborateur, type_conge=type_conge, annee=annee, valeur=valeur, nature=nature, motif=motif, utilisateur=request.user)
     return JsonResponse({"message": "Droits enregistrés pour %d collaborateur%s" % (len(collaborateurs), "s" if len(collaborateurs) > 1 else "")})
+
+
+def Lire_valeur(texte=""):
+    """ Valeur numérique saisie (virgule ou point), None si invalide """
+    try:
+        return decimal.Decimal((texte or "").replace(",", ".").strip())
+    except decimal.InvalidOperation:
+        return None
+
+
+@Verifie_permission
+def Transferer(request):
+    """ Transfert d'une quantité d'un compteur vers un autre (exemple : congés annuels vers le compte épargne-temps).
+        Crée deux ajustements : négatif sur le compteur d'origine, positif sur le compteur de destination. """
+    collaborateur = Collaborateurs_accessibles(request.user).filter(pk=Get_int(request, "idcollaborateur")).first()
+    if not collaborateur or not utils_conges.Peut_traiter(request.user, collaborateur.pk):
+        return Erreur("Collaborateur introuvable ou non modifiable", 403)
+    source = TypeCongeCollaborateur.objects.filter(pk=Get_int(request, "idsource")).first()
+    destination = TypeCongeCollaborateur.objects.filter(pk=Get_int(request, "iddestination")).first()
+    if not source or not destination:
+        return Erreur("Sélectionnez le compteur d'origine et le compteur de destination")
+    if source.pk == destination.pk:
+        return Erreur("Le compteur de destination doit être différent du compteur d'origine")
+    if source.unite != destination.unite:
+        return Erreur("Les deux compteurs doivent avoir la même unité (jours ou heures)")
+    annee_source, annee_destination = Get_int(request, "annee_source"), Get_int(request, "annee_destination")
+    if not 1900 < annee_source < 2200 or not 1900 < annee_destination < 2200:
+        return Erreur("Sélectionnez les périodes")
+    valeur = Lire_valeur(request.POST.get("valeur"))
+    if valeur is None or valeur <= 0:
+        return Erreur("Saisissez une quantité positive (exemple : 5 ou 2,5)")
+
+    # Contrôle du solde disponible (demandes en attente déduites)
+    compteur = utils_conges.Get_compteurs([collaborateur.pk], [source], annee=annee_source)[(collaborateur.pk, source.pk)]
+    if not source.solde_negatif and compteur["previsionnel"] - float(valeur) < -0.001:
+        return Erreur("Solde disponible insuffisant sur le compteur %s : %s (demandes en attente déduites)" % (source.nom, compteur["previsionnel_txt"]))
+
+    motif = request.POST.get("motif", "").strip()
+    periode_source = utils_conges.Periode(source, annee_source)["libelle"]
+    periode_destination = utils_conges.Periode(destination, annee_destination)["libelle"]
+    with transaction.atomic():
+        DroitCongeCollaborateur.objects.create(collaborateur=collaborateur, type_conge=source, annee=annee_source, valeur=-valeur, nature="AJUSTEMENT", utilisateur=request.user,
+                                               motif=(motif or "Transfert vers %s (%s)" % (destination.nom, periode_destination))[:300])
+        DroitCongeCollaborateur.objects.create(collaborateur=collaborateur, type_conge=destination, annee=annee_destination, valeur=valeur, nature="AJUSTEMENT", utilisateur=request.user,
+                                               motif=(motif or "Transfert depuis %s (%s)" % (source.nom, periode_source))[:300])
+    return JsonResponse({"message": "%s transféré%s de %s vers %s" % (utils_conges.Format_valeur(valeur, source.unite), "s" if valeur > 1 else "", source.nom, destination.nom)})
+
+
+@Verifie_permission
+def Reporter_soldes(request):
+    """ Report du solde d'une période sur la période suivante, pour un type de congé et plusieurs collaborateurs.
+        Avec apercu=1, renvoie seulement le détail des reports qui seraient créés. """
+    type_conge = TypeCongeCollaborateur.objects.filter(pk=Get_int(request, "idtype")).first()
+    if not type_conge:
+        return Erreur("Sélectionnez un type de congé")
+    annee = Get_int(request, "annee")
+    if not 1900 < annee < 2200:
+        return Erreur("Sélectionnez la période à reporter")
+    plafond = None
+    if request.POST.get("plafond", "").strip():
+        plafond = Lire_valeur(request.POST.get("plafond"))
+        if plafond is None or plafond <= 0:
+            return Erreur("Saisissez un plafond positif ou laissez le champ vide")
+    negatifs = request.POST.get("negatifs") == "1"
+    try:
+        ids = [int(valeur_id) for valeur_id in json.loads(request.POST.get("collaborateurs", "[]"))]
+    except (ValueError, TypeError):
+        ids = []
+    ids_modifiables = utils_planning.Get_ids_modifiables(request.user)
+    collaborateurs = [collaborateur for collaborateur in Collaborateurs_accessibles(request.user).filter(pk__in=ids) if collaborateur.pk in ids_modifiables]
+    if not collaborateurs:
+        return Erreur("Aucun collaborateur dont vous gérez les congés n'est concerné")
+
+    periode_source, periode_suivante = utils_conges.Periode(type_conge, annee), utils_conges.Periode(type_conge, annee + 1)
+    compteurs = utils_conges.Get_compteurs([collaborateur.pk for collaborateur in collaborateurs], [type_conge], annee=annee)
+    deja = set(DroitCongeCollaborateur.objects.filter(type_conge=type_conge, annee=annee + 1, nature="REPORT", collaborateur__in=collaborateurs).values_list("collaborateur_id", flat=True))
+    reports, ignores = [], {"deja": 0, "nul": 0, "negatif": 0}
+    for collaborateur in sorted(collaborateurs, key=lambda c: c.Get_nom()):
+        solde = decimal.Decimal(str(round(compteurs[(collaborateur.pk, type_conge.pk)]["solde"], 2)))
+        if collaborateur.pk in deja:
+            ignores["deja"] += 1
+            continue
+        if not solde:
+            ignores["nul"] += 1
+            continue
+        if solde < 0 and not negatifs:
+            ignores["negatif"] += 1
+            continue
+        valeur = min(solde, plafond) if plafond is not None else solde
+        reports.append({"collaborateur": collaborateur, "solde": solde, "valeur": valeur})
+
+    if request.POST.get("apercu") == "1":
+        total = sum(report["valeur"] for report in reports)
+        return JsonResponse({"periode_source": periode_source["libelle"], "periode_suivante": periode_suivante["libelle"], "ignores": ignores,
+                             "total_txt": utils_conges.Format_valeur(total, type_conge.unite),
+                             "lignes": [{"collaborateur": report["collaborateur"].Get_nom(), "solde_txt": utils_conges.Format_valeur(report["solde"], type_conge.unite),
+                                         "valeur_txt": utils_conges.Format_valeur(report["valeur"], type_conge.unite), "plafonne": report["valeur"] != report["solde"]} for report in reports]})
+
+    if not reports:
+        return Erreur("Aucun solde à reporter")
+    with transaction.atomic():
+        for report in reports:
+            DroitCongeCollaborateur.objects.create(collaborateur=report["collaborateur"], type_conge=type_conge, annee=annee + 1, valeur=report["valeur"], nature="REPORT",
+                                                   motif="Report du solde %s" % periode_source["libelle"], utilisateur=request.user)
+    return JsonResponse({"message": "Solde %s reporté sur %s pour %d collaborateur%s" % (periode_source["libelle"], periode_suivante["libelle"], len(reports), "s" if len(reports) > 1 else "")})
 
 
 @Verifie_permission

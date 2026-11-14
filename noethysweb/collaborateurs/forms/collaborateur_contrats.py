@@ -40,6 +40,10 @@ class Formulaire(FormulaireBase, ModelForm):
         idcollaborateur = kwargs.pop("idcollaborateur", None)
         super(Formulaire, self).__init__(*args, **kwargs)
 
+        # Tri alphabétique des listes déroulantes
+        for nom_champ in ("type_contrat", "type_poste", "profil_reglementaire"):
+            self.fields[nom_champ].queryset = self.fields[nom_champ].queryset.order_by("nom")
+
         self.helper = FormHelper()
         self.helper.form_id = 'collaborateurs_contrats_form'
         self.helper.form_method = 'post'

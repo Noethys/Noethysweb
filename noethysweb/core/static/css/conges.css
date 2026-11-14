@@ -30,3 +30,55 @@
 .dark-mode .cg-carte {border-color: #4b545c;}
 .dark-mode .cg-ligne {border-bottom-color: rgba(255, 255, 255, 0.08);}
 .dark-mode .cg-ligne.attention, .dark-mode .cg-ligne.attention > i {color: #fbbf24;}
+
+
+/* Compteurs de la fiche collaborateur : liste compacte */
+.cg-liste-tete, .cg-liste-ligne > summary {display: grid; grid-template-columns: minmax(150px, 1.1fr) minmax(0, 2fr) 90px 70px; gap: 14px; align-items: center;}
+.cg-liste-tete {font-size: 11px; color: #6c757d; padding: 0 6px 6px; border-bottom: 1px solid #dee2e6;}
+.cg-liste-ligne {border-bottom: 1px solid #dee2e6;}
+.cg-liste-ligne > summary {list-style: none; cursor: pointer; padding: 10px 6px; font-size: 13px;}
+.cg-liste-ligne > summary::-webkit-details-marker {display: none;}
+.cg-liste-ligne > summary:hover {background: rgba(60, 141, 188, 0.05);}
+.cg-liste-ligne > summary:focus-visible {outline: 2px solid #3c8dbc; outline-offset: -2px;}
+.cg-liste-type {display: flex; align-items: center; gap: 4px; min-width: 0;}
+.cg-liste-type small {font-size: 11px;}
+.cg-chevron {font-size: 10px; color: #6c757d; width: 12px; transition: transform 0.15s;}
+.cg-liste-ligne[open] .cg-chevron {transform: rotate(90deg);}
+.cg-jauge {display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: #eef1f4; margin-bottom: 3px;}
+.cg-jauge.negatif {background: #fcebeb; box-shadow: inset 0 0 0 1px #e24b4a;}
+.cg-jauge-attente {opacity: 0.55; background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.6) 0 3px, transparent 3px 6px);}
+.cg-jauge-vide {font-size: 12px; color: #6c757d; font-style: italic;}
+.cg-liste-jauge small {font-size: 11px;}
+.cg-liste-solde {text-align: right; font-weight: 700; font-size: 15px; white-space: nowrap; font-variant-numeric: tabular-nums;}
+.cg-impact {display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #faeeda; color: #633806; white-space: nowrap;}
+.cg-impact.negatif {background: #fcebeb; color: #a32d2d;}
+.cg-liste-detail {padding: 4px 6px 12px 34px;}
+.cg-jauge.negatif {box-shadow: none;}
+.cg-jauge-depasse {background: #e24b4a;}
+.cg-lien {border: 0; background: none; padding: 0; color: #3c8dbc; font-size: inherit; cursor: pointer;}
+.cg-lien:hover {text-decoration: underline;}
+.cg-table-droits {table-layout: fixed; font-size: 12px; max-width: 640px;}
+.cg-table-droits th, .cg-table-droits td {vertical-align: middle; padding: 4px 8px;}
+.cg-table-droits th:nth-child(1) {width: 32%;}
+.cg-table-droits th:nth-child(2) {width: 14%;}
+.cg-table-droits th:nth-child(4) {width: 18%;}
+.cg-table-droits th:nth-child(5) {width: 40px;}
+.dark-mode .cg-liste-tete, .dark-mode .cg-liste-ligne {border-color: #4b545c;}
+.dark-mode .cg-jauge {background: #3f474e;}
+@media (max-width: 575px) {
+    .cg-liste-tete {display: none;}
+    .cg-liste-ligne > summary {grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px;}
+    .cg-liste-jauge {grid-column: 1 / -1; grid-row: 2;}
+    .cg-liste-detail {padding-left: 6px;}
+    .cg-table-droits {table-layout: auto;}
+    .cg-table-droits th {width: auto !important; white-space: nowrap;}
+    .cg-table-droits td:nth-child(4) {white-space: nowrap;}
+}
+
+/* Transfert entre compteurs et report des soldes */
+.cg-tr-info {font-size: 13px; min-height: 18px;}
+.cg-rp-apercu {border-top: 1px solid #dee2e6; padding-top: 10px; font-size: 13px;}
+.cg-rp-resume {margin-bottom: 6px;}
+.cg-rp-liste {max-height: 260px; overflow-y: auto;}
+.cg-rp-liste table {font-size: 12px;}
+.dark-mode .cg-rp-apercu {border-color: #4b545c;}

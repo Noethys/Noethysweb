@@ -86,3 +86,63 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="cg_modal_transfert" tabindex="-1" role="dialog" aria-labelledby="cg_modal_transfert_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="cg_modal_transfert_titre"><strong>Transférer entre compteurs</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted">Exemple : verser des jours de congés annuels non pris sur le compte épargne-temps. Les jours sont retirés du compteur d'origine et ajoutés au compteur de destination.</p>
+                <div class="form-row">
+                    <div class="form-group col-md-7"><label for="cg_tr_source">Depuis le compteur</label><select id="cg_tr_source" class="form-control"></select></div>
+                    <div class="form-group col-md-5"><label for="cg_tr_annee_source">Période</label><select id="cg_tr_annee_source" class="form-control"></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-7"><label for="cg_tr_destination">Vers le compteur</label><select id="cg_tr_destination" class="form-control"></select></div>
+                    <div class="form-group col-md-5"><label for="cg_tr_annee_destination">Période</label><select id="cg_tr_annee_destination" class="form-control"></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-5 mb-0"><label for="cg_tr_valeur">Quantité <span class="text-muted" id="cg_tr_unite"></span></label><input type="text" inputmode="decimal" id="cg_tr_valeur" class="form-control" placeholder="5"></div>
+                    <div class="form-group col-md-7 mb-0"><label for="cg_tr_motif">Motif <span class="text-muted">(facultatif)</span></label><input type="text" id="cg_tr_motif" class="form-control" maxlength="300"></div>
+                </div>
+                <div class="cg-tr-info mt-2" id="cg_tr_info" aria-live="polite"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="cg_tr_valider"><i class="fa fa-exchange margin-r-5"></i>Transférer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cg_modal_report" tabindex="-1" role="dialog" aria-labelledby="cg_modal_report_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="cg_modal_report_titre"><strong>Reporter les soldes sur la période suivante</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted">Le solde de chaque collaborateur sur la période choisie est ajouté comme droit « Report » sur la période suivante. Indispensable pour un compte épargne-temps, utile pour les reliquats de congés. Les collaborateurs dont le solde a déjà été reporté sont ignorés.</p>
+                <div class="form-row">
+                    <div class="form-group col-md-5"><label for="cg_rp_type">Type de congé</label><select id="cg_rp_type" class="form-control"></select></div>
+                    <div class="form-group col-md-4"><label for="cg_rp_annee">Période à reporter</label><select id="cg_rp_annee" class="form-control"></select></div>
+                    <div class="form-group col-md-3"><label for="cg_rp_plafond">Plafond</label><input type="text" inputmode="decimal" id="cg_rp_plafond" class="form-control" placeholder="Aucun" title="Valeur maximale reportée par collaborateur (exemple : 60 jours pour un CET). Laissez vide pour reporter tout le solde."></div>
+                </div>
+                <div class="form-group">
+                    <label for="cg_rp_collabs">Collaborateurs</label><select id="cg_rp_collabs" class="form-control" multiple></select>
+                    <small class="form-text text-muted">Sélectionnez des collaborateurs ou des groupes. Seuls les collaborateurs dont vous gérez les congés sont concernés.</small>
+                </div>
+                <div class="custom-control custom-checkbox mb-2"><input type="checkbox" class="custom-control-input" id="cg_rp_negatifs"><label class="custom-control-label" for="cg_rp_negatifs">Reporter aussi les soldes négatifs (dette reprise sur la période suivante)</label></div>
+                <div id="cg_rp_apercu" class="cg-rp-apercu" aria-live="polite"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="cg_rp_valider" disabled><i class="fa fa-share margin-r-5"></i>Reporter</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>

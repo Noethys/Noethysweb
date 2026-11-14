@@ -557,3 +557,11 @@
 .pl-barre-sel .pl-btn:hover:not(:disabled) {background: rgba(255, 255, 255, 0.12);}
 .pl-barre-sel .pl-btn.pl-btn-primaire {background: var(--pl-primaire); border-color: var(--pl-primaire);}
 .pl-barre-sel .pl-btn:focus-visible {outline-color: #fff;}
+
+/* Pastille de catégorie à la place de l'icône dans les menus */
+.pl-menu button > span .pl-pastille, .pl-pop-menu button > .pl-pastille {margin: 0 4px 0 2px; vertical-align: -1px;}
+
+/* Hauteur limitée et défilement vertical : filtres des catégories, légende et menu de la catégorie par défaut */
+.pl-filtre-cats {max-height: 220px; overflow-y: auto; padding-right: 4px;}
+.pl-leg-liste {max-height: 260px; overflow-y: auto; padding-right: 4px;}
+#pl_cat_defaut_menu {max-height: min(360px, 60vh); overflow-y: auto;}

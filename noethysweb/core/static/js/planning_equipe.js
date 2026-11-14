@@ -1087,6 +1087,7 @@
             if (sans_aff) { html += "<div class='pl-leg-ligne'><span class='pl-leg-nom'><span class='pl-muted' style='font-style:italic'>Sans affectation</span></span><span class='pl-leg-val'>" + Duree(sans_aff) + "</span></div>"; }
             if (!html) { html = "<p class='pl-muted pl-petit'>Aucun temps de travail affecté sur la période affichée.</p>"; }
         }
+        html = "<div class='pl-leg-liste'>" + html + "</div>";
         html += "<div class='pl-leg-total'><span>Temps de travail</span><span class='pl-leg-val'>" + Duree(travail) + "</span></div>";
         $("#pl_acc_resume_legende").text(Duree(travail) + " de travail" + (attendu ? " · écart " + (travail - attendu > 0 ? "+" : "") + Duree(travail - attendu) : ""))
             .attr("title", "Temps de travail : " + Duree(travail) + (attendu ? " · prévu aux contrats : " + Duree(attendu) : ""));
@@ -1901,7 +1902,7 @@
         options = options || {};
         if (options.action) { Menu_actions[code] = options.action; }
         return "<button type='button' role='menuitem' data-menu='" + code + "' class='" + (options.danger ? "danger" : "") + "'" + (options.desactive ? " disabled" : "") + ">" +
-            "<i class='fa fa-" + icone + "' aria-hidden='true'></i><span>" + libelle + "</span>" + (raccourci ? "<span class='pl-kbd'>" + raccourci + "</span>" : "") + "</button>";
+            (icone ? "<i class='fa fa-" + icone + "' aria-hidden='true'></i>" : "") + "<span>" + libelle + "</span>" + (raccourci ? "<span class='pl-kbd'>" + raccourci + "</span>" : "") + "</button>";
     }
     var SEP = "<div class='pl-menu-sep' role='separator'></div>";
 
@@ -1909,7 +1910,7 @@
         Menu_actions = {};
         var html = Item("retour", "arrow-left", "Retour", "", {action: function() { Menu_barres(x, y, Minute_menu); }}) + SEP;
         S.cats.forEach(function(cat) {
-            html += Item("cat" + cat.id, "square", "<span class='pl-pastille' style='background:" + Echapper(cat.couleur) + "'></span> " + Echapper(cat.nom), "", {action: function() {
+            html += Item("cat" + cat.id, "", "<span class='pl-pastille' style='background:" + Echapper(cat.couleur) + "'></span>" + Echapper(cat.nom), "", {action: function() {
                 Modifier_evts("Changer de catégorie", evts, function(evt) { evt.cat = cat.id; });
             }});
         });
@@ -1938,7 +1939,7 @@
             }});
         }
         var cat = S.cats.get(ref.cat), collab = S.collabs.get(ref.c);
-        Critere("sim_cat", "square", "Même catégorie : <span class='pl-pastille' style='background:" + Echapper(cat ? cat.couleur : "#94a3b8") + "'></span> " + Echapper(cat ? cat.nom : ""),
+        Critere("sim_cat", "", "<span class='pl-pastille' style='background:" + Echapper(cat ? cat.couleur : "#94a3b8") + "'></span>Même catégorie : " + Echapper(cat ? cat.nom : ""),
             function(evt) { return evt.cat === ref.cat; });
         Critere("sim_aff", "sitemap", ref.aff ? "Même affectation : " + Echapper(Chemin_aff(ref.aff)) : "Sans affectation",
             function(evt) { return (evt.aff || null) === (ref.aff || null); });
@@ -2227,7 +2228,6 @@
             V.mois_cal = {a: d.getUTCFullYear(), m: d.getUTCMonth()};
             Rendu_calendrier();
         });
-        $("#pl_cal_effacer").on("click", function() { var j = Aujourdhui(); var i = Infos_jour(j); V.mois_cal = {a: i.a, m: i.m}; V.ancre_cal = j; Changer_dates([j]); });
         $("[data-raccourci]").on("click", function() { Raccourci_dates(this.getAttribute("data-raccourci")); });
 
         // Collaborateurs
