@@ -42,7 +42,7 @@
                             <button type="button" class="pl-chip" data-raccourci="mois">Ce mois</button>
                             <button type="button" class="pl-chip" data-raccourci="mois_suivant">Mois suivant</button>
                         </div>
-                        <div class="pl-info" id="pl_cal_info"></div>
+                        <div class="pl-info" id="pl_cal_info">Clic : une date · Maj+clic : plage · Ctrl+clic : ajouter ou retirer une date</div>
                     </div>
                 </section>
 
@@ -254,8 +254,8 @@
                 <div class="pl-alerte" id="pl_evt_info" aria-live="polite"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-danger mr-auto" id="pl_evt_supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
-                <button type="button" class="btn btn-default" id="pl_evt_dupliquer"><i class="fa fa-clone margin-r-5"></i>Dupliquer</button>
+                <button type="button" class="btn btn-outline-danger" id="pl_evt_supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
+                <button type="button" class="btn btn-default mr-auto" id="pl_evt_dupliquer"><i class="fa fa-clone margin-r-5"></i>Dupliquer</button>
                 <button type="button" class="btn btn-primary" id="pl_evt_enregistrer"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
             </div>
@@ -529,6 +529,7 @@
             csrf: "{{ csrf_token }}",
             media_url: "{{ MEDIA_URL }}",
             url_fiche: "{% url 'collaborateur_resume' idcollaborateur=0 %}",
+            url_planning_individuel: "{% if perms.core.planning_individuel %}{% url 'planning_individuel' %}{% endif %}",
             urls: {
                 donnees: "{% url 'ajax_planning_equipe_get_donnees' %}",
                 evenements: "{% url 'ajax_planning_equipe_get_evenements' %}",

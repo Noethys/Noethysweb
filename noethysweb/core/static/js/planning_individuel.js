@@ -1,7 +1,7 @@
 /*  Copyright (c) 2019-2026 Ivan LUCAS.
     Noethysweb, application de gestion multi-activités.
     Distribué sous licence GNU GPL.
-    Planning individuel annuel d'un collaborateur (vues calendrier, colonnes par mois et mois x jours) */
+    Planning individuel annuel d'un collaborateur (vues calendrier, colonnes par mois et lignes) */
 
 (function($) {
     "use strict";
@@ -12,7 +12,7 @@
     var JOURS_LONGS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
     var MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
     var MOIS_COURTS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
-    var VUES = {calendrier: "Calendrier", colonnes: "Colonnes", mois: "Mois × jours"};
+    var VUES = {calendrier: "Calendrier", colonnes: "Colonnes", mois: "Lignes"};
 
     // ------------------------------------------------------------------ Outils
     function Echapper(texte) {
@@ -731,7 +731,8 @@
     function Positionner_actions() {
         // Barre flottante en bas de l'écran, centrée sur la partie visible du planning
         var $barre = $("#pi_actions");
-        if ($barre.prop("hidden")) { return; }
+        // Barre masquée (fenêtre ouverte) : largeur non mesurable, on repositionnera à la réapparition
+        if ($barre.prop("hidden") || $barre.hasClass("pi-masque")) { return; }
         var carte = document.querySelector("#pi_app .pl-card-planning");
         if (!carte) { return; }
         var r = carte.getBoundingClientRect(), largeur = $barre.outerWidth();
@@ -1327,7 +1328,7 @@
         if (el && el.scrollIntoView) { el.scrollIntoView({block: "nearest", inline: "nearest"}); }
     }
     function Delta_vertical(sens) {
-        // Haut/bas : semaine (calendrier), jour (colonnes), mois (mois x jours)
+        // Haut/bas : semaine (calendrier), jour (colonnes), mois (lignes)
         if (V.vue === "colonnes") { return sens; }
         if (V.vue === "mois") {
             var j = V.curseur !== null ? V.curseur : Debut_periode(), i = Infos_jour(j);
@@ -1524,7 +1525,7 @@
         $("#pi_evt_valider").on("click", Valider_evt);
         // Barre d'actions masquée tant qu'une fenêtre est ouverte
         $(document).on("show.bs.modal.pi", ".pi-modal, #modal_pdf", function() { $("#pi_actions").addClass("pi-masque"); });
-        $(document).on("hidden.bs.modal.pi", ".pi-modal, #modal_pdf", function() { if (!$(".pi-modal.show, #modal_pdf.show").length) { $("#pi_actions").removeClass("pi-masque"); } });
+        $(document).on("hidden.bs.modal.pi", ".pi-modal, #modal_pdf", function() { if (!$(".pi-modal.show, #modal_pdf.show").length) { $("#pi_actions").removeClass("pi-masque"); Positionner_actions(); } });
         $("#pi_modal_evt").on("hidden.bs.modal", function() {
             if (V.pop_retour !== null && V.pop_retour !== undefined) { var j = V.pop_retour; V.pop_retour = null; Ouvrir_jour(j); }
         });

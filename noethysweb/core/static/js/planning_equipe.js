@@ -142,7 +142,7 @@
         S.affOrdre.forEach(function(id) {
             var a = S.affs.get(id);
             if (actives_seulement && !a.actif && id !== valeur) { return; }
-            html += "<option value='" + id + "'" + (id === valeur ? " selected" : "") + ">" + " ".repeat(a.niveau) + Echapper(a.nom) + (a.actif ? "" : " (inactive)") + "</option>";
+            html += "<option value='" + id + "' data-niveau='" + a.niveau + "'" + (id === valeur ? " selected" : "") + ">" + " ".repeat(a.niveau) + Echapper(a.nom) + (a.actif ? "" : " (inactive)") + "</option>";
         });
         return html;
     }
@@ -1141,7 +1141,6 @@
         }
         $("#pl_cal").html(html);
         var n = V.dates.length;
-        var info = n ? "<strong>" + n + " date" + (n > 1 ? "s" : "") + " sélectionnée" + (n > 1 ? "s" : "") + "</strong>" + (n > 1 ? " · du " + Texte_jour_fr(V.dates[0]) + " au " + Texte_jour_fr(V.dates[n - 1]) : " · " + Texte_jour_long(V.dates[0])) : "<strong>Aucune date sélectionnée</strong>";
         var resume = "Aucune date sélectionnée";
         if (n === 1) { resume = Texte_jour_long(V.dates[0]); }
         if (n > 1) {
@@ -1150,8 +1149,6 @@
             resume = debut_resume + " → " + Texte_jour_court(V.dates[n - 1]) + " · " + n + " dates";
         }
         $("#pl_acc_resume_dates").text(resume).attr("title", resume);
-        $("#pl_cal_info").html(info + "<br>Clic : une date · Maj+clic : plage · Ctrl+clic : ajouter ou retirer une date" +
-            "<span class='pl-cal-legende'><span><i class='pl-pastille pl-pastille-ferie'></i>Férié</span><span><i class='pl-pastille pl-pastille-vacances'></i>Vacances</span></span>");
     }
 
     // ------------------------------------------------------------------ Collaborateurs et filtres
@@ -1810,6 +1807,7 @@
         html += Item("ligne", "arrows-h", "Sélectionner toute la ligne", "", {action: function() { Selectionner_ligne(ligne); }});
         html += SEP + Item("ical", "calendar", "Lien d'agenda en ligne (iCal)…", "", {desactive: !collab.modifiable, action: function() { Ouvrir_ical(ligne.c); }});
         html += Item("fiche", "user", "Ouvrir la fiche du collaborateur", "", {action: function() { window.open(CFG.url_fiche.replace(/0$/, String(ligne.c)), "_blank"); }});
+        if (CFG.url_planning_individuel) { html += Item("planning_individuel", "calendar-check-o", "Ouvrir le planning individuel", "", {action: function() { window.location.href = CFG.url_planning_individuel + "?idcollaborateur=" + ligne.c; }}); }
         Ouvrir_menu(x, y, html);
     }
 
@@ -2261,6 +2259,7 @@
         $("#pl_evt_collab").html(Options_collabs(base.c, true));
         $("#pl_evt_cat").html(Options_categories(base.cat));
         $("#pl_evt_aff").html(Options_affectations(base.aff, true));
+        $("#pl_evt_collab, #pl_evt_cat, #pl_evt_aff").trigger("change.select2");
         $("#pl_evt_titre").val(base.t);
         var jour = Jour_de(base.s);
         $("#pl_evt_date").val(Iso_jour(jour));
@@ -2271,7 +2270,7 @@
         $("#pl_evt_date_fin").val(Iso_jour(Jour_de(base.e - 1)));
         $("#pl_evt_rdebut").val(base.rs !== null ? Heure(base.rs) : "");
         $("#pl_evt_rfin").val(base.re !== null ? Heure(base.re) : "");
-        $("#pl_modal_evt").find("input, select").prop("disabled", !modifiable);
+        $("#pl_modal_evt").find("input, select").not(".select2-search__field").prop("disabled", !modifiable);
         $("#pl_evt_supprimer, #pl_evt_dupliquer").prop("hidden", !evt || !modifiable);
         $("#pl_evt_enregistrer, #pl_evt_realise_copier").prop("hidden", !modifiable);
         Maj_info_evt();
@@ -2826,7 +2825,51 @@
         });
     }
 
+    // ------------------------------------------------------------------ Select2 de la modale évènement
+    function Html_pastille(couleur) {
+        return "<span class='pl-s2-pastille' style='background:" + Echapper(couleur || "#94a3b8") + "' aria-hidden='true'></span>";
+    }
+    function Init_select2_evt() {
+        var $modal = $("#pl_modal_evt");
+        var options = {language: "fr", width: "100%", theme: "bootstrap4", dropdownParent: $modal, escapeMarkup: function(m) { return m; }};
+        function Texte(d) { return Echapper($.trim(d.text)); }
+
+        // Collaborateur : avatar + nom
+        function Rendu_collab(d) {
+            if (!d.id) { return Texte(d); }
+            return "<span class='pl-s2-ligne'>" + Html_avatar(+d.id, true) + "<span>" + Texte(d) + "</span></span>";
+        }
+        $("#pl_evt_collab").select2($.extend({}, options, {templateResult: Rendu_collab, templateSelection: Rendu_collab}));
+
+        // Catégorie : pastille de couleur
+        function Rendu_cat(d) {
+            if (!d.id) { return Texte(d); }
+            var cat = S.cats.get(+d.id);
+            return "<span class='pl-s2-ligne'>" + Html_pastille(cat && cat.couleur) + "<span>" + Texte(d) + "</span></span>";
+        }
+        $("#pl_evt_cat").select2($.extend({}, options, {templateResult: Rendu_cat, templateSelection: Rendu_cat}));
+
+        // Affectation : arborescence indentée dans la liste + pastille, effaçable
+        function Rendu_aff(d, dans_liste) {
+            if (!d.id) { return Texte(d); }
+            var aff = S.affs.get(+d.id);
+            var niveau = dans_liste && d.element ? (+$(d.element).data("niveau") || 0) : 0;
+            return "<span class='pl-s2-ligne' style='padding-left:" + (niveau * 1.1) + "em'>" + Html_pastille(aff && aff.couleur) + "<span>" + Texte(d) + "</span></span>";
+        }
+        $("#pl_evt_aff").select2($.extend({}, options, {
+            placeholder: "Aucune affectation", allowClear: true,
+            templateResult: function(d) { return Rendu_aff(d, true); },
+            templateSelection: function(d) { return Rendu_aff(d, false); }
+        }));
+
+        // Échap dans la liste déroulante : fermer la liste sans fermer la modale
+        $("#pl_evt_collab, #pl_evt_cat, #pl_evt_aff").each(function() {
+            $(this).data("select2").$dropdown.on("keydown", function(e) { if (e.key === "Escape") { e.stopPropagation(); } });
+        });
+    }
+
     function Brancher_modales() {
+        Init_select2_evt();
         $("#pl_modal_evt").on("change input", "input, select", Debounce(Maj_info_evt, 120));
         $("#pl_evt_enregistrer").on("click", function() { Enregistrer_evt(false); });
         $("#pl_evt_dupliquer").on("click", function() { Enregistrer_evt(true); });
@@ -2836,7 +2879,7 @@
             $("#pl_modal_evt").modal("hide");
         });
         $("#pl_evt_realise_copier").on("click", function() { $("#pl_evt_rdebut").val($("#pl_evt_debut").val()); $("#pl_evt_rfin").val($("#pl_evt_fin").val()); Maj_info_evt(); });
-        $("#pl_modal_evt").on("keydown", function(e) { if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "BUTTON") { e.preventDefault(); Enregistrer_evt(false); } });
+        $("#pl_modal_evt").on("keydown", function(e) { if (e.key === "Enter" && !$(e.target).closest(".select2-container").length && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "BUTTON") { e.preventDefault(); Enregistrer_evt(false); } });
 
         $("#pl_lot_titre_coche").on("change", function() { $("#pl_lot_titre").prop("disabled", !this.checked); if (this.checked) { $("#pl_lot_titre").focus(); } });
         $("#pl_lot_valider").on("click", Valider_lot);
