@@ -18,7 +18,7 @@ class Consulter(Onglet, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Groupes"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Les groupes permettent de classer les collaborateurs (équipe, site, service...). Lorsque des superviseurs sont définis pour un groupe, seuls ces utilisateurs ont accès aux collaborateurs du groupe. Cliquez sur le bouton Modifier pour changer les groupes."
         context['onglet_actif'] = "groupes"
         return context
 
@@ -31,7 +31,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Sélectionnez dans la liste déroulante le ou les groupes du collaborateur."
+        context['box_introduction'] = "Sélectionnez le ou les groupes du collaborateur puis cliquez sur le bouton Enregistrer. Les groupes se paramètrent dans Paramétrage > Groupes de collaborateurs."
         return context
 
     def get_success_url(self):

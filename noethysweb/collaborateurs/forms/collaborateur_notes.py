@@ -16,8 +16,8 @@ from core.widgets import DatePickerWidget
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    date_parution = forms.DateField(label="Date de parution", required=True, widget=DatePickerWidget())
-    acces = forms.ChoiceField(label="Utilisateurs associés", initial="automatique", required=True, help_text="Sélectionnez les utilisateurs qui auront accès à cette note.", choices=[
+    date_parution = forms.DateField(label="Date de parution", required=True, widget=DatePickerWidget(), help_text="La note n'apparaît qu'à partir de cette date. Par défaut, la date du jour.")
+    acces = forms.ChoiceField(label="Utilisateurs associés", initial="automatique", required=True, help_text="Sélectionnez les utilisateurs qui pourront consulter cette note.", choices=[
         (None, "-------"), ("moi", "Uniquement moi"),
         ("structure", "Les utilisateurs de la structure suivante"),
         ("tous", "Tous les utilisateurs"),
@@ -29,6 +29,13 @@ class Formulaire(FormulaireBase, ModelForm):
         fields = "__all__"
         widgets = {
             'texte': forms.Textarea(attrs={'rows': 4}),
+        }
+        help_texts = {
+            "categorie": "Sélectionnez si besoin une catégorie pour classer la note.",
+            "texte": "Saisissez le texte de la note.",
+            "priorite": "Sélectionnez la priorité Haute pour une note importante.",
+            "afficher_accueil": "Cochez cette case pour afficher la note sur la page d'accueil des utilisateurs concernés.",
+            "rappel": "Cochez cette case pour afficher la note en rappel à l'ouverture de l'application.",
         }
 
     def __init__(self, *args, **kwargs):

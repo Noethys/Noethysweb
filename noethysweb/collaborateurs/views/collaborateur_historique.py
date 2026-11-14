@@ -11,7 +11,7 @@ from django.db.models import Q
 
 
 class Page(Onglet):
-    description_liste = "Vous pouvez consulter ici la liste des actions effectuées sur cette fiche collaborateur."
+    description_liste = "Retrouvez ici les actions effectuées sur cette fiche collaborateur (création, modifications, suppressions), avec leur date et l'utilisateur concerné."
 
     def get_context_data(self, **kwargs):
         """ Context data spécial pour onglet """

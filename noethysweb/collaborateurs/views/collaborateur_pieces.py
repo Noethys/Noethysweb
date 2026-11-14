@@ -23,8 +23,8 @@ class Page(Onglet):
     url_modifier = "collaborateur_pieces_modifier"
     url_supprimer = "collaborateur_pieces_supprimer"
     url_supprimer_plusieurs = "collaborateur_pieces_supprimer_plusieurs"
-    description_liste = "Saisissez ici les pièces du collaborateur."
-    description_saisie = "Saisissez toutes les informations concernant la pièce et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les pièces fournies par le collaborateur (pièce d'identité, diplômes, certificats...) avec leur période de validité. Les pièces manquantes ou expirées sont signalées dans le résumé de la fiche."
+    description_saisie = "Choisissez le type de pièce, indiquez sa période de validité et joignez si besoin le document numérisé, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une pièce"
     objet_pluriel = "des pièces"
 

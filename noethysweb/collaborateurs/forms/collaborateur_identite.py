@@ -20,7 +20,7 @@ class Formulaire(FormulaireBase, ModelForm):
     cropper_data = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     # Naissance
-    date_naiss = forms.DateField(label="Date", required=False, widget=DatePickerWidget())
+    date_naiss = forms.DateField(label="Date de naissance", required=False, widget=DatePickerWidget(), help_text="Saisissez la date au format JJ/MM/AAAA. Exemple : 14/03/1990. Cette information est chiffrée dans la base de données.")
 
     class Meta:
         model = Collaborateur
@@ -30,9 +30,12 @@ class Formulaire(FormulaireBase, ModelForm):
             'photo': Crop_image(attrs={"largeur_min": 200, "hauteur_min": 200, "ratio": "1/1"}),
         }
         help_texts = {
-            "civilite": "Sélectionnez une civilité dans la liste déroulante.",
-            "nom": "Saisissez le nom de famille en majuscules.",
-            "prenom": "Saisissez le prénom en minuscules avec la première lettre majuscule.",
+            "civilite": "Sélectionnez la civilité du collaborateur.",
+            "nom": "Saisissez le nom d'usage en majuscules. Exemple : DUPONT.",
+            "nom_jfille": "Saisissez le nom de naissance s'il est différent du nom d'usage. Exemple : MARTIN.",
+            "prenom": "Saisissez le prénom avec une majuscule initiale. Exemple : Marie.",
+            "memo": "Saisissez si besoin une information libre sur le collaborateur. Elle est visible par tous les utilisateurs ayant accès à la fiche.",
+            "photo": "Sélectionnez une image (JPG ou PNG) puis recadrez-la. Elle est affichée sur la fiche du collaborateur.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -62,6 +65,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("nom"),
                 Field("nom_jfille"),
                 Field("prenom"),
+                Field("date_naiss"),
             ),
             Fieldset("Divers",
                 Field("memo"),

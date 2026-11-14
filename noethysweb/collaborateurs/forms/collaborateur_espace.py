@@ -15,7 +15,7 @@ from fiche_famille.widgets import Internet_identifiant, Internet_mdp
 
 
 class Formulaire(FormulaireBase, ModelForm):
-    internet_identifiant = forms.CharField(label="Identifiant", required=False, widget=Internet_identifiant(), help_text="Identifiant de connexion à l'espace collaborateur du portail, généré automatiquement. Il est déconseillé de le modifier.")
+    internet_identifiant = forms.CharField(label="Identifiant", required=False, widget=Internet_identifiant(), help_text="Identifiant de connexion à l'espace collaborateur, généré automatiquement. Il est déconseillé de le modifier car le collaborateur ne pourrait plus se connecter avec l'ancien.")
     internet_mdp = forms.CharField(label="Mot de passe", required=False, widget=Internet_mdp(), help_text="Mot de passe provisoire à transmettre au collaborateur. Des étoiles ***** signifient qu'il a personnalisé son mot de passe lors de sa première connexion : il n'est alors plus consultable. S'il l'a oublié, générez-en un nouveau.")
     date_expiration_mdp = forms.DateTimeField(label="Date d'expiration", required=False)
 

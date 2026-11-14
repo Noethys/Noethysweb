@@ -68,7 +68,7 @@ class View(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['box_titre'] = "Fusionner un contrat vers Word"
-        context['box_introduction'] = "Sélectionnez un modèle de document Word et cliquez sur Fusionner."
+        context['box_introduction'] = "Sélectionnez un modèle de document Word puis cliquez sur Fusionner : les champs de fusion du modèle (nom, poste, dates...) sont remplacés par les données de ce contrat."
         context['onglet_actif'] = "contrats"
         context['form_modele'] = Form_modele()
         context['idcollaborateur'] = kwargs.get("idcollaborateur", None)

@@ -22,8 +22,8 @@ class Page(Onglet):
     url_modifier = "collaborateur_evenements_modifier"
     url_supprimer = "collaborateur_evenements_supprimer"
     url_supprimer_plusieurs = "collaborateur_evenements_supprimer_plusieurs"
-    description_liste = "Saisissez ici les évènements du collaborateur."
-    description_saisie = "Saisissez toutes les informations concernant l'évènement et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les évènements du planning du collaborateur (temps de travail, réunions, formations, congés, absences...). Pour une saisie plus visuelle, utilisez l'onglet Planning."
+    description_saisie = "Choisissez la catégorie de l'évènement puis sa période : une période unique, ou une récurrence pour créer en une seule fois des évènements répétés chaque semaine. Cliquez ensuite sur le bouton Enregistrer."
     objet_singulier = "un évènement"
     objet_pluriel = "des évènements"
 

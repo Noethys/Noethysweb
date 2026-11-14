@@ -13,7 +13,7 @@ from collaborateurs.views.collaborateur import Onglet
 class Page(Onglet):
     model = Note
     url_liste = "collaborateur_resume"
-    description_saisie = "Saisissez les caractéristiques de la note et cliquez sur le bouton Enregistrer."
+    description_saisie = "Saisissez le texte de la note, choisissez les utilisateurs qui pourront la consulter et ses options d'affichage, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une note"
     objet_pluriel = "des notes"
 

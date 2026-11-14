@@ -30,14 +30,14 @@ class Formulaire(FormulaireBase, ModelForm):
             'ville_resid': Ville(attrs={"id_codepostal": "id_cp_resid"}),
         }
         help_texts = {
-            "rue_resid": "Saisissez le numéro et le nom de la voie. Exemple : 12 Rue des acacias.",
-            "cp_resid": "Saisissez le code postal de la ville de résidence, attendez une seconde et sélectionnez la ville dans la liste déroulante.",
-            "ville_resid": "Saisissez le nom de la ville en majuscules.",
-            "tel_domicile": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
-            "tel_mobile": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
-            "mail": "Saisissez une adresse Email valide.",
-            "travail_tel": "Saisissez un numéro de téléphone au format xx.xx.xx.xx.xx.",
-            "travail_mail": "Saisissez une adresse Email valide.",
+            "rue_resid": "Saisissez le numéro et le nom de la voie, avec si besoin un complément d'adresse. Exemple : 12 rue des Acacias.",
+            "cp_resid": "Saisissez le code postal, patientez un instant puis sélectionnez la ville dans la liste proposée.",
+            "ville_resid": "Saisissez le nom de la ville en majuscules. Il est rempli automatiquement si vous avez choisi la ville à partir du code postal.",
+            "tel_domicile": "Saisissez le numéro de téléphone fixe au format 01.23.45.67.89.",
+            "tel_mobile": "Saisissez le numéro de portable au format 06.12.34.56.78. Il est utilisé pour l'envoi de SMS au collaborateur.",
+            "mail": "Saisissez l'adresse email personnelle. Exemple : marie.dupont@exemple.fr. Elle est utilisée pour l'envoi d'emails au collaborateur.",
+            "travail_tel": "Saisissez le numéro de téléphone professionnel (ligne directe ou poste) au format 01.23.45.67.89.",
+            "travail_mail": "Saisissez l'adresse email professionnelle si le collaborateur en dispose.",
         }
 
     def __init__(self, *args, **kwargs):

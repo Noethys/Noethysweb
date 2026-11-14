@@ -21,6 +21,9 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "qualifications": Select2MultipleWidget({"data-minimum-input-length": 0}),
         }
+        help_texts = {
+            "qualifications": "Sélectionnez une ou plusieurs qualifications. Pensez à enregistrer ensuite le justificatif correspondant dans l'onglet Pièces.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

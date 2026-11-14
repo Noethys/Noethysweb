@@ -20,22 +20,24 @@ from core.widgets import DatePickerWidget, DateTimePickerWidget
 class Formulaire(FormulaireBase, ModelForm):
     # Collaborateur
     collaborateur = forms.ModelChoiceField(label="Collaborateur", widget=Select2Widget({"data-minimum-input-length": 0}),
-                                     queryset=Collaborateur.objects.all().order_by("nom", "prenom"), required=True)
+                                     queryset=Collaborateur.objects.all().order_by("nom", "prenom"), required=True,
+                                     help_text="Sélectionnez le collaborateur concerné par l'évènement.")
 
     # Période
     choix_periode = [("UNIQUE", "Période unique"), ("RECURRENCE", "Récurrence")]
-    selection_periode = forms.TypedChoiceField(label="Type de période", choices=choix_periode, initial="UNIQUE", required=False)
-    recurrence_date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}))
-    recurrence_date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}))
-    recurrence_heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    recurrence_heure_fin = forms.TimeField(label="Heure de fin", required=False, widget=forms.TimeInput(attrs={'type': 'time'}))
-    recurrence_feries = forms.BooleanField(label="Inclure les fériés", required=False)
+    selection_periode = forms.TypedChoiceField(label="Type de période", choices=choix_periode, initial="UNIQUE", required=False,
+                                          help_text="Période unique : un seul évènement. Récurrence : plusieurs évènements créés en une fois sur les jours et la fréquence choisis.")
+    recurrence_date_debut = forms.DateField(label="Date de début", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}), help_text="Saisissez la date du premier jour de la récurrence au format JJ/MM/AAAA.")
+    recurrence_date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(attrs={'afficher_fleches': False}), help_text="Saisissez la date du dernier jour de la récurrence au format JJ/MM/AAAA.")
+    recurrence_heure_debut = forms.TimeField(label="Heure de début", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Saisissez l'heure de début de chaque évènement. Exemple : 08:30.")
+    recurrence_heure_fin = forms.TimeField(label="Heure de fin", required=False, widget=forms.TimeInput(attrs={'type': 'time'}), help_text="Saisissez l'heure de fin de chaque évènement. Exemple : 17:00.")
+    recurrence_feries = forms.BooleanField(label="Inclure les fériés", required=False, help_text="Cochez cette case pour créer aussi les évènements sur les jours fériés.")
     recurrence_jours_scolaires = forms.MultipleChoiceField(label="Jours scolaires", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("recurrence_jours_scolaires"))
     recurrence_jours_vacances = forms.MultipleChoiceField(label="Jours de vacances", required=False, widget=forms.CheckboxSelectMultiple, choices=JOURS_SEMAINE, help_text=Creation_tout_cocher("recurrence_jours_vacances"))
     choix_frequence = [(1, "Toutes les semaines"), (2, "Une semaine sur deux"),
                         (3, "Une semaine sur trois"), (4, "Une semaine sur quatre"),
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]
-    recurrence_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False)
+    recurrence_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False, help_text="Sélectionnez le rythme de répétition des semaines.")
 
     class Meta:
         model = EvenementCollaborateur
@@ -46,8 +48,10 @@ class Formulaire(FormulaireBase, ModelForm):
             "type_evenement": Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}),
         }
         help_texts = {
-            "date_debut": "Saisissez une date et heure de début au format JJ/MM/AAAA HH:MM.",
-            "date_fin": "Saisissez une date et heure de début au format JJ/MM/AAAA HH:MM.",
+            "type_evenement": "Sélectionnez la catégorie de l'évènement (travail, réunion, congés...). Elle détermine sa couleur et sa prise en compte dans le temps de travail.",
+            "titre": "Saisissez si besoin un titre pour préciser l'évènement. Exemple : Réunion d'équipe.",
+            "date_debut": "Saisissez la date et l'heure de début au format JJ/MM/AAAA HH:MM.",
+            "date_fin": "Saisissez la date et l'heure de fin au format JJ/MM/AAAA HH:MM.",
         }
 
     def __init__(self, *args, **kwargs):

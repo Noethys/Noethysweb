@@ -19,6 +19,12 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "groupes": Select2MultipleWidget({"data-minimum-input-length": 0}),
         }
+        help_texts = {
+            "civilite": "Sélectionnez la civilité du collaborateur.",
+            "nom": "Saisissez le nom d'usage en majuscules. Exemple : DUPONT.",
+            "prenom": "Saisissez le prénom avec une majuscule initiale. Exemple : Marie.",
+            "groupes": "Sélectionnez si besoin un ou plusieurs groupes. Les autres informations se complètent ensuite dans la fiche.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

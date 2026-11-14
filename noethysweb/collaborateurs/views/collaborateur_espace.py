@@ -44,7 +44,7 @@ class Consulter(Onglet, UpdateView):
         context = super(Consulter, self).get_context_data(**kwargs)
         context["onglet_actif"] = "espace"
         context["box_titre"] = "Espace collaborateur"
-        context["box_introduction"] = "L'espace collaborateur du portail permet au collaborateur de consulter son planning, ses congés et ses documents, de demander une absence, de transmettre une pièce et de déclarer ses heures réalisées."
+        context["box_introduction"] = "L'espace collaborateur du portail permet au collaborateur de consulter son planning, ses congés et ses documents, de demander une absence, de transmettre une pièce et de déclarer ses heures réalisées. Gérez ici son accès et ses identifiants de connexion."
         if not utils_espace_collaborateur.Espace_actif():
             context["box_introduction"] += " <b class='text-danger'>L'espace collaborateur est actuellement désactivé : activez-le dans Paramétrage > Paramètres du portail > Espace collaborateur.</b>"
         collaborateur = self.get_object()

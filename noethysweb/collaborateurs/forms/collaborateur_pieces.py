@@ -19,15 +19,15 @@ from collaborateurs.utils import utils_pieces_manquantes
 
 class Formulaire(FormulaireBase, ModelForm):
     # Type de pièce
-    mode_piece = forms.ChoiceField(label="Type de pièce", choices=[("AFOURNIR", "Une pièce à fournir"), ("TOUTES", "Une pièce prédéfinie"), ("AUTRE", "Autre type de pièce")], initial="AFOURNIR", required=False)
-    pieces_fournir = forms.TypedChoiceField(label="Choix de la pièce", choices=[], required=False, help_text="Sélectionnez un type de pièce dans la liste.")
-    pieces_toutes = forms.TypedChoiceField(label="Choix de la pièce", choices=[], required=False, help_text="Sélectionnez un type de pièce dans la liste.")
+    mode_piece = forms.ChoiceField(label="Type de pièce", choices=[("AFOURNIR", "Une pièce à fournir"), ("TOUTES", "Une pièce prédéfinie"), ("AUTRE", "Autre type de pièce")], initial="AFOURNIR", required=False, help_text="Une pièce à fournir : pièce attendue pour ce collaborateur selon le paramétrage. Une pièce prédéfinie : n'importe quel type de pièce du paramétrage. Autre type de pièce : pièce libre, avec un titre à saisir.")
+    pieces_fournir = forms.TypedChoiceField(label="Choix de la pièce", choices=[], required=False, help_text="Sélectionnez la pièce parmi celles qui sont exigées pour ce collaborateur selon le paramétrage des types de pièces.")
+    pieces_toutes = forms.TypedChoiceField(label="Choix de la pièce", choices=[], required=False, help_text="Sélectionnez le type de pièce dans la liste des pièces paramétrées.")
 
     # Période de validité
     choix_validite = [("ILLIMITEE", "Durée illimitée"), ("LIMITEE", "Durée limitée")]
-    validite_type = forms.TypedChoiceField(label="Validité", choices=choix_validite, initial='ILLIMITEE', required=False)
-    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget())
-    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget())
+    validite_type = forms.TypedChoiceField(label="Validité", choices=choix_validite, initial='ILLIMITEE', required=False, help_text="Choisissez Durée limitée si la pièce expire (certificat, extrait de casier judiciaire...). La date de fin est alors proposée selon la durée de validité du type de pièce.")
+    date_debut = forms.DateField(label="Date de début", required=True, widget=DatePickerWidget(), help_text="Saisissez la date de délivrance de la pièce au format JJ/MM/AAAA.")
+    date_fin = forms.DateField(label="Date de fin", required=False, widget=DatePickerWidget(), help_text="Saisissez la date d'expiration au format JJ/MM/AAAA. Après cette date, la pièce n'est plus considérée comme valide.")
 
     class Meta:
         model = PieceCollaborateur
@@ -36,8 +36,9 @@ class Formulaire(FormulaireBase, ModelForm):
             "observations": forms.Textarea(attrs={'rows': 3}),
         }
         help_texts = {
-            "titre": "Vous devez obligatoirement saisir un titre pour cette pièce.",
-            "document": "Vous pouvez ajouter un document numérisé au format PDF ou image.",
+            "titre": "Saisissez le nom de la pièce. Exemple : Attestation de formation incendie.",
+            "document": "Joignez si besoin la pièce numérisée au format PDF ou image (JPG, PNG).",
+            "observations": "Saisissez si besoin une remarque sur cette pièce. Exemple : original consulté le 12/09.",
         }
 
     def __init__(self, *args, **kwargs):

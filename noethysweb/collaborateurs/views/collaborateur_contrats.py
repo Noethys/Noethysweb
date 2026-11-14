@@ -19,8 +19,8 @@ class Page(Onglet):
     url_modifier = "collaborateur_contrats_modifier"
     url_supprimer = "collaborateur_contrats_supprimer"
     url_supprimer_plusieurs = "collaborateur_contrats_supprimer_plusieurs"
-    description_liste = "Saisissez ici les contrats du collaborateur."
-    description_saisie = "Saisissez toutes les informations concernant le contrat et cliquez sur le bouton Enregistrer."
+    description_liste = "Retrouvez ici les contrats successifs du collaborateur. Le contrat en cours détermine le poste du collaborateur et l'objectif de temps de travail suivi dans le planning individuel."
+    description_saisie = "Renseignez le type de contrat, le poste, la période et le temps de travail, puis cliquez sur le bouton Enregistrer. La rubrique Objectif de temps de travail définit le calcul du solde d'heures."
     objet_singulier = "un contrat"
     objet_pluriel = "des contrats"
 

@@ -22,7 +22,7 @@ class View(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context['box_titre'] = "Appliquer un modèle de planning"
-        context['box_introduction'] = "Sélectionnez une période d'application et le ou les modèles à appliquer."
+        context['box_introduction'] = "Sélectionnez une période d'application et le ou les modèles de planning à appliquer : leurs évènements seront créés dans le planning du collaborateur sur cette période."
         context['onglet_actif'] = "evenements"
         context['idcollaborateur'] = kwargs.get("idcollaborateur")
         context['form'] = kwargs.get("form") or Formulaire(request=self.request)

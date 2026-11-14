@@ -18,7 +18,7 @@ class Consulter(Onglet, crud.Modifier):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Qualifications"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Retrouvez ici les qualifications du collaborateur (diplômes, brevets, certificats...). Elles déterminent les pièces à fournir lorsqu'un type de pièce est obligatoire pour une qualification. Cliquez sur le bouton Modifier pour les mettre à jour."
         context['onglet_actif'] = "qualifications"
         return context
 
@@ -31,7 +31,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Sélectionnez dans la liste déroulante les qualifications du collaborateur."
+        context['box_introduction'] = "Sélectionnez les qualifications détenues par le collaborateur puis cliquez sur le bouton Enregistrer. Les qualifications se paramètrent dans Paramétrage > Types de qualifications."
         return context
 
     def get_success_url(self):

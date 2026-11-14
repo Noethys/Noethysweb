@@ -18,7 +18,7 @@ class Consulter(Onglet, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Consulter, self).get_context_data(**kwargs)
         context['box_titre'] = "Questionnaire"
-        context['box_introduction'] = "Cliquez sur le bouton Modifier pour modifier une des informations ci-dessous."
+        context['box_introduction'] = "Retrouvez ici les réponses du collaborateur au questionnaire personnalisé. Cliquez sur le bouton Modifier pour les compléter."
         context['onglet_actif'] = "questionnaire"
         context['form'] = Formulaire(idcollaborateur=self.kwargs["idcollaborateur"], request=self.request, mode=self.mode)
         return context
@@ -29,7 +29,7 @@ class Modifier(Consulter):
 
     def get_context_data(self, **kwargs):
         context = super(Modifier, self).get_context_data(**kwargs)
-        context['box_introduction'] = "Renseignez le questionnaire du collaborateur."
+        context['box_introduction'] = "Renseignez les réponses puis cliquez sur le bouton Enregistrer. Les questions se paramètrent dans Paramétrage > Questionnaires."
         return context
 
     def post(self, request, **kwargs):

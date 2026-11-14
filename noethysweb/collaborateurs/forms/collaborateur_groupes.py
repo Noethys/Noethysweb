@@ -21,6 +21,9 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "groupes": Select2MultipleWidget({"data-minimum-input-length": 0}),
         }
+        help_texts = {
+            "groupes": "Sélectionnez un ou plusieurs groupes. Laissez vide si le collaborateur n'appartient à aucun groupe.",
+        }
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)

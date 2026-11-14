@@ -29,10 +29,11 @@ class Formulaire(FormulaireBase, ModelForm):
             "observations": forms.Textarea(attrs={'rows': 3}),
         }
         help_texts = {
-            "type_contrat": "Sélectionnez le type de contrat dans la liste proposée.",
-            "type_poste": "Sélectionnez le type de poste dans la liste proposée.",
-            "date_debut": "Saisissez la date de début du contrat.",
-            "date_fin": "Saisissez la date de fin de contrat ou laissez vide s'il s'agit d'un contrat à durée indéterminée."
+            "type_contrat": "Sélectionnez le type de contrat (CDI, CDD, titulaire...). La liste se paramètre dans Paramétrage > Types de contrats.",
+            "type_poste": "Sélectionnez le poste occupé (animateur, directeur...). La liste se paramètre dans Paramétrage > Types de postes.",
+            "date_debut": "Saisissez la date de début du contrat au format JJ/MM/AAAA.",
+            "date_fin": "Saisissez la date de fin du contrat au format JJ/MM/AAAA. Laissez vide pour un contrat à durée indéterminée.",
+            "observations": "Saisissez si besoin une remarque sur ce contrat. Elle peut être reprise dans un document Word avec le champ {CONTRAT_OBSERVATIONS}."
         }
 
     def __init__(self, *args, **kwargs):
