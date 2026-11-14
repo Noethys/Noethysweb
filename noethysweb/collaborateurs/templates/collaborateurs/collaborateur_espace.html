@@ -1,0 +1,41 @@
+{% extends "collaborateurs/collaborateur.html" %}
+{% load crispy_forms_tags %}
+{% load embed %}
+
+{% block detail_collaborateur %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}{% crispy form %}{% endblock %}
+        {% endembed %}
+    </div>
+
+    <script>
+        function regenerer_identifiant() {
+            $.ajax({type: "POST", url: "{% url 'ajax_collaborateur_espace_regenerer_identifiant' %}", data: {idcollaborateur: {{ idcollaborateur }}, csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function (data) { $("#id_internet_identifiant").val(data.identifiant); },
+                error: function (xhr) { toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Erreur"); }});
+        }
+
+        function regenerer_mdp() {
+            $.ajax({type: "POST", url: "{% url 'ajax_collaborateur_espace_regenerer_mdp' %}", data: {idcollaborateur: {{ idcollaborateur }}, csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function (data) {
+                    $("#id_internet_mdp").val(data.mdp).prop("type", "text");
+                    $("input[name='date_expiration_mdp']").val(data.date_expiration_mdp);
+                },
+                error: function (xhr) { toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Erreur"); }});
+        }
+
+        function envoyer_codes() {
+            {% if form.mode == "EDITION" %}
+                toastr.warning("Enregistrez d'abord les modifications avant d'envoyer les codes.");
+                return;
+            {% endif %}
+            $.ajax({type: "POST", url: "{% url 'ajax_collaborateur_espace_envoyer_codes' %}", data: {idcollaborateur: {{ idcollaborateur }}, csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function (data) { window.location.href = data.url; },
+                error: function (xhr) { toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Erreur"); }});
+        }
+    </script>
+{% endblock %}

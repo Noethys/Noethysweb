@@ -157,7 +157,15 @@ def Decider(request):
             message = "Demande refusée"
     except utils_conges.Erreur as erreur:
         return Erreur(str(erreur), 409)
+    Notifier_collaborateur(demande, request)
     return JsonResponse({"message": message})
+
+
+def Notifier_collaborateur(demande=None, request=None):
+    """ Informe par email le collaborateur qui dispose d'un espace collaborateur de la décision prise """
+    from collaborateurs.utils import utils_espace_collaborateur
+    demande.refresh_from_db()
+    utils_espace_collaborateur.Notifier_decision(demande, request=request)
 
 
 @Verifie_permission
@@ -171,6 +179,7 @@ def Annuler(request):
         resultat = utils_conges.Annuler(demande, request.user, restaurer=request.POST.get("restaurer") == "true", commentaire=request.POST.get("commentaire", "").strip())
     except utils_conges.Erreur as erreur:
         return Erreur(str(erreur), 409)
+    Notifier_collaborateur(demande, request)
     message = "Demande annulée"
     if resultat["restaures"]:
         message += " : %d évènement%s de travail restauré%s" % (resultat["restaures"], "s" if resultat["restaures"] > 1 else "", "s" if resultat["restaures"] > 1 else "")

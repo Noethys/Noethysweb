@@ -1,0 +1,84 @@
+{% extends "portail/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/espace_collaborateur.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+<div class="card card-outline card-lightblue">
+    <div class="card-header ec-planning-tete">
+        <div class="btn-group" role="group" aria-label="Affichage">
+            <a class="btn btn-sm {% if vue == 'semaine' %}btn-primary{% else %}btn-outline-primary{% endif %}" href="?vue=semaine&date={{ reference }}" {% if vue == 'semaine' %}aria-current="page"{% endif %}>Semaine</a>
+            <a class="btn btn-sm {% if vue == 'mois' %}btn-primary{% else %}btn-outline-primary{% endif %}" href="?vue=mois&date={{ reference }}" {% if vue == 'mois' %}aria-current="page"{% endif %}>Mois</a>
+        </div>
+        <div class="ec-nav">
+            <a class="btn btn-sm btn-outline-secondary" href="?vue={{ vue }}&date={{ precedent }}" aria-label="Période précédente"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
+            <h2 class="ec-periode">{{ titre_periode }}</h2>
+            <a class="btn btn-sm btn-outline-secondary" href="?vue={{ vue }}&date={{ suivant }}" aria-label="Période suivante"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="ec-outils">
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'portail_collaborateur_planning_pdf' %}?vue={{ vue }}&date={{ reference }}"><i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>PDF</a>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#ec_modal_ical"><i class="bi bi-calendar-plus me-1" aria-hidden="true"></i>Mon agenda</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="ec-total"><strong>{{ total }}</strong> de travail planifiées{% if contrat %} · contrat {{ contrat }} par semaine{% endif %}</p>
+        {% if vue == "semaine" %}
+            <div class="ec-semaine">
+                {% for jour in jours %}
+                    <section class="ec-jour{% if jour.aujourdhui %} ec-aujourdhui{% endif %}{% if jour.we %} ec-we{% endif %}" aria-label="{{ jour.texte }}">
+                        <div class="ec-jour-tete"><span><span class="ec-jour-long">{{ jour.texte }}</span><span class="ec-jour-court">{{ jour.court }}</span>{% if jour.aujourdhui %} <span class="badge text-bg-primary">Aujourd'hui</span>{% endif %}{% if jour.ferie %} <span class="badge text-bg-danger">{{ jour.ferie }}</span>{% endif %}</span>
+                            {% if jour.evenements %}<span class="text-body-secondary small">{{ jour.total }}</span>{% endif %}</div>
+                        {% for evt in jour.evenements %}{% include "portail/collaborateur/_evenement.html" %}{% empty %}<p class="text-body-secondary small mb-0">Repos</p>{% endfor %}
+                    </section>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="ec-mois" role="grid" aria-label="{{ titre_periode }}">
+                {% for nom in jours_semaine %}<div class="ec-mois-jl" aria-hidden="true">{{ nom }}</div>{% endfor %}
+                {% for _ in decalage_mois %}<div class="ec-mois-vide" aria-hidden="true"></div>{% endfor %}
+                {% for jour in jours %}
+                    <div class="ec-mois-c{% if jour.aujourdhui %} ec-aujourdhui{% endif %}{% if jour.we %} ec-we{% endif %}" role="gridcell">
+                        <span class="ec-mois-n">{{ jour.date.day }}</span>
+                        {% for evt in jour.evenements %}<span class="ec-mois-evt" style="--ec-couleur: {{ evt.couleur }}" title="{{ evt.categorie }}">{% if evt.journee_entiere or not evt.travail %}{{ evt.categorie|truncatechars:12 }}{% else %}{{ evt.debut|date:"H\hi" }}-{{ evt.fin|date:"H\hi" }}{% endif %}</span>{% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="ec_modal_ical" tabindex="-1" aria-labelledby="ec_modal_ical_titre" aria-hidden="true">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h2 class="modal-title fs-5" id="ec_modal_ical_titre">Ajouter mon planning à mon agenda</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+        <div class="modal-body">
+            {% if lien_ical %}
+                <p>Abonnez votre agenda (Google Agenda, Outlook, téléphone) à ce lien : votre planning s'y mettra à jour automatiquement.</p>
+                <div class="input-group"><input type="text" class="form-control" id="ec_lien_ical" value="{{ lien_ical }}" readonly aria-label="Lien de l'agenda"><button class="btn btn-primary" type="button" id="ec_copier_ical">Copier</button></div>
+            {% else %}
+                <p class="mb-0">Le lien d'agenda n'est pas encore activé. Demandez-le à votre responsable.</p>
+            {% endif %}
+        </div>
+    </div></div>
+</div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(function () {
+            $("#ec_copier_ical").on("click", function () {
+                var champ = document.getElementById("ec_lien_ical");
+                champ.select();
+                (navigator.clipboard ? navigator.clipboard.writeText(champ.value) : Promise.reject()).then(function () {
+                    toastr.success("Lien copié");
+                }, function () {
+                    document.execCommand("copy");
+                    toastr.success("Lien copié");
+                });
+            });
+        });
+    </script>
+{% endblock scripts %}

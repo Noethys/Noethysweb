@@ -1,0 +1,60 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block contenu_page %}
+<div class="card card-outline card-lightblue">
+    <div class="card-header"><h3 class="card-title">Heures réalisées déclarées par les collaborateurs</h3></div>
+    <div class="card-body">
+        <p>Les collaborateurs déclarent leurs heures réalisées depuis leur espace collaborateur. Un horaire identique au planning est enregistré automatiquement ; un horaire différent apparaît ici. La validation l'enregistre comme horaire réalisé dans le planning, le refus conserve l'horaire réalisé précédent.</p>
+        {% if lignes %}
+            <table class="table table-sm table-hover" id="table_heures">
+                <thead><tr>
+                    <th style="width: 30px;"><input type="checkbox" id="cocher_tout" title="Tout cocher"></th>
+                    <th>Date</th><th>Collaborateur</th><th>Evènement</th><th>Prévu</th><th>Déclaré</th><th>Ecart</th><th>Transmis le</th><th></th>
+                </tr></thead>
+                <tbody>
+                {% for ligne in lignes %}
+                    <tr data-id="{{ ligne.evenement.pk }}">
+                        <td><input type="checkbox" class="cocher" value="{{ ligne.evenement.pk }}"></td>
+                        <td>{{ ligne.evenement.date_debut|date:"D d/m/Y" }}</td>
+                        <td><a href="{% url 'planning_individuel' %}?idcollaborateur={{ ligne.evenement.collaborateur_id }}">{{ ligne.evenement.collaborateur.Get_nom }}</a></td>
+                        <td><span class="badge" style="background: {{ ligne.evenement.type_evenement.couleur }}; color: #fff;">{{ ligne.evenement.titre|default:ligne.evenement.type_evenement.nom }}</span></td>
+                        <td>{{ ligne.evenement.date_debut|date:"H\hi" }}-{{ ligne.evenement.date_fin|date:"H\hi" }}</td>
+                        <td><b>{{ ligne.evenement.declare_debut|date:"H\hi" }}-{{ ligne.evenement.declare_fin|date:"H\hi" }}</b></td>
+                        <td class="{% if ligne.ecart_positif %}text-success{% else %}text-danger{% endif %}">{{ ligne.ecart }}</td>
+                        <td>{{ ligne.evenement.declare_date|date:"d/m/Y H\hi" }}</td>
+                        <td class="text-nowrap">
+                            <button type="button" class="btn btn-xs btn-success decider" data-decision="valider" title="Valider"><i class="fa fa-check"></i></button>
+                            <button type="button" class="btn btn-xs btn-danger decider" data-decision="refuser" title="Refuser"><i class="fa fa-ban"></i></button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-success decider_selection" data-decision="valider"><i class="fa fa-check margin-r-5"></i>Valider la sélection</button>
+            <button type="button" class="btn btn-danger decider_selection" data-decision="refuser"><i class="fa fa-ban margin-r-5"></i>Refuser la sélection</button>
+        {% else %}
+            <p class="text-muted mb-0"><i class="fa fa-check margin-r-5"></i>Aucune déclaration en attente de validation.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        function decider(ids, decision) {
+            if (!ids.length) { toastr.error("Cochez au moins une ligne"); return; }
+            $.ajax({type: "POST", url: "{% url 'ajax_heures_declarees_decider' %}", data: {ids: ids.join(";"), decision: decision, csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function (data) { toastr.success(data.message); setTimeout(function () { location.reload(); }, 600); },
+                error: function () { toastr.error("Erreur lors de l'enregistrement"); }});
+        }
+        $(function () {
+            $("#cocher_tout").on("change", function () { $(".cocher").prop("checked", $(this).is(":checked")); });
+            $(".decider").on("click", function () { decider([$(this).closest("tr").data("id")], $(this).data("decision")); });
+            $(".decider_selection").on("click", function () { decider($(".cocher:checked").map(function () { return this.value; }).get(), $(this).data("decision")); });
+        });
+    </script>
+{% endblock scripts %}

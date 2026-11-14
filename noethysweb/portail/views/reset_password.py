@@ -30,7 +30,17 @@ class MyPasswordResetView(ClassCommuneLogin, auth_views.PasswordResetView):
 
         # Recherche l'utilisateur
         utilisateur = Utilisateur.objects.filter(username__iexact=identifiant, is_active=True, categorie="famille").first()
-        if not utilisateur or not utilisateur.famille.mail or utilisateur.famille.mail.strip().lower() != email.strip().lower():
+        if not utilisateur:
+            # Espace collaborateur : l'adresse doit correspondre à l'email professionnel ou personnel du collaborateur
+            from collaborateurs.utils import utils_espace_collaborateur
+            candidat = Utilisateur.objects.filter(username__iexact=identifiant, is_active=True, categorie="collaborateur").first()
+            collaborateur = getattr(candidat, "collaborateur", None) if candidat else None
+            if collaborateur and collaborateur.internet_actif and utils_espace_collaborateur.Espace_actif() and \
+                    email.strip().lower() in [adresse.strip().lower() for adresse in (collaborateur.travail_mail, collaborateur.mail) if adresse]:
+                return self.Envoyer_reinitialisation(form, candidat, email.strip())
+            logger.debug("Erreur : Pas de compte actif existant.")
+            return super().form_valid(form)
+        if not utilisateur.famille.mail or utilisateur.famille.mail.strip().lower() != email.strip().lower():
             logger.debug("Erreur : Pas de compte actif existant.")
             return super().form_valid(form)
             # form.add_error(None, "Il n'existe pas de compte actif correspondant à cet identifiant et cette adresse Email.")
@@ -56,6 +66,22 @@ class MyPasswordResetView(ClassCommuneLogin, auth_views.PasswordResetView):
         return super().form_valid(form)
 
 
+    def Envoyer_reinitialisation(self, form, utilisateur, adresse=None):
+        """ Envoi du lien de réinitialisation à un collaborateur (pas de question de sécurité) """
+        opts = {
+            "nom_template_sujet": "portail/password_reset/emails/confirmation_sujet.txt",
+            "nom_template_html": "portail/password_reset/emails/confirmation_html.html",
+            "nom_template_texte": "portail/password_reset/emails/confirmation_texte.html",
+            "utilisateur": utilisateur, "request": self.request,
+            "token": default_token_generator.make_token(utilisateur), "adresse": adresse,
+        }
+        resultat = utils_email.Envoyer_email(**opts)
+        if resultat != True:
+            form.add_error(None, resultat)
+            return super(MyPasswordResetView, self).form_invalid(form)
+        return super().form_valid(form)
+
+
 class MyPasswordResetDoneView(ClassCommuneLogin, auth_views.PasswordResetDoneView):
     template_name = "portail/password_reset/done.html"
 
@@ -67,14 +93,22 @@ class MyPasswordResetConfirmView(ClassCommuneLogin, auth_views.PasswordResetConf
     def form_valid(self, form):
         # Vérification de la secquest
         if "secquest" in form.cleaned_data:
-            if not utils_secquest.Check_secquest(famille=self.user.famille, reponse=form.cleaned_data["secquest"]):
+            if self.user.categorie != "famille" or not utils_secquest.Check_secquest(famille=self.user.famille, reponse=form.cleaned_data["secquest"]):
                 form.add_error(None, "La réponse à la question est erronée")
                 return self.render_to_response(self.get_context_data(form=form))
 
         # Le changement de mot de passe par email prouve l'identité de la famille : on lève le blocage du compte
         AccessAttempt.objects.filter(username__iexact=self.user.username).delete()
 
-        return super().form_valid(form)
+        reponse = super().form_valid(form)
+        if self.user.categorie == "collaborateur" and getattr(self.user, "collaborateur", None):
+            # Mot de passe personnalisé : il n'est plus consultable dans la fiche du collaborateur
+            self.user.force_reset_password = False
+            self.user.date_expiration_mdp = None
+            self.user.save()
+            self.user.collaborateur.internet_mdp = "*****"
+            self.user.collaborateur.save()
+        return reponse
 
 
 class MyPasswordResetCompleteView(ClassCommuneLogin, auth_views.PasswordResetCompleteView):

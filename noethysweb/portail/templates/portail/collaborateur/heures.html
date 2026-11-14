@@ -1,0 +1,67 @@
+{% extends "portail/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/espace_collaborateur.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+<div class="card card-outline card-lightblue">
+    <div class="card-header ec-planning-tete">
+        <h2 class="card-title"><i class="bi bi-stopwatch me-2" aria-hidden="true"></i>Déclarer mes heures réalisées</h2>
+        <div class="btn-group" role="group" aria-label="Semaine">
+            <a class="btn btn-sm {% if semaine == 1 %}btn-primary{% else %}btn-outline-primary{% endif %}" href="?semaine=1">Semaine précédente</a>
+            <a class="btn btn-sm {% if semaine == 0 %}btn-primary{% else %}btn-outline-primary{% endif %}" href="?semaine=0">Cette semaine</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <p>Vérifiez vos horaires puis enregistrez-les. Un horaire identique au planning est enregistré immédiatement ; un écart est transmis à votre responsable pour validation.</p>
+        <h3 class="fs-6 fw-semibold">{{ titre_semaine }}</h3>
+        {% if lignes %}
+        <table class="table table-sm ec-heures-table">
+            <thead><tr><th scope="col">Jour</th><th scope="col">Prévu</th><th scope="col">Arrivée</th><th scope="col">Départ</th><th scope="col">Etat</th></tr></thead>
+            <tbody>
+            {% for evt in lignes %}
+                <tr class="ec-ligne-heures" data-id="{{ evt.id }}" data-debut="{{ evt.debut|date:'H:i' }}" data-fin="{{ evt.fin|date:'H:i' }}">
+                    <td class="ec-col-prevu fw-semibold">{{ evt.jour }}</td>
+                    <td class="ec-col-prevu"><div class="ec-prevu" style="--ec-couleur: {{ evt.couleur }}">{{ evt.debut|date:"H\hi" }} – {{ evt.fin|date:"H\hi" }} <span class="text-body-secondary small">· {{ evt.titre|default:evt.categorie }}</span></div></td>
+                    <td><label class="visually-hidden" for="ec_rd_{{ evt.id }}">Arrivée</label><input type="time" class="form-control form-control-sm ec-rd" id="ec_rd_{{ evt.id }}" value="{{ evt.arrivee|date:'H:i' }}"></td>
+                    <td><label class="visually-hidden" for="ec_rf_{{ evt.id }}">Départ</label><input type="time" class="form-control form-control-sm ec-rf" id="ec_rf_{{ evt.id }}" value="{{ evt.depart|date:'H:i' }}"></td>
+                    <td class="ec-col-etat"><span class="badge text-bg-{{ evt.etat_classe }}">{{ evt.etat_texte }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" id="ec_enregistrer_heures"><i class="bi bi-check2 me-2" aria-hidden="true"></i>Enregistrer mes heures</button>
+        {% else %}
+            <p class="text-body-secondary mb-0">Aucun horaire à déclarer pour cette semaine.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(function () {
+            $(".ec-rd, .ec-rf").on("change", function () {
+                var ligne = $(this).closest("tr"), conforme = ligne.find(".ec-rd").val() === ligne.data("debut") && ligne.find(".ec-rf").val() === ligne.data("fin");
+                ligne.find(".ec-col-etat").html(conforme ? '<span class="badge text-bg-success">Conforme</span>' : '<span class="badge text-bg-warning">Ecart à valider</span>');
+            });
+            $("#ec_enregistrer_heures").on("click", function () {
+                var heures = [], erreur = false;
+                $(".ec-ligne-heures").each(function () {
+                    var rd = $(this).find(".ec-rd").val(), rf = $(this).find(".ec-rf").val();
+                    if (!rd || !rf) { erreur = true; return; }
+                    heures.push({id: $(this).data("id"), rd: rd, rf: rf});
+                });
+                if (erreur) { toastr.error("Renseignez l'heure d'arrivée et de départ de chaque ligne"); return; }
+                var bouton = $(this).prop("disabled", true);
+                $.ajax({type: "POST", url: "{% url 'ajax_portail_collaborateur_enregistrer_heures' %}", data: {heures: JSON.stringify(heures), csrfmiddlewaretoken: "{{ csrf_token }}"},
+                    success: function () { location.reload(); },
+                    error: function (xhr) { toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Erreur"); bouton.prop("disabled", false); }});
+            });
+        });
+    </script>
+{% endblock scripts %}

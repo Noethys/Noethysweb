@@ -33,6 +33,8 @@ LISTE_RUBRIQUES = [
                            "helloasso_organisation_slug", "helloasso_client_id", "helloasso_client_secret", "helloasso_mode", "helloasso_cle_notification"]),
     ("Page des règlements", ["reglements_afficher_page", "reglements_intro", "reglements_afficher_encaissement", "reglements_autoriser_telechargement_recu", "reglements_modele_impression_recu"]),
     ("Page contact", ["contact_afficher_page", "contact_intro", "messagerie_intro", "messagerie_envoyer_notification_famille", "messagerie_envoyer_notification_admin", "contact_afficher_coords_structures", "contact_afficher_coords_organisateur"]),
+    ("Espace collaborateur", ["collaborateurs_espace_actif", "collaborateurs_texte_bienvenue", "collaborateurs_demandes_absences", "collaborateurs_depot_pieces",
+                              "collaborateurs_saisie_realise", "collaborateurs_notifier_planning", "collaborateurs_adresse_exp", "collaborateurs_email_responsables"]),
     ("Page des mentions légales", ["mentions_afficher_page", "mentions_intro", "mentions_type", "mentions_html"]),
     ("Accessibilité", ["accessibilite_declaration_type", "accessibilite_declaration_html"]),
 ]

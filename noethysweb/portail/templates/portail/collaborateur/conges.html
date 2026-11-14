@@ -1,0 +1,57 @@
+{% extends "portail/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/espace_collaborateur.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+<div class="row g-3 mb-3">
+    {% for compteur in conges %}
+        <div class="col-6 col-lg-3">
+            <div class="ec-compteur">
+                <span class="ec-compteur-nom">{{ compteur.nom }} <span class="text-body-secondary">{{ compteur.periode }}</span></span>
+                <span class="ec-compteur-solde{% if compteur.solde < 0 %} text-danger{% endif %}">{{ compteur.solde_txt }}</span>
+                <span class="ec-compteur-detail">sur {{ compteur.droits_txt }} · posés {{ compteur.poses_txt }}{% if compteur.attente %} · en attente {{ compteur.attente_txt }}{% endif %}</span>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% if autoriser_demandes %}<a class="btn btn-primary mb-3 ec-btn-mobile" href="{% url 'portail_collaborateur_demande' %}"><i class="bi bi-plus-lg me-2" aria-hidden="true"></i>Demander une absence</a>{% endif %}
+
+<div class="card card-outline card-lightblue">
+    <div class="card-header"><h2 class="card-title"><i class="bi bi-list-check me-2" aria-hidden="true"></i>Mes demandes</h2></div>
+    <div class="card-body">
+        {% for demande in demandes %}
+            <div class="ec-demande">
+                <div class="ec-demande-ligne">
+                    <span class="fw-semibold">{{ demande.periode_txt|capfirst }}</span>
+                    <span class="badge {% if demande.etat == 'ATTENTE' %}text-bg-warning{% elif demande.etat == 'VALIDEE' %}text-bg-success{% elif demande.etat == 'REFUSEE' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ demande.etat_txt }}</span>
+                </div>
+                <div class="ec-demande-ligne text-body-secondary small">
+                    <span><span class="ec-pastille" style="background: {{ demande.couleur }}" aria-hidden="true"></span>{{ demande.type_nom }} · {{ demande.quantite_txt }}</span>
+                    {% if demande.etat == 'ATTENTE' %}<button type="button" class="btn btn-link btn-sm text-danger p-0 ec-annuler" data-id="{{ demande.id }}">Annuler ma demande</button>{% endif %}
+                </div>
+                {% if demande.commentaire %}<div class="small mt-1"><i class="bi bi-chat-left-text me-1" aria-hidden="true"></i>{{ demande.decideur }} : {{ demande.commentaire }}</div>{% endif %}
+            </div>
+        {% empty %}
+            <p class="text-body-secondary mb-0">Vous n'avez fait aucune demande.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(function () {
+            $(".ec-annuler").on("click", function () {
+                if (!confirm("Annuler cette demande d'absence ?")) { return; }
+                $.ajax({type: "POST", url: "{% url 'ajax_portail_collaborateur_annuler_demande' %}", data: {iddemande: $(this).data("id"), csrfmiddlewaretoken: "{{ csrf_token }}"},
+                    success: function () { location.reload(); },
+                    error: function (xhr) { toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Erreur"); }});
+            });
+        });
+    </script>
+{% endblock scripts %}

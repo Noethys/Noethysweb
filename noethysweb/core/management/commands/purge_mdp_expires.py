@@ -12,3 +12,5 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         from fiche_famille.utils import utils_internet
         utils_internet.Purge_mdp_expires()
+        from collaborateurs.utils import utils_espace_collaborateur
+        utils_espace_collaborateur.Purge_mdp_expires()

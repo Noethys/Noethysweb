@@ -18,7 +18,7 @@ from core.utils import utils_portail
 
 def Envoyer_email(utilisateur=None, domain_override=None,
         nom_template_sujet=None, nom_template_texte=None, nom_template_html=None,
-        request=None, token=None, extra_email_context=None):
+        request=None, token=None, extra_email_context=None, adresse=None):
     """ Envoi d'un email avec un token """
 
     if not domain_override:
@@ -86,7 +86,7 @@ def Envoyer_email(utilisateur=None, domain_override=None,
     objet = ''.join(objet.splitlines())
 
     text_content = loader.render_to_string(nom_template_texte, context)
-    message = EmailMultiAlternatives(subject=objet, body=text_content, from_email=adresse_exp.adresse, to=[utilisateur.famille.mail], connection=connection)
+    message = EmailMultiAlternatives(subject=objet, body=text_content, from_email=adresse_exp.adresse, to=[adresse or utilisateur.famille.mail], connection=connection)
 
     if nom_template_html is not None:
         html_content = loader.render_to_string(nom_template_html, context)

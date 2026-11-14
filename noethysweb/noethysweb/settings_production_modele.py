@@ -125,6 +125,7 @@ DATABASES = {
 #     ("45 23 * * *", "noethysweb.cron.Traiter_attentes", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour traiter les réservations en attente
 #     ("50 23 * * *", "noethysweb.cron.Corriger_anomalies", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour corriger les anomalies
 #     ("00 03 * * *", "noethysweb.cron.Generer_taches", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour générer les tâches récurrentes
+#     ("00 18 * * *", "noethysweb.cron.Envoyer_recapitulatifs_planning", ">> " + os.path.join(BASE_DIR, "debug_cron.log")), # Pour envoyer aux collaborateurs le récapitulatif des changements de planning
 # ]
 
 #########################################################################################

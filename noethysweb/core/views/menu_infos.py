@@ -529,6 +529,7 @@ COMMANDES = {
     "statistiques_evenements_collaborateurs": ("bar-chart", "s", "Tableau de bord du temps de travail, des absences et des objectifs des collaborateurs."),
     "demandes_absences_collaborateurs": ("plane", "a", "Saisir et valider les demandes de congé et d'absence."),
     "compteurs_conges_collaborateurs": ("balance-scale", "l", "Consulter les soldes de congés et attribuer les droits."),
+    "heures_declarees_collaborateurs": ("clock-o", "a", "Valider les heures réalisées déclarées par les collaborateurs depuis leur espace."),
 }
 
 
@@ -554,6 +555,7 @@ NOUVEAUTES = {
     "statistiques_evenements_collaborateurs": "2026-11-13",
     "demandes_absences_collaborateurs": "2026-11-14",
     "compteurs_conges_collaborateurs": "2026-11-14",
+    "heures_declarees_collaborateurs": "2026-11-14",
 }
 
 

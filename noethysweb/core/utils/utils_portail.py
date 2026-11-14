@@ -165,6 +165,16 @@ LISTE_PARAMETRES = [
     Parametre(code="contact_afficher_coords_structures", label="Afficher les coordonnées des structures", type="boolean", valeur=True),
     Parametre(code="contact_afficher_coords_organisateur", label="Afficher les coordonnées de l'organisateur", type="boolean", valeur=True),
 
+    # Espace collaborateur
+    Parametre(code="collaborateurs_espace_actif", label="Activer l'espace collaborateur", type="boolean", valeur=False, help_text="Permet aux collaborateurs disposant de codes d'accès (onglet Espace collaborateur de leur fiche) de se connecter au portail pour consulter leur planning, leurs congés et leurs documents."),
+    Parametre(code="collaborateurs_texte_bienvenue", label="Texte de bienvenue", type="char_2lignes", valeur="", help_text="Texte facultatif affiché en haut de la page d'accueil de l'espace collaborateur."),
+    Parametre(code="collaborateurs_demandes_absences", label="Autoriser les demandes d'absence", type="boolean", valeur=True, help_text="Le collaborateur peut demander une absence depuis son espace. La demande est ensuite traitée dans Collaborateurs > Demandes d'absence."),
+    Parametre(code="collaborateurs_depot_pieces", label="Autoriser la transmission de documents", type="boolean", valeur=True, help_text="Le collaborateur peut transmettre une pièce (certificat, diplôme...). Elle reste en cours de vérification jusqu'à sa validation dans l'onglet Pièces de sa fiche."),
+    Parametre(code="collaborateurs_saisie_realise", label="Autoriser la déclaration des heures réalisées", type="boolean", valeur=False, help_text="Le collaborateur peut déclarer ses horaires réels des deux dernières semaines. Une déclaration identique au planning est enregistrée directement ; un écart est soumis à validation (Collaborateurs > Heures déclarées)."),
+    Parametre(code="collaborateurs_notifier_planning", label="Envoyer le récapitulatif des changements de planning", type="boolean", valeur=False, help_text="Chaque soir, les collaborateurs dont la case Notifications est cochée dans la fiche reçoivent un email récapitulant les changements de leur planning sur les 14 prochains jours. Nécessite la tâche planifiée noethysweb.cron.Envoyer_recapitulatifs_planning."),
+    Parametre(code="collaborateurs_adresse_exp", label="Adresse d'expédition", type="adresse_exp", valeur=None, help_text="Adresse utilisée pour les emails de l'espace collaborateur (demandes, décisions, récapitulatifs). A défaut, aucun email n'est envoyé."),
+    Parametre(code="collaborateurs_email_responsables", label="Email des responsables", type="char_1ligne", valeur="", help_text="Adresse(s) prévenue(s) des demandes et des documents à vérifier lorsque le collaborateur n'appartient à aucun groupe ayant des superviseurs. Séparez plusieurs adresses par des points-virgules."),
+
     # Mentions
     Parametre(code="mentions_afficher_page", label="Afficher la page", type="boolean", valeur=True),
     Parametre(code="mentions_intro", label="Texte d'introduction", type="char_2lignes", valeur="Vous pouvez consulter ici les mentions légales du portail."),

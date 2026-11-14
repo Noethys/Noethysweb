@@ -1,0 +1,64 @@
+{% extends "portail/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/espace_collaborateur.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card card-outline card-lightblue">
+            <div class="card-header"><h2 class="card-title"><i class="bi bi-files me-2" aria-hidden="true"></i>Pièces à fournir</h2></div>
+            <div class="card-body">
+                {% for piece in pieces_fournir %}
+                    <div class="d-flex align-items-center gap-2 mb-2">{% if piece.valide %}<i class="bi bi-check-circle-fill text-success" aria-hidden="true"></i>{% else %}<i class="bi bi-x-circle-fill text-danger" aria-hidden="true"></i>{% endif %}<span>{{ piece.label }}</span></div>
+                {% empty %}<p class="mb-0"><i class="bi bi-check-circle-fill text-success me-2" aria-hidden="true"></i>Aucune pièce à fournir.</p>{% endfor %}
+            </div>
+        </div>
+        {% if autoriser_depot %}
+        <div class="card card-outline card-lightblue">
+            <div class="card-header"><h2 class="card-title"><i class="bi bi-upload me-2" aria-hidden="true"></i>Transmettre un document</h2></div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" action="{% url 'portail_collaborateur_documents' %}">
+                    {% csrf_token %}
+                    <div class="mb-3"><label class="form-label" for="ec_piece_type">Type de document</label>
+                        <select class="form-select" id="ec_piece_type" name="type_piece">{% for type in types_pieces %}<option value="{{ type.pk }}">{{ type.nom }}</option>{% endfor %}<option value="">Autre document</option></select></div>
+                    <div class="mb-3 d-none" id="ec_piece_titre_bloc"><label class="form-label" for="ec_piece_titre">Nom du document</label><input type="text" class="form-control" id="ec_piece_titre" name="titre" maxlength="200"></div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6"><label class="form-label" for="ec_piece_debut">Valable du</label><input type="date" class="form-control" id="ec_piece_debut" name="date_debut"></div>
+                        <div class="col-6"><label class="form-label" for="ec_piece_fin">au</label><input type="date" class="form-control" id="ec_piece_fin" name="date_fin"></div>
+                    </div>
+                    <div class="mb-3"><label class="form-label" for="ec_piece_fichier">Fichier (PDF ou photo, 10 Mo maximum)</label><input type="file" class="form-control" id="ec_piece_fichier" name="document" accept=".pdf,image/*" required></div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-send me-2" aria-hidden="true"></i>Transmettre</button>
+                </form>
+                <p class="text-body-secondary small mt-2 mb-0">Le document est vérifié par votre responsable avant d'être enregistré dans votre dossier.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-lg-7">
+        <div class="card card-outline card-lightblue">
+            <div class="card-header"><h2 class="card-title"><i class="bi bi-folder2-open me-2" aria-hidden="true"></i>Mes pièces</h2></div>
+            <div class="card-body">
+                {% for item in pieces %}
+                    <div class="ec-piece">
+                        <div><span class="fw-semibold">{{ item.nom }}</span><br><small class="text-body-secondary">{% if item.piece.statut == "ATTENTE" and item.piece.date_depot %}transmis le {{ item.piece.date_depot|date:"d/m/Y" }}{% else %}{% if item.piece.date_debut %}du {{ item.piece.date_debut|date:"d/m/Y" }}{% endif %}{% if item.piece.date_fin and item.piece.date_fin.year < 2999 %} au {{ item.piece.date_fin|date:"d/m/Y" }}{% else %} · sans limite{% endif %}{% endif %}</small></div>
+                        <div class="d-flex align-items-center gap-2"><span class="badge text-bg-{{ item.classe }}">{{ item.etat }}</span>{% if item.piece.document %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'portail_collaborateur_piece' item.piece.pk %}" aria-label="Télécharger {{ item.nom }}"><i class="bi bi-download" aria-hidden="true"></i></a>{% endif %}</div>
+                    </div>
+                {% empty %}<p class="text-body-secondary mb-0">Aucune pièce dans votre dossier.</p>{% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(function () {
+            $("#ec_piece_type").on("change", function () { $("#ec_piece_titre_bloc").toggleClass("d-none", $(this).val() !== ""); }).trigger("change");
+        });
+    </script>
+{% endblock scripts %}

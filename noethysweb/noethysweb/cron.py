@@ -60,6 +60,12 @@ def Purge_mdp_expires():
     logger.debug("%s : Purge des mots de passe expirés..." % datetime.datetime.now())
     call_command("purge_mdp_expires")
 
+def Envoyer_recapitulatifs_planning():
+    logger.debug("%s : Envoi des récapitulatifs de planning aux collaborateurs..." % datetime.datetime.now())
+    from collaborateurs.utils import utils_espace_collaborateur
+    nbre = utils_espace_collaborateur.Envoyer_recapitulatifs_planning()
+    logger.debug("%s : %d récapitulatif(s) envoyé(s)." % (datetime.datetime.now(), nbre))
+
 def Purge_auto_historique():
     logger.debug("%s : Purge historique..." % datetime.datetime.now())
     call_command("purge_auto_historique")

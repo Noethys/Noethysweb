@@ -31,6 +31,9 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin):
         if not request.user.is_authenticated:
             logger.debug("dispatch : Utilisateur non authentifié. Retour à la page de connexion.")
             return redirect("portail_connexion")
+        # Un collaborateur est redirigé vers son espace
+        if request.user.categorie == "collaborateur" and not getattr(self, "espace_collaborateur", False):
+            return redirect("portail_collaborateur_accueil")
         return super(CustomView, self).dispatch(request, *args, **kwargs)
 
     def test_func(self):

@@ -76,10 +76,11 @@ class Liste(Page, crud.Liste):
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         nom = columns.TextColumn("Nom de la pièce", sources=None, processor='Get_nom')
         date_fin = columns.TextColumn("Date de fin", sources=["date_fin"], processor='Get_date_fin')
+        statut = columns.TextColumn("Statut", sources=["statut"], processor='Get_statut')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idpiece", "date_debut", "date_fin", "nom"]
+            columns = ["check", "idpiece", "date_debut", "date_fin", "nom", "statut"]
             processors = {
                 "date_debut": helpers.format_date('%d/%m/%Y'),
             }
@@ -94,6 +95,13 @@ class Liste(Page, crud.Liste):
             else:
                 return instance.date_fin.strftime('%d/%m/%Y')
 
+        def Get_statut(self, instance, **kwargs):
+            if instance.statut == "ATTENTE":
+                return "<span class='badge badge-warning'>En cours de vérification</span><br><small>Transmise le %s</small>" % instance.date_depot.strftime("%d/%m/%Y") if instance.date_depot else "<span class='badge badge-warning'>En cours de vérification</span>"
+            if instance.statut == "REFUSEE":
+                return "<span class='badge badge-secondary'>Refusée</span>"
+            return "<span class='badge badge-success'>Valide</span>"
+
         def Get_actions_speciales(self, instance, *args, **kwargs):
             view = kwargs["view"]
             kwargs = view.kwargs
@@ -102,6 +110,12 @@ class Liste(Page, crud.Liste):
                 self.Create_bouton_modifier(url=reverse(view.url_modifier, kwargs=kwargs)),
                 self.Create_bouton_supprimer(url=reverse(view.url_supprimer, kwargs=kwargs)),
             ]
+            if instance.statut == "ATTENTE":
+                # Pièce transmise depuis l'espace collaborateur : à accepter ou à refuser
+                html.insert(0, self.Create_bouton(url=reverse("collaborateur_pieces_decider", kwargs={"idcollaborateur": kwargs["idcollaborateur"], "pk": instance.pk, "decision": "refuser"}),
+                                                  title="Refuser la pièce transmise", icone="fa-ban"))
+                html.insert(0, self.Create_bouton(url=reverse("collaborateur_pieces_decider", kwargs={"idcollaborateur": kwargs["idcollaborateur"], "pk": instance.pk, "decision": "accepter"}),
+                                                  title="Accepter la pièce transmise", icone="fa-check"))
             return self.Create_boutons_actions(html)
 
 
@@ -138,3 +152,19 @@ class Saisie_rapide(Page, RedirectView):
                                                   date_debut=date_debut, date_fin=date_fin)
         messages.add_message(self.request, messages.SUCCESS, "La pièce '%s' a été créée avec succès" % piece.Get_nom())
         return self.request.META['HTTP_REFERER']
+
+
+class Decider(Page, RedirectView):
+    """ Acceptation ou refus d'une pièce transmise depuis l'espace collaborateur """
+    def get_redirect_url(self, *args, **kwargs):
+        piece = PieceCollaborateur.objects.filter(pk=kwargs["pk"], collaborateur_id=kwargs["idcollaborateur"], statut="ATTENTE").first()
+        if piece:
+            piece.statut = "VALIDE" if kwargs["decision"] == "accepter" else "REFUSEE"
+            piece.save()
+            from core.utils import utils_historique
+            from collaborateurs.utils import utils_espace_collaborateur
+            utils_historique.Ajouter(titre="Acceptation d'une pièce" if piece.statut == "VALIDE" else "Refus d'une pièce", detail=piece.Get_nom(), utilisateur=self.request.user,
+                                     collaborateur=piece.collaborateur_id, objet="Pièce", idobjet=piece.pk, classe="PieceCollaborateur")
+            utils_espace_collaborateur.Notifier_piece(piece, request=self.request)
+            messages.add_message(self.request, messages.SUCCESS, "La pièce '%s' a été %s" % (piece.Get_nom(), "acceptée" if piece.statut == "VALIDE" else "refusée"))
+        return reverse("collaborateur_pieces_liste", kwargs={"idcollaborateur": kwargs["idcollaborateur"]})

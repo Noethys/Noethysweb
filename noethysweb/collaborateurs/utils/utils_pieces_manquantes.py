@@ -15,7 +15,7 @@ def Get_pieces_manquantes(collaborateur=None, date_reference=None, only_invalide
         date_reference = datetime.date.today()
 
     # Récupération des types de pièces correspondant aux pièces actuellement valables
-    types_pieces_existants = list({piece.type_piece: True for piece in PieceCollaborateur.objects.select_related("type_piece").filter(collaborateur=collaborateur, date_fin__gte=date_reference, type_piece__isnull=False)}.keys())
+    types_pieces_existants = list({piece.type_piece: True for piece in PieceCollaborateur.objects.select_related("type_piece").filter(collaborateur=collaborateur, date_fin__gte=date_reference, type_piece__isnull=False, statut="VALIDE")}.keys())
     types_postes_contrats = list({contrat.type_poste: True for contrat in ContratCollaborateur.objects.select_related("type_poste").filter(Q(collaborateur=collaborateur) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today())))}.keys())
     qualifications_collaborateur = collaborateur.qualifications.all()
 

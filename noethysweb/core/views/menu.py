@@ -518,6 +518,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_conges_collaborateurs = menu_collaborateurs.Add(titre="Congés et absences")
     menu_conges_collaborateurs.Add(code="demandes_absences_collaborateurs", titre="Demandes d'absence", icone="file-text-o")
     menu_conges_collaborateurs.Add(code="compteurs_conges_collaborateurs", titre="Compteurs de congés", icone="file-text-o")
+    menu_conges_collaborateurs.Add(code="heures_declarees_collaborateurs", titre="Heures déclarées", icone="file-text-o")
 
     # Analyse
     menu_analyse_collaborateurs = menu_collaborateurs.Add(titre="Analyse")

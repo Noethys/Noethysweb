@@ -23,5 +23,5 @@ class MyPasswordChangeForm(SetPasswordForm):
         self.fields['new_password2'].widget.attrs['placeholder'] = _("Saisissez le nouveau mot de passe une nouvelle fois")
 
         # Question
-        if kwargs["user"].famille.internet_secquest:
+        if kwargs["user"].categorie == "famille" and kwargs["user"].famille.internet_secquest:
             self.fields["secquest"] = utils_secquest.Generation_field_secquest(famille=kwargs["user"].famille)

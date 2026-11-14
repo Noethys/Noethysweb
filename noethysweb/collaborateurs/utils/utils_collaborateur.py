@@ -16,4 +16,5 @@ LISTE_ONGLETS = [
     {"code": "outils", "label": "Outils", "icone": "fa-wrench", "url": "collaborateur_outils"},
     {"code": "planning", "label": "Planning", "icone": "fa-calendar-o", "url": "collaborateur_planning"},
     {"code": "conges", "label": "Congés", "icone": "fa-plane", "url": "collaborateur_conges"},
+    {"code": "espace", "label": "Espace collaborateur", "icone": "fa-globe", "url": "collaborateur_espace"},
 ]

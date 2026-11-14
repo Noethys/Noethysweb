@@ -24,7 +24,7 @@ class MyPasswordChangeView(ClassCommuneLogin, auth_views.PasswordChangeView):
     def form_valid(self, form):
         # Vérification de la secquest
         if "secquest" in form.cleaned_data:
-            if not utils_secquest.Check_secquest(famille=self.request.user.famille, reponse=form.cleaned_data["secquest"]):
+            if self.request.user.categorie != "famille" or not utils_secquest.Check_secquest(famille=self.request.user.famille, reponse=form.cleaned_data["secquest"]):
                 form.add_error(None, _("La réponse à la question est erronée"))
                 return self.render_to_response(self.get_context_data(form=form))
 
@@ -38,8 +38,12 @@ class MyPasswordChangeView(ClassCommuneLogin, auth_views.PasswordChangeView):
         utilisateur.force_reset_password = False
         utilisateur.date_expiration_mdp = None
         utilisateur.save()
-        utilisateur.famille.internet_mdp = "*****"
-        utilisateur.famille.save()
+        if utilisateur.categorie == "collaborateur":
+            utilisateur.collaborateur.internet_mdp = "*****"
+            utilisateur.collaborateur.save()
+        else:
+            utilisateur.famille.internet_mdp = "*****"
+            utilisateur.famille.save()
 
         return super().form_valid(form)
 

@@ -7,7 +7,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from core.decorators import secure_ajax_portail
 from consommations.views import grille
-from portail.views import accueil, login
+from portail.views import accueil, login, espace_collaborateur
 from portail.views import reset_password, change_password, reservations, planning, renseignements, individu_identite, individu_questionnaire, individu_contacts, \
                             individu_regimes_alimentaires, individu_coords, individu_medecin, individu_informations, individu_assurances, individu_vaccinations, \
                             famille_caisse, profil, profil_password_change, facturation, reglements, mentions, contact, messagerie, individu_maladies, album, documents, \
@@ -20,6 +20,20 @@ urlpatterns = [
 
     # Accueil
     path('', accueil.Accueil.as_view(), name='portail_accueil'),
+
+    # Espace collaborateur
+    path('collaborateur/', espace_collaborateur.Accueil.as_view(), name='portail_collaborateur_accueil'),
+    path('collaborateur/planning', espace_collaborateur.Planning.as_view(), name='portail_collaborateur_planning'),
+    path('collaborateur/conges', espace_collaborateur.Conges.as_view(), name='portail_collaborateur_conges'),
+    path('collaborateur/conges/demande', espace_collaborateur.Demande.as_view(), name='portail_collaborateur_demande'),
+    path('collaborateur/documents', espace_collaborateur.Documents.as_view(), name='portail_collaborateur_documents'),
+    path('collaborateur/heures', espace_collaborateur.Heures.as_view(), name='portail_collaborateur_heures'),
+    path('collaborateur/planning/pdf', espace_collaborateur.Planning_pdf.as_view(), name='portail_collaborateur_planning_pdf'),
+    path('collaborateur/documents/<int:idpiece>', espace_collaborateur.Telecharger_piece.as_view(), name='portail_collaborateur_piece'),
+    path('collaborateur/ajax/calculer_demande', espace_collaborateur.Ajax_calculer_demande, name='ajax_portail_collaborateur_calculer_demande'),
+    path('collaborateur/ajax/envoyer_demande', espace_collaborateur.Ajax_envoyer_demande, name='ajax_portail_collaborateur_envoyer_demande'),
+    path('collaborateur/ajax/annuler_demande', espace_collaborateur.Ajax_annuler_demande, name='ajax_portail_collaborateur_annuler_demande'),
+    path('collaborateur/ajax/enregistrer_heures', espace_collaborateur.Ajax_enregistrer_heures, name='ajax_portail_collaborateur_enregistrer_heures'),
 
     # Connexion
     path('connexion', login.LoginViewFamille.as_view(), name='portail_connexion'),

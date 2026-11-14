@@ -1,0 +1,90 @@
+{% extends "portail/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/espace_collaborateur.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+<h2 class="ec-bonjour">Bonjour {{ collaborateur.prenom|default:collaborateur.nom }}</h2>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+        <a class="ec-tuile ec-tuile-bleu" href="{% url 'portail_collaborateur_planning' %}">
+            <span class="ec-tuile-valeur">{{ semaine_total }}</span>
+            <span class="ec-tuile-label">planifiées cette semaine{% if semaine_contrat %} · contrat {{ semaine_contrat }}{% endif %}</span>
+            <i class="bi bi-calendar4-week" aria-hidden="true"></i>
+        </a>
+    </div>
+    {% for compteur in conges|slice:":1" %}
+    <div class="col-6 col-lg-3">
+        <a class="ec-tuile ec-tuile-vert" href="{% url 'portail_collaborateur_conges' %}">
+            <span class="ec-tuile-valeur">{{ compteur.solde_txt }}</span>
+            <span class="ec-tuile-label">{{ compteur.nom }} {{ compteur.periode }}</span>
+            <i class="bi bi-airplane" aria-hidden="true"></i>
+        </a>
+    </div>
+    {% endfor %}
+    <div class="col-6 col-lg-3">
+        <a class="ec-tuile {% if nb_demandes_attente %}ec-tuile-orange{% else %}ec-tuile-gris{% endif %}" href="{% url 'portail_collaborateur_conges' %}">
+            <span class="ec-tuile-valeur">{{ nb_demandes_attente }}</span>
+            <span class="ec-tuile-label">demande{{ nb_demandes_attente|pluralize }} en attente</span>
+            <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a class="ec-tuile {% if pieces_manquantes %}ec-tuile-rouge{% elif pieces_alerte %}ec-tuile-orange{% else %}ec-tuile-gris{% endif %}" href="{% url 'portail_collaborateur_documents' %}">
+            <span class="ec-tuile-valeur">{{ nb_documents }}</span>
+            <span class="ec-tuile-label">document{{ nb_documents|pluralize }} à fournir ou à renouveler</span>
+            <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card card-outline card-lightblue h-100">
+            <div class="card-header"><h2 class="card-title"><i class="bi bi-clock me-2" aria-hidden="true"></i>Mes prochains horaires</h2></div>
+            <div class="card-body">
+                {% for jour in jours %}
+                    <div class="ec-jour-titre">{{ jour.libelle }} <span class="text-body-secondary">· {{ jour.texte }}</span></div>
+                    {% for evt in jour.evenements %}{% include "portail/collaborateur/_evenement.html" %}{% empty %}<p class="text-body-secondary small mb-3">Rien de prévu.</p>{% endfor %}
+                {% endfor %}
+                {% if prochain_jour %}
+                    <div class="ec-jour-titre">Ensuite <span class="text-body-secondary">· {{ prochain_jour.texte }}</span></div>
+                    {% for evt in prochain_jour.evenements %}{% include "portail/collaborateur/_evenement.html" %}{% endfor %}
+                {% endif %}
+                <a class="btn btn-outline-primary btn-sm mt-2" href="{% url 'portail_collaborateur_planning' %}"><i class="bi bi-calendar4-week me-2" aria-hidden="true"></i>Voir tout mon planning</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        {% if modifications %}
+        <div class="card card-outline card-warning mb-3">
+            <div class="card-header"><h2 class="card-title"><i class="bi bi-bell me-2" aria-hidden="true"></i>Modifications récentes de mon planning</h2></div>
+            <div class="card-body">
+                <ul class="list-unstyled ec-modifs mb-0">
+                    {% for modif in modifications %}
+                        <li><span class="ec-modif-type">{% if "Ajout" in modif.titre %}Ajout{% elif "Suppression" in modif.titre %}Suppression{% else %}Modification{% endif %}</span>
+                            {{ modif.detail }} <small class="text-body-secondary d-block">le {{ modif.horodatage|date:"d/m à H\hi" }}</small></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% if pieces_manquantes or pieces_alerte %}
+        <div class="card card-outline {% if pieces_manquantes %}card-danger{% else %}card-warning{% endif %}">
+            <div class="card-header"><h2 class="card-title"><i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>Documents à transmettre</h2></div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-2">
+                    {% for piece in pieces_manquantes %}<li class="mb-1"><i class="bi bi-x-circle-fill text-danger me-2" aria-hidden="true"></i>{{ piece.label }}</li>{% endfor %}
+                    {% for piece in pieces_alerte %}<li class="mb-1"><i class="bi bi-exclamation-circle-fill text-warning me-2" aria-hidden="true"></i>{{ piece.nom }} : expire le {{ piece.piece.date_fin|date:"d/m/Y" }}</li>{% endfor %}
+                </ul>
+                <a class="btn btn-primary btn-sm" href="{% url 'portail_collaborateur_documents' %}"><i class="bi bi-upload me-2" aria-hidden="true"></i>Transmettre un document</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock contenu_page %}

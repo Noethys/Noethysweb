@@ -400,7 +400,7 @@ def Serialiser_demande(demande=None, user=None, ids_modifiables=None):
         "heure_debut": demande.heure_debut.strftime("%H:%M") if demande.heure_debut else "", "heure_fin": demande.heure_fin.strftime("%H:%M") if demande.heure_fin else "",
         "periode_txt": Texte_periode_demande(demande), "quantite_txt": Format_valeur(demande.quantite, demande.type_conge.unite),
         "etat": demande.etat, "etat_txt": demande.get_etat_display(), "motif": demande.motif or "", "commentaire": demande.commentaire or "",
-        "date_demande": demande.date_demande.strftime("%d/%m/%Y"), "auteur": (demande.auteur.get_full_name() or demande.auteur.username) if demande.auteur else "",
+        "date_demande": demande.date_demande.strftime("%d/%m/%Y"), "auteur": ("Espace collaborateur" if demande.auteur.categorie == "collaborateur" else (demande.auteur.get_full_name() or demande.auteur.username)) if demande.auteur else "",
         "decideur": (demande.decideur.get_full_name() or demande.decideur.username) if demande.decideur else "",
         "date_decision": demande.date_decision.strftime("%d/%m/%Y") if demande.date_decision else "",
         "traitable": demande.collaborateur_id in ids_modifiables, "retires": bool(demande.evenements_retires),

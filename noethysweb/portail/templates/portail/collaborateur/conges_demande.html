@@ -1,0 +1,74 @@
+{% extends "portail/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/espace_collaborateur.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+<div class="card card-outline card-lightblue ec-form">
+    <div class="card-header"><h2 class="card-title"><i class="bi bi-airplane me-2" aria-hidden="true"></i>Nouvelle demande d'absence</h2></div>
+    <div class="card-body">
+        <div class="mb-3"><label class="form-label" for="ec_type">Type d'absence</label>
+            <select class="form-select" id="ec_type">{% for type in types %}<option value="{{ type.pk }}" data-unite="{{ type.unite }}">{{ type.nom }}</option>{% endfor %}</select></div>
+        <div class="row g-3 mb-3">
+            <div class="col-sm-6"><label class="form-label" for="ec_debut">Du</label><input type="date" class="form-control" id="ec_debut" value="{{ aujourdhui }}">
+                <div class="form-check mt-2 ec-jours"><input class="form-check-input" type="checkbox" id="ec_debut_am"><label class="form-check-label" for="ec_debut_am">à partir de l'après-midi</label></div></div>
+            <div class="col-sm-6"><label class="form-label" for="ec_fin">Au</label><input type="date" class="form-control" id="ec_fin" value="{{ aujourdhui }}">
+                <div class="form-check mt-2 ec-jours"><input class="form-check-input" type="checkbox" id="ec_fin_matin"><label class="form-check-label" for="ec_fin_matin">jusqu'au matin inclus</label></div></div>
+        </div>
+        <div class="row g-3 mb-3 ec-heures d-none">
+            <div class="col-6"><label class="form-label" for="ec_heure_debut">De</label><input type="time" class="form-control" id="ec_heure_debut"></div>
+            <div class="col-6"><label class="form-label" for="ec_heure_fin">à</label><input type="time" class="form-control" id="ec_heure_fin"></div>
+        </div>
+        <div class="mb-3"><label class="form-label" for="ec_motif">Motif <span class="text-body-secondary">(facultatif)</span></label><textarea class="form-control" id="ec_motif" rows="2" maxlength="2000"></textarea></div>
+        <div class="alert alert-info ec-calcul" id="ec_calcul" role="status" aria-live="polite">Renseignez les dates de votre absence.</div>
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-primary" id="ec_envoyer"><i class="bi bi-send me-2" aria-hidden="true"></i>Envoyer la demande</button>
+            <a class="btn btn-outline-secondary" href="{% url 'portail_collaborateur_conges' %}">Annuler</a>
+        </div>
+        <p class="text-body-secondary small mt-3 mb-0"><i class="bi bi-envelope me-1" aria-hidden="true"></i>Votre responsable est prévenu par email. Vous recevrez un email dès que votre demande sera traitée.</p>
+    </div>
+</div>
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        $(function () {
+            function donnees() {
+                var heures = $("#ec_type option:selected").data("unite") === "HEURES";
+                return {idtype: $("#ec_type").val(), date_debut: $("#ec_debut").val(), date_fin: heures ? $("#ec_debut").val() : $("#ec_fin").val(),
+                        debut_apres_midi: !heures && $("#ec_debut_am").is(":checked"), fin_matin: !heures && $("#ec_fin_matin").is(":checked"),
+                        heure_debut: heures ? $("#ec_heure_debut").val() : "", heure_fin: heures ? $("#ec_heure_fin").val() : "",
+                        motif: $("#ec_motif").val(), csrfmiddlewaretoken: "{{ csrf_token }}"};
+            }
+            function echapper(texte) { return $("<div>").text(texte).html(); }
+            function calculer() {
+                var heures = $("#ec_type option:selected").data("unite") === "HEURES";
+                $(".ec-heures").toggleClass("d-none", !heures);
+                $(".ec-jours").toggleClass("d-none", heures);
+                $("#ec_fin").prop("disabled", heures);
+                if (heures && !($("#ec_heure_debut").val() && $("#ec_heure_fin").val())) { $("#ec_calcul").attr("class", "alert alert-info ec-calcul").text("Renseignez les heures de votre absence."); return; }
+                $.post("{% url 'ajax_portail_collaborateur_calculer_demande' %}", donnees(), function (reponse) {
+                    if (reponse.erreur) { $("#ec_calcul").attr("class", "alert alert-warning ec-calcul").text(reponse.erreur); $("#ec_envoyer").prop("disabled", true); return; }
+                    var texte = "<strong>" + echapper(reponse.quantite_txt) + "</strong> décompté(s) · solde " + echapper(reponse.nom) + " " + echapper(reponse.periode) + " : " + echapper(reponse.solde_txt) +
+                        (reponse.attente_txt ? " (dont " + echapper(reponse.attente_txt) + " en attente)" : "") + " → <strong>" + echapper(reponse.apres_txt) + "</strong> après cette demande.";
+                    if (reponse.bloquant) { texte += "<br>Votre solde est insuffisant pour ce type d'absence."; }
+                    $("#ec_calcul").attr("class", "alert ec-calcul " + (reponse.negatif ? "alert-warning" : "alert-info")).html(texte);
+                    $("#ec_envoyer").prop("disabled", reponse.bloquant);
+                });
+            }
+            $("#ec_type, #ec_debut, #ec_fin, #ec_debut_am, #ec_fin_matin, #ec_heure_debut, #ec_heure_fin").on("change", calculer);
+            $("#ec_debut").on("change", function () { if ($("#ec_fin").val() < $(this).val()) { $("#ec_fin").val($(this).val()); } });
+            $("#ec_envoyer").on("click", function () {
+                var bouton = $(this).prop("disabled", true);
+                $.ajax({type: "POST", url: "{% url 'ajax_portail_collaborateur_envoyer_demande' %}", data: donnees(),
+                    success: function (reponse) { window.location.href = reponse.url; },
+                    error: function (xhr) { toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Erreur"); bouton.prop("disabled", false); }});
+            });
+            calculer();
+        });
+    </script>
+{% endblock scripts %}

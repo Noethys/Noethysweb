@@ -10,7 +10,8 @@ from collaborateurs.views import collaborateur, collaborateur_identite, collabor
                                 collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, \
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
-                                fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel, statistiques_evenements, conges
+                                fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel, statistiques_evenements, conges, \
+                                collaborateur_espace, heures_declarees
 
 
 urlpatterns = [
@@ -45,6 +46,7 @@ urlpatterns = [
     path('collaborateurs/collaborateurs/pieces/supprimer/<int:idcollaborateur>/<int:pk>', collaborateur_pieces.Supprimer.as_view(), name='collaborateur_pieces_supprimer'),
     path('collaborateurs/collaborateurs/pieces/supprimer_plusieurs/<int:idcollaborateur>/<str:listepk>', collaborateur_pieces.Supprimer_plusieurs.as_view(), name='collaborateur_pieces_supprimer_plusieurs'),
     path('collaborateurs/collaborateurs/pieces/saisie_rapide/<int:idcollaborateur>/<int:idtype_piece>', collaborateur_pieces.Saisie_rapide.as_view(), name='collaborateur_pieces_saisie_rapide'),
+    path('collaborateurs/collaborateurs/pieces/decider/<int:idcollaborateur>/<int:pk>/<str:decision>', collaborateur_pieces.Decider.as_view(), name='collaborateur_pieces_decider'),
 
     path('collaborateurs/collaborateurs/contrats/liste/<int:idcollaborateur>', collaborateur_contrats.Liste.as_view(), name='collaborateur_contrats_liste'),
     path('collaborateurs/collaborateurs/contrats/ajouter/<int:idcollaborateur>', collaborateur_contrats.Ajouter.as_view(), name='collaborateur_contrats_ajouter'),
@@ -62,6 +64,8 @@ urlpatterns = [
     path('collaborateurs/collaborateurs/outils/<int:idcollaborateur>', collaborateur_outils.View.as_view(), name='collaborateur_outils'),
     path('collaborateurs/collaborateurs/planning/<int:idcollaborateur>', planning_individuel.Onglet_planning.as_view(), name='collaborateur_planning'),
     path('collaborateurs/collaborateurs/conges/<int:idcollaborateur>', conges.Onglet_conges.as_view(), name='collaborateur_conges'),
+    path('collaborateurs/collaborateurs/espace/<int:idcollaborateur>', collaborateur_espace.Consulter.as_view(), name='collaborateur_espace'),
+    path('collaborateurs/collaborateurs/espace/modifier/<int:idcollaborateur>', collaborateur_espace.Modifier.as_view(), name='collaborateur_espace_modifier'),
     path('collaborateurs/collaborateurs/historique/<int:idcollaborateur>', collaborateur_historique.Liste.as_view(), name='collaborateur_historique'),
     path('collaborateurs/collaborateurs/emails/ajouter/<int:idcollaborateur>', collaborateur_emails.Ajouter.as_view(), name='collaborateur_emails_ajouter'),
     path('collaborateurs/collaborateurs/sms/ajouter/<int:idcollaborateur>', collaborateur_sms.Ajouter.as_view(), name='collaborateur_sms_ajouter'),
@@ -83,6 +87,7 @@ urlpatterns = [
     path('collaborateurs/planning_individuel', planning_individuel.View.as_view(), name='planning_individuel'),
     path('collaborateurs/soldes_objectifs', planning_individuel.View_soldes.as_view(), name='soldes_objectifs_collaborateurs'),
     path('collaborateurs/demandes_absences', conges.View_demandes.as_view(), name='demandes_absences_collaborateurs'),
+    path('collaborateurs/heures_declarees', heures_declarees.View.as_view(), name='heures_declarees_collaborateurs'),
     path('collaborateurs/compteurs_conges', conges.View_compteurs.as_view(), name='compteurs_conges_collaborateurs'),
 
     # Analyse
@@ -122,6 +127,10 @@ urlpatterns = [
     path('collaborateurs/planning_individuel/reporter_soldes', secure_ajax(planning_individuel.Reporter_soldes), name='ajax_planning_individuel_reporter_soldes'),
 
     # Congés et absences
+    path('collaborateurs/collaborateurs/espace/regenerer_identifiant', secure_ajax(collaborateur_espace.Regenerer_identifiant), name='ajax_collaborateur_espace_regenerer_identifiant'),
+    path('collaborateurs/collaborateurs/espace/regenerer_mdp', secure_ajax(collaborateur_espace.Regenerer_mdp), name='ajax_collaborateur_espace_regenerer_mdp'),
+    path('collaborateurs/collaborateurs/espace/envoyer_codes', secure_ajax(collaborateur_espace.Envoyer_codes), name='ajax_collaborateur_espace_envoyer_codes'),
+    path('collaborateurs/heures_declarees/decider', secure_ajax(heures_declarees.Decider), name='ajax_heures_declarees_decider'),
     path('collaborateurs/conges/get_demandes', secure_ajax(conges.Get_demandes), name='ajax_conges_get_demandes'),
     path('collaborateurs/conges/calculer', secure_ajax(conges.Calculer), name='ajax_conges_calculer'),
     path('collaborateurs/conges/enregistrer_demande', secure_ajax(conges.Enregistrer_demande), name='ajax_conges_enregistrer_demande'),

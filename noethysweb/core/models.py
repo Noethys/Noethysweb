@@ -4234,6 +4234,12 @@ class Collaborateur(models.Model):
     qualifications = models.ManyToManyField(TypeQualificationCollaborateur, verbose_name="Qualifications", related_name="collaborateur_qualifications", blank=True)
     groupes = models.ManyToManyField(GroupeCollaborateurs, verbose_name="Groupes associés", related_name="collaborateur_groupes", blank=True)
     token_ical = models.CharField(verbose_name="Jeton de l'agenda iCal", max_length=64, blank=True, null=True, unique=True)
+    utilisateur = models.OneToOneField(Utilisateur, verbose_name="Compte de l'espace collaborateur", related_name="collaborateur", on_delete=models.SET_NULL, blank=True, null=True)
+    internet_actif = models.BooleanField(verbose_name="Accès à l'espace collaborateur activé", default=True)
+    internet_identifiant = encrypt(models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True))
+    internet_mdp = encrypt(models.CharField(verbose_name="Mot de passe", max_length=200, blank=True, null=True))
+    notifier_planning = models.BooleanField(verbose_name="Envoyer le récapitulatif des changements de planning", default=False)
+    notifier_planning_date = models.DateTimeField(verbose_name="Date du dernier récapitulatif des changements de planning", blank=True, null=True)
 
     class Meta:
         db_table = "collaborateurs"
@@ -4262,6 +4268,9 @@ class PieceCollaborateur(models.Model):
     document = models.FileField(verbose_name="Document", storage=get_storage("piece_collaborateur"), upload_to=get_uuid_path, blank=True, null=True)
     titre = models.CharField(verbose_name="Titre", max_length=200, blank=True, null=True)
     observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+    statut = models.CharField(verbose_name="Statut", max_length=20, default="VALIDE", choices=[("VALIDE", "Validée"), ("ATTENTE", "En cours de vérification"), ("REFUSEE", "Refusée")],
+                              help_text="Une pièce transmise par le collaborateur depuis son espace reste en cours de vérification jusqu'à sa validation.")
+    date_depot = models.DateTimeField(verbose_name="Date de transmission", blank=True, null=True)
 
     class Meta:
         db_table = 'pieces_collaborateur'
@@ -4336,6 +4345,10 @@ class EvenementCollaborateur(models.Model):
     realise_debut = models.DateTimeField(verbose_name="Début réalisé", blank=True, null=True)
     realise_fin = models.DateTimeField(verbose_name="Fin réalisée", blank=True, null=True)
     version = models.PositiveIntegerField(verbose_name="Version", default=1)
+    declare_debut = models.DateTimeField(verbose_name="Début déclaré par le collaborateur", blank=True, null=True)
+    declare_fin = models.DateTimeField(verbose_name="Fin déclarée par le collaborateur", blank=True, null=True)
+    declare_etat = models.CharField(verbose_name="Etat de la déclaration", max_length=20, blank=True, null=True, choices=[("ATTENTE", "A valider"), ("REFUSEE", "Refusée")])
+    declare_date = models.DateTimeField(verbose_name="Date de la déclaration", blank=True, null=True)
 
     class Meta:
         db_table = "evenements_collaborateur"

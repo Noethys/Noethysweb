@@ -76,7 +76,13 @@ class FormLoginFamille(AuthenticationForm):
     def confirm_login_allowed(self, user):
         if not user.is_active:
             raise ValidationError(_("Ce compte a été désactivé"), code='inactive')
-        if user.categorie != "famille":
+        if user.categorie == "collaborateur":
+            # Espace collaborateur : uniquement s'il est activé et si l'accès du collaborateur est actif
+            from collaborateurs.utils import utils_espace_collaborateur
+            collaborateur = getattr(user, "collaborateur", None)
+            if not utils_espace_collaborateur.Espace_actif() or not collaborateur or not collaborateur.internet_actif:
+                raise ValidationError(_("Accès non autorisé"), code='acces_interdit')
+        elif user.categorie != "famille":
             raise ValidationError(_("Accès non autorisé"), code='acces_interdit')
         if user.date_expiration_mdp and user.date_expiration_mdp < datetime.datetime.now():
             raise ValidationError(_("Ce mot de passe a expiré"), code='mdp_expire')

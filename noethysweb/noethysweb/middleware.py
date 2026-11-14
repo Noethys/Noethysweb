@@ -20,5 +20,8 @@ class CustomMiddleware:
         if request.user.is_authenticated and request.user.categorie == "famille" and request.user.force_reset_password and request.path != url_change_password:
             utils_secquest.Generation_secquest(famille=request.user.famille)
             return HttpResponseRedirect(url_change_password)
+        if request.user.is_authenticated and request.user.categorie == "collaborateur" and request.user.force_reset_password and request.path != url_change_password \
+                and request.path != reverse("portail_deconnexion"):
+            return HttpResponseRedirect(url_change_password)
 
         return response

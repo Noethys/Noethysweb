@@ -1,0 +1,8 @@
+<div class="ec-evt{% if not evt.travail %} ec-evt-absence{% endif %}" style="--ec-couleur: {{ evt.couleur }}">
+    <div class="ec-evt-heures">{% if evt.journee_entiere %}Journée{% else %}{{ evt.debut|date:"H\hi" }} – {{ evt.fin|date:"H\hi" }}{% endif %}</div>
+    <div class="ec-evt-texte">
+        <span class="ec-evt-cat">{{ evt.titre|default:evt.categorie }}</span>
+        {% if evt.affectation %}<span class="ec-evt-aff"><i class="bi bi-diagram-3 me-1" aria-hidden="true"></i>{{ evt.affectation }}</span>{% endif %}
+        {% if evt.realise %}<span class="ec-evt-aff"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Réalisé {{ evt.realise }}</span>{% endif %}
+    </div>
+</div>

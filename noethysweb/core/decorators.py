@@ -36,6 +36,22 @@ def secure_ajax(function):
     return _function
 
 
+def secure_ajax_collaborateur(function):
+    """ A associer aux requêtes AJAX de l'espace collaborateur du portail """
+    def _function(request, *args, **kwargs):
+        if not request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            return HttpResponseBadRequest()
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden()
+        if request.user.categorie != "collaborateur" or not getattr(request.user, "collaborateur", None) or not request.user.collaborateur.internet_actif:
+            return HttpResponseForbidden()
+        from collaborateurs.utils import utils_espace_collaborateur
+        if not utils_espace_collaborateur.Espace_actif():
+            return HttpResponseForbidden()
+        return function(request, *args, **kwargs)
+    return _function
+
+
 def secure_ajax_portail(function):
     """ A associer aux requêtes AJAX """
     def _function(request, *args, **kwargs):
