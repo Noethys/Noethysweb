@@ -8,6 +8,7 @@ from django.db.models import Count
 from django.utils.dateparse import parse_date
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
+from parametrage.views.valeurs_defaut_collaborateurs import Bouton as Bouton_valeurs_defaut
 from core.models import TypePieceCollaborateur
 from parametrage.forms.types_pieces_collaborateurs import Formulaire
 
@@ -24,6 +25,7 @@ class Page(crud.Page):
     objet_pluriel = "des types de pièces"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
+        Bouton_valeurs_defaut("types_pieces"),
     ]
 
 

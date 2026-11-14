@@ -21,7 +21,14 @@
     {% if boutons_liste %}
         <div>
             {% for bouton in boutons_liste %}
-                <a class="{{ bouton.classe }}" href="{{ bouton.href }}" {% if bouton.onclick %}onclick="{{ bouton.onclick }}"{% endif %}><i class="{{ bouton.icone }} margin-r-5"></i> {{ bouton.label }}</a>
+                {% if bouton.post %}
+                    <form method="post" action="{{ bouton.href }}" style="display: inline;" {% if bouton.confirmation %}onsubmit="return confirm('{{ bouton.confirmation|escapejs }}');"{% endif %}>
+                        {% csrf_token %}
+                        <button type="submit" class="{{ bouton.classe }}"><i class="{{ bouton.icone }} margin-r-5"></i> {{ bouton.label }}</button>
+                    </form>
+                {% else %}
+                    <a class="{{ bouton.classe }}" href="{{ bouton.href }}" {% if bouton.onclick %}onclick="{{ bouton.onclick }}"{% endif %}><i class="{{ bouton.icone }} margin-r-5"></i> {{ bouton.label }}</a>
+                {% endif %}
             {% endfor %}
         </div>
     {% endif %}

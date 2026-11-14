@@ -6,6 +6,7 @@
 from django.urls import reverse_lazy
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
+from parametrage.views.valeurs_defaut_collaborateurs import Bouton as Bouton_valeurs_defaut
 from core.models import TypeCongeCollaborateur, DemandeAbsenceCollaborateur
 from parametrage.forms.types_conges_collaborateurs import Formulaire
 
@@ -23,6 +24,7 @@ class Page(crud.Page):
     objet_pluriel = "des types de congés"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
+        Bouton_valeurs_defaut("types_conges"),
     ]
 
 

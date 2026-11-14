@@ -6,6 +6,7 @@
 from django.urls import reverse_lazy, reverse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
+from parametrage.views.valeurs_defaut_collaborateurs import Bouton as Bouton_valeurs_defaut
 from core.models import TypeQualificationCollaborateur
 from parametrage.forms.types_qualifications_collaborateurs import Formulaire
 from django.db.models import Count
@@ -23,6 +24,7 @@ class Page(crud.Page):
     objet_pluriel = "des types de qualifications"
     boutons_liste = [
         {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(url_ajouter), "icone": "fa fa-plus"},
+        Bouton_valeurs_defaut("types_qualifications"),
     ]
 
 
