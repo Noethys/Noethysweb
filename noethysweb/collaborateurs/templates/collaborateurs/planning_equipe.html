@@ -139,6 +139,7 @@
                         <button type="button" class="pl-btn" id="pl_modele" title="Appliquer un modèle de planning"><i class="fa fa-th-list" aria-hidden="true"></i><span class="pl-lbl pl-lbl-opt">Appliquer un modèle</span></button>
                         <button type="button" class="pl-btn" id="pl_copie" title="Copier une période"><i class="fa fa-files-o" aria-hidden="true"></i><span class="pl-lbl pl-lbl-opt">Copier une période</span></button>
                     </div>
+                    <button type="button" class="pl-btn pl-btn-anomalies" id="pl_anomalies_btn" aria-haspopup="dialog" hidden><i class="fa fa-exclamation-triangle" aria-hidden="true"></i><span class="pl-lbl"></span></button>
                     <span class="pl-espace"></span>
                     <div class="pl-groupe pl-zoom">
                         <button type="button" class="pl-btn pl-btn-sm pl-btn-icone" id="pl_zoom_moins" aria-label="Élargir la plage horaire" title="Élargir la plage horaire"><i class="fa fa-search-minus" aria-hidden="true"></i></button>
@@ -252,12 +253,31 @@
                     </div>
                 </fieldset>
                 <div class="pl-alerte" id="pl_evt_info" aria-live="polite"></div>
+                <div class="pl-alerte attention pl-evt-regles" id="pl_evt_regles" aria-live="polite" hidden></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-danger" id="pl_evt_supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
                 <button type="button" class="btn btn-default mr-auto" id="pl_evt_dupliquer"><i class="fa fa-clone margin-r-5"></i>Dupliquer</button>
                 <button type="button" class="btn btn-primary" id="pl_evt_enregistrer"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pl_modal_anomalies" tabindex="-1" role="dialog" aria-labelledby="pl_modal_anomalies_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_anomalies_titre"><strong>Alertes réglementaires</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="pl-muted pl-petit">Règles des profils réglementaires (Paramétrage &gt; Collaborateurs). Ces alertes ne bloquent pas l'enregistrement. Cliquez sur une alerte pour afficher les évènements concernés.</p>
+                <div id="pl_anomalies_liste" class="pl-anom-liste"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Fermer</button>
             </div>
         </div>
     </div>
@@ -533,6 +553,7 @@
             urls: {
                 donnees: "{% url 'ajax_planning_equipe_get_donnees' %}",
                 evenements: "{% url 'ajax_planning_equipe_get_evenements' %}",
+                anomalies: "{% url 'ajax_planning_equipe_get_anomalies' %}",
                 suivi_consommations: "{% if perms.core.suivi_consommations %}{% url 'suivi_consommations' %}{% endif %}",
                 enregistrer: "{% url 'ajax_planning_equipe_enregistrer' %}",
                 modele: "{% url 'ajax_planning_equipe_appliquer_modele' %}",

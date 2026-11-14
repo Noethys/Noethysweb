@@ -249,6 +249,7 @@ COMMANDES = {
     "types_postes_collaborateurs_liste": ("briefcase", "a", "Définir les postes occupés par les collaborateurs."),
     "modeles_plannings_collaborateurs_liste": ("calendar", "a", "Créer des plannings types réutilisables."),
     "groupes_collaborateurs_liste": ("users", "a", "Regrouper les collaborateurs."),
+    "profils_reglementaires_collaborateurs_liste": ("balance-scale", "a", "Définir les règles de temps de travail contrôlées dans les plannings."),
 
     # Transports
     "parametrage_transports": ("bus", "a", "Définir compagnies, lignes, arrêts et lieux."),

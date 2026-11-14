@@ -291,6 +291,10 @@
         S.peut_regler_tous = data.peut_regler_tous;
         S.prefs = data.preferences;
         S.aujourdhui = data.aujourdhui;
+        if (Anomalies.idc !== data.collaborateur.id) {
+            Anomalies.idc = data.collaborateur.id; Anomalies.liste = []; Anomalies.par_jour = new Map(); Anomalies.profil = null; Anomalies.charge = false;
+        }
+        Anomalies.rev++;
         if (!S.charge_une_fois) { V.vue = S.prefs.vue || "calendrier"; S.charge_une_fois = true; }
         S.charge = true;
     }
@@ -415,6 +419,7 @@
             derniere_sauvegarde = new Date();
             Statut();
             Traiter_file();
+            Invalider_anomalies();
         }).fail(function(xhr) {
             envoi_en_cours = false;
             File_envoi = [];
@@ -434,6 +439,8 @@
         if (V.selection.has(j)) { classes.push("sel"); }
         if (V.curseur === j) { classes.push("curseur"); }
         if (S.contrats.length && !Contrat_actif(j)) { classes.push("hors"); }
+        var anomalies = Anomalies.par_jour.get(j) || [];
+        if (anomalies.length) { classes.push("anom"); }
         // Répartition par catégorie (toutes catégories visibles)
         var par_cat = new Map(), total = 0;
         evts.forEach(function(evt) { var m = Minutes_dans_jour(evt, j); par_cat.set(evt.cat, (par_cat.get(evt.cat) || 0) + m); total += m; });
@@ -455,6 +462,7 @@
         var titre = Texte_jour_long(j) + (ferie ? " · " + ferie : "") + (vac ? " · " + vac.nom : "");
         evts.forEach(function(evt) { var c = S.cats.get(evt.cat); titre += "\n" + Heure_courte(evt.s) + "–" + Heure_courte(evt.e) + " " + (c ? c.nom : "") + (evt.t ? " (" + evt.t + ")" : ""); });
         if (valeur) { titre += "\nTotal compté : " + Valeur(valeur); }
+        anomalies.forEach(function(a) { titre += "\n⚠ " + a.texte; });
         return {classes: classes, cat: cat, total: total, nb_cats: par_cat.size, pile: pile, texte: texte, titre: titre, ferie: ferie, valeur: valeur, js: js,
                 fond: cat ? Teinte(cat.couleur) : ""};
     }
@@ -757,8 +765,66 @@
         Rendu_vue();
         Rendu_legende();
         Rendu_objectif();
+        Rendu_anomalies();
         Rendu_actions();
         if (V.pop_jour !== null) { Ouvrir_jour(V.pop_jour, null, true); }
+        Demander_anomalies();
+    }
+
+    // ------------------------------------------------------------------ Contrôle réglementaire
+    // Anomalies calculées par le serveur (alertes non bloquantes) sur la période affichée
+    var Anomalies = {liste: [], par_jour: new Map(), profil: null, cle: null, rev: 0, charge: false};
+    function Cle_anomalies() { return S.charge ? [CFG.idcollaborateur, S.periode.debut, S.periode.fin, Anomalies.rev].join("|") : null; }
+    function Invalider_anomalies() { Anomalies.rev++; Demander_anomalies(); }
+    var Demander_anomalies = Debounce(function() {
+        if (!CFG.urls.anomalies || !S.charge || envoi_en_cours || File_envoi.length) { return; }
+        var cle = Cle_anomalies();
+        if (cle === Anomalies.cle) { return; }
+        Anomalies.cle = cle;
+        Ajax(CFG.urls.anomalies, {idcollaborateur: CFG.idcollaborateur, date_debut: S.periode.debut, date_fin: S.periode.fin}).done(function(data) {
+            if (cle !== Anomalies.cle) { return; }
+            Anomalies.liste = (data.anomalies || []).map(function(a) { return $.extend({}, a, {jour: Parse_jour(a.date), jours: a.dates.map(Parse_jour)}); });
+            Anomalies.profil = data.profil;
+            Anomalies.charge = true;
+            Anomalies.par_jour = new Map();
+            Anomalies.liste.forEach(function(a) {
+                a.jours.forEach(function(j) { if (!Anomalies.par_jour.has(j)) { Anomalies.par_jour.set(j, []); } Anomalies.par_jour.get(j).push(a); });
+            });
+            Rendu_vue();
+            Rendu_anomalies();
+            if (V.pop_jour !== null) { Ouvrir_jour(V.pop_jour, null, true); }
+        }).fail(function() { Anomalies.cle = null; });
+    }, 400);
+
+    function Rendu_anomalies() {
+        var liste = Anomalies.liste, n = liste.length;
+        var resume = !Anomalies.charge ? "" : (!Anomalies.profil ? "Aucun profil" : (n ? Pluriel(n, "alerte") : "Conforme"));
+        $("#pi_acc_resume_anomalies").text(resume).toggleClass("pi-anom-resume", n > 0);
+        var html = "";
+        if (Anomalies.charge && !Anomalies.profil) {
+            html = "<p class='pl-muted pl-petit mb-0'>Aucun profil réglementaire ne s'applique à ce collaborateur. Définissez un profil par défaut ou indiquez un profil dans son contrat (Paramétrage &gt; Collaborateurs &gt; Profils réglementaires).</p>";
+        } else if (Anomalies.profil) {
+            html = "<p class='pl-muted pl-petit mb-1' title='" + Echapper(Anomalies.profil.regles.map(function(r) { return r.libelle + " : " + r.valeur; }).join("\n")) + "'>Profil : <strong>" + Echapper(Anomalies.profil.nom) + "</strong></p>";
+            html += n ? liste.map(function(a, index) {
+                return "<button type='button' class='pi-anom-item' data-anomalie='" + index + "'><i class='fa fa-exclamation-triangle' aria-hidden='true'></i><span><b>" + Echapper(Texte_jour_court(a.jour)) + "</b> " + Echapper(a.texte) + "</span></button>";
+            }).join("") : "<p class='pl-petit mb-0'><i class='fa fa-check-circle text-success' aria-hidden='true'></i> Aucune alerte sur la période.</p>";
+        }
+        $("#pi_anomalies").html(html);
+        // Bandeau (mode fiche)
+        $("#pi_bandeau_anomalies").remove();
+        if (CFG.mode === "fiche" && n) {
+            $("#pi_bandeau").append("<button type='button' class='pi-bandeau-carte pi-bandeau-anomalies' id='pi_bandeau_anomalies' title='" + Echapper(liste.map(function(a) { return Texte_jour_court(a.jour) + " : " + a.texte; }).join("\n")) + "'>" +
+                "<small>Contrôle réglementaire</small><strong><i class='fa fa-exclamation-triangle' aria-hidden='true'></i> " + n + "</strong><span>alerte" + (n > 1 ? "s" : "") + " sur la période</span></button>");
+        }
+    }
+    function Aller_anomalie(a) {
+        var j = a.jours.find(Dans_periode);
+        if (j === undefined) { return; }
+        V.curseur = j;
+        Selectionner([j]);
+        var $cellule = $("#pi_corps [data-j='" + j + "']");
+        if ($cellule.length) { $cellule[0].scrollIntoView({block: "nearest", inline: "nearest"}); }
+        Ouvrir_jour(j);
     }
 
     // ------------------------------------------------------------------ Sélection
@@ -894,6 +960,9 @@
             (ferie ? "<span class='pl-badge pl-badge-ferie'>" + Echapper(ferie) + "</span>" : "") +
             (vac ? "<span class='pl-badge pl-badge-vacances'>" + Echapper(vac.nom) + "</span>" : "") +
             (S.contrats.length && !Contrat_actif(j) ? "<span class='pl-badge pl-badge-contrat'>Hors contrat</span>" : "") + "</div>";
+        (Anomalies.par_jour.get(j) || []).forEach(function(a) {
+            html += "<div class='pi-pop-anom'><i class='fa fa-exclamation-triangle' aria-hidden='true'></i><span>" + Echapper(a.texte) + "</span></div>";
+        });
         if (!evts.length) { html += "<p class='pl-muted pl-petit mb-0'>Aucun évènement.</p>"; }
         evts.forEach(function(evt) {
             var c = S.cats.get(evt.cat), multi = Jour_de(evt.e - 1) !== Jour_de(evt.s);
@@ -988,9 +1057,37 @@
         $("#pi_evt_rdebut").val(evt.rs !== null && evt.rs !== undefined ? Heure(evt.rs) : "");
         $("#pi_evt_rfin").val(evt.re !== null && evt.re !== undefined ? Heure(evt.re) : "");
         $("#pi_evt_info").text("").removeClass("erreur");
+        $("#pi_evt_regles").prop("hidden", true).empty().data("signature", null);
         $("#pi_evt_supprimer").prop("hidden", nouveau);
         $("#pi_modal_evt").modal("show");
     }
+    function Lire_evt_modale() {
+        // Evènement saisi dans la fenêtre (sans message d'erreur), pour le contrôle réglementaire avant enregistrement
+        var date = $("#pi_evt_date").val(), debut = Minutes_heure($("#pi_evt_debut").val()), fin = Minutes_heure($("#pi_evt_fin").val());
+        if (!date || debut === null || fin === null || !Edition) { return null; }
+        var j = Parse_jour(date), s = j * 1440 + debut, e = j * 1440 + fin;
+        if ($("#pi_evt_multi").prop("checked")) { if (!$("#pi_evt_date_fin").val()) { return null; } e = Parse_jour($("#pi_evt_date_fin").val()) * 1440 + fin; }
+        else if (fin <= debut) { e += 1440; }
+        if (e <= s) { return null; }
+        var rd = Minutes_heure($("#pi_evt_rdebut").val()), rf = Minutes_heure($("#pi_evt_rfin").val());
+        var rs = rd !== null && rf !== null ? j * 1440 + rd : null, re = rd !== null && rf !== null ? j * 1440 + rf : null;
+        if (re !== null && re <= rs) { re += 1440; }
+        return {id: Edition.id !== null ? Id_actuel(Edition.id) : null, c: S.collab.id, cat: +$("#pi_evt_cat").val(), aff: null, t: "", s: s, e: e, rs: rs, re: re};
+    }
+    var Verifier_evt_modale = Debounce(function() {
+        var $regles = $("#pi_evt_regles"), evt = Lire_evt_modale();
+        if (!CFG.urls.anomalies || !evt || !Modifiable()) { $regles.prop("hidden", true); return; }
+        var simulation = $.extend({id: evt.id !== null && evt.id > 0 ? evt.id : null}, Evt_vers_serveur(evt));
+        var jours = [Jour_de(evt.s), Jour_de(evt.e - 1)], signature = JSON.stringify(simulation);
+        $regles.data("signature", signature);
+        Ajax(CFG.urls.anomalies, {idcollaborateur: CFG.idcollaborateur, date_debut: Iso_jour(jours[0]), date_fin: Iso_jour(jours[1]), simulation: JSON.stringify([simulation])}).done(function(data) {
+            if ($regles.data("signature") !== signature) { return; }
+            var liste = (data.anomalies || []).filter(function(a) { return a.dates.some(function(d) { var j = Parse_jour(d); return j >= jours[0] && j <= jours[1]; }); });
+            $regles.prop("hidden", !liste.length).html(liste.length ? "<i class='fa fa-exclamation-triangle' aria-hidden='true'></i><span><strong>Contrôle réglementaire après enregistrement :</strong> " +
+                liste.map(function(a) { return Echapper(a.texte); }).join(" · ") + ". L'enregistrement reste possible.</span>" : "");
+        });
+    }, 300);
+
     function Valider_evt() {
         var date = $("#pi_evt_date").val(), debut = Minutes_heure($("#pi_evt_debut").val()), fin = Minutes_heure($("#pi_evt_fin").val());
         var $info = $("#pi_evt_info");
@@ -1532,6 +1629,10 @@
         $("#pi_evt_supprimer").on("click", function() { if (Edition && Edition.id !== null) { Supprimer_evt(Edition.id); $("#pi_modal_evt").modal("hide"); } });
         $("#pi_evt_multi").on("change", function() { $("#pi_evt_date_fin").closest(".form-group").prop("hidden", !this.checked); });
         $("#pi_evt_realise_copier").on("click", function() { $("#pi_evt_rdebut").val($("#pi_evt_debut").val()); $("#pi_evt_rfin").val($("#pi_evt_fin").val()); });
+        $("#pi_modal_evt").on("change input", "input, select", Verifier_evt_modale);
+        $("#pi_modal_evt").on("shown.bs.modal", Verifier_evt_modale);
+        $("#pi_anomalies").on("click", "[data-anomalie]", function() { var a = Anomalies.liste[+this.getAttribute("data-anomalie")]; if (a) { Aller_anomalie(a); } });
+        $("#pi_bandeau").on("click", "#pi_bandeau_anomalies", function() { if (Anomalies.liste.length) { Aller_anomalie(Anomalies.liste[0]); } });
         $("#pi_modal_evt").on("keydown", "input", function(e) { if (e.key === "Enter") { Valider_evt(); e.preventDefault(); } });
 
         // Modale période

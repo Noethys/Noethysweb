@@ -59,6 +59,7 @@ class Formulaire(FormulaireBase, ModelForm):
             ),
             Fieldset("Temps de travail",
                 Field("heures_hebdo"),
+                Field("profil_reglementaire"),
             ),
             Fieldset("Objectif de temps de travail",
                 Field("objectif_mode"),

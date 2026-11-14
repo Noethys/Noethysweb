@@ -251,7 +251,9 @@
         function Suivante() {
             if (!tranches.length) {
                 S.chargement_en_cours = false;
+                Invalider_anomalies();
                 Statut();
+                Rafraichir_tout();
                 deferred.resolve();
                 return;
             }
@@ -483,6 +485,7 @@
             Reindexer();
             envoi_en_cours = false;
             derniere_sauvegarde = new Date();
+            Invalider_anomalies();
             Statut();
             Rafraichir_tout();
             Traiter_file();
@@ -753,6 +756,7 @@
         if (cat.type !== "ADDITION") { classes += " neutre"; }
         if (V.selection.has(evt.id)) { classes += " sel"; }
         if (!Est_modifiable(evt.c)) { classes += " lecture"; }
+        if (Anomalies.par_evt.has(evt.id)) { classes += " anomalie"; }
         if (droite <= gauche) {
             // Evènement entièrement hors de la plage affichée
             var cote = e <= M.plage.debut ? "left:2px" : "right:2px";
@@ -806,6 +810,7 @@
         if (V.ligne_courante === ligne.cle) { classes += " courante"; }
         var label, indent = 16 + (ligne.niveau || 0) * 20;
         var verrou = Est_modifiable(ligne.c) ? "" : "<i class='fa fa-lock' title='Lecture seule' aria-label='Lecture seule'></i>";
+        verrou += Html_badge_anomalies(Anomalies.par_ligne.get(ligne.c + "|" + ligne.jour) || [], "data-c='" + ligne.c + "' data-jour='" + ligne.jour + "'", false);
         if (V.mode === "date") {
             label = Html_avatar(ligne.c, M.densite !== "confortable") + "<span class='pl-lbl-txt'><span class='pl-nom'>" + Echapper(collab.libelle) + "</span>" +
                 (M.densite === "confortable" && collab.poste ? "<span class='pl-sous-nom'>" + Echapper(collab.poste) + "</span>" : "") + "</span>" + verrou;
@@ -898,6 +903,8 @@
             if (Math.abs(ecart) >= 1) { html += "<span class='pl-badge " + (ecart > 0 ? "pl-badge-ecart-plus" : "pl-badge-ecart-moins") + "' title='Écart avec le contrat'>" + (ecart > 0 ? "+" : "") + Duree(ecart) + "</span>"; }
         }
         if (ligne.absents) { html += "<span class='pl-badge pl-badge-abs'>" + ligne.absents + " abs.</span>"; }
+        html += V.mode === "date" ? Html_badge_anomalies(Anomalies_visibles(function(a) { return a.jours.indexOf(ligne.jour) >= 0; }), "data-jour='" + ligne.jour + "'", true)
+                                  : Html_badge_anomalies(Anomalies_visibles(function(a) { return a.c === ligne.c; }), "data-c='" + ligne.c + "'", true);
         if (V.mode === "collab") {
             html += "<button type='button' class='pl-mini-btn' data-action='masquer' data-c='" + ligne.c + "' aria-label='Masquer ce collaborateur' title='Masquer ce collaborateur'><i class='fa fa-eye-slash'></i></button>";
         }
@@ -1254,6 +1261,94 @@
         $("#pl_statut").html(html);
     }
 
+    // ------------------------------------------------------------------ Contrôle réglementaire
+    // Anomalies calculées par le serveur (alertes non bloquantes), rechargées quand la période, les collaborateurs ou les données changent
+    var Anomalies = {liste: [], par_ligne: new Map(), par_evt: new Map(), cle: null, rev: 0};
+
+    function Cle_anomalies() {
+        if (!V.dates.length || !V.affiches.length) { return null; }
+        return [V.dates[0], V.dates[V.dates.length - 1], V.affiches.slice().sort(function(a, b) { return a - b; }).join(","), Anomalies.rev].join("|");
+    }
+    var Demander_anomalies = Debounce(function() {
+        if (!CFG.urls.anomalies || S.chargement_en_cours || envoi_en_cours || File_envoi.length) { return; }
+        var cle = Cle_anomalies();
+        if (cle === Anomalies.cle) { return; }
+        Anomalies.cle = cle;
+        if (!cle) { Indexer_anomalies([]); Rafraichir_tout(); return; }
+        Ajax(CFG.urls.anomalies, {date_debut: Iso_jour(V.dates[0]), date_fin: Iso_jour(V.dates[V.dates.length - 1]), collaborateurs: JSON.stringify(V.affiches)}).done(function(data) {
+            if (cle !== Anomalies.cle) { return; }
+            Indexer_anomalies(data.anomalies || []);
+            Rafraichir_tout();
+        }).fail(function() { Anomalies.cle = null; });
+    }, 400);
+    function Invalider_anomalies() { Anomalies.rev++; }
+
+    function Indexer_anomalies(liste) {
+        Anomalies.liste = liste.map(function(a) { return $.extend({}, a, {jour: Parse_jour(a.date), jours: a.dates.map(Parse_jour)}); });
+        Anomalies.par_ligne = new Map(); Anomalies.par_evt = new Map();
+        Anomalies.liste.forEach(function(a) {
+            a.jours.forEach(function(j) {
+                var cle = a.c + "|" + j;
+                if (!Anomalies.par_ligne.has(cle)) { Anomalies.par_ligne.set(cle, []); }
+                Anomalies.par_ligne.get(cle).push(a);
+            });
+            a.evts.forEach(function(id) {
+                if (!Anomalies.par_evt.has(id)) { Anomalies.par_evt.set(id, []); }
+                Anomalies.par_evt.get(id).push(a);
+            });
+        });
+    }
+    function Anomalies_visibles(filtre) {
+        // Anomalies des collaborateurs affichés qui touchent au moins une date affichée
+        var dates = new Set(V.dates), affiches = new Set(V.affiches);
+        return Anomalies.liste.filter(function(a) {
+            return affiches.has(a.c) && !V.masques.has(a.c) && a.jours.some(function(j) { return dates.has(j); }) && (!filtre || filtre(a));
+        });
+    }
+    function Texte_anomalies(liste) { return liste.map(function(a) { return "• " + a.texte; }).join("\n"); }
+    function Html_badge_anomalies(liste, attributs, avec_texte) {
+        if (!liste.length) { return ""; }
+        return "<button type='button' class='pl-anom-badge' data-action='anomalies' " + attributs + " title='" + Echapper(Texte_anomalies(liste)) + "'" +
+            " aria-label='" + Echapper(liste.length + " alerte" + (liste.length > 1 ? "s" : "") + " réglementaire" + (liste.length > 1 ? "s" : "") + " : " + liste.map(function(a) { return a.texte; }).join(" ; ")) + "'>" +
+            "<i class='fa fa-exclamation-triangle' aria-hidden='true'></i>" + liste.length + (avec_texte ? " alerte" + (liste.length > 1 ? "s" : "") : "") + "</button>";
+    }
+    function Rendu_bouton_anomalies() {
+        var n = Anomalies_visibles().length;
+        $("#pl_anomalies_btn").prop("hidden", !n).attr("title", n ? Texte_anomalies(Anomalies_visibles()) : "")
+            .find(".pl-lbl").text(n + " alerte" + (n > 1 ? "s" : "") + " réglementaire" + (n > 1 ? "s" : ""));
+    }
+
+    function Ouvrir_anomalies(c, jour) {
+        var liste = Anomalies_visibles(function(a) { return (c === undefined || a.c === c) && (jour === undefined || a.jours.indexOf(jour) >= 0); });
+        var titre = "Alertes réglementaires" + (c !== undefined ? " · " + S.collabs.get(c).libelle : "") + (jour !== undefined ? " · " + Texte_jour_long(jour) : "");
+        $("#pl_modal_anomalies_titre strong").text(titre);
+        var html = "", courant = null;
+        liste.slice().sort(function(a, b) { return S.collabs.get(a.c).libelle.localeCompare(S.collabs.get(b.c).libelle) || a.jour - b.jour; }).forEach(function(a, index) {
+            if (a.c !== courant) {
+                courant = a.c;
+                html += "<div class='pl-anom-collab'>" + Html_avatar(a.c, true) + "<strong>" + Echapper(S.collabs.get(a.c).libelle) + "</strong></div>";
+            }
+            html += "<button type='button' class='pl-anom-item' data-index='" + Anomalies.liste.indexOf(a) + "'><i class='fa fa-exclamation-triangle' aria-hidden='true'></i>" +
+                "<span><span class='pl-anom-date'>" + Echapper(Texte_jour_court(a.jour)) + "</span>" + Echapper(a.texte) + "</span></button>";
+        });
+        $("#pl_anomalies_liste").html(html || "<p class='pl-muted'>Aucune alerte sur les dates affichées.</p>");
+        $("#pl_modal_anomalies").modal("show");
+    }
+
+    function Aller_anomalie(a) {
+        // Sélectionne les évènements concernés et fait défiler le planning jusqu'à la ligne du collaborateur
+        V.selection = new Set(a.evts.filter(function(id) { return S.evts.has(id); }));
+        var jour = V.dates.indexOf(a.jour) >= 0 ? a.jour : a.jours.find(function(j) { return V.dates.indexOf(j) >= 0; });
+        if (V.vue === "frise") {
+            V.bascules.set(V.mode === "date" ? "d" + jour : "c" + a.c, true);
+            Rafraichir_tout();
+            var ligne = M.lignes.find(function(l) { return l.type === "l" && l.c === a.c && l.jour === jour; });
+            if (ligne) { $scroll[0].scrollTop = Math.max(0, ligne.top - 60); V.ligne_courante = ligne.cle; Rafraichir_tout(); }
+        } else {
+            Rafraichir_tout();
+        }
+    }
+
     function Rafraichir_tout() {
         if (V.vue === "frise") {
             $("#pl_corps").prop("hidden", false);
@@ -1270,6 +1365,8 @@
         Maj_resume_filtres();
         Maj_boutons();
         Statut();
+        Rendu_bouton_anomalies();
+        Demander_anomalies();
     }
 
     function Rafraichir_selection() {
@@ -1901,6 +1998,11 @@
             if (action === "note") { Ouvrir_note(+this.getAttribute("data-jour"), this.getAttribute("data-aff") ? +this.getAttribute("data-aff") : null); }
             if (action === "remplissage") { Ouvrir_detail_remplissage(this); }
             if (action === "masquer") { V.masques.add(+this.getAttribute("data-c")); Apres_changement_collabs(); }
+            if (action === "anomalies") {
+                e.stopPropagation();
+                Ouvrir_anomalies(this.hasAttribute("data-c") ? +this.getAttribute("data-c") : undefined, this.hasAttribute("data-jour") ? +this.getAttribute("data-jour") : undefined);
+                return;
+            }
             if (action === "libelle") {
                 var piste = this.parentNode.querySelector(".pl-piste");
                 if (piste) { var rect = this.getBoundingClientRect(); Context_menu({target: this, clientX: rect.left + 20, clientY: rect.bottom, preventDefault: function() {}}); }
@@ -2315,8 +2417,25 @@
         } else {
             $info.attr("class", "pl-alerte" + (contrat === false ? " attention" : "")).html(texte);
         }
+        Verifier_evt_modale(evt);
         return lu;
     }
+
+    var Verifier_evt_modale = Debounce(function(evt) {
+        // Contrôle réglementaire de l'évènement en cours de saisie, avant son enregistrement
+        var $regles = $("#pl_evt_regles");
+        if (!CFG.urls.anomalies || !Est_modifiable(evt.c)) { $regles.prop("hidden", true); return; }
+        var simulation = $.extend({id: Evt_edite && Evt_edite.id > 0 ? Evt_edite.id : null}, Evt_vers_serveur(evt));
+        var jours = [Jour_de(evt.s), Jour_de(evt.e - 1)];
+        var signature = JSON.stringify(simulation);
+        $regles.data("signature", signature);
+        Ajax(CFG.urls.anomalies, {date_debut: Iso_jour(jours[0]), date_fin: Iso_jour(jours[1]), collaborateurs: JSON.stringify([evt.c]), simulation: JSON.stringify([simulation])}).done(function(data) {
+            if ($regles.data("signature") !== signature) { return; }
+            var liste = (data.anomalies || []).filter(function(a) { return a.dates.some(function(d) { var j = Parse_jour(d); return j >= jours[0] && j <= jours[1]; }); });
+            $regles.prop("hidden", !liste.length).html(liste.length ? "<i class='fa fa-exclamation-triangle' aria-hidden='true'></i><span><strong>Contrôle réglementaire après enregistrement :</strong> " +
+                liste.map(function(a) { return Echapper(a.texte); }).join(" · ") + ". L'enregistrement reste possible.</span>" : "");
+        });
+    }, 300);
 
     function Enregistrer_evt(dupliquer) {
         var lu = Maj_info_evt();
@@ -2870,6 +2989,12 @@
 
     function Brancher_modales() {
         Init_select2_evt();
+        $("#pl_anomalies_btn").on("click", function() { Ouvrir_anomalies(); });
+        $("#pl_anomalies_liste").on("click", ".pl-anom-item", function() {
+            var a = Anomalies.liste[+this.getAttribute("data-index")];
+            $("#pl_modal_anomalies").modal("hide");
+            if (a) { Aller_anomalie(a); }
+        });
         $("#pl_modal_evt").on("change input", "input, select", Debounce(Maj_info_evt, 120));
         $("#pl_evt_enregistrer").on("click", function() { Enregistrer_evt(false); });
         $("#pl_evt_dupliquer").on("click", function() { Enregistrer_evt(true); });

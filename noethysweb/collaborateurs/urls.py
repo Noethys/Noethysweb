@@ -89,6 +89,7 @@ urlpatterns = [
     # AJAX
     path('collaborateurs/planning_equipe/get_donnees', secure_ajax(planning.Get_donnees), name='ajax_planning_equipe_get_donnees'),
     path('collaborateurs/planning_equipe/get_evenements', secure_ajax(planning.Get_evenements), name='ajax_planning_equipe_get_evenements'),
+    path('collaborateurs/planning_equipe/get_anomalies', secure_ajax(planning.Get_anomalies), name='ajax_planning_equipe_get_anomalies'),
     path('collaborateurs/planning_equipe/enregistrer', secure_ajax(planning.Enregistrer), name='ajax_planning_equipe_enregistrer'),
     path('collaborateurs/appliquer_modele_planning/get_liste', secure_ajax(appliquer_modele_planning.Get_liste), name='ajax_modeles_planning_get_liste'),
     path('collaborateurs/appliquer_modele_planning/get_frise', secure_ajax(appliquer_modele_planning.Get_frise), name='ajax_modeles_planning_get_frise'),
@@ -102,6 +103,7 @@ urlpatterns = [
     path('collaborateurs/planning_equipe/exporter_recapitulatif', secure_ajax(planning.Exporter_recapitulatif), name='ajax_planning_equipe_exporter_recapitulatif'),
     path('collaborateurs/planning_equipe/get_lien_ical', secure_ajax(planning.Get_lien_ical), name='ajax_planning_equipe_get_lien_ical'),
     path('collaborateurs/planning_individuel/get_donnees', secure_ajax(planning_individuel.Get_donnees), name='ajax_planning_individuel_get_donnees'),
+    path('collaborateurs/planning_individuel/get_anomalies', secure_ajax(planning_individuel.Get_anomalies), name='ajax_planning_individuel_get_anomalies'),
     path('collaborateurs/planning_individuel/get_objectif', secure_ajax(planning_individuel.Get_objectif), name='ajax_planning_individuel_get_objectif'),
     path('collaborateurs/planning_individuel/memoriser_preferences', secure_ajax(planning_individuel.Memoriser_preferences), name='ajax_planning_individuel_memoriser_preferences'),
     path('collaborateurs/planning_individuel/enregistrer_parametres', secure_ajax(planning_individuel.Enregistrer_parametres), name='ajax_planning_individuel_enregistrer_parametres'),

@@ -13,7 +13,7 @@ from core.views.base import CustomView
 from core.models import Collaborateur, TypeEvenementCollaborateur, ModelePlanningCollaborateur, GroupeCollaborateurs, TypeQualificationCollaborateur, \
                         ContratCollaborateur, NotePlanningCollaborateur, EvenementCollaborateur, AffectationCollaborateur, Mail, Destinataire, DocumentJoint, ModeleEmail
 from core.utils import utils_parametres
-from collaborateurs.utils import utils_planning
+from collaborateurs.utils import utils_planning, utils_controle_reglementaire
 from collaborateurs.utils.utils_planning import Parse_date, PERMISSION, CATEGORIE_PARAMETRES
 from collaborateurs.utils.utils_affectations import Arbre
 
@@ -92,6 +92,22 @@ def Get_evenements(request):
                 "date_debut": str(date_debut), "date_fin": str(date_fin)}
     resultat.update(utils_planning.Get_dates_speciales(date_debut, date_fin))
     return JsonResponse(resultat)
+
+
+@Verifie_permission
+def Get_anomalies(request):
+    """ Contrôle réglementaire : anomalies des collaborateurs sur la période (avec éventuellement des évènements simulés non enregistrés) """
+    date_debut = Parse_date(request.POST.get("date_debut"))
+    date_fin = Parse_date(request.POST.get("date_fin"))
+    if not date_debut or not date_fin or date_fin < date_debut or (date_fin - date_debut).days > 400:
+        return JsonResponse({"erreur": "Période incorrecte"}, status=400)
+    collaborateurs = None if request.POST.get("collaborateurs", "tous") == "tous" else Get_liste_ids(request)
+    simulation = utils_controle_reglementaire.Lire_simulation(request.POST.get("simulation"))
+    if simulation is None:
+        return JsonResponse({"erreur": "Données incorrectes"}, status=400)
+    anomalies = utils_controle_reglementaire.Get_anomalies(date_debut=date_debut, date_fin=date_fin, collaborateurs=collaborateurs,
+                                                           simulation=simulation, supprimes=Get_liste_ids(request, "supprimes"))
+    return JsonResponse({"anomalies": anomalies})
 
 
 @Verifie_permission

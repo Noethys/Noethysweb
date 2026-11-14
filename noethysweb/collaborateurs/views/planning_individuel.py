@@ -14,7 +14,7 @@ from django.db.models import Q
 from core.views.base import CustomView
 from core.models import Collaborateur, TypeEvenementCollaborateur, ModelePlanningCollaborateur, ContratCollaborateur, AjustementObjectifCollaborateur
 from core.utils import utils_parametres, utils_historique
-from collaborateurs.utils import utils_planning, utils_objectif
+from collaborateurs.utils import utils_planning, utils_objectif, utils_controle_reglementaire
 from collaborateurs.utils.utils_planning import Parse_date
 from collaborateurs.utils.utils_affectations import Arbre
 from collaborateurs.views.collaborateur import Onglet
@@ -127,6 +127,28 @@ def Get_donnees(request):
     }
     resultat.update(utils_planning.Get_dates_speciales(periode["debut"], periode["fin"]))
     return JsonResponse(resultat)
+
+
+@Verifie_permission
+def Get_anomalies(request):
+    """ Contrôle réglementaire du collaborateur affiché sur la période """
+    collaborateur = Get_collaborateur(request)
+    if not collaborateur:
+        return JsonResponse({"erreur": "Collaborateur introuvable"}, status=404)
+    date_debut = Parse_date(request.POST.get("date_debut"))
+    date_fin = Parse_date(request.POST.get("date_fin"))
+    if not date_debut or not date_fin or date_fin < date_debut or (date_fin - date_debut).days > 400:
+        return JsonResponse({"erreur": "Période incorrecte"}, status=400)
+    simulation = utils_controle_reglementaire.Lire_simulation(request.POST.get("simulation"))
+    if simulation is None or any(evt["c"] != collaborateur.pk for evt in simulation):
+        return JsonResponse({"erreur": "Données incorrectes"}, status=400)
+    try:
+        supprimes = [int(valeur) for valeur in json.loads(request.POST.get("supprimes", "[]"))]
+    except (TypeError, ValueError):
+        supprimes = []
+    anomalies = utils_controle_reglementaire.Get_anomalies(date_debut=date_debut, date_fin=date_fin, collaborateurs=[collaborateur.pk], simulation=simulation, supprimes=supprimes)
+    profil = utils_controle_reglementaire.Profils(collaborateurs=[collaborateur.pk]).Get(collaborateur.pk, min(max(datetime.date.today(), date_debut), date_fin))
+    return JsonResponse({"anomalies": anomalies, "profil": utils_controle_reglementaire.Get_profil_dict(profil)})
 
 
 @Verifie_permission

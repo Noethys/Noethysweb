@@ -42,6 +42,18 @@
                 </section>
                 <section class="pl-acc-item">
                     <h2 class="pl-acc-titre">
+                        <button type="button" class="pl-acc-tete" id="pi_acc_tete_anomalies" aria-expanded="true" aria-controls="pi_acc_corps_anomalies">
+                            <span class="pl-acc-icone" aria-hidden="true"><i class="fa fa-balance-scale"></i></span>
+                            <span class="pl-acc-textes"><span class="pl-acc-nom">Contrôle réglementaire</span><span class="pl-acc-resume" id="pi_acc_resume_anomalies"></span></span>
+                            <i class="fa fa-chevron-right pl-acc-chevron" aria-hidden="true"></i>
+                        </button>
+                    </h2>
+                    <div class="pl-acc-corps" id="pi_acc_corps_anomalies" role="region" aria-labelledby="pi_acc_tete_anomalies">
+                        <div id="pi_anomalies" class="pi-anom-liste" aria-live="polite"></div>
+                    </div>
+                </section>
+                <section class="pl-acc-item">
+                    <h2 class="pl-acc-titre">
                         <button type="button" class="pl-acc-tete" id="pi_acc_tete_legende" aria-expanded="true" aria-controls="pi_acc_corps_legende">
                             <span class="pl-acc-icone" aria-hidden="true"><i class="fa fa-pie-chart"></i></span>
                             <span class="pl-acc-textes"><span class="pl-acc-nom">Légende et totaux</span><span class="pl-acc-resume" id="pi_acc_resume_legende"></span></span>
@@ -173,6 +185,7 @@
                     </div>
                 </fieldset>
                 <div class="pl-alerte" id="pi_evt_info" role="alert" aria-live="assertive"></div>
+                <div class="pl-alerte pi-evt-regles" id="pi_evt_regles" aria-live="polite" hidden></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-danger mr-auto" id="pi_evt_supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer</button>

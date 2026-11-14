@@ -4350,6 +4350,38 @@ class EvenementCollaborateur(models.Model):
 CHOIX_MODES_OBJECTIF = [("HEBDO", "Hebdomadaire"), ("ANNUALISE", "Annualisé"), ("VOLUME", "Volume fixe"), ("FORFAIT_JOURS", "Forfait jours"), ("AUCUN", "Aucun")]
 
 
+class ProfilReglementaireCollaborateur(models.Model):
+    """ Règles de temps de travail contrôlées dans les plannings (durées exprimées en minutes, valeur vide = règle désactivée) """
+    idprofil = models.AutoField(verbose_name="ID", db_column="IDprofil", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    defaut = models.BooleanField(verbose_name="Profil par défaut", default=False, help_text="Profil appliqué aux collaborateurs dont le contrat n'indique pas de profil réglementaire.")
+    utiliser_realise = models.BooleanField(verbose_name="Contrôler le réalisé", default=False, help_text="Utiliser les horaires réalisés à la place des horaires prévus lorsqu'ils sont saisis.")
+    duree_max_jour = models.PositiveIntegerField(verbose_name="Durée maximale par jour", blank=True, null=True)
+    amplitude_max_jour = models.PositiveIntegerField(verbose_name="Amplitude maximale de la journée", blank=True, null=True)
+    repos_quotidien_min = models.PositiveIntegerField(verbose_name="Repos quotidien minimal", blank=True, null=True)
+    duree_max_semaine = models.PositiveIntegerField(verbose_name="Durée maximale par semaine", blank=True, null=True)
+    moyenne_max_12_semaines = models.PositiveIntegerField(verbose_name="Moyenne hebdomadaire maximale sur 12 semaines", blank=True, null=True)
+    repos_hebdo_min = models.PositiveIntegerField(verbose_name="Repos hebdomadaire minimal", blank=True, null=True)
+    pause_duree = models.PositiveIntegerField(verbose_name="Durée minimale de la pause", blank=True, null=True)
+    pause_apres = models.PositiveIntegerField(verbose_name="Pause obligatoire après", blank=True, null=True)
+    jours_consecutifs_max = models.PositiveSmallIntegerField(verbose_name="Jours travaillés consécutifs maximum", blank=True, null=True)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+
+    class Meta:
+        db_table = "profils_reglementaires_collaborateurs"
+        verbose_name = "profil réglementaire"
+        verbose_name_plural = "profils réglementaires"
+
+    def __str__(self):
+        return self.nom if self.idprofil else "Nouveau profil réglementaire"
+
+    def save(self, *args, **kwargs):
+        super(ProfilReglementaireCollaborateur, self).save(*args, **kwargs)
+        # Un seul profil par défaut
+        if self.defaut:
+            ProfilReglementaireCollaborateur.objects.filter(defaut=True).exclude(pk=self.pk).update(defaut=False)
+
+
 class ContratCollaborateur(models.Model):
     idcontrat = models.AutoField(verbose_name="ID", db_column="IDcontrat", primary_key=True)
     collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", on_delete=models.PROTECT)
@@ -4366,6 +4398,8 @@ class ContratCollaborateur(models.Model):
                                                     "Forfait jours : nombre de jours par période (laissez vide pour la valeur par défaut, en général 218).")
     objectif_periode = models.CharField(verbose_name="Période de référence", max_length=20, blank=True, null=True, choices=[("CIVILE", "Année civile"), ("SCOLAIRE", "Année scolaire")],
                                         help_text="Période affichée par défaut dans le planning individuel pour le suivi de l'objectif. Laissez vide pour utiliser le paramètre général.")
+    profil_reglementaire = models.ForeignKey(ProfilReglementaireCollaborateur, verbose_name="Profil réglementaire", related_name="contrats", on_delete=models.SET_NULL, blank=True, null=True,
+                                             help_text="Règles de temps de travail contrôlées dans les plannings. Laissez vide pour appliquer le profil par défaut.")
 
     class Meta:
         db_table = "contrats_collaborateur"
