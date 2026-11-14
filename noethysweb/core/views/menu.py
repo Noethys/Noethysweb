@@ -155,6 +155,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_collaborateurs.Add(code="modeles_plannings_collaborateurs_liste", titre="Modèles de plannings", icone="file-text-o")
     menu_collaborateurs.Add(code="groupes_collaborateurs_liste", titre="Groupes de collaborateurs", icone="file-text-o")
     menu_collaborateurs.Add(code="profils_reglementaires_collaborateurs_liste", titre="Profils réglementaires", icone="file-text-o")
+    menu_collaborateurs.Add(code="types_conges_collaborateurs_liste", titre="Types de congés", icone="file-text-o")
 
     # Transports
     menu_parametrage_transports = menu_parametrage.Add(titre="Transports")
@@ -512,6 +513,11 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_gestion_evenements_collaborateurs.Add(code="planning_individuel", titre="Planning individuel", icone="file-text-o")
     menu_gestion_evenements_collaborateurs.Add(code="soldes_objectifs_collaborateurs", titre="Soldes et reports des objectifs", icone="file-text-o")
     menu_gestion_evenements_collaborateurs.Add(code="appliquer_modele_planning", titre="Appliquer un modèle de planning", icone="file-text-o")
+
+    # Congés et absences
+    menu_conges_collaborateurs = menu_collaborateurs.Add(titre="Congés et absences")
+    menu_conges_collaborateurs.Add(code="demandes_absences_collaborateurs", titre="Demandes d'absence", icone="file-text-o")
+    menu_conges_collaborateurs.Add(code="compteurs_conges_collaborateurs", titre="Compteurs de congés", icone="file-text-o")
 
     # Analyse
     menu_analyse_collaborateurs = menu_collaborateurs.Add(titre="Analyse")

@@ -1,0 +1,21 @@
+{% load static %}
+{{ conges_config|json_script:"cg_config" }}
+<script>
+    window.CONGES = JSON.parse(document.getElementById("cg_config").textContent);
+    window.CONGES.csrf = "{{ csrf_token }}";
+    window.CONGES.urls = {
+        demandes: "{% url 'ajax_conges_get_demandes' %}",
+        calculer: "{% url 'ajax_conges_calculer' %}",
+        enregistrer: "{% url 'ajax_conges_enregistrer_demande' %}",
+        apercu: "{% url 'ajax_conges_apercu' %}",
+        decider: "{% url 'ajax_conges_decider' %}",
+        annuler: "{% url 'ajax_conges_annuler' %}",
+        compteurs: "{% url 'ajax_conges_get_compteurs' %}",
+        droits: "{% url 'ajax_conges_enregistrer_droits' %}",
+        supprimer_droit: "{% url 'ajax_conges_supprimer_droit' %}",
+        fiche: "{% url 'collaborateur_conges' idcollaborateur=0 %}"
+    };
+</script>
+<script src="{% static 'lib/select2/js/select2.min.js' %}"></script>
+<script src="{% static 'lib/select2/js/i18n/fr.js' %}"></script>
+<script src="{% static 'js/conges.js' %}"></script>

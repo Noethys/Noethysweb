@@ -124,9 +124,21 @@ def Get_donnees(request):
         "peut_regler_tous": utils_planning.Peut_regler_pour_tous(request.user),
         "preferences": Get_preferences(request.user),
         "aujourdhui": str(datetime.date.today()),
+        "conges": Get_conges(request.user, collaborateur),
     }
     resultat.update(utils_planning.Get_dates_speciales(periode["debut"], periode["fin"]))
     return JsonResponse(resultat)
+
+
+def Get_conges(user=None, collaborateur=None):
+    """ Soldes de congés du collaborateur sur les périodes en cours (si l'utilisateur a accès aux congés) """
+    from collaborateurs.utils import utils_conges
+    from core.models import TypeCongeCollaborateur
+    if not utils_conges.Peut_acceder(user):
+        return None
+    types = [type_conge for type_conge in TypeCongeCollaborateur.objects.select_related("categorie").order_by("ordre", "nom") if type_conge.actif]
+    compteurs = utils_conges.Get_compteurs([collaborateur.pk], types)
+    return [{key: compteurs[(collaborateur.pk, type_conge.pk)][key] for key in ("nom", "periode", "droits_txt", "poses_txt", "solde", "solde_txt", "attente", "attente_txt")} for type_conge in types]
 
 
 @Verifie_permission

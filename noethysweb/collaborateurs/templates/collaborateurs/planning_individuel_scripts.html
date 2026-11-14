@@ -5,6 +5,7 @@
         mode: "{{ pi_mode }}",
         idcollaborateur: {{ pi_collaborateur.pk|default:0 }},
         url_fiche: "{% url 'collaborateur_resume' idcollaborateur=0 %}",
+        url_conges: "{% url 'collaborateur_conges' idcollaborateur=0 %}",
         urls: {
             donnees: "{% url 'ajax_planning_individuel_get_donnees' %}",
             anomalies: "{% url 'ajax_planning_individuel_get_anomalies' %}",

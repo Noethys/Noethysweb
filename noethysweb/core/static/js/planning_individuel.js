@@ -291,6 +291,7 @@
         S.peut_regler_tous = data.peut_regler_tous;
         S.prefs = data.preferences;
         S.aujourdhui = data.aujourdhui;
+        S.conges = data.conges || null;
         if (Anomalies.idc !== data.collaborateur.id) {
             Anomalies.idc = data.collaborateur.id; Anomalies.liste = []; Anomalies.par_jour = new Map(); Anomalies.profil = null; Anomalies.charge = false;
         }
@@ -766,9 +767,22 @@
         Rendu_legende();
         Rendu_objectif();
         Rendu_anomalies();
+        Rendu_conges();
         Rendu_actions();
         if (V.pop_jour !== null) { Ouvrir_jour(V.pop_jour, null, true); }
         Demander_anomalies();
+    }
+
+    function Rendu_conges() {
+        // Soldes de congés des périodes en cours (panneau latéral)
+        var liste = S.conges || [];
+        $("#pi_section_conges").prop("hidden", !S.conges || !liste.length);
+        if (!liste.length) { return; }
+        $("#pi_acc_resume_conges").text(liste.map(function(c) { return c.nom + " " + c.solde_txt; }).join(" · "));
+        $("#pi_conges").html(liste.map(function(c) {
+            return "<div class='pi-obj-ligne'><span>" + Echapper(c.nom) + " <small class='pl-muted'>" + Echapper(c.periode) + "</small><br><small class='pl-muted'>Droits " + Echapper(c.droits_txt) +
+                " · posés " + Echapper(c.poses_txt) + (c.attente ? " · en attente " + Echapper(c.attente_txt) : "") + "</small></span><strong" + (c.solde < 0 ? " class='text-danger'" : "") + ">" + Echapper(c.solde_txt) + "</strong></div>";
+        }).join("") + (CFG.url_conges ? "<a class='pl-petit' href='" + CFG.url_conges.replace(/0$/, CFG.idcollaborateur) + "'><i class='fa fa-external-link margin-r-5' aria-hidden='true'></i>Congés et demandes</a>" : ""));
     }
 
     // ------------------------------------------------------------------ Contrôle réglementaire

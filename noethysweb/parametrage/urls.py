@@ -25,7 +25,7 @@ from parametrage.views import organisateur, structures, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
     types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, affectations_collaborateurs, \
-    modeles_plannings_collaborateurs, groupes_collaborateurs, profils_reglementaires_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
+    modeles_plannings_collaborateurs, groupes_collaborateurs, profils_reglementaires_collaborateurs, types_conges_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
     modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes, \
     activites_evenements_categories, activites_import_export, api_particulier, activites_controle_ia, activites_tarifs_formule, activites_evenements_import, modeles_documents_import_export
 
@@ -662,6 +662,12 @@ urlpatterns = [
     path('parametrage/profils_reglementaires_collaborateurs/ajouter', profils_reglementaires_collaborateurs.Ajouter.as_view(), name='profils_reglementaires_collaborateurs_ajouter'),
     path('parametrage/profils_reglementaires_collaborateurs/modifier/<int:pk>', profils_reglementaires_collaborateurs.Modifier.as_view(), name='profils_reglementaires_collaborateurs_modifier'),
     path('parametrage/profils_reglementaires_collaborateurs/supprimer/<int:pk>', profils_reglementaires_collaborateurs.Supprimer.as_view(), name='profils_reglementaires_collaborateurs_supprimer'),
+
+    # Types de congés des collaborateurs
+    path('parametrage/types_conges_collaborateurs/liste', types_conges_collaborateurs.Liste.as_view(), name='types_conges_collaborateurs_liste'),
+    path('parametrage/types_conges_collaborateurs/ajouter', types_conges_collaborateurs.Ajouter.as_view(), name='types_conges_collaborateurs_ajouter'),
+    path('parametrage/types_conges_collaborateurs/modifier/<int:pk>', types_conges_collaborateurs.Modifier.as_view(), name='types_conges_collaborateurs_modifier'),
+    path('parametrage/types_conges_collaborateurs/supprimer/<int:pk>', types_conges_collaborateurs.Supprimer.as_view(), name='types_conges_collaborateurs_supprimer'),
 
     # Transports
     path('parametrage/transports', transports.View.as_view(), name='parametrage_transports'),

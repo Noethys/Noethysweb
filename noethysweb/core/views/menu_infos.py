@@ -250,6 +250,7 @@ COMMANDES = {
     "modeles_plannings_collaborateurs_liste": ("calendar", "a", "Créer des plannings types réutilisables."),
     "groupes_collaborateurs_liste": ("users", "a", "Regrouper les collaborateurs."),
     "profils_reglementaires_collaborateurs_liste": ("balance-scale", "a", "Définir les règles de temps de travail contrôlées dans les plannings."),
+    "types_conges_collaborateurs_liste": ("plane", "a", "Définir les compteurs de congés (congés annuels, RTT, récupération...)."),
 
     # Transports
     "parametrage_transports": ("bus", "a", "Définir compagnies, lignes, arrêts et lieux."),
@@ -526,6 +527,8 @@ COMMANDES = {
     "appliquer_modele_planning": ("calendar-plus-o", "a", "Appliquer un planning type à des collaborateurs."),
     "planning_equipe": ("tasks", "a", "Gérer les plannings des collaborateurs par date ou par collaborateur."),
     "statistiques_evenements_collaborateurs": ("bar-chart", "s", "Tableau de bord du temps de travail, des absences et des objectifs des collaborateurs."),
+    "demandes_absences_collaborateurs": ("plane", "a", "Saisir et valider les demandes de congé et d'absence."),
+    "compteurs_conges_collaborateurs": ("balance-scale", "l", "Consulter les soldes de congés et attribuer les droits."),
 }
 
 
@@ -549,6 +552,8 @@ NOUVEAUTES = {
     "planning_individuel": "2026-11-13",
     "soldes_objectifs_collaborateurs": "2026-11-13",
     "statistiques_evenements_collaborateurs": "2026-11-13",
+    "demandes_absences_collaborateurs": "2026-11-14",
+    "compteurs_conges_collaborateurs": "2026-11-14",
 }
 
 

@@ -1,0 +1,88 @@
+{# Fenêtres partagées des congés : demandes d'absence, traitement, attribution de droits #}
+
+<div class="modal fade" id="cg_modal_demande" tabindex="-1" role="dialog" aria-labelledby="cg_modal_demande_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="cg_modal_demande_titre"><strong>Nouvelle demande d'absence</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col-md-6" id="cg_dem_collab_bloc"><label for="cg_dem_collab">Collaborateur</label><select id="cg_dem_collab" class="form-control"></select></div>
+                    <div class="form-group col-md-6"><label for="cg_dem_type">Type de congé</label><select id="cg_dem_type" class="form-control"></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="cg_dem_debut">Du</label><input type="date" id="cg_dem_debut" class="form-control">
+                        <div class="custom-control custom-checkbox mt-1"><input type="checkbox" class="custom-control-input" id="cg_dem_debut_am"><label class="custom-control-label" for="cg_dem_debut_am">à partir de l'après-midi</label></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="cg_dem_fin">Au</label><input type="date" id="cg_dem_fin" class="form-control">
+                        <div class="custom-control custom-checkbox mt-1"><input type="checkbox" class="custom-control-input" id="cg_dem_fin_matin"><label class="custom-control-label" for="cg_dem_fin_matin">jusqu'au matin inclus</label></div>
+                    </div>
+                </div>
+                <div class="form-row" id="cg_dem_heures_bloc" hidden>
+                    <div class="form-group col-md-6"><label for="cg_dem_heure_debut">De <span class="text-muted">(facultatif, sur une seule journée)</span></label><input type="time" id="cg_dem_heure_debut" class="form-control" step="300"></div>
+                    <div class="form-group col-md-6"><label for="cg_dem_heure_fin">À</label><input type="time" id="cg_dem_heure_fin" class="form-control" step="300"></div>
+                </div>
+                <div class="form-group"><label for="cg_dem_motif">Motif <span class="text-muted">(facultatif)</span></label><textarea id="cg_dem_motif" class="form-control" rows="2"></textarea></div>
+                <div class="cg-calcul" id="cg_dem_calcul" aria-live="polite"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="cg_dem_traiter" hidden><i class="fa fa-gavel margin-r-5"></i>Enregistrer et traiter</button>
+                <button type="button" class="btn btn-primary" id="cg_dem_enregistrer"><i class="fa fa-check margin-r-5"></i>Enregistrer la demande</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cg_modal_traiter" tabindex="-1" role="dialog" aria-labelledby="cg_modal_traiter_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="cg_modal_traiter_titre"><strong>Traiter la demande</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="cg_tr_contenu" aria-live="polite"></div>
+                <div class="form-group mt-3 mb-0"><label for="cg_tr_commentaire">Commentaire <span class="text-muted">(facultatif)</span></label><textarea id="cg_tr_commentaire" class="form-control" rows="2"></textarea></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger mr-auto" id="cg_tr_refuser"><i class="fa fa-ban margin-r-5"></i>Refuser</button>
+                <button type="button" class="btn btn-success" id="cg_tr_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cg_modal_droits" tabindex="-1" role="dialog" aria-labelledby="cg_modal_droits_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="cg_modal_droits_titre"><strong>Attribuer des droits</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col-md-7"><label for="cg_dr_type">Type de congé</label><select id="cg_dr_type" class="form-control"></select></div>
+                    <div class="form-group col-md-5"><label for="cg_dr_annee">Période</label><select id="cg_dr_annee" class="form-control"></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-7"><label for="cg_dr_nature">Nature</label>
+                        <select id="cg_dr_nature" class="form-control"><option value="DROIT">Droits de la période</option><option value="REPORT">Report</option><option value="AJUSTEMENT">Ajustement</option></select></div>
+                    <div class="form-group col-md-5"><label for="cg_dr_valeur">Valeur <span class="text-muted" id="cg_dr_unite"></span></label><input type="text" inputmode="decimal" id="cg_dr_valeur" class="form-control" placeholder="25"></div>
+                </div>
+                <div class="form-group"><label for="cg_dr_motif">Motif <span class="text-muted">(facultatif)</span></label><input type="text" id="cg_dr_motif" class="form-control" maxlength="300"></div>
+                <div class="form-group mb-0" id="cg_dr_collabs_bloc"><label for="cg_dr_collabs">Collaborateurs</label><select id="cg_dr_collabs" class="form-control" multiple></select>
+                    <small class="form-text text-muted">Sélectionnez des collaborateurs ou des groupes. Seuls les collaborateurs dont vous gérez le planning sont proposés.</small></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="cg_dr_enregistrer"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>

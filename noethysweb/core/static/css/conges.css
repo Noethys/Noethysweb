@@ -1,0 +1,32 @@
+/*  Copyright (c) 2019-2026 Ivan LUCAS.
+    Noethysweb, application de gestion multi-activités.
+    Distribué sous licence GNU GPL.
+    Congés et absences des collaborateurs */
+
+.cg-barre {display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;}
+.cg-espace {flex: 1 1 auto;}
+.cg-select {width: auto; display: inline-block;}
+.cg-table td {vertical-align: middle;}
+.cg-saisie {font-size: 12px;}
+.cg-actions .btn {margin-left: 3px;}
+.cg-pastille {display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle;}
+.cg-calcul {font-size: 13px; margin-bottom: 0;}
+.cg-calcul:empty {display: none;}
+.cg-titre-demande {font-weight: 700; margin-bottom: 10px;}
+.cg-ligne {display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(0, 0, 0, 0.06); font-size: 13px;}
+.cg-ligne > i {width: 16px; margin-top: 3px; color: #6c757d; text-align: center;}
+.cg-ligne.attention, .cg-ligne.attention > i {color: #b45309;}
+.cg-ligne details summary {cursor: pointer;}
+.cg-cartes {display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;}
+.cg-carte {border: 1px solid #dee2e6; border-radius: 10px; padding: 10px 12px;}
+.cg-carte-tete {display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px;}
+.cg-chiffres {display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-bottom: 8px;}
+.cg-chiffres div {display: flex; flex-direction: column;}
+.cg-chiffres small {font-size: 11px; color: #6c757d;}
+.cg-chiffres b {font-size: 15px; white-space: nowrap;}
+.cg-droits summary {font-size: 12px; cursor: pointer; color: #3c8dbc;}
+.cg-droits ul {list-style: none; padding: 0; margin: 6px 0 0; font-size: 12px;}
+.cg-droits li {display: flex; justify-content: space-between; align-items: center; padding: 2px 0; border-bottom: 1px solid rgba(0, 0, 0, 0.05);}
+.dark-mode .cg-carte {border-color: #4b545c;}
+.dark-mode .cg-ligne {border-bottom-color: rgba(255, 255, 255, 0.08);}
+.dark-mode .cg-ligne.attention, .dark-mode .cg-ligne.attention > i {color: #fbbf24;}

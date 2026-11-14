@@ -15,4 +15,5 @@ LISTE_ONGLETS = [
     {"code": "evenements", "label": "Evènements", "icone": "fa-calendar", "url": "collaborateur_evenements_liste"},
     {"code": "outils", "label": "Outils", "icone": "fa-wrench", "url": "collaborateur_outils"},
     {"code": "planning", "label": "Planning", "icone": "fa-calendar-o", "url": "collaborateur_planning"},
+    {"code": "conges", "label": "Congés", "icone": "fa-plane", "url": "collaborateur_conges"},
 ]

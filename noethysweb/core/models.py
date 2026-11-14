@@ -4431,6 +4431,88 @@ class AjustementObjectifCollaborateur(models.Model):
         return "Ajustement ID%d" % self.idajustement if self.idajustement else "Nouvel ajustement"
 
 
+CHOIX_MOIS = [(1, "Janvier"), (2, "Février"), (3, "Mars"), (4, "Avril"), (5, "Mai"), (6, "Juin"), (7, "Juillet"), (8, "Août"), (9, "Septembre"), (10, "Octobre"), (11, "Novembre"), (12, "Décembre")]
+
+
+class TypeCongeCollaborateur(models.Model):
+    """ Type de congé ou d'absence suivi par un compteur (congés annuels, RTT, récupération...) """
+    idtype_conge = models.AutoField(verbose_name="ID", db_column="IDtype_conge", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=200)
+    abrege = models.CharField(verbose_name="Abréviation", max_length=20, blank=True, null=True)
+    unite = models.CharField(verbose_name="Unité du compteur", max_length=20, default="JOURS", choices=[("JOURS", "Jours"), ("HEURES", "Heures")],
+                             help_text="Jours : décompte en jours ouvrés (lundi au vendredi hors jours fériés), avec des demi-journées. Heures : décompte des heures d'absence.")
+    categorie = models.ForeignKey(TypeEvenementCollaborateur, verbose_name="Catégorie d'évènement", related_name="types_conges", on_delete=models.PROTECT,
+                                  help_text="Catégorie des évènements créés dans le planning lors de la validation d'une demande. Les évènements de cette catégorie sont décomptés du compteur.")
+    mois_debut = models.PositiveSmallIntegerField(verbose_name="Début de la période de référence", default=1, choices=CHOIX_MOIS,
+                                                  help_text="Mois de début de la période de 12 mois sur laquelle les droits sont attribués (janvier pour l'année civile, juin pour une période de juin à mai...).")
+    solde_negatif = models.BooleanField(verbose_name="Autoriser un solde négatif", default=True, help_text="Si cette case est décochée, une demande qui rend le solde négatif ne peut pas être validée.")
+    actif = models.BooleanField(verbose_name="Actif", default=True, help_text="Seuls les types actifs sont proposés pour les nouvelles demandes.")
+    ordre = models.IntegerField(verbose_name="Ordre", default=0)
+    observations = models.TextField(verbose_name="Observations", blank=True, null=True)
+
+    class Meta:
+        db_table = "types_conges_collaborateurs"
+        verbose_name = "type de congé"
+        verbose_name_plural = "types de congés"
+
+    def __str__(self):
+        return self.nom if self.idtype_conge else "Nouveau type de congé"
+
+
+class DroitCongeCollaborateur(models.Model):
+    """ Droits attribués à un collaborateur pour un type de congé et une période de référence """
+    iddroit = models.AutoField(verbose_name="ID", db_column="IDdroit", primary_key=True)
+    collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", related_name="droits_conges", on_delete=models.CASCADE)
+    type_conge = models.ForeignKey(TypeCongeCollaborateur, verbose_name="Type de congé", related_name="droits", on_delete=models.CASCADE)
+    annee = models.PositiveSmallIntegerField(verbose_name="Période", help_text="Année de début de la période de référence.")
+    valeur = models.DecimalField(verbose_name="Valeur", max_digits=7, decimal_places=2, help_text="Nombre de jours ou d'heures (négatif pour retirer des droits).")
+    nature = models.CharField(verbose_name="Nature", max_length=20, default="DROIT", choices=[("DROIT", "Droits de la période"), ("REPORT", "Report"), ("AJUSTEMENT", "Ajustement")])
+    motif = models.CharField(verbose_name="Motif", max_length=300, blank=True, null=True)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.SET_NULL)
+    date_saisie = models.DateTimeField(verbose_name="Date de saisie", auto_now=True)
+
+    class Meta:
+        db_table = "droits_conges_collaborateurs"
+        verbose_name = "droit à congé"
+        verbose_name_plural = "droits à congé"
+        indexes = [models.Index(fields=["collaborateur", "type_conge", "annee"], name="droit_conge_idx")]
+
+    def __str__(self):
+        return "Droit ID%d" % self.iddroit if self.iddroit else "Nouveau droit"
+
+
+class DemandeAbsenceCollaborateur(models.Model):
+    """ Demande de congé ou d'absence d'un collaborateur """
+    iddemande = models.AutoField(verbose_name="ID", db_column="IDdemande", primary_key=True)
+    collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", related_name="demandes_absences", on_delete=models.CASCADE)
+    type_conge = models.ForeignKey(TypeCongeCollaborateur, verbose_name="Type de congé", related_name="demandes", on_delete=models.PROTECT)
+    date_debut = models.DateField(verbose_name="Date de début")
+    debut_apres_midi = models.BooleanField(verbose_name="Début l'après-midi", default=False)
+    date_fin = models.DateField(verbose_name="Date de fin")
+    fin_matin = models.BooleanField(verbose_name="Fin le matin", default=False)
+    heure_debut = models.TimeField(verbose_name="Heure de début", blank=True, null=True)
+    heure_fin = models.TimeField(verbose_name="Heure de fin", blank=True, null=True)
+    quantite = models.DecimalField(verbose_name="Durée", max_digits=7, decimal_places=2, default=0)
+    etat = models.CharField(verbose_name="Etat", max_length=20, default="ATTENTE", choices=[("ATTENTE", "En attente"), ("VALIDEE", "Validée"), ("REFUSEE", "Refusée"), ("ANNULEE", "Annulée")])
+    motif = models.TextField(verbose_name="Motif", blank=True, null=True)
+    commentaire = models.TextField(verbose_name="Commentaire de la décision", blank=True, null=True)
+    date_demande = models.DateTimeField(verbose_name="Date de la demande", auto_now_add=True)
+    auteur = models.ForeignKey(Utilisateur, verbose_name="Saisie par", related_name="demandes_absences_saisies", blank=True, null=True, on_delete=models.SET_NULL)
+    decideur = models.ForeignKey(Utilisateur, verbose_name="Traitée par", related_name="demandes_absences_traitees", blank=True, null=True, on_delete=models.SET_NULL)
+    date_decision = models.DateTimeField(verbose_name="Date de la décision", blank=True, null=True)
+    evenements = models.ManyToManyField(EvenementCollaborateur, verbose_name="Evènements créés", related_name="demandes_absences", blank=True)
+    evenements_retires = models.TextField(verbose_name="Evènements retirés", blank=True, null=True)
+
+    class Meta:
+        db_table = "demandes_absences_collaborateurs"
+        verbose_name = "demande d'absence"
+        verbose_name_plural = "demandes d'absence"
+        indexes = [models.Index(fields=["etat", "date_debut"], name="demande_abs_etat_idx")]
+
+    def __str__(self):
+        return "Demande ID%d" % self.iddemande if self.iddemande else "Nouvelle demande"
+
+
 class ModelePlanningCollaborateur(models.Model):
     idmodele = models.AutoField(verbose_name="ID", db_column="IDmodele", primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=300)

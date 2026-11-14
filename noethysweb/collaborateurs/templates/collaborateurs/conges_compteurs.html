@@ -1,0 +1,40 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/conges.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+<div class="card card-outline card-lightblue">
+    <div class="card-header"><h3 class="card-title">Compteurs de congés</h3></div>
+    <div class="card-body">
+        <p>Le solde correspond aux droits de la période diminués des absences posées dans le planning (catégorie d'évènements du type de congé). Le solde prévisionnel déduit en plus les demandes en attente. Cliquez sur un collaborateur pour ouvrir l'onglet Congés de sa fiche.</p>
+        <div class="cg-barre">
+            <label for="cg_cp_type" class="sr-only">Type de congé</label><select id="cg_cp_type" class="form-control form-control-sm cg-select"></select>
+            <label for="cg_cp_annee" class="sr-only">Période</label><select id="cg_cp_annee" class="form-control form-control-sm cg-select"></select>
+            <label for="cg_cp_groupe" class="sr-only">Groupe</label><select id="cg_cp_groupe" class="form-control form-control-sm cg-select"><option value="">Tous les collaborateurs</option></select>
+            <span class="cg-espace"></span>
+            <button type="button" class="btn btn-primary btn-sm" id="cg_attribuer"><i class="fa fa-list-ol margin-r-5"></i>Attribuer des droits</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover cg-table">
+                <caption class="sr-only">Compteurs de congés par collaborateur</caption>
+                <thead><tr><th scope="col">Collaborateur</th><th scope="col" class="text-right">Droits</th><th scope="col" class="text-right">Posés</th><th scope="col" class="text-right">Solde</th>
+                    <th scope="col" class="text-right">En attente</th><th scope="col" class="text-right">Solde prévisionnel</th></tr></thead>
+                <tbody id="cg_compteurs"><tr><td colspan="6" class="text-muted">Chargement…</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% include "collaborateurs/conges_modales.html" %}
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    {% include "collaborateurs/conges_scripts.html" %}
+{% endblock scripts %}

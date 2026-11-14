@@ -1,0 +1,26 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block page_titre %}{{ page_titre }}{% endblock page_titre %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/conges.css' %}">
+{% endblock styles %}
+
+{% block contenu_page %}
+<div class="card card-outline card-lightblue">
+    <div class="card-header"><h3 class="card-title">Demandes de congé et d'absence</h3></div>
+    <div class="card-body">
+        <p>Saisissez les demandes des collaborateurs puis traitez-les. La validation crée les absences dans le planning et retire le travail prévu sur ces créneaux ; l'annulation d'une demande validée supprime les absences et peut restaurer le travail retiré. Vous pouvez traiter les demandes des collaborateurs dont vous gérez le planning.</p>
+        {% include "collaborateurs/conges_bloc_demandes.html" %}
+    </div>
+</div>
+{% include "collaborateurs/conges_modales.html" %}
+{% endblock contenu_page %}
+
+{% block scripts %}
+    {{ block.super }}
+    {% include "collaborateurs/conges_scripts.html" %}
+{% endblock scripts %}

@@ -10,7 +10,7 @@ from collaborateurs.views import collaborateur, collaborateur_identite, collabor
                                 collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, \
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
-                                fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel, statistiques_evenements
+                                fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel, statistiques_evenements, conges
 
 
 urlpatterns = [
@@ -61,6 +61,7 @@ urlpatterns = [
 
     path('collaborateurs/collaborateurs/outils/<int:idcollaborateur>', collaborateur_outils.View.as_view(), name='collaborateur_outils'),
     path('collaborateurs/collaborateurs/planning/<int:idcollaborateur>', planning_individuel.Onglet_planning.as_view(), name='collaborateur_planning'),
+    path('collaborateurs/collaborateurs/conges/<int:idcollaborateur>', conges.Onglet_conges.as_view(), name='collaborateur_conges'),
     path('collaborateurs/collaborateurs/historique/<int:idcollaborateur>', collaborateur_historique.Liste.as_view(), name='collaborateur_historique'),
     path('collaborateurs/collaborateurs/emails/ajouter/<int:idcollaborateur>', collaborateur_emails.Ajouter.as_view(), name='collaborateur_emails_ajouter'),
     path('collaborateurs/collaborateurs/sms/ajouter/<int:idcollaborateur>', collaborateur_sms.Ajouter.as_view(), name='collaborateur_sms_ajouter'),
@@ -81,6 +82,8 @@ urlpatterns = [
     path('collaborateurs/planning/ical/<str:token>.ics', planning.Ical, name='planning_equipe_ical'),
     path('collaborateurs/planning_individuel', planning_individuel.View.as_view(), name='planning_individuel'),
     path('collaborateurs/soldes_objectifs', planning_individuel.View_soldes.as_view(), name='soldes_objectifs_collaborateurs'),
+    path('collaborateurs/demandes_absences', conges.View_demandes.as_view(), name='demandes_absences_collaborateurs'),
+    path('collaborateurs/compteurs_conges', conges.View_compteurs.as_view(), name='compteurs_conges_collaborateurs'),
 
     # Analyse
     path('collaborateurs/statistiques_evenements', statistiques_evenements.View.as_view(), name='statistiques_evenements_collaborateurs'),
@@ -117,6 +120,17 @@ urlpatterns = [
     path('collaborateurs/planning_individuel/exporter_excel', secure_ajax(planning_individuel.Exporter_excel), name='ajax_planning_individuel_exporter_excel'),
     path('collaborateurs/planning_individuel/get_lien_ical', secure_ajax(planning_individuel.Get_lien_ical), name='ajax_planning_individuel_get_lien_ical'),
     path('collaborateurs/planning_individuel/reporter_soldes', secure_ajax(planning_individuel.Reporter_soldes), name='ajax_planning_individuel_reporter_soldes'),
+
+    # Congés et absences
+    path('collaborateurs/conges/get_demandes', secure_ajax(conges.Get_demandes), name='ajax_conges_get_demandes'),
+    path('collaborateurs/conges/calculer', secure_ajax(conges.Calculer), name='ajax_conges_calculer'),
+    path('collaborateurs/conges/enregistrer_demande', secure_ajax(conges.Enregistrer_demande), name='ajax_conges_enregistrer_demande'),
+    path('collaborateurs/conges/apercu', secure_ajax(conges.Apercu), name='ajax_conges_apercu'),
+    path('collaborateurs/conges/decider', secure_ajax(conges.Decider), name='ajax_conges_decider'),
+    path('collaborateurs/conges/annuler', secure_ajax(conges.Annuler), name='ajax_conges_annuler'),
+    path('collaborateurs/conges/get_compteurs', secure_ajax(conges.Get_compteurs), name='ajax_conges_get_compteurs'),
+    path('collaborateurs/conges/enregistrer_droits', secure_ajax(conges.Enregistrer_droits), name='ajax_conges_enregistrer_droits'),
+    path('collaborateurs/conges/supprimer_droit', secure_ajax(conges.Supprimer_droit), name='ajax_conges_supprimer_droit'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrat', secure_ajax(collaborateur_voir_contrat.Fusionner), name='ajax_collaborateur_fusionner_contrat'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrats', secure_ajax(fusionner_contrats_word.Fusionner), name='ajax_collaborateur_fusionner_contrats'),
     path('collaborateurs/statistiques_evenements/exporter_excel', secure_ajax(statistiques_evenements.Exporter_excel), name='ajax_statistiques_evenements_collaborateurs_exporter_excel'),

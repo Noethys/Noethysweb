@@ -110,6 +110,9 @@ class Onglet(CustomView):
         if code == "planning":
             # Le planning individuel dépend des permissions du planning (individuel ou général)
             return self.request.user.has_perm("core.planning_individuel") or self.request.user.has_perm("core.planning_equipe")
+        if code == "conges":
+            # Les congés dépendent des permissions des demandes d'absence et des compteurs de congés
+            return self.request.user.has_perm("core.demandes_absences_collaborateurs") or self.request.user.has_perm("core.compteurs_conges_collaborateurs")
         return self.request.user.has_perm("core.collaborateur_%s" % code)
 
     def test_func_page(self):

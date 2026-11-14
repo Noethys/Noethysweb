@@ -1,0 +1,20 @@
+<div class="cg-barre">
+    <button type="button" class="btn btn-success btn-sm" id="cg_nouvelle"><i class="fa fa-plus margin-r-5"></i>Nouvelle demande</button>
+    <div class="btn-group btn-group-sm cg-filtres" role="group" aria-label="Filtrer les demandes">
+        <button type="button" class="btn btn-default active" data-etat="ATTENTE" aria-pressed="true">En attente <span class="badge badge-warning" id="cg_nb_attente"></span></button>
+        <button type="button" class="btn btn-default" data-etat="VALIDEE" aria-pressed="false">Validées</button>
+        <button type="button" class="btn btn-default" data-etat="REFUSEE" aria-pressed="false">Refusées</button>
+        <button type="button" class="btn btn-default" data-etat="ANNULEE" aria-pressed="false">Annulées</button>
+        <button type="button" class="btn btn-default" data-etat="TOUS" aria-pressed="false">Toutes</button>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-sm table-hover cg-table">
+        <caption class="sr-only">Demandes d'absence</caption>
+        <thead><tr>
+            <th scope="col" class="cg-col-collab">Collaborateur</th><th scope="col">Type</th><th scope="col">Période</th><th scope="col" class="text-right">Durée</th>
+            <th scope="col">Etat</th><th scope="col">Saisie</th><th scope="col" class="text-right">Actions</th>
+        </tr></thead>
+        <tbody id="cg_demandes"><tr><td colspan="7" class="text-muted">Chargement…</td></tr></tbody>
+    </table>
+</div>
