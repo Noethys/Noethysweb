@@ -112,11 +112,6 @@
 .pi-evt-txt small {color: var(--pl-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .pi-pop-actions {display: flex; align-items: center; gap: 6px; margin-top: 10px;}
 .pi-pop-actions .pl-espace {flex: 1 1 0;}
-.pi-menu-pose {display: flex; align-items: center; gap: 6px; padding: 2px 6px 2px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;}
-.pi-menu-pose:hover {background: var(--pl-fond-doux);}
-.pi-menu-pose span.nom {flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
-.pl-menu .pi-menu-pose button {width: auto; min-height: 26px; padding: 0 7px; font-size: 11px; border: 1px solid var(--pl-bordure); background: var(--pl-carte);}
-.pl-menu .pi-menu-titre {font-size: 11px; font-weight: 700; color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.03em; padding: 6px 10px 2px;}
 .pl-menu hr {border: 0; border-top: 1px solid var(--pl-bordure-legere); margin: 4px 0;}
 .pl-menu kbd {margin-left: auto; padding: 0; background: transparent; color: var(--pl-muted); font: inherit; font-size: 11px; font-weight: 600; box-shadow: none;}
 .pi-app .pl-menu {position: fixed; z-index: 1065; min-width: 270px; background: var(--pl-carte); border: 1px solid var(--pl-bordure); border-radius: 10px; box-shadow: var(--pl-ombre); padding: 6px; max-height: calc(100vh - 16px); overflow: auto;}

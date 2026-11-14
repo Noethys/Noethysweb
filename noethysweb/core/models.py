@@ -4168,6 +4168,19 @@ class TypePosteCollaborateur(models.Model):
         return self.nom
 
 
+class TypeContratCollaborateur(models.Model):
+    idtype_contrat = models.AutoField(verbose_name="ID", db_column="IDtype_contrat", primary_key=True)
+    nom = models.CharField(verbose_name="Nom", max_length=300)
+
+    class Meta:
+        db_table = "types_contrats_collaborateur"
+        verbose_name = "type de contrat"
+        verbose_name_plural = "types de contrats"
+
+    def __str__(self):
+        return self.nom
+
+
 class TypePieceCollaborateur(models.Model):
     idtype_piece = models.AutoField(verbose_name="ID", db_column='IDtype_piece', primary_key=True)
     nom = models.CharField(verbose_name="Nom", max_length=200)
@@ -4398,6 +4411,7 @@ class ProfilReglementaireCollaborateur(models.Model):
 class ContratCollaborateur(models.Model):
     idcontrat = models.AutoField(verbose_name="ID", db_column="IDcontrat", primary_key=True)
     collaborateur = models.ForeignKey(Collaborateur, verbose_name="Collaborateur", on_delete=models.PROTECT)
+    type_contrat = models.ForeignKey(TypeContratCollaborateur, verbose_name="Type de contrat", on_delete=models.PROTECT, blank=True, null=True)
     type_poste = models.ForeignKey(TypePosteCollaborateur, verbose_name="Poste", on_delete=models.PROTECT)
     date_debut = models.DateField(verbose_name="Date de début")
     date_fin = models.DateField(verbose_name="Date de fin", blank=True, null=True)

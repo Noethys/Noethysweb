@@ -24,7 +24,7 @@ class Liste(Page, crud.Liste):
 
     def get_queryset(self):
         conditions = (Q(collaborateur__groupes__superviseurs=self.request.user) | Q(collaborateur__groupes__superviseurs__isnull=True))
-        return ContratCollaborateur.objects.select_related("collaborateur", "type_poste").filter(conditions, self.Get_filtres("Q"))
+        return ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").filter(conditions, self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -33,14 +33,15 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idcontrat", "date_debut", "date_fin", "collaborateur", "type_poste"]
+        filtres = ["idcontrat", "date_debut", "date_fin", "collaborateur", "type_contrat", "type_poste"]
         collaborateur = columns.TextColumn("Collaborateur", sources=["collaborateur__nom", "collaborateur__prenom"], processor='Get_nom_collaborateur')
+        type_contrat = columns.TextColumn("Type de contrat", sources=["type_contrat__nom"], processor='Get_nom_type_contrat')
         type_poste = columns.TextColumn("Poste", sources=["type_poste__nom"], processor='Get_nom_type_poste')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idcontrat", "date_debut", "date_fin", "collaborateur", "type_poste"]
+            columns = ["idcontrat", "date_debut", "date_fin", "collaborateur", "type_contrat", "type_poste"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -53,6 +54,9 @@ class Liste(Page, crud.Liste):
 
         def Get_nom_collaborateur(self, instance, *args, **kwargs):
             return instance.collaborateur.Get_nom()
+
+        def Get_nom_type_contrat(self, instance, *args, **kwargs):
+            return instance.type_contrat.nom if instance.type_contrat else ""
 
         def Get_nom_type_poste(self, instance, *args, **kwargs):
             return instance.type_poste.nom

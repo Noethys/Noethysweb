@@ -52,7 +52,7 @@ class Liste(Page, crud.Liste):
     template_name = "collaborateurs/collaborateur_liste.html"
 
     def get_queryset(self):
-        return ContratCollaborateur.objects.select_related("type_poste").filter(Q(collaborateur_id=self.Get_idcollaborateur()) & self.Get_filtres("Q"))
+        return ContratCollaborateur.objects.select_related("type_contrat", "type_poste").filter(Q(collaborateur_id=self.Get_idcollaborateur()) & self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -62,17 +62,21 @@ class Liste(Page, crud.Liste):
 
     class datatable_class(MyDatatable):
         filtres = ["idcontrat", "date_debut", "date_fin"]
+        nom_type_contrat = columns.TextColumn("Type de contrat", sources=["type_contrat__nom"], processor='Get_nom_type_contrat')
         nom_type_poste = columns.TextColumn("Poste", sources=["type_poste__nom"], processor='Get_nom_type_poste')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idcontrat", "date_debut", "date_fin", "nom_type_poste", "actions"]
+            columns = ["idcontrat", "date_debut", "date_fin", "nom_type_contrat", "nom_type_poste", "actions"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
             }
             ordering = ['date_debut']
+
+        def Get_nom_type_contrat(self, instance, *args, **kwargs):
+            return instance.type_contrat.nom if instance.type_contrat else ""
 
         def Get_nom_type_poste(self, instance, *args, **kwargs):
             return instance.type_poste.nom

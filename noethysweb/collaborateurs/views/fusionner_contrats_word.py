@@ -19,7 +19,7 @@ def Fusionner(request):
     contrats_coches = json.loads(request.POST.get("contrats_coches"))
     if not contrats_coches:
         return JsonResponse({"erreur": "Veuillez cocher au moins un contrat dans la liste"}, status=401)
-    contrats = ContratCollaborateur.objects.select_related("collaborateur", "type_poste").filter(pk__in=contrats_coches)
+    contrats = ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").filter(pk__in=contrats_coches)
 
     # Récupération du modèle de document
     form_modele = Form_modele(json.loads(request.POST.get("form_modele")))
@@ -34,6 +34,7 @@ def Fusionner(request):
             "{CONTRAT_ID}": contrat.pk,
             "{CONTRAT_DATE_DEBUT}": utils_dates.ConvertDateToFR(contrat.date_debut),
             "{CONTRAT_DATE_FIN}": utils_dates.ConvertDateToFR(contrat.date_fin),
+            "{CONTRAT_TYPE_CONTRAT}": contrat.type_contrat.nom if contrat.type_contrat else "",
             "{CONTRAT_TYPE_POSTE}": contrat.type_poste.nom,
             "{CONTRAT_OBSERVATIONS}": contrat.observations,
             "{COLLABORATEUR_ID}": contrat.collaborateur_id,
@@ -79,7 +80,7 @@ class Liste(Page, crud.Liste):
     model = ContratCollaborateur
 
     def get_queryset(self):
-        return ContratCollaborateur.objects.select_related("collaborateur", "type_poste").filter(self.Get_filtres("Q"))
+        return ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").filter(self.Get_filtres("Q"))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -97,15 +98,16 @@ class Liste(Page, crud.Liste):
         return context
 
     class datatable_class(MyDatatable):
-        filtres = ["idcontrat", "date_debut", "date_fin", "collaborateur", "type_poste"]
+        filtres = ["idcontrat", "date_debut", "date_fin", "collaborateur", "type_contrat", "type_poste"]
         check = columns.CheckBoxSelectColumn(label="")
         collaborateur = columns.TextColumn("Collaborateur", sources=["collaborateur__nom", "collaborateur__prenom"], processor='Get_nom_collaborateur')
+        type_contrat = columns.TextColumn("Type de contrat", sources=["type_contrat__nom"], processor='Get_nom_type_contrat')
         type_poste = columns.TextColumn("Poste", sources=["type_poste__nom"], processor='Get_nom_type_poste')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["check", "idcontrat", "date_debut", "date_fin", "collaborateur", "type_poste"]
+            columns = ["check", "idcontrat", "date_debut", "date_fin", "collaborateur", "type_contrat", "type_poste"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -118,6 +120,9 @@ class Liste(Page, crud.Liste):
 
         def Get_nom_collaborateur(self, instance, *args, **kwargs):
             return instance.collaborateur.Get_nom()
+
+        def Get_nom_type_contrat(self, instance, *args, **kwargs):
+            return instance.type_contrat.nom if instance.type_contrat else ""
 
         def Get_nom_type_poste(self, instance, *args, **kwargs):
             return instance.type_poste.nom

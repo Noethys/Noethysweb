@@ -22,13 +22,14 @@ def Fusionner(request):
     modele_document = form_modele.cleaned_data["modele"]
 
     # Récupération du contrat
-    contrat = ContratCollaborateur.objects.select_related("collaborateur", "type_poste").get(pk=int(request.POST["idcontrat"]))
+    contrat = ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").get(pk=int(request.POST["idcontrat"]))
 
     # Création des valeurs à fusionner
     valeurs = {
         "{CONTRAT_ID}": contrat.pk,
         "{CONTRAT_DATE_DEBUT}": utils_dates.ConvertDateToFR(contrat.date_debut),
         "{CONTRAT_DATE_FIN}": utils_dates.ConvertDateToFR(contrat.date_fin),
+        "{CONTRAT_TYPE_CONTRAT}": contrat.type_contrat.nom if contrat.type_contrat else "",
         "{CONTRAT_TYPE_POSTE}": contrat.type_poste.nom,
         "{CONTRAT_OBSERVATIONS}": contrat.observations,
         "{COLLABORATEUR_ID}": contrat.collaborateur_id,

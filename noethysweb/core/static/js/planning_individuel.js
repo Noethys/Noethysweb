@@ -200,6 +200,7 @@
     function Initialiser_select2() {
         Proteger_echap("pi_modal_evt");
         Proteger_echap("pi_modal_periode");
+        Proteger_echap("pi_modal_lot");
         Select2($("#pi_collab_select"), {placeholder: "Rechercher un collaborateur…"});
     }
 
@@ -903,13 +904,6 @@
         return [[Minutes_heure(prefs.journee_debut), Minutes_heure(prefs.journee_fin)]];
     }
 
-    function Poser_rapidement(cat, mode) {
-        var jours = Jours_selectionnes();
-        if (!jours.length) { return; }
-        Creer_periode({jours: jours, cat: cat, plages: Plages_mode(mode), ignorer_non_ouvres: jours.length > 1 && S.prefs.ignorer_non_ouvres !== false, conflit: "remplacer",
-                       libelle: "Poser " + {journee: "la journée", matin: "le matin", am: "l'après-midi"}[mode]});
-    }
-
     function Effacer_selection() {
         var changements = [], vus = new Set();
         Jours_selectionnes().forEach(function(j) {
@@ -1023,14 +1017,7 @@
         if (Modifiable()) {
             html += "<button type='button' role='menuitem' data-menu='ajouter'><i class='fa fa-plus' aria-hidden='true'></i>Ajouter un évènement…</button>" +
                     "<button type='button' role='menuitem' data-menu='periode'><i class='fa fa-calendar-plus-o' aria-hidden='true'></i>Créer une période…</button>" +
-                    "<div class='pl-menu-sep'></div><div class='pi-menu-titre'>Poser rapidement</div>";
-            S.catOrdre.forEach(function(id) {
-                var c = S.cats.get(id);
-                html += "<div class='pi-menu-pose'><span class='pl-pastille' style='background:" + Echapper(c.couleur) + "'></span><span class='nom'>" + Echapper(c.nom) + "</span>" +
-                        "<button type='button' role='menuitem' data-poser='" + id + "' data-mode='journee' aria-label='Poser " + Echapper(c.nom) + " : journée'>Journée</button>" +
-                        "<button type='button' role='menuitem' data-poser='" + id + "' data-mode='matin' aria-label='Poser " + Echapper(c.nom) + " : matin'>Matin</button>" +
-                        "<button type='button' role='menuitem' data-poser='" + id + "' data-mode='am' aria-label='Poser " + Echapper(c.nom) + " : après-midi'>A-midi</button></div>";
-            });
+                    "<button type='button' role='menuitem' data-menu='lot'" + (Evts_selection().length ? "" : " disabled") + "><i class='fa fa-pencil-square-o' aria-hidden='true'></i>Modifier par lot…</button>";
             html += "<div class='pl-menu-sep'></div>" +
                     (S.modeles.length ? "<button type='button' role='menuitem' data-menu='modele'><i class='fa fa-th-list' aria-hidden='true'></i>Appliquer un modèle…</button>" : "") +
                     "<button type='button' role='menuitem' data-menu='copier'><i class='fa fa-copy' aria-hidden='true'></i>Copier<span class='pl-kbd'>Ctrl+C</span></button>" +
@@ -1202,6 +1189,69 @@
         }
         S.dernier_cat = o.cat;
         if (Creer_periode(o)) { $("#pi_modal_periode").modal("hide"); }
+    }
+
+    // ------------------------------------------------------------------ Modale "Modifier par lot"
+    function Evts_selection() {
+        // Evènements visibles des jours sélectionnés (un évènement sur plusieurs jours n'est compté qu'une fois)
+        var evts = [], vus = new Set();
+        Jours_selectionnes().forEach(function(j) {
+            Evts_du_jour(j).forEach(function(evt) {
+                if (vus.has(evt.id)) { return; }
+                vus.add(evt.id);
+                evts.push(evt);
+            });
+        });
+        return evts;
+    }
+    function Ouvrir_lot() {
+        if (!Modifiable()) { return; }
+        Fermer_menu();
+        var evts = Evts_selection(), jours = Jours_selectionnes();
+        if (!evts.length) { toastr.info("Aucun évènement à modifier sur la sélection"); return; }
+        var portee = jours.length === 1 ? Texte_jour_long(jours[0]) : "Du " + Texte_jour_court(jours[0]) + " au " + Texte_jour_court(jours[jours.length - 1]);
+        $("#pi_lot_intro").text(portee + " · " + Pluriel(evts.length, "évènement sélectionné", "évènements sélectionnés") + ". Seuls les champs renseignés seront modifiés.");
+        Select2_categorie($("#pi_lot_cat").html("<option value=''>— Inchangée —</option>" + Options_categories(null)), $("#pi_modal_lot"));
+        Select2_affectation($("#pi_lot_aff").html("<option value='inchange'>— Inchangée —</option>" + Options_affectations(null)), $("#pi_modal_lot"));
+        $("#pi_lot_titre_coche").prop("checked", false);
+        $("#pi_lot_titre").val("").prop("disabled", true);
+        $("#pi_lot_decalage, #pi_lot_duree").val(0);
+        $("#pi_modal_lot").modal("show");
+    }
+    function Valider_lot() {
+        var cat = $("#pi_lot_cat").val() ? +$("#pi_lot_cat").val() : null;
+        var aff = $("#pi_lot_aff").val();
+        var titre = $("#pi_lot_titre_coche").is(":checked") ? $.trim($("#pi_lot_titre").val()) : null;
+        var decalage = Math.round(+$("#pi_lot_decalage").val() || 0), duree = Math.round(+$("#pi_lot_duree").val() || 0);
+        var evts = Evts_selection();
+        var modifies = new Set(evts.map(function(evt) { return evt.id; }));
+        var apres_liste = evts.map(function(evt) {
+            var copie = Copie_evt(evt);
+            if (cat) { copie.cat = cat; }
+            if (aff !== "inchange") { copie.aff = aff ? +aff : null; }
+            if (titre !== null) { copie.t = titre; }
+            if (decalage) { copie.s += decalage; copie.e += decalage; copie.rs = null; copie.re = null; }
+            if (duree) { copie.e += duree; }
+            return copie;
+        });
+        // Les évènements qui créeraient un chevauchement ou des horaires incorrects sont ignorés
+        var changements = [], ignores = 0;
+        apres_liste.forEach(function(apres, i) {
+            var avant = evts[i];
+            if (apres.e <= apres.s || apres.e - apres.s > 31 * 1440 || !Dans_periode(Jour_de(apres.s))) { ignores++; return; }
+            var conflit = Conflits(apres, modifies).length || apres_liste.some(function(autre, k) {
+                return k !== i && apres.s < autre.e && apres.e > autre.s && !Peut_chevaucher(apres, autre);
+            });
+            if (conflit) { ignores++; return; }
+            if (JSON.stringify(Evt_vers_serveur(avant)) === JSON.stringify(Evt_vers_serveur(apres))) { return; }
+            changements.push({type: "update", id: avant.id, avant: Copie_evt(avant), apres: apres});
+        });
+        $("#pi_modal_lot").modal("hide");
+        if (cat) { S.dernier_cat = cat; }
+        Valider("Modifier par lot", changements);
+        if (changements.length) { toastr.success(Pluriel(changements.length, "évènement modifié", "évènements modifiés") + ". Ctrl+Z pour annuler."); }
+        else if (!ignores) { toastr.info("Aucune modification à appliquer"); }
+        if (ignores) { toastr.warning(Pluriel(ignores, "évènement non modifié", "évènements non modifiés") + " (chevauchement ou horaires incorrects)"); }
     }
 
     // ------------------------------------------------------------------ Modale "Appliquer un modèle"
@@ -1612,12 +1662,12 @@
             if (action === "jour") { Ouvrir_jour(jours[0]); }
             if (action === "ajouter") { Ouvrir_evt(null, jours[0]); }
             if (action === "periode") { Ouvrir_periode(); }
+            if (action === "lot") { Ouvrir_lot(); }
             if (action === "modele") { Ouvrir_modele(); }
             if (action === "copier") { Copier_selection(); }
             if (action === "coller") { Coller(); }
             if (action === "effacer") { Effacer_selection(); }
         });
-        $("#pi_menu").on("click", "[data-poser]", function() { Fermer_menu(); Poser_rapidement(+$(this).data("poser"), $(this).data("mode")); });
         $("#pi_menu").on("keydown", function(e) {
             var $items = $(this).find("button:not(:disabled)"), index = $items.index(document.activeElement);
             if (e.key === "ArrowDown") { $items.eq((index + 1) % $items.length).trigger("focus"); e.preventDefault(); }
@@ -1653,6 +1703,10 @@
         $("#pi_modal_periode").on("change input", "input, select", Maj_apercu_periode);
         $("#pi_modal_periode").on("focus", ".pl-inline-champs input", function() { $(this).closest(".pl-radio-carte").find("input[type=radio]").prop("checked", true); Maj_apercu_periode(); });
         $("#pi_per_valider").on("click", Valider_periode);
+
+        // Modale "Modifier par lot"
+        $("#pi_lot_titre_coche").on("change", function() { $("#pi_lot_titre").prop("disabled", !this.checked); if (this.checked) { $("#pi_lot_titre").trigger("focus"); } });
+        $("#pi_lot_valider").on("click", Valider_lot);
 
         // Modale modèle
         $("#pi_mod_btn_apercu").on("click", function() { Envoyer_modele(true); });

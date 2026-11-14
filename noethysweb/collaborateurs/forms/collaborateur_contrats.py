@@ -24,10 +24,12 @@ class Formulaire(FormulaireBase, ModelForm):
         widgets = {
             "date_debut": DatePickerWidget(),
             "date_fin": DatePickerWidget(),
+            "type_contrat": Select2Widget({"data-minimum-input-length": 0}),
             "type_poste": Select2Widget({"data-minimum-input-length": 0}),
             "observations": forms.Textarea(attrs={'rows': 3}),
         }
         help_texts = {
+            "type_contrat": "Sélectionnez le type de contrat dans la liste proposée.",
             "type_poste": "Sélectionnez le type de poste dans la liste proposée.",
             "date_debut": "Saisissez la date de début du contrat.",
             "date_fin": "Saisissez la date de fin de contrat ou laissez vide s'il s'agit d'un contrat à durée indéterminée."
@@ -50,6 +52,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Commandes(annuler_url="{{ view.get_success_url }}"),
             Hidden('collaborateur', value=idcollaborateur),
             Fieldset("Généralités",
+                Field("type_contrat"),
                 Field("type_poste"),
                 Field("observations"),
             ),

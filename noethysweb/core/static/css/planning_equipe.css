@@ -545,3 +545,15 @@
 .dark-mode .pl-anom-badge, .dark-mode .pl-btn-anomalies {background: #4a3a12; border-color: #6b5316; color: #fde68a;}
 .dark-mode .pl-anom-item:hover {background: #3d3420;}
 @media print {.pl-anom-badge, .pl-btn-anomalies {display: none !important;}}
+
+/* Sélection au lasso */
+.pl-lasso {position: absolute; z-index: 5; border: 1px dashed var(--pl-primaire); background: rgba(var(--pl-primaire-rgb), 0.08); border-radius: 3px; pointer-events: none;}
+
+/* Barre d'actions de la sélection (même apparence que celle du planning individuel) */
+.pl-barre-sel {position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 20; width: max-content; max-width: calc(100% - 16px); display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    padding: 6px 8px 6px 12px; background: #0f172a; color: #fff; border-radius: 10px; box-shadow: 0 12px 28px rgba(15, 23, 42, 0.35); font-size: 13px; font-weight: 600;}
+.pl-barre-sel[hidden] {display: none;}
+.pl-barre-sel .pl-btn {height: 30px; background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.28); font-size: 12px;}
+.pl-barre-sel .pl-btn:hover:not(:disabled) {background: rgba(255, 255, 255, 0.12);}
+.pl-barre-sel .pl-btn.pl-btn-primaire {background: var(--pl-primaire); border-color: var(--pl-primaire);}
+.pl-barre-sel .pl-btn:focus-visible {outline-color: #fff;}

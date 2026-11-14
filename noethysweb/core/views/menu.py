@@ -147,6 +147,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
 
     # Collaborateurs
     menu_collaborateurs = menu_parametrage.Add(titre="Collaborateurs")
+    menu_collaborateurs.Add(code="types_contrats_collaborateurs_liste", titre="Types de contrats", icone="file-text-o")
     menu_collaborateurs.Add(code="types_qualifications_collaborateurs_liste", titre="Types de qualifications", icone="file-text-o")
     menu_collaborateurs.Add(code="types_pieces_collaborateurs_liste", titre="Types de pièces", icone="file-text-o")
     menu_collaborateurs.Add(code="types_evenements_collaborateurs_liste", titre="Catégories d'évènements", icone="file-text-o")

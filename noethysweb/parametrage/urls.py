@@ -24,7 +24,7 @@ from parametrage.views import organisateur, structures, \
     types_consentements, unites_consentements, articles, images_articles, albums, images_fond, portail_documents, portail_parametres_renseignements, \
     configurations_sms, perceptions, modeles_prelevements, taches_recurrentes, modeles_prestations, \
     categories_produits, produits, produits_tarifs, postes_analytiques, comptes_comptables, categories_comptables, tiers, budgets, \
-    types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, affectations_collaborateurs, \
+    types_contrats_collaborateurs, types_qualifications_collaborateurs, types_pieces_collaborateurs, types_evenements_collaborateurs, types_postes_collaborateurs, affectations_collaborateurs, \
     modeles_plannings_collaborateurs, groupes_collaborateurs, profils_reglementaires_collaborateurs, types_conges_collaborateurs, modeles_aides, transports, compagnies, lignes, lieux, arrets, modeles_impressions, \
     modeles_word, releves_bancaires, sondages, achats_categories, achats_fournisseurs, modeles_commandes, modeles_commandes_colonnes, \
     activites_evenements_categories, activites_import_export, api_particulier, activites_controle_ia, activites_tarifs_formule, activites_evenements_import, modeles_documents_import_export
@@ -617,6 +617,12 @@ urlpatterns = [
     path('parametrage/produits/tarifs_produits/ajouter/<int:idproduit>', produits_tarifs.Ajouter.as_view(), name='produits_tarifs_ajouter'),
     path('parametrage/produits/tarifs_produits/modifier/<int:idproduit>/<int:pk>', produits_tarifs.Modifier.as_view(), name='produits_tarifs_modifier'),
     path('parametrage/produits/tarifs_produits/supprimer/<int:idproduit>/<int:pk>', produits_tarifs.Supprimer.as_view(), name='produits_tarifs_supprimer'),
+
+    # Types de contrats collaborateurs
+    path('parametrage/types_contrats_collaborateurs/liste', types_contrats_collaborateurs.Liste.as_view(), name='types_contrats_collaborateurs_liste'),
+    path('parametrage/types_contrats_collaborateurs/ajouter', types_contrats_collaborateurs.Ajouter.as_view(), name='types_contrats_collaborateurs_ajouter'),
+    path('parametrage/types_contrats_collaborateurs/modifier/<int:pk>', types_contrats_collaborateurs.Modifier.as_view(), name='types_contrats_collaborateurs_modifier'),
+    path('parametrage/types_contrats_collaborateurs/supprimer/<int:pk>', types_contrats_collaborateurs.Supprimer.as_view(), name='types_contrats_collaborateurs_supprimer'),
 
     # Types de qualifications collaborateurs
     path('parametrage/types_qualifications_collaborateurs/liste', types_qualifications_collaborateurs.Liste.as_view(), name='types_qualifications_collaborateurs_liste'),

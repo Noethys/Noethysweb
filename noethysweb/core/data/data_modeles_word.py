@@ -32,6 +32,7 @@ MOTSCLES = {
         ("{CONTRAT_ID}", "ID du contrat"),
         ("{CONTRAT_DATE_DEBUT}", "Date de début du contrat"),
         ("{CONTRAT_DATE_FIN}", "Date de fin du contrat"),
+        ("{CONTRAT_TYPE_CONTRAT}", "Type de contrat"),
         ("{CONTRAT_TYPE_POSTE}", "Type de poste du contrat"),
         ("{CONTRAT_OBSERVATIONS}", "Observations du contrat"),
         ("{COLLABORATEUR_ID}", "ID du collaborateur"),

@@ -255,6 +255,34 @@
     </div>
 </div>
 
+<div class="modal fade pi-modal" id="pi_modal_lot" tabindex="-1" role="dialog" aria-labelledby="pi_modal_lot_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pi_modal_lot_titre"><strong>Modifier par lot</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p id="pi_lot_intro"></p>
+                <div class="form-group"><label for="pi_lot_cat">Catégorie</label><select id="pi_lot_cat" class="form-control"></select></div>
+                <div class="form-group"><label for="pi_lot_aff">Affectation</label><select id="pi_lot_aff" class="form-control"></select></div>
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="pi_lot_titre_coche"><label class="custom-control-label" for="pi_lot_titre_coche">Remplacer le titre par :</label></div>
+                    <label for="pi_lot_titre" class="sr-only">Nouveau titre</label><input type="text" id="pi_lot_titre" class="form-control mt-1" maxlength="200" disabled>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-6"><label for="pi_lot_decalage">Décaler de (minutes)</label><input type="number" id="pi_lot_decalage" class="form-control" step="5" value="0"></div>
+                    <div class="form-group col-6"><label for="pi_lot_duree">Modifier la durée de (minutes)</label><input type="number" id="pi_lot_duree" class="form-control" step="5" value="0"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="pi_lot_valider"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade pi-modal" id="pi_modal_modele" tabindex="-1" role="dialog" aria-labelledby="pi_modal_modele_titre">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">

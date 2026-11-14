@@ -1213,11 +1213,25 @@
     }
 
     // ------------------------------------------------------------------ Barre d'outils, bannière et statut
+    function Maj_barre_selection(modifiable) {
+        // Barre d'actions flottante, affichée dès que 2 évènements ou plus sont sélectionnés
+        var $barre = $("#pl_barre_sel");
+        var evts = Array.from(V.selection).map(function(id) { return S.evts.get(id); }).filter(Boolean);
+        var visible = V.vue === "frise" && evts.length >= 2;
+        $barre.prop("hidden", !visible);
+        if (!visible) { return; }
+        var total = 0;
+        evts.forEach(function(evt) { total += Signe_categorie(evt.cat) * (evt.e - evt.s); });
+        $("#pl_bs_texte").text(evts.length + " sélectionnés · " + Duree(total));
+        $barre.find("[data-sel-action]").not("[data-sel-action='vider']").prop("disabled", !modifiable);
+    }
+
     function Maj_boutons() {
         $("#pl_annuler").prop("disabled", !Pile.annuler.length).attr("title", Pile.annuler.length ? "Annuler : " + Pile.annuler[Pile.annuler.length - 1].libelle + " (Ctrl+Z)" : "Annuler (Ctrl+Z)");
         $("#pl_retablir").prop("disabled", !Pile.retablir.length).attr("title", Pile.retablir.length ? "Rétablir : " + Pile.retablir[Pile.retablir.length - 1].libelle + " (Ctrl+Y)" : "Rétablir (Ctrl+Y)");
         var selection_modifiable = Array.from(V.selection).some(function(id) { var evt = S.evts.get(id); return evt && Est_modifiable(evt.c); });
         $("#pl_dupliquer, #pl_supprimer").prop("disabled", !selection_modifiable);
+        Maj_barre_selection(selection_modifiable);
         $("[data-mode]").each(function() { $(this).attr("aria-pressed", String($(this).data("mode") === V.mode)); });
         $("[data-vue]").each(function() { $(this).attr("aria-pressed", String($(this).data("vue") === V.vue)); });
         $("[data-densite]").each(function() { $(this).attr("aria-pressed", String($(this).data("densite") === V.densite)); });
@@ -1594,6 +1608,14 @@
         var barre = e.target.closest(".pl-barre");
         var piste_el = e.target.closest(".pl-piste");
         Fermer_menu();
+        if (e.shiftKey && !barre && e.pointerType !== "touch" && $canvas[0].contains(e.target) && !e.target.closest("button, a, input, select")) {
+            // Maj + glisser sur le fond : sélection au lasso (Ctrl en plus pour ajouter à la sélection existante)
+            var origine = Coord_canvas(e);
+            D = {type: "lasso", x0: e.clientX, y0: e.clientY, cx0: origine.x, cy0: origine.y, demarre: false, pointer: e.pointerId,
+                 ajouter: e.ctrlKey || e.metaKey, base: new Set(V.selection)};
+            e.preventDefault();
+            return;
+        }
         if (barre && !barre.classList.contains("fantome")) {
             var id = +barre.getAttribute("data-id"), evt = S.evts.get(id);
             if (!evt) { return; }
@@ -1644,11 +1666,69 @@
             try { $scroll[0].setPointerCapture(D.pointer); } catch (err) {}
             Demarrer_glisser();
         }
-        if (D.type === "creation") { Glisser_creation(e); } else { Glisser_barre(e); }
+        if (D.type === "lasso") { Glisser_lasso(e); }
+        else if (D.type === "creation") { Glisser_creation(e); } else { Glisser_barre(e); }
+    }
+
+    // ------------------------------------------------------------------ Sélection au lasso
+    function Coord_canvas(e) {
+        var r = $canvas[0].getBoundingClientRect();
+        return {x: e.clientX - r.left, y: e.clientY - r.top};
+    }
+    function Geometrie_pistes() {
+        // Position horizontale des pistes dans le canvas (identique pour toutes les lignes)
+        var piste = $canvas[0].querySelector(".pl-l-ligne .pl-piste, .pl-piste");
+        if (!piste) { return null; }
+        var rp = piste.getBoundingClientRect(), rc = $canvas[0].getBoundingClientRect();
+        return {gauche: rp.left - rc.left, largeur: rp.width};
+    }
+    function Ids_lasso(x1, y1, x2, y2) {
+        // Evènements affichés touchés par le rectangle (coordonnées du canvas)
+        var geo = Geometrie_pistes(), ids = [];
+        if (!geo || geo.largeur <= 0) { return ids; }
+        var duree = M.plage.fin - M.plage.debut;
+        var minute = function(x) { return M.plage.debut + Math.min(1, Math.max(0, (x - geo.gauche) / geo.largeur)) * duree; };
+        var m1 = minute(Math.min(x1, x2)), m2 = minute(Math.max(x1, x2));
+        var haut = Math.min(y1, y2), bas = Math.max(y1, y2);
+        if (m2 <= m1) { return ids; }
+        M.lignes.forEach(function(ligne) {
+            if (ligne.type !== "l" || ligne.top + ligne.h <= haut || ligne.top >= bas) { return; }
+            var debut_jour = ligne.jour * 1440;
+            Ligne_evts(ligne).forEach(function(evt) {
+                var s = Math.max(evt.s - debut_jour, M.plage.debut), f = Math.min(evt.e - debut_jour, M.plage.fin);
+                if (f > s && s < m2 && f > m1 && ids.indexOf(evt.id) < 0) { ids.push(evt.id); }
+            });
+        });
+        return ids;
+    }
+    function Glisser_lasso(e) {
+        // Défilement automatique près des bords haut et bas
+        var rs = $scroll[0].getBoundingClientRect();
+        if (e.clientY > rs.bottom - 30) { $scroll[0].scrollTop += 20; } else if (e.clientY < rs.top + 50) { $scroll[0].scrollTop -= 20; }
+        var p = Coord_canvas(e);
+        // L'origine est conservée dans le repère du canvas : elle reste juste si la zone défile
+        var gauche = Math.min(D.cx0, p.x), haut = Math.min(D.cy0, p.y);
+        D.element.style.left = gauche + "px";
+        D.element.style.top = haut + "px";
+        D.element.style.width = Math.abs(p.x - D.cx0) + "px";
+        D.element.style.height = Math.abs(p.y - D.cy0) + "px";
+        D.ids = Ids_lasso(D.cx0, D.cy0, p.x, p.y);
+        var apercu = new Set(D.ajouter ? D.base : []);
+        D.ids.forEach(function(id) { apercu.add(id); });
+        $canvas.find(".pl-barre:not(.fantome)").each(function() { this.classList.toggle("sel", apercu.has(+this.getAttribute("data-id"))); });
+        Afficher_tooltip("<strong>" + apercu.size + " sélectionné" + (apercu.size > 1 ? "s" : "") + "</strong>" + (D.ajouter ? "<br><span class='pl-tt-muted'>Ajout à la sélection</span>" : ""), e.clientX, e.clientY);
     }
 
     function Demarrer_glisser() {
         Masquer_tooltip();
+        if (D.type === "lasso") {
+            D.element = document.createElement("div");
+            D.element.className = "pl-lasso";
+            $canvas[0].appendChild(D.element);
+            D.ids = [];
+            document.body.style.cursor = "crosshair";
+            return;
+        }
         if (D.type === "creation") {
             D.fantome = Fantome(D.piste.element, D.piste.ligne.jour * 1440 + D.debut, D.piste.ligne.jour * 1440 + D.debut + V.pas, "creation", D.piste.ligne.jour);
             return;
@@ -1756,6 +1836,12 @@
         document.body.style.cursor = "";
         Masquer_tooltip();
         try { $scroll[0].releasePointerCapture(etat.pointer); } catch (err) {}
+        if (etat.type === "lasso") {
+            if (etat.element) { etat.element.remove(); }
+            if (!etat.demarre) { if (!etat.ajouter && V.selection.size) { Selectionner([], false); } return; }
+            Selectionner(etat.ajouter ? Array.from(etat.base).concat(etat.ids) : etat.ids, false);
+            return;
+        }
         if (!etat.demarre) {
             if (etat.type === "barre" && etat.clic_simple_multi && !e.shiftKey) { Selectionner([etat.id], false); }
             Rafraichir_ligne_courante();
@@ -1830,6 +1916,38 @@
         Ouvrir_menu(x, y, html);
     }
 
+    function Evts_affiches() {
+        // Tous les évènements affichés dans la frise (filtres et collaborateurs masqués pris en compte)
+        var ids = new Set(), liste = [];
+        M.lignes.forEach(function(ligne) {
+            if (ligne.type !== "l") { return; }
+            Ligne_evts(ligne).forEach(function(evt) { if (!ids.has(evt.id)) { ids.add(evt.id); liste.push(evt); } });
+        });
+        return liste;
+    }
+    function Menu_similaires(ref, x, y, minute) {
+        Menu_actions = {};
+        var affiches = Evts_affiches();
+        var html = Item("retour", "arrow-left", "Retour", "", {action: function() { Menu_barres(x, y, minute); return false; }}) + SEP;
+        function Critere(code, icone, libelle, test) {
+            var ids = affiches.filter(test).map(function(evt) { return evt.id; });
+            html += Item(code, icone, libelle, String(ids.length), {desactive: !ids.length, action: function(e) {
+                var ajouter = e && (e.ctrlKey || e.metaKey);
+                Selectionner(ajouter ? Array.from(V.selection).concat(ids) : ids, false);
+                toastr.info(V.selection.size + " évènement" + (V.selection.size > 1 ? "s sélectionnés" : " sélectionné"));
+            }});
+        }
+        var cat = S.cats.get(ref.cat), collab = S.collabs.get(ref.c);
+        Critere("sim_cat", "square", "Même catégorie : <span class='pl-pastille' style='background:" + Echapper(cat ? cat.couleur : "#94a3b8") + "'></span> " + Echapper(cat ? cat.nom : ""),
+            function(evt) { return evt.cat === ref.cat; });
+        Critere("sim_aff", "sitemap", ref.aff ? "Même affectation : " + Echapper(Chemin_aff(ref.aff)) : "Sans affectation",
+            function(evt) { return (evt.aff || null) === (ref.aff || null); });
+        Critere("sim_collab", "user", "Même collaborateur : " + Echapper(collab ? collab.libelle : ""), function(evt) { return evt.c === ref.c; });
+        if (ref.t) { Critere("sim_titre", "font", "Même titre : " + Echapper(ref.t), function(evt) { return evt.t === ref.t; }); }
+        html += SEP + "<div class='pl-menu-titre' style='font-weight:500'>Ctrl+clic : ajouter à la sélection</div>";
+        Ouvrir_menu(x, y, html);
+    }
+
     var Minute_menu = null;
     function Menu_barres(x, y, minute) {
         Menu_actions = {};
@@ -1869,6 +1987,8 @@
             var ligne = M.lignes.find(function(l) { return l.cle === V.ligne_courante; });
             if (ligne) { Selectionner_ligne(ligne); }
         }});
+        var ref = S.evts.get(V.ref_menu) && V.selection.has(V.ref_menu) ? S.evts.get(V.ref_menu) : evts[0];
+        html += Item("similaires", "magic", "Sélectionner les similaires", "▸", {action: function() { setTimeout(function() { Menu_similaires(ref, x, y, minute); }, 0); return false; }});
         if (modifiables.length) { html += SEP + Item("supprimer", "trash", "Supprimer", "Suppr", {danger: true, action: Supprimer_selection}); }
         Ouvrir_menu(x, y, html);
     }
@@ -1928,6 +2048,7 @@
         if (barre && !barre.classList.contains("fantome")) {
             var id = +barre.getAttribute("data-id");
             if (!V.selection.has(id)) { Selectionner([id], false); }
+            V.ref_menu = id;
             Menu_barres(e.clientX, e.clientY, minute);
         } else {
             Menu_piste(e.clientX, e.clientY, infos.ligne, minute);
@@ -1972,7 +2093,7 @@
         $scroll[0].addEventListener("pointerdown", Pointer_down);
         document.addEventListener("pointermove", Pointer_move);
         document.addEventListener("pointerup", Pointer_up);
-        document.addEventListener("pointercancel", function() { if (D) { D = null; Masquer_tooltip(); Rafraichir_tout(); } });
+        document.addEventListener("pointercancel", function() { if (D) { if (D.element) { D.element.remove(); } D = null; document.body.style.cursor = ""; Masquer_tooltip(); Rafraichir_tout(); } });
         $scroll.on("pointerleave", function() { if (!D) { Masquer_tooltip(); } });
         $scroll[0].addEventListener("contextmenu", Context_menu);
         $scroll.on("dblclick", function(e) {
@@ -2021,10 +2142,20 @@
             $scroll[0].scrollTop = (e.clientY - rect.top) / rect.height * M.hauteur - $scroll[0].clientHeight / 2;
         });
 
+        // Barre d'actions de la sélection
+        $("#pl_barre_sel").on("click", "[data-sel-action]", function() {
+            var action = this.getAttribute("data-sel-action");
+            if (action === "lot") { Ouvrir_lot(); }
+            if (action === "dupliquer") { Dupliquer_selection(); }
+            if (action === "realise") { Realise_egal_prevu(Selection_modifiable()); }
+            if (action === "supprimer") { Supprimer_selection(); }
+            if (action === "vider") { Selectionner([], false); }
+        });
+
         // Menu contextuel
-        $menu.on("click", "button[data-menu]", function() {
+        $menu.on("click", "button[data-menu]", function(e) {
             var action = Menu_actions[this.getAttribute("data-menu")];
-            var garder = action ? action() === false : false;
+            var garder = action ? action(e) === false : false;
             if (!garder) { Fermer_menu(); }
         });
         $menu.on("keydown", function(e) {

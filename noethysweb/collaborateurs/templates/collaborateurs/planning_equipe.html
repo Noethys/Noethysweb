@@ -207,12 +207,20 @@
                         <div class="pl-vide" id="pl_vide" hidden></div>
                     </div>
                     <nav class="pl-minimap" id="pl_minimap" aria-label="Navigation rapide" hidden></nav>
+                    <div class="pl-barre-sel" id="pl_barre_sel" role="toolbar" aria-label="Actions sur la sélection" hidden>
+                        <span id="pl_bs_texte" aria-live="polite"></span>
+                        <button type="button" class="pl-btn pl-btn-primaire" data-sel-action="lot"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>Modifier par lot</button>
+                        <button type="button" class="pl-btn" data-sel-action="dupliquer" title="Ctrl+D"><i class="fa fa-clone" aria-hidden="true"></i>Dupliquer</button>
+                        <button type="button" class="pl-btn" data-sel-action="realise"><i class="fa fa-check-square-o" aria-hidden="true"></i>Réalisé = prévu</button>
+                        <button type="button" class="pl-btn pl-btn-icone" data-sel-action="supprimer" aria-label="Supprimer les évènements sélectionnés (Suppr)" title="Supprimer (Suppr)"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                        <button type="button" class="pl-btn pl-btn-icone" data-sel-action="vider" aria-label="Désélectionner (Échap)" title="Désélectionner (Échap)"><i class="fa fa-times" aria-hidden="true"></i></button>
+                    </div>
                 </div>
                 <div class="pl-synthese" id="pl_synthese" hidden></div>
 
                 <div class="pl-footer">
                     <span id="pl_statut" aria-live="polite"></span>
-                    <span class="pl-muted pl-aide-courte">Glisser sur une ligne vide : créer · Double-clic : modifier · Clic droit : actions · Alt + glisser : copier</span>
+                    <span class="pl-muted pl-aide-courte">Glisser sur une ligne vide : créer · Double-clic : modifier · Clic droit : actions · Alt + glisser : copier · Maj + glisser : sélectionner</span>
                 </div>
             </div>
         </main>
