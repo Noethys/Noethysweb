@@ -242,6 +242,7 @@ COMMANDES = {
     "produits_liste": ("cube", "a", "Gérer les produits proposés à la location."),
 
     # Collaborateurs
+    "types_contrats_collaborateurs_liste": ("file-text-o", "a", "Définir les types de contrats (CDI, CDD, titulaire...)."),
     "types_qualifications_collaborateurs_liste": ("certificate", "a", "Définir les qualifications (BAFA, PSC1...)."),
     "types_pieces_collaborateurs_liste": ("file-o", "a", "Définir les pièces demandées aux collaborateurs."),
     "types_evenements_collaborateurs_liste": ("calendar-check-o", "a", "Définir les catégories d'évènements du planning."),
