@@ -5,7 +5,7 @@
 
 """ Espace collaborateur du portail : planning, congés, documents et heures réalisées du collaborateur connecté """
 
-import datetime, json, os, logging
+import datetime, json, os, logging, html
 logger = logging.getLogger(__name__)
 from django.views.generic import TemplateView
 from django.http import JsonResponse, FileResponse, Http404, HttpResponseRedirect
@@ -26,6 +26,8 @@ from portail.views.menu import Menu
 
 EXTENSIONS_PIECES = ("pdf", "jpg", "jpeg", "png", "heic", "webp")
 TAILLE_MAX_PIECE = 10 * 1024 * 1024
+MAX_PIECES_PAR_JOUR = 20        # Limite anti-abus : pièces transmises par un collaborateur sur 24 heures
+MAX_DEMANDES_ATTENTE = 20       # Limite anti-abus : demandes d'absence en attente simultanément
 JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
 
@@ -41,6 +43,15 @@ def Get_menu_collaborateur(parametres_portail={}, user=None):
         menu.Add(code="portail_collaborateur_heures", titre="Mes heures réalisées", icone="bi bi-stopwatch", toujours_afficher=True)
     menu.Add(code="portail_mentions", titre="Mentions légales", icone="bi bi-info-circle", toujours_afficher=parametres_portail.get("mentions_afficher_page", False))
     return menu
+
+
+def Lire_date_reference(texte=""):
+    """ Date de référence demandée dans l'URL, bornée à une plage raisonnable (évite les dépassements de capacité sur les dates extrêmes) """
+    try:
+        date = datetime.datetime.strptime(texte or "", "%Y-%m-%d").date()
+    except ValueError:
+        return datetime.date.today()
+    return date if 2000 <= date.year <= 2100 else datetime.date.today()
 
 
 def Texte_jour(date=None):
@@ -185,10 +196,7 @@ class Planning(CustomViewCollaborateur, TemplateView):
         context["page_titre"] = "Mon planning"
         collaborateur = context["collaborateur"]
         vue = "mois" if self.request.GET.get("vue") == "mois" else "semaine"
-        try:
-            reference = datetime.datetime.strptime(self.request.GET.get("date", ""), "%Y-%m-%d").date()
-        except ValueError:
-            reference = datetime.date.today()
+        reference = Lire_date_reference(self.request.GET.get("date", ""))
         liste_feries = list(Ferie.objects.all())
         if vue == "semaine":
             debut = reference - datetime.timedelta(days=reference.weekday())
@@ -271,6 +279,8 @@ class Documents(CustomViewCollaborateur, TemplateView):
             erreur = "Type de fichier non autorisé (formats acceptés : %s)" % ", ".join(EXTENSIONS_PIECES)
         elif fichier.size > TAILLE_MAX_PIECE:
             erreur = "Le fichier est trop volumineux (10 Mo maximum)"
+        elif PieceCollaborateur.objects.filter(collaborateur=collaborateur, statut="ATTENTE", date_depot__gte=datetime.datetime.now() - datetime.timedelta(days=1)).count() >= MAX_PIECES_PAR_JOUR:
+            erreur = "Vous avez déjà transmis de nombreux documents aujourd'hui. Merci de réessayer demain ou de contacter votre responsable."
         type_piece = TypePieceCollaborateur.objects.filter(pk=request.POST.get("type_piece") or 0).first()
         try:
             date_debut = datetime.datetime.strptime(request.POST.get("date_debut", ""), "%Y-%m-%d").date() if request.POST.get("date_debut") else datetime.date.today()
@@ -289,7 +299,7 @@ class Documents(CustomViewCollaborateur, TemplateView):
         utils_historique.Ajouter(titre="Transmission d'une pièce", detail=type_piece.nom if type_piece else titre, utilisateur=request.user, collaborateur=collaborateur.pk,
                                  objet="Pièce", idobjet=piece.pk, classe="PieceCollaborateur", portail=True)
         utils_espace_collaborateur.Notifier_a_verifier(collaborateur, "Document à vérifier pour %s" % collaborateur.Get_nom(),
-                                                       "a transmis un document (%s) depuis son espace collaborateur." % (type_piece.nom if type_piece else titre),
+                                                       "a transmis un document (%s) depuis son espace collaborateur." % html.escape(type_piece.nom if type_piece else titre),
                                                        "onglet Pièces de sa fiche", request=request)
         messages.add_message(request, messages.SUCCESS, "Votre document a été transmis. Il sera vérifié par votre responsable.")
         return HttpResponseRedirect(reverse("portail_collaborateur_documents"))
@@ -339,10 +349,7 @@ class Planning_pdf(CustomViewCollaborateur, TemplateView):
     def get(self, request, *args, **kwargs):
         from collaborateurs.utils import utils_impression_planning, utils_objectif
         collaborateur = self.get_collaborateur()
-        try:
-            reference = datetime.datetime.strptime(request.GET.get("date", ""), "%Y-%m-%d").date()
-        except ValueError:
-            reference = datetime.date.today()
+        reference = Lire_date_reference(request.GET.get("date", ""))
         if request.GET.get("vue") == "mois":
             debut = reference.replace(day=1)
             fin = (debut + datetime.timedelta(days=32)).replace(day=1) - datetime.timedelta(days=1)
@@ -417,6 +424,8 @@ def Ajax_envoyer_demande(request):
     if not utils_espace_collaborateur.Get_parametres().get("collaborateurs_demandes_absences", True):
         return JsonResponse({"erreur": "Les demandes d'absence ne sont pas ouvertes"}, status=403)
     collaborateur = request.user.collaborateur
+    if DemandeAbsenceCollaborateur.objects.filter(collaborateur=collaborateur, etat="ATTENTE").count() >= MAX_DEMANDES_ATTENTE:
+        return JsonResponse({"erreur": "Vous avez déjà %d demandes en attente : patientez jusqu'à leur traitement" % MAX_DEMANDES_ATTENTE}, status=400)
     try:
         demande = Lire_demande_portail(request, collaborateur)
     except utils_conges.Erreur as erreur:
@@ -452,9 +461,12 @@ def Ajax_enregistrer_heures(request):
     aujourdhui = datetime.date.today()
     limite = aujourdhui - datetime.timedelta(days=aujourdhui.weekday() + 7)
     try:
-        lignes = json.loads(request.POST.get("heures", "[]"))[:200]
+        lignes = json.loads(request.POST.get("heures", "[]"))
     except ValueError:
         return JsonResponse({"erreur": "Données incorrectes"}, status=400)
+    if not isinstance(lignes, list) or not all(isinstance(ligne, dict) for ligne in lignes):
+        return JsonResponse({"erreur": "Données incorrectes"}, status=400)
+    lignes = lignes[:200]
     enregistrees, ecarts = 0, 0
     with transaction.atomic():
         for ligne in lignes:
@@ -463,8 +475,8 @@ def Ajax_enregistrer_heures(request):
             if not evenement:
                 continue
             try:
-                debut = Lire_heure_jour(ligne.get("rd", ""), evenement.date_debut.date())
-                fin = Lire_heure_jour(ligne.get("rf", ""), evenement.date_debut.date())
+                debut = Lire_heure_jour(str(ligne.get("rd", "")), evenement.date_debut.date())
+                fin = Lire_heure_jour(str(ligne.get("rf", "")), evenement.date_debut.date())
             except ValueError:
                 return JsonResponse({"erreur": "Horaire incorrect le %s" % evenement.date_debut.strftime("%d/%m")}, status=400)
             if fin <= debut:

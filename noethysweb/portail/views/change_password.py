@@ -41,7 +41,7 @@ class MyPasswordChangeView(ClassCommuneLogin, auth_views.PasswordChangeView):
         if utilisateur.categorie == "collaborateur":
             utilisateur.collaborateur.internet_mdp = "*****"
             utilisateur.collaborateur.save()
-        else:
+        elif utilisateur.categorie == "famille":
             utilisateur.famille.internet_mdp = "*****"
             utilisateur.famille.save()
 

@@ -5,7 +5,7 @@
 
 """ Espace collaborateur du portail : comptes d'accès, emails de notification et récapitulatif des changements de planning """
 
-import logging, datetime, random, re, json, html
+import logging, datetime, random, secrets, re, json, html
 logger = logging.getLogger(__name__)
 from django.conf import settings
 from django.db.models import Q
@@ -29,7 +29,7 @@ def Espace_actif(parametres=None):
 def Creation_identifiant(collaborateur=None):
     """ Identifiant aléatoire préfixé par C (les familles utilisent F) et unique parmi tous les comptes """
     for _ in range(50):
-        identifiant = "C%d" % (int("".join(random.choice("123456789") for x in range(4)) + "0" * 5) + collaborateur.pk)
+        identifiant = "C%d" % (int("".join(secrets.choice("123456789") for x in range(4)) + "0" * 5) + collaborateur.pk)
         if not Utilisateur.objects.filter(username__iexact=identifiant).exists():
             return identifiant
     raise Exception("Impossible de générer un identifiant unique")

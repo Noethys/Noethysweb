@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.urls import reverse
 from portail.utils import utils_secquest
 
@@ -13,15 +13,17 @@ class CustomMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        response = self.get_response(request)
+        # Oblige la famille ou le collaborateur à changer son mot de passe provisoire.
+        # Le contrôle est fait AVANT l'exécution de la vue : sinon une action (requête AJAX, envoi de formulaire...)
+        # serait exécutée avec le mot de passe provisoire avant que la réponse ne soit remplacée par la redirection.
+        user = getattr(request, "user", None)
+        if user is not None and user.is_authenticated and user.categorie in ("famille", "collaborateur") and user.force_reset_password:
+            url_change_password = reverse("password_change")
+            if request.path not in (url_change_password, reverse("portail_deconnexion")):
+                if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                    return HttpResponseForbidden()
+                if user.categorie == "famille":
+                    utils_secquest.Generation_secquest(famille=user.famille)
+                return HttpResponseRedirect(url_change_password)
 
-        # Oblige la famille à changer son mot de passe
-        url_change_password = reverse("password_change")
-        if request.user.is_authenticated and request.user.categorie == "famille" and request.user.force_reset_password and request.path != url_change_password:
-            utils_secquest.Generation_secquest(famille=request.user.famille)
-            return HttpResponseRedirect(url_change_password)
-        if request.user.is_authenticated and request.user.categorie == "collaborateur" and request.user.force_reset_password and request.path != url_change_password \
-                and request.path != reverse("portail_deconnexion"):
-            return HttpResponseRedirect(url_change_password)
-
-        return response
+        return self.get_response(request)

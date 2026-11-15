@@ -69,7 +69,7 @@
             if (d.etat === "ATTENTE") { actions += "<button type='button' class='btn btn-default btn-xs' data-action='modifier' data-id='" + d.id + "' title='Modifier la demande' aria-label='Modifier la demande'><i class='fa fa-pencil'></i></button>"; }
             if ((d.etat === "ATTENTE" || d.etat === "VALIDEE") && d.traitable) { actions += "<button type='button' class='btn btn-default btn-xs' data-action='annuler' data-id='" + d.id + "' title='Annuler la demande' aria-label='Annuler la demande'><i class='fa fa-times'></i></button>"; }
             var details = [d.motif ? "Motif : " + d.motif : "", d.commentaire ? "Décision : " + d.commentaire : ""].filter(Boolean);
-            var saisie = d.date_demande + (d.auteur ? " par " + d.auteur : "") + (d.decideur ? "<br><small class='text-muted'>" + Echapper((d.etat === "REFUSEE" ? "Refusée" : (d.etat === "ANNULEE" ? "Traitée" : "Validée")) + " le " + d.date_decision + " par " + d.decideur) + "</small>" : "");
+            var saisie = Echapper(d.date_demande + (d.auteur ? " par " + d.auteur : "")) + (d.decideur ? "<br><small class='text-muted'>" + Echapper((d.etat === "REFUSEE" ? "Refusée" : (d.etat === "ANNULEE" ? "Traitée" : "Validée")) + " le " + d.date_decision + " par " + d.decideur) + "</small>" : "");
             return "<tr>" +
                 (fiche ? "" : "<td><a href='" + C.urls.fiche.replace(/0$/, d.c) + "'>" + Echapper(d.collaborateur) + "</a></td>") +
                 "<td><span class='cg-pastille' style='background:" + Echapper(d.couleur) + "' aria-hidden='true'></span>" + Echapper(d.type_nom) + "</td>" +

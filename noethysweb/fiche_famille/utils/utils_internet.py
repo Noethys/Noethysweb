@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, random, datetime
+import logging, random, secrets, datetime
 logger = logging.getLogger(__name__)
 from django.conf import settings
 from core.models import Famille, Utilisateur
@@ -14,7 +14,7 @@ def CreationIdentifiant(IDfamille=None, IDutilisateur=None, nbreCaract=8):
     """ Création d'un identifiant aléatoire """
     numTmp = ""
     for x in range(0, nbreCaract-4):
-        numTmp += random.choice("123456789")
+        numTmp += secrets.choice("123456789")
     identifiant = numTmp + "0" * 5
     if IDfamille:
         identifiant = u"F%d" % (int(identifiant) + IDfamille)
@@ -24,7 +24,7 @@ def CreationIdentifiant(IDfamille=None, IDutilisateur=None, nbreCaract=8):
 
 def CreationMDP(nbreCaract=10):
     """ Création d'un mot de passe aléatoire """
-    mdp = "".join([random.choice("bcdfghjkmnprstvwxzBCDFGHJKLMNPRSTVWXZ123456789") for x in range(0, nbreCaract)])
+    mdp = "".join([secrets.choice("bcdfghjkmnprstvwxzBCDFGHJKLMNPRSTVWXZ123456789") for x in range(0, nbreCaract)])
     date_expiration = CreationDateExpirationMDP()
     return mdp, date_expiration
 
