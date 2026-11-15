@@ -96,6 +96,12 @@ def Activer(request, uidb64, token):
     except (TypeError, ValueError, OverflowError, Utilisateur.DoesNotExist):
         utilisateur = None
 
+    # Sécurité : le lien d'activation ne concerne que les comptes famille créés depuis le portail et jamais utilisés.
+    # Sans ce contrôle, un lien de réinitialisation du mot de passe (même générateur de jeton) permettait de réactiver un compte désactivé.
+    if utilisateur is not None and (utilisateur.categorie != "famille" or utilisateur.last_login or not hasattr(utilisateur, "famille")
+                                    or not utils_portail.Get_dict_parametres().get("connexion_creation_compte", False)):
+        utilisateur = None
+
     if utilisateur is not None and default_token_generator.check_token(utilisateur, token):
         # Activation du compte utilisateur
         utilisateur.is_active = True

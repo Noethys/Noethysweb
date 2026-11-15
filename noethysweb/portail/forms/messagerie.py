@@ -55,6 +55,9 @@ class Formulaire(FormulaireBase, ModelForm):
         # Sécurité : la famille n'est jamais lue depuis le navigateur
         self.fields["famille"].disabled = True
         self.initial["famille"] = self.request.user.famille.pk
+        # Sécurité : la structure est celle de la page (déjà contrôlée par la vue), jamais celle envoyée par le navigateur
+        self.fields["structure"].disabled = True
+        self.initial["structure"] = idstructure
         self.fields["texte"].widget = SummernoteInplaceWidgetBS5(attrs=self.fields["texte"].widget.attrs)
 
         # Affichage

@@ -6,6 +6,7 @@
 import logging, datetime, json
 logger = logging.getLogger(__name__)
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import truncatechars, striptags
 from django.utils.translation import gettext as _
 from core.views import crud
@@ -23,7 +24,7 @@ class Page(CustomView):
     def get_context_data(self, **kwargs):
         context = super(Page, self).get_context_data(**kwargs)
         context['page_titre'] = _("Messagerie")
-        context['structure'] = Structure.objects.get(pk=self.get_idstructure())
+        context['structure'] = self.get_structure()
         context['liste_messages'] = PortailMessage.objects.select_related("famille", "utilisateur").filter(famille=self.request.user.famille, structure_id=self.get_idstructure()).order_by("date_creation")
 
         # Importation des messages non lus
@@ -41,6 +42,17 @@ class Page(CustomView):
 
     def get_idstructure(self):
         return self.kwargs.get("idstructure", 0)
+
+    def get_structure(self):
+        """ Sécurité : seules les structures dont la messagerie est active sont accessibles """
+        if not hasattr(self, "_structure"):
+            self._structure = get_object_or_404(Structure, pk=self.get_idstructure(), messagerie_active=True)
+        return self._structure
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and getattr(request.user, "categorie", None) == "famille":
+            self.get_structure()
+        return super(Page, self).dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy("portail_messagerie", kwargs={'idstructure': self.get_idstructure()})
@@ -64,7 +76,7 @@ class Ajouter(Page, crud.Ajouter):
                 return
 
             # Importation de la structure concernée
-            structure = Structure.objects.get(pk=self.get_idstructure())
+            structure = self.get_structure()
             if not structure.adresse_exp:
                 return
             url_message = self.request.build_absolute_uri(reverse_lazy("messagerie_portail", kwargs={"idstructure": structure.pk, "idfamille": self.request.user.famille.pk}))

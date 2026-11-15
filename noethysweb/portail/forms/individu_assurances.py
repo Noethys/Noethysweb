@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 import datetime
+from django.core.validators import FileExtensionValidator
 from django import forms
 from django.forms import ModelForm
 from django.contrib import messages
@@ -48,6 +49,8 @@ class Formulaire(FormulaireBase, ModelForm):
         rattachement = kwargs.pop("rattachement", None)
         mode = kwargs.pop("mode", "MODIFICATION")
         super(Formulaire, self).__init__(*args, **kwargs)
+        # Sécurité : seuls les PDF et les images sont acceptés (un fichier HTML ou SVG serait exécuté par le navigateur à l'ouverture)
+        self.fields["document"].validators.append(FileExtensionValidator(allowed_extensions=["pdf", "png", "jpg", "jpeg"]))
         self.helper = FormHelper()
         self.helper.form_id = 'individu_contacts_form'
         self.helper.form_method = 'post'

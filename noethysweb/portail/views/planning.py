@@ -9,7 +9,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, Http404
 from django.contrib import messages
 from core.models import Individu, Inscription, PortailPeriode, Vacance, Ferie, Activite, JOURS_COMPLETS_SEMAINE, AdresseMail, ModeleEmail, Mail, Destinataire, Rattachement, Unite
 from core.utils import utils_portail, utils_dates
@@ -34,7 +34,11 @@ class View(CustomView, TemplateView):
         if not request.user.is_authenticated:
             logger.debug("dispatch : Utilisateur non authentifié. Retour à la page de connexion.")
             return redirect("portail_connexion")
-        activite = Activite.objects.prefetch_related("types_consentements").get(pk=kwargs["idactivite"])
+        if request.user.categorie != "famille":
+            return super(View, self).dispatch(request, *args, **kwargs)
+        activite = Activite.objects.prefetch_related("types_consentements").filter(pk=kwargs["idactivite"]).first()
+        if not activite:
+            raise Http404
         approbations_requises = utils_approbations.Get_approbations_requises(famille=request.user.famille, activites=[activite,], idindividu=kwargs["idindividu"])
         if approbations_requises["nbre_total"] > 0:
             messages.add_message(request, messages.ERROR, "L'accès à ces réservations nécessite au moins une approbation. Veuillez valider les approbations en attente.")

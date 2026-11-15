@@ -5,6 +5,7 @@
 
 from django import forms
 from django.forms import ModelForm
+from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, Fieldset
@@ -33,6 +34,8 @@ class Formulaire(FormulaireBase, ModelForm):
         rattachement = kwargs.pop("rattachement", None)
         mode = kwargs.pop("mode", "MODIFICATION")
         super(Formulaire, self).__init__(*args, **kwargs)
+        # Sécurité : seuls les PDF et les images sont acceptés (un fichier HTML ou SVG serait exécuté par le navigateur à l'ouverture)
+        self.fields["document"].validators.append(FileExtensionValidator(allowed_extensions=["pdf", "png", "jpg", "jpeg"]))
         self.helper = FormHelper()
         self.helper.form_id = 'individu_informations_form'
         self.helper.form_method = 'post'

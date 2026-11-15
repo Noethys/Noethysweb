@@ -234,6 +234,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Summernote
 SUMMERNOTE_THEME = 'bs4'
+# Sécurité : l'envoi d'images par l'éditeur est réservé aux utilisateurs connectés (sinon n'importe qui peut déposer des fichiers sur le serveur)
+SUMMERNOTE_CONFIG = {"attachment_require_authentication": True}
 
 # Django-resize
 DJANGORESIZED_DEFAULT_SIZE = [500, 500]
