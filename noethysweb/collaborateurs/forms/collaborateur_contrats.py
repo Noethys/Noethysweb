@@ -8,14 +8,19 @@ from django.forms import ModelForm
 from core.forms.select2 import Select2Widget
 from django.db.models import Q
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Hidden, Fieldset
+from crispy_forms.layout import Layout, Hidden, Fieldset, HTML
 from crispy_forms.bootstrap import Field, InlineCheckboxes
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.models import ContratCollaborateur, QuestionnaireQuestion, QuestionnaireReponse
 from core.widgets import DatePickerWidget
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from parametrage.forms import questionnaires
 
+
+# Champs repris du précédent contrat lors de la création d'un nouveau contrat (dates et observations exclues)
+CHAMPS_REPRIS = ["type_contrat", "type_poste", "heures_hebdo", "jours_travailles", "modele_planning", "profil_reglementaire", "objectif_mode", "objectif_volume", "objectif_periode"]
 
 JOURS_SEMAINE_CONTRAT = [("0", "Lundi"), ("1", "Mardi"), ("2", "Mercredi"), ("3", "Jeudi"), ("4", "Vendredi"), ("5", "Samedi"), ("6", "Dimanche")]
 
@@ -52,8 +57,17 @@ class Formulaire(FormulaireBase, ModelForm):
         idcollaborateur = kwargs.pop("idcollaborateur", None)
         super(Formulaire, self).__init__(*args, **kwargs)
 
+        # Création d'un contrat : reprise des données du précédent contrat du collaborateur (sauf dates et observations)
+        self.contrat_precedent = None
+        if not self.instance.pk and idcollaborateur and not (self.request and self.request.GET.get("vierge")):
+            self.contrat_precedent = ContratCollaborateur.objects.select_related("type_contrat", "type_poste").filter(collaborateur_id=idcollaborateur).order_by("-date_debut", "-pk").first()
+        if self.contrat_precedent:
+            for nom_champ in CHAMPS_REPRIS:
+                champ_modele = ContratCollaborateur._meta.get_field(nom_champ)
+                self.initial[nom_champ] = getattr(self.contrat_precedent, champ_modele.attname)
+
         # Jours travaillés : lundi au vendredi par défaut. La valeur enregistrée ("0,1,2,3,4") est convertie en liste pour cocher les cases.
-        jours = (self.instance.jours_travailles or "0,1,2,3,4").split(",")
+        jours = ((self.contrat_precedent or self.instance).jours_travailles or "0,1,2,3,4").split(",")
         self.fields["jours_travailles"].initial = jours
         self.initial["jours_travailles"] = jours
 
@@ -81,6 +95,7 @@ class Formulaire(FormulaireBase, ModelForm):
         self.helper.layout = Layout(
             Commandes(annuler_url="{{ view.get_success_url }}"),
             Hidden('collaborateur', value=idcollaborateur),
+            *self.Get_bandeau_reprise(),
             Fieldset("Généralités",
                 Field("type_contrat"),
                 Field("type_poste"),
@@ -115,11 +130,29 @@ class Formulaire(FormulaireBase, ModelForm):
                     liste_fields.append(Field(nom_controle))
             self.helper.layout.append(Fieldset("Questionnaire", *liste_fields))
 
-            # Importation des réponses
-            for reponse in QuestionnaireReponse.objects.filter(donnee=self.instance.pk, question__categorie="contrat_collaborateur"):
+            # Importation des réponses (celles du précédent contrat lors d'une création)
+            iddonnee = self.instance.pk or (self.contrat_precedent.pk if self.contrat_precedent else None)
+            for reponse in QuestionnaireReponse.objects.filter(donnee=iddonnee, question__categorie="contrat_collaborateur") if iddonnee else []:
                 key = "question_%d" % reponse.question_id
                 if key in self.fields:
                     self.fields[key].initial = reponse.Get_reponse_for_ctrl()
+
+    def Get_bandeau_reprise(self):
+        """ Bandeau signalant que les données du précédent contrat ont été reproduites """
+        contrat = self.contrat_precedent
+        if not contrat:
+            return []
+        libelle = " · ".join([nom for nom in (contrat.type_poste.nom, contrat.type_contrat.nom if contrat.type_contrat else None) if nom])
+        periode = "du %s au %s" % (contrat.date_debut.strftime("%d/%m/%Y"), contrat.date_fin.strftime("%d/%m/%Y")) if contrat.date_fin else "depuis le %s" % contrat.date_debut.strftime("%d/%m/%Y")
+        texte = format_html("Les données du précédent contrat ({} · {}) ont été reproduites. Vérifiez-les avant d'enregistrer.", libelle, periode)
+        if not contrat.date_fin:
+            texte += mark_safe(" <br>Ce précédent contrat n'a pas de date de fin : pensez à le clôturer pour éviter un chevauchement des deux contrats.")
+        html = format_html("""<div class="alert alert-info d-flex align-items-center justify-content-between flex-wrap" role="status">
+            <span class="mr-2"><i class="fa fa-info-circle mr-1" aria-hidden="true"></i>{}</span>
+            <a href="?vierge=1" class="btn btn-sm btn-light mt-1 mb-1"><i class="fa fa-eraser mr-1" aria-hidden="true"></i>Vider le formulaire</a>
+        </div>""", texte)
+        # Le bloc HTML de crispy est interprété comme un template Django : neutralisation des accolades éventuelles des libellés
+        return [HTML(html.replace("{", "&#123;").replace("}", "&#125;"))]
 
     def clean(self):
         # Objectif
