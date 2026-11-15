@@ -4,6 +4,7 @@
 #  Distribué sous licence GNU GPL.
 
 from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from core.views.base import CustomView
 from django.conf import settings
 from core.views import menu_favoris, menu_infos
@@ -18,6 +19,9 @@ class Toc(CustomView, TemplateView):
         # Recherche le menu actif
         menu_principal = context['menu_principal']
         menu = menu_principal.Find(code=self.menu_code)
+        if not menu:
+            # Aucune commande de ce menu n'est autorisée pour cet utilisateur
+            raise PermissionDenied
 
         # Mémorise le nom du menu
         context['page_titre'] = menu.titre

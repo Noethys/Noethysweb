@@ -71,6 +71,19 @@ def Memorise_page_length(request):
 
 
 
+def Permission_existe(code=None):
+    """ Indique si une permission existe pour ce code (liste calculée une seule fois) """
+    global _CODES_PERMISSIONS
+    if not code:
+        return False
+    if _CODES_PERMISSIONS is None:
+        from django.contrib.auth.models import Permission
+        _CODES_PERMISSIONS = set(Permission.objects.filter(content_type__app_label="core").values_list("codename", flat=True))
+    return code in _CODES_PERMISSIONS
+
+_CODES_PERMISSIONS = None
+
+
 class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequiredMixin):
     """ Implémente les données de la page : menus..."""
     menu_code = ""
@@ -83,9 +96,10 @@ class CustomView(LoginRequiredMixin, UserPassesTestMixin): #, PermissionRequired
     def test_func(self):
         # Vérifie que l'user a une permission
         menu_code = getattr(self, "menu_code", None)
+        if not menu_code and Permission_existe(getattr(self, "url_liste", None)):
+            # Page CRUD sans menu_code : la permission est celle de la liste associée (si elle existe)
+            menu_code = self.url_liste
         if menu_code and menu_code not in ("accueil", "aide_accueil") and not menu_code.endswith("_toc"):
-            if not menu_code and hasattr(self, "url_liste"):
-                menu_code = self.url_liste
             if not self.request.user.has_perm("core.%s" % menu_code):
                 logger.debug("Interdiction d'accéder à la page 'core.%s' : Pas de permission." % menu_code)
                 return False

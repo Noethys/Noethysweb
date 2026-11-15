@@ -3,7 +3,7 @@
 #  Distribué sous licence GNU GPL.
 
 import json
-from django.utils.html import format_html
+from django.utils.html import format_html, conditional_escape
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.http import JsonResponse
@@ -73,6 +73,16 @@ class MyDatatable(Datatable):
             for code, colonne in self.columns.items():
                 if colonne and code not in getattr(self._meta, "hidden_columns", []):
                     colonne.visible = True
+
+    def get_record_data(self, obj):
+        """ Echappe les valeurs brutes des colonnes (champs du modèle) pour éviter l'injection de code HTML.
+            Les colonnes calculées par une fonction (processor) produisent leur propre HTML et doivent échapper leurs données. """
+        data = super(MyDatatable, self).get_record_data(obj)
+        for index, (nom, column) in enumerate(self.columns.items()):
+            valeur = data.get(str(index))
+            if valeur is not None and not self.get_processor_method(column, index):
+                data[str(index)] = conditional_escape(valeur)
+        return data
 
     def Create_boutons_actions(self, liste_boutons=[]):
         return format_html("&nbsp;".join(liste_boutons))
