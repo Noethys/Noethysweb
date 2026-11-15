@@ -1,3 +1,19 @@
+Version 1.3.6.7 (15/11/2026) :
+
+Nouveautés
+- Module Collaborateurs : planning général et planning individuel, suivi des objectifs d'heures, contrôle réglementaire du temps de travail, gestion des congés et absences, heures déclarées, pièces manquantes, éléments variables de paie, statistiques, éditions RH, widgets de la page d'accueil
+- Portail : nouvel espace collaborateur sur le portail
+- Facturation > Prélèvements : ajout d'impressions (liste des prélèvements, état nominatif détaillé, récapitulatif par activité, bordereaux de remise à la banque ou au comptable public, avis de prélèvement aux familles) et de la saisie d'un prélèvement manuel
+- Facturation > Exports vers le Trésor Public : ajout d'impressions (liste détaillée des pièces, récapitulatif par imputation, bordereau des titres de recettes, état des prélèvements, rapport de contrôle)
+Améliorations
+- Module Collaborateurs : nouveaux paramétrages (types de contrats, profils réglementaires, types de congés) avec import des valeurs par défaut, modèles de plannings améliorés et fiche collaborateur réorganisée
+- Paramétrage > Modèles de documents : relooking complet de l'éditeur (alignement et répartition des objets, ordre des plans, zoom, grille, données d'exemple, raccourcis clavier)
+- Prélèvements et exports vers le Trésor Public : erreurs de validation du fichier XML traduites en messages compréhensibles indiquant la donnée et l'écran à corriger
+- Portail : nombreuses corrections d'accessibilité RGAA (connexion, en-tête, fenêtres modales, planning, grille de réservation, semaine-type, messagerie, vidéos, champs obligatoires, contrastes) et mise à jour de la déclaration d'accessibilité
+Corrections
+- Paramétrage > Images de fond : impossible de supprimer l'image utilisée comme fond de la page de connexion du portail
+- Portail > Messagerie : accès limité aux structures dont la messagerie est active
+
 Version 1.3.6.6 (12/11/2026) :
 
 Corrections
