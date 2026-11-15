@@ -1,0 +1,159 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .ed_parametres fieldset legend {font-size: 13px; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: .03em; border-bottom: 1px solid #e9ecef; margin-bottom: 10px; padding-bottom: 4px}
+        .ed_parametres fieldset + fieldset {margin-top: 6px}
+        .ed_parametres .ed_defilement > div {max-height: 210px; overflow-y: auto; padding: 4px 8px; border: 1px solid #dee2e6; border-radius: .25rem}
+        .dark-mode .ed_parametres .ed_defilement > div {border-color: #4b545c}
+        .ed_barre {display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px}
+        .ed_barre .ed_recherche {max-width: 240px}
+        .ed_compteur {font-size: 12.5px; color: #6c757d}
+        .ed_liste {max-height: 62vh; overflow-y: auto; border: 1px solid #dee2e6; border-radius: .25rem}
+        .ed_table {margin-bottom: 0; font-size: 13px}
+        .ed_table thead th {position: sticky; top: 0; z-index: 1; background: #f8f9fa; font-size: 12px; font-weight: 600; color: #495057; border-top: 0}
+        .ed_table td, .ed_table th {padding: .4rem .6rem; vertical-align: middle}
+        .ed_table .ed_check {width: 34px; text-align: center}
+        .ed_table tbody tr {cursor: pointer}
+        .dark-mode .ed_table thead th {background: #3f474e; color: #e9ecef}
+        .dark-mode .ed_liste {border-color: #4b545c}
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-lg-3">
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body ed_parametres">
+                    <button type="submit" form="form_parametres" class="btn btn-default btn-block mb-3" title="Actualiser la liste selon la sélection"><i class="fa fa-refresh margin-r-5"></i> Actualiser la liste</button>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-print margin-r-5"></i> {{ edition.titre }}</h3>
+                </div>
+                <div class="card-body">
+                    <p>{{ box_introduction }}</p>
+
+                    <div class="ed_barre">
+                        {% if "pdf" in edition.exports %}<button type="button" class="btn btn-primary ed_generer" data-format="pdf" title="Créer le document PDF des lignes cochées"><i class="fa fa-file-pdf-o margin-r-5"></i>Aperçu PDF</button>{% endif %}
+                        {% if "xlsx" in edition.exports %}<button type="button" class="btn btn-default ed_generer" data-format="xlsx" title="Exporter les lignes cochées vers Excel"><i class="fa fa-file-excel-o margin-r-5"></i>Exporter vers Excel</button>{% endif %}
+                        <span class="ed_compteur ml-2" id="ed_compteur" aria-live="polite"></span>
+                        <input type="search" class="form-control ed_recherche ml-auto" id="ed_recherche" placeholder="Rechercher..." aria-label="Rechercher dans la liste">
+                    </div>
+
+                    {% if lignes %}
+                        <div class="ed_liste">
+                            <table class="table table-sm table-hover ed_table" id="ed_table">
+                                <thead>
+                                    <tr>
+                                        <th class="ed_check"><input type="checkbox" id="ed_tout" aria-label="Tout cocher" title="Tout cocher / décocher"></th>
+                                        {% for entete in edition.entetes %}<th scope="col">{{ entete }}</th>{% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ligne in lignes %}
+                                        <tr>
+                                            <td class="ed_check"><input type="checkbox" class="ed_case" value="{{ ligne.id }}" aria-label="Cocher {{ ligne.colonnes.0 }}"
+                                                {% if not preselection or ligne.idcollaborateur in preselection %}checked{% endif %}></td>
+                                            {% for valeur in ligne.colonnes %}<td>{{ valeur }}</td>{% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="callout callout-info mb-0"><p>Aucun{% if edition.libelle_lignes == "demande" %}e demande{% else %} collaborateur{% endif %} ne correspond à la sélection. Modifiez les paramètres puis cliquez sur <b>Actualiser la liste</b>.</p></div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'core/modal_pdf.html' %}
+
+    <script>
+        $(function() {
+            var libelle = "{{ edition.libelle_lignes }}";
+
+            function Actualiser_compteur() {
+                var nbre = $(".ed_case:checked").length;
+                $("#ed_compteur").text(nbre + " " + libelle + (nbre > 1 ? "s" : "") + " coché" + (libelle === "demande" ? "e" : "") + (nbre > 1 ? "s" : "") + " sur " + $(".ed_case").length);
+                $("#ed_tout").prop("checked", nbre > 0 && nbre === $(".ed_case").length);
+            }
+            Actualiser_compteur();
+
+            $("#ed_tout").on("change", function() {
+                $("#ed_table tbody tr:visible .ed_case").prop("checked", this.checked);
+                Actualiser_compteur();
+            });
+            $("#ed_table").on("change", ".ed_case", Actualiser_compteur);
+            $("#ed_table tbody").on("click", "tr", function(event) {
+                if ($(event.target).is("input, a")) return;
+                var caseCoche = $(this).find(".ed_case");
+                caseCoche.prop("checked", !caseCoche.prop("checked"));
+                Actualiser_compteur();
+            });
+
+            $("#ed_recherche").on("input", function() {
+                var texte = this.value.toLowerCase();
+                $("#ed_table tbody tr").each(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(texte) !== -1);
+                });
+            });
+
+            $(".ed_generer").on("click", function() {
+                var coches = $(".ed_case:checked").map(function() {return parseInt(this.value)}).get();
+                if (!coches.length) {
+                    toastr.error("Cochez au moins une ligne dans la liste");
+                    return;
+                }
+                var format = $(this).data("format");
+                var bouton = $(this);
+                var contenu = bouton.html();
+                bouton.prop("disabled", true).html("<i class='fa fa-spinner fa-spin margin-r-5'></i>Création en cours...");
+                var data = $("#form_parametres").serializeArray();
+                data.push({name: "coches", value: JSON.stringify(coches)});
+                data.push({name: "format", value: format});
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_editions_collaborateurs_generer' code=edition.code %}",
+                    data: $.param(data),
+                    datatype: "json",
+                    success: function(data) {
+                        bouton.prop("disabled", false).html(contenu);
+                        if (data.url) {
+                            window.location.href = data.url;
+                        } else {
+                            charge_pdf(data);
+                        }
+                    },
+                    error: function(data) {
+                        bouton.prop("disabled", false).html(contenu);
+                        toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue");
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock contenu_page %}

@@ -11,7 +11,7 @@ from collaborateurs.views import collaborateur, collaborateur_identite, collabor
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
                                 fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel, statistiques_evenements, conges, \
-                                collaborateur_espace, heures_declarees, pieces_manquantes, planning_absences, variables_paie
+                                collaborateur_espace, heures_declarees, pieces_manquantes, planning_absences, variables_paie, editions
 
 
 urlpatterns = [
@@ -97,6 +97,9 @@ urlpatterns = [
     path('collaborateurs/planning_absences', planning_absences.View.as_view(), name='planning_absences_collaborateurs'),
     path('collaborateurs/variables_paie', variables_paie.View.as_view(), name='variables_paie_collaborateurs'),
 
+    # Editions
+    *[path('collaborateurs/editions/%s' % code, editions.View.as_view(code=code), name=code) for code in editions.EDITIONS],
+
 
     # AJAX
     path('collaborateurs/planning_equipe/get_donnees', secure_ajax(planning.Get_donnees), name='ajax_planning_equipe_get_donnees'),
@@ -154,6 +157,7 @@ urlpatterns = [
     path('collaborateurs/statistiques_evenements/generer_pdf', secure_ajax(statistiques_evenements.Generer_pdf), name='ajax_statistiques_evenements_collaborateurs_generer_pdf'),
     path('collaborateurs/importer_collaborateurs/importer', secure_ajax(importer_collaborateurs.Importer), name='ajax_importer_collaborateurs_importer'),
     path('collaborateurs/pieces_manquantes/envoyer_emails', secure_ajax(pieces_manquantes.Envoyer_emails), name='ajax_pieces_manquantes_collaborateurs_emails'),
+    path('collaborateurs/editions/generer/<str:code>', secure_ajax(editions.Generer), name='ajax_editions_collaborateurs_generer'),
     path('collaborateurs/variables_paie/exporter_excel', secure_ajax(variables_paie.Exporter_excel), name='ajax_variables_paie_collaborateurs_exporter_excel'),
 
 ]

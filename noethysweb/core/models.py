@@ -4233,6 +4233,7 @@ class Collaborateur(models.Model):
     nom_jfille = models.CharField(verbose_name="Nom de naissance", max_length=200, blank=True, null=True)
     prenom = models.CharField(verbose_name="Prénom", max_length=200, blank=True, null=True)
     date_naiss = encrypt(models.DateField(verbose_name="Date de naissance", blank=True, null=True))
+    nationalite = models.CharField(verbose_name="Nationalité", max_length=100, blank=True, null=True, help_text="Mentionnée dans le registre unique du personnel. Exemple : Française.")
     rue_resid = encrypt(models.CharField(verbose_name="Rue", max_length=200, blank=True, null=True))
     cp_resid = encrypt(models.CharField(verbose_name="Code postal", max_length=50, blank=True, null=True))
     ville_resid = encrypt(models.CharField(verbose_name="Ville", max_length=200, blank=True, null=True))

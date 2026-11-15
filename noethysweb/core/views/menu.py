@@ -515,13 +515,26 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_gestion_evenements_collaborateurs.Add(code="planning_individuel", titre="Planning individuel", icone="file-text-o")
     menu_gestion_evenements_collaborateurs.Add(code="soldes_objectifs_collaborateurs", titre="Soldes et reports des objectifs", icone="file-text-o")
     menu_gestion_evenements_collaborateurs.Add(code="appliquer_modele_planning", titre="Appliquer un modèle de planning", icone="file-text-o")
+    menu_gestion_evenements_collaborateurs.Add(code="releves_heures_collaborateurs", titre="Relevés mensuels d'heures", icone="file-text-o")
 
     # Congés et absences
     menu_conges_collaborateurs = menu_collaborateurs.Add(titre="Congés et absences")
     menu_conges_collaborateurs.Add(code="demandes_absences_collaborateurs", titre="Demandes d'absence", icone="file-text-o")
     menu_conges_collaborateurs.Add(code="planning_absences_collaborateurs", titre="Planning des absences", icone="file-text-o")
     menu_conges_collaborateurs.Add(code="compteurs_conges_collaborateurs", titre="Compteurs de congés", icone="file-text-o")
+    menu_conges_collaborateurs.Add(code="attestations_conges_collaborateurs", titre="Attestations de congés", icone="file-text-o")
+    menu_conges_collaborateurs.Add(code="impression_demandes_absences_collaborateurs", titre="Imprimer des demandes d'absence", icone="file-text-o")
     menu_conges_collaborateurs.Add(code="heures_declarees_collaborateurs", titre="Heures déclarées", icone="file-text-o")
+
+    # Editions
+    menu_editions_collaborateurs = menu_collaborateurs.Add(titre="Editions")
+    menu_editions_collaborateurs.Add(code="edition_liste_collaborateurs", titre="Liste des collaborateurs", icone="file-text-o")
+    menu_editions_collaborateurs.Add(code="fiches_collaborateurs", titre="Fiches des collaborateurs", icone="file-text-o")
+    menu_editions_collaborateurs.Add(code="trombinoscope_collaborateurs", titre="Trombinoscope", icone="file-text-o")
+    menu_editions_collaborateurs.Add(code="liste_telephonique_collaborateurs", titre="Liste téléphonique", icone="file-text-o")
+    menu_editions_collaborateurs.Add(code="etiquettes_collaborateurs", titre="Etiquettes et badges", icone="file-text-o")
+    menu_editions_collaborateurs.Add(code="registre_personnel_collaborateurs", titre="Registre unique du personnel", icone="file-text-o")
+    menu_editions_collaborateurs.Add(code="etat_qualifications_collaborateurs", titre="Etat des qualifications", icone="file-text-o")
 
     # Analyse
     menu_analyse_collaborateurs = menu_collaborateurs.Add(titre="Analyse")

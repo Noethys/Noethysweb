@@ -24,7 +24,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = Collaborateur
-        fields = ["civilite", "nom", "nom_jfille", "prenom", "date_naiss", "memo", "photo"]
+        fields = ["civilite", "nom", "nom_jfille", "prenom", "date_naiss", "nationalite", "memo", "photo"]
         widgets = {
             'memo': forms.Textarea(attrs={'rows': 3}),
             'photo': Crop_image(attrs={"largeur_min": 200, "hauteur_min": 200, "ratio": "1/1"}),
@@ -66,6 +66,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("nom_jfille"),
                 Field("prenom"),
                 Field("date_naiss"),
+                Field("nationalite"),
             ),
             Fieldset("Divers",
                 Field("memo"),

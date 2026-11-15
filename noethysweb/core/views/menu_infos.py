@@ -535,6 +535,16 @@ COMMANDES = {
     "pieces_manquantes_collaborateurs": ("file-text-o", "l", "Repérer les pièces non fournies ou expirées et relancer les collaborateurs."),
     "planning_absences_collaborateurs": ("calendar", "l", "Visualiser les congés et absences de l'équipe sur le mois."),
     "variables_paie_collaborateurs": ("calculator", "e", "Préparer la paie : heures, majorations, congés et absences du mois."),
+    "edition_liste_collaborateurs": ("list", "e", "Imprimer ou exporter une liste en choisissant les colonnes."),
+    "fiches_collaborateurs": ("id-card-o", "e", "Imprimer les fiches récapitulatives pour les dossiers du personnel."),
+    "trombinoscope_collaborateurs": ("th", "e", "Imprimer les photos de l'équipe par groupe ou par poste."),
+    "liste_telephonique_collaborateurs": ("phone", "e", "Imprimer les téléphones et emails de l'équipe."),
+    "etiquettes_collaborateurs": ("tags", "e", "Imprimer des étiquettes d'adresse et des badges avec photo."),
+    "registre_personnel_collaborateurs": ("book", "e", "Imprimer le registre unique du personnel."),
+    "etat_qualifications_collaborateurs": ("graduation-cap", "e", "Imprimer les qualifications de l'équipe et la validité des justificatifs."),
+    "releves_heures_collaborateurs": ("clock-o", "e", "Imprimer les relevés d'heures du mois à faire signer."),
+    "attestations_conges_collaborateurs": ("file-text-o", "e", "Imprimer les relevés de congés à remettre aux collaborateurs."),
+    "impression_demandes_absences_collaborateurs": ("print", "e", "Imprimer les demandes d'absence sous forme de bons à signer."),
 }
 
 
@@ -564,6 +574,16 @@ NOUVEAUTES = {
     "pieces_manquantes_collaborateurs": "2026-11-15",
     "planning_absences_collaborateurs": "2026-11-15",
     "variables_paie_collaborateurs": "2026-11-15",
+    "edition_liste_collaborateurs": "2026-11-15",
+    "fiches_collaborateurs": "2026-11-15",
+    "trombinoscope_collaborateurs": "2026-11-15",
+    "liste_telephonique_collaborateurs": "2026-11-15",
+    "etiquettes_collaborateurs": "2026-11-15",
+    "registre_personnel_collaborateurs": "2026-11-15",
+    "etat_qualifications_collaborateurs": "2026-11-15",
+    "releves_heures_collaborateurs": "2026-11-15",
+    "attestations_conges_collaborateurs": "2026-11-15",
+    "impression_demandes_absences_collaborateurs": "2026-11-15",
 }
 
 
