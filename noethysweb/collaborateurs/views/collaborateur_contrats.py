@@ -13,10 +13,15 @@ from core.views import crud
 from core.models import ContratCollaborateur
 from collaborateurs.forms.collaborateur_contrats import Formulaire
 from collaborateurs.views.collaborateur import Onglet
+from django.utils.html import escape
 
 
 class Page(Onglet):
     model = ContratCollaborateur
+
+    def get_queryset(self):
+        # Les objets ne sont accessibles que depuis la fiche de leur collaborateur
+        return ContratCollaborateur.objects.filter(collaborateur_id=self.Get_idcollaborateur())
     url_liste = "collaborateur_contrats_liste"
     url_ajouter = "collaborateur_contrats_ajouter"
     url_modifier = "collaborateur_contrats_modifier"
@@ -152,10 +157,10 @@ class Liste(Page, crud.Liste):
             ordering = ['date_debut']
 
         def Get_nom_type_contrat(self, instance, *args, **kwargs):
-            return instance.type_contrat.nom if instance.type_contrat else ""
+            return escape(instance.type_contrat.nom) if instance.type_contrat else ""
 
         def Get_nom_type_poste(self, instance, *args, **kwargs):
-            return instance.type_poste.nom
+            return escape(instance.type_poste.nom)
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             view = kwargs["view"]

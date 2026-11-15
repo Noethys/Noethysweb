@@ -32,5 +32,14 @@ def GetPermissionsPossibles(organisateur=None):
         if commande["code"] not in ("resume", "consommations"):
             liste_permissions.append(("individu_%s_modifier" % commande["code"], "Fiche individuelle | %s | Modifier" % commande["label"]))
 
+    # Fiche collaborateur (le planning et les congés dépendent des permissions de leurs menus)
+    from collaborateurs.utils.utils_collaborateur import LISTE_ONGLETS as LISTE_ONGLETS_COLLABORATEURS, ONGLETS_SANS_PERMISSION, ONGLETS_SANS_MODIFICATION
+    for commande in LISTE_ONGLETS_COLLABORATEURS:
+        if commande["code"] in ONGLETS_SANS_PERMISSION:
+            continue
+        liste_permissions.append(("collaborateur_%s" % commande["code"], "Fiche collaborateur | %s" % commande["label"]))
+        if commande["code"] not in ONGLETS_SANS_MODIFICATION:
+            liste_permissions.append(("collaborateur_%s_modifier" % commande["code"], "Fiche collaborateur | %s | Modifier" % commande["label"]))
+
     return liste_permissions
 

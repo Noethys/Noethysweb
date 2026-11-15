@@ -160,7 +160,7 @@
                                     <span class="valeur sous-texte">Aucun contrat saisi</span>
                                 {% endif %}
                             {% endwith %}
-                            <a class="lien-etiquette" href="{% url 'collaborateur_contrats_liste' idcollaborateur=collaborateur.pk %}">Voir les contrats</a>
+                            {% if perms.core.collaborateur_contrats %}<a class="lien-etiquette" href="{% url 'collaborateur_contrats_liste' idcollaborateur=collaborateur.pk %}">Voir les contrats</a>{% endif %}
                         </div>
                     {% endif %}
 
@@ -170,7 +170,7 @@
                             <span class="libelle">Solde d'heures</span>
                             <span class="grand {% if solde_heures.valeur > 0.005 %}positif{% elif solde_heures.valeur < -0.005 %}negatif{% endif %}">{{ solde_heures.texte }}</span>
                             <span class="sous-texte">Au {% now "d/m/Y" %} · période {{ solde_heures.periode }}</span>
-                            <a class="lien-etiquette" href="{% url 'collaborateur_planning' idcollaborateur=collaborateur.pk %}">Voir le planning</a>
+                            {% if perms.core.planning_individuel or perms.core.planning_equipe %}<a class="lien-etiquette" href="{% url 'collaborateur_planning' idcollaborateur=collaborateur.pk %}">Voir le planning</a>{% endif %}
                         </div>
                     {% endif %}
 
@@ -184,7 +184,7 @@
                                 {% endfor %}
                             </ul>
                             {% if demandes_attente %}<span class="sous-texte">{{ demandes_attente }} demande{{ demandes_attente|pluralize }} en attente de validation</span>{% endif %}
-                            <a class="lien-etiquette" href="{% url 'collaborateur_conges' idcollaborateur=collaborateur.pk %}">Voir les congés</a>
+                            {% if perms.core.demandes_absences_collaborateurs or perms.core.compteurs_conges_collaborateurs %}<a class="lien-etiquette" href="{% url 'collaborateur_conges' idcollaborateur=collaborateur.pk %}">Voir les congés</a>{% endif %}
                         </div>
                     {% endif %}
 
@@ -212,7 +212,7 @@
                                 {% endfor %}
                             </ul>
                             <span class="sous-texte">Sur les 30 derniers jours et les 14 prochains{% if nbre_anomalies > 4 %} · {{ nbre_anomalies|add:"-4" }} autre{{ nbre_anomalies|add:"-4"|pluralize }} non affichée{{ nbre_anomalies|add:"-4"|pluralize }}{% endif %}</span>
-                            <a class="lien-etiquette" href="{% url 'collaborateur_planning' idcollaborateur=collaborateur.pk %}">Voir le planning</a>
+                            {% if perms.core.planning_individuel or perms.core.planning_equipe %}<a class="lien-etiquette" href="{% url 'collaborateur_planning' idcollaborateur=collaborateur.pk %}">Voir le planning</a>{% endif %}
                         </div>
                     {% endif %}
 

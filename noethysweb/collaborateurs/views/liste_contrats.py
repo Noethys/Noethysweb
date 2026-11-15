@@ -8,6 +8,7 @@ from django.db.models import Q
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import ContratCollaborateur
+from django.utils.html import escape
 
 
 class Page(crud.Page):
@@ -53,13 +54,13 @@ class Liste(Page, crud.Liste):
             ordering = ["date_debut"]
 
         def Get_nom_collaborateur(self, instance, *args, **kwargs):
-            return instance.collaborateur.Get_nom()
+            return escape(instance.collaborateur.Get_nom())
 
         def Get_nom_type_contrat(self, instance, *args, **kwargs):
-            return instance.type_contrat.nom if instance.type_contrat else ""
+            return escape(instance.type_contrat.nom) if instance.type_contrat else ""
 
         def Get_nom_type_poste(self, instance, *args, **kwargs):
-            return instance.type_poste.nom
+            return escape(instance.type_poste.nom)
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [

@@ -13,12 +13,17 @@ from collaborateurs.forms.importer_collaborateurs import Formulaire_parametres, 
 
 
 def Importer(request):
+    if not request.user.has_perm("core.importer_collaborateurs"):
+        return JsonResponse({"texte_resume": "Vous n'avez pas la permission d'importer des collaborateurs"}, status=403)
     time.sleep(1)
-    donnees_tableau = json.loads(request.POST["donnees_tableau"])
-    colonnes_affectees = json.loads(request.POST["colonnes_affectees"])
+    try:
+        donnees_tableau = json.loads(request.POST.get("donnees_tableau", "[]"))
+        colonnes_affectees = json.loads(request.POST.get("colonnes_affectees", "{}"))
+    except (TypeError, ValueError):
+        return JsonResponse({"texte_resume": "Données incorrectes"}, status=400)
     type_import = "COLLABORATEURS"
-    mode_test = request.POST["mode_test"] == "true"
-    masquer_avertissements = request.POST["masquer_avertissements"] == "true"
+    mode_test = request.POST.get("mode_test") == "true"
+    masquer_avertissements = request.POST.get("masquer_avertissements") == "true"
     groupes = request.POST.getlist("groupes[]")
 
     # Vérifie qu'il existe des données

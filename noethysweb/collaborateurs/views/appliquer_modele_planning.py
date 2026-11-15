@@ -5,7 +5,7 @@
 
 
 import json, datetime
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponseForbidden
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.views.generic import TemplateView
@@ -16,8 +16,15 @@ from collaborateurs.utils import utils_evenements
 from collaborateurs.utils.utils_modeles_planning import Generateur, Get_departs, Repartir, Memoriser_recents, Get_liste_modeles
 
 
+def Peut_utiliser_modeles(user=None):
+    """ Les modèles sont utilisés depuis l'application des modèles, le planning d'équipe et le planning individuel """
+    return any(user.has_perm("core.%s" % code) for code in ("appliquer_modele_planning", "planning_equipe", "planning_individuel"))
+
+
 def Get_liste(request):
     """ Liste des modèles pour le sélecteur, avec les collaborateurs concernés (AJAX) """
+    if not Peut_utiliser_modeles(request.user):
+        return HttpResponseForbidden()
     try:
         collaborateurs = [int(valeur) for valeur in json.loads(request.POST.get("collaborateurs", "[]"))]
         date = datetime.date.fromisoformat(request.POST["date"]) if request.POST.get("date") else datetime.date.today()
@@ -28,6 +35,8 @@ def Get_liste(request):
 
 def Get_frise(request):
     """ Correspondance entre les semaines d'une période et les semaines du cycle des modèles (AJAX) """
+    if not Peut_utiliser_modeles(request.user):
+        return HttpResponseForbidden()
     try:
         modeles = [int(valeur) for valeur in json.loads(request.POST.get("modeles", "[]"))]
         dates = sorted(set(datetime.date.fromisoformat(valeur) for valeur in json.loads(request.POST.get("dates", "[]"))))

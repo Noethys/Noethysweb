@@ -13,10 +13,15 @@ from core.models import EvenementCollaborateur, Vacance, Ferie
 from core.utils import utils_dates
 from collaborateurs.forms.collaborateur_evenements import Formulaire
 from collaborateurs.views.collaborateur import Onglet
+from django.utils.html import format_html
 
 
 class Page(Onglet):
     model = EvenementCollaborateur
+
+    def get_queryset(self):
+        # Les objets ne sont accessibles que depuis la fiche de leur collaborateur
+        return EvenementCollaborateur.objects.filter(collaborateur_id=self.Get_idcollaborateur())
     url_liste = "collaborateur_evenements_liste"
     url_ajouter = "collaborateur_evenements_ajouter"
     url_modifier = "collaborateur_evenements_modifier"
@@ -83,7 +88,7 @@ class Liste(Page, crud.Liste):
             ordering = ['date_debut']
 
         def Get_nom_type_evenement(self, instance, *args, **kwargs):
-            return """<i class="fa fa-circle margin-r-5" style="color: %s"></i> %s""" % (instance.type_evenement.couleur, instance.type_evenement.nom)
+            return format_html("""<i class="fa fa-circle margin-r-5" style="color: {}"></i> {}""", instance.type_evenement.couleur, instance.type_evenement.nom)
 
         def Get_duree(self, instance, *args, **kwargs):
             return utils_dates.DeltaEnStr(instance.date_fin - instance.date_debut)
@@ -129,6 +134,10 @@ class Supprimer(Page, crud.Supprimer):
 
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
+    def get_objets(self):
+        listepk = [int(valeur) for valeur in self.kwargs.get("listepk").split(";") if valeur.isdigit()]
+        return self.get_queryset().filter(pk__in=listepk)
+
     template_name = "collaborateurs/collaborateur_delete.html"
 
 

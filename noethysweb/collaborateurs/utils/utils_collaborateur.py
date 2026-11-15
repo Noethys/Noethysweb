@@ -18,6 +18,29 @@ LISTE_ONGLETS = [
     {"code": "conges", "label": "Congés", "icone": "fa-plane", "url": "collaborateur_conges"},
     {"code": "espace", "label": "Espace collaborateur", "icone": "fa-globe", "url": "collaborateur_espace"},
 ]
+ONGLETS_SANS_PERMISSION = ("planning", "conges")       # Ces onglets dépendent des permissions du planning et des congés
+ONGLETS_SANS_MODIFICATION = ("resume", "outils")
+
+
+# ------------------------------------------------- Jetons des actions déclenchées par un lien -------------------------------------------------
+
+def Jeton_action(user=None, *valeurs):
+    """ Jeton signé, propre à l'utilisateur, à ajouter aux liens qui modifient des données (protection contre la falsification de requêtes) """
+    from django.core import signing
+    return signing.Signer(salt="collaborateurs.actions").signature(":".join([str(user.pk)] + [str(valeur) for valeur in valeurs]))
+
+
+def Verifier_jeton(jeton="", user=None, *valeurs):
+    import hmac
+    return bool(jeton) and hmac.compare_digest(str(jeton), Jeton_action(user, *valeurs))
+
+
+def Ajouter_jetons_saisie_rapide(pieces=[], user=None, collaborateur=None):
+    """ Ajoute le jeton aux liens de saisie rapide des pièces manquantes """
+    for piece in pieces:
+        if piece.get("href"):
+            piece["href"] = "%s?jeton=%s" % (piece["href"], Jeton_action(user, "saisie_rapide", collaborateur.pk, piece["type_piece"].pk))
+    return pieces
 
 
 # ------------------------------------------------- Contrats -------------------------------------------------

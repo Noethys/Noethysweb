@@ -5,6 +5,8 @@
 
 import datetime
 from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.db.models import Q
 from django.views.generic.base import RedirectView
 from django.contrib import messages
@@ -14,10 +16,16 @@ from core.models import PieceCollaborateur, TypePieceCollaborateur, Collaborateu
 from collaborateurs.forms.collaborateur_pieces import Formulaire
 from collaborateurs.views.collaborateur import Onglet
 from collaborateurs.utils import utils_pieces_manquantes
+from collaborateurs.utils.utils_collaborateur import Jeton_action, Verifier_jeton, Ajouter_jetons_saisie_rapide
+from django.utils.html import escape
 
 
 class Page(Onglet):
     model = PieceCollaborateur
+
+    def get_queryset(self):
+        # Les objets ne sont accessibles que depuis la fiche de leur collaborateur
+        return PieceCollaborateur.objects.filter(collaborateur_id=self.Get_idcollaborateur())
     url_liste = "collaborateur_pieces_liste"
     url_ajouter = "collaborateur_pieces_ajouter"
     url_modifier = "collaborateur_pieces_modifier"
@@ -34,7 +42,8 @@ class Page(Onglet):
         if not hasattr(self, "verbe_action"):
             context['box_titre'] = "Pièces"
         context['onglet_actif'] = "pieces"
-        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(collaborateur=context["collaborateur"])
+        context['pieces_fournir'] = Ajouter_jetons_saisie_rapide(utils_pieces_manquantes.Get_pieces_manquantes(collaborateur=context["collaborateur"]),
+                                                                  user=self.request.user, collaborateur=context["collaborateur"])
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={"idcollaborateur": self.kwargs.get("idcollaborateur", None)}), "icone": "fa fa-plus"},
         ]
@@ -87,9 +96,11 @@ class Liste(Page, crud.Liste):
             ordering = ['date_debut']
 
         def Get_nom(self, instance, **kwargs):
-            return instance.Get_nom()
+            return escape(instance.Get_nom())
 
         def Get_date_fin(self, instance, **kwargs):
+            if not instance.date_fin:
+                return ""
             if instance.date_fin == datetime.date(2999, 1, 1):
                 return "Illimitée"
             else:
@@ -112,9 +123,11 @@ class Liste(Page, crud.Liste):
             ]
             if instance.statut == "ATTENTE":
                 # Pièce transmise depuis l'espace collaborateur : à accepter ou à refuser
-                html.insert(0, self.Create_bouton(url=reverse("collaborateur_pieces_decider", kwargs={"idcollaborateur": kwargs["idcollaborateur"], "pk": instance.pk, "decision": "refuser"}),
+                html.insert(0, self.Create_bouton(url=reverse("collaborateur_pieces_decider", kwargs={"idcollaborateur": kwargs["idcollaborateur"], "pk": instance.pk, "decision": "refuser"}) +
+                                                  "?jeton=" + Jeton_action(view.request.user, "decider", instance.pk, "refuser"),
                                                   title="Refuser la pièce transmise", icone="fa-ban"))
-                html.insert(0, self.Create_bouton(url=reverse("collaborateur_pieces_decider", kwargs={"idcollaborateur": kwargs["idcollaborateur"], "pk": instance.pk, "decision": "accepter"}),
+                html.insert(0, self.Create_bouton(url=reverse("collaborateur_pieces_decider", kwargs={"idcollaborateur": kwargs["idcollaborateur"], "pk": instance.pk, "decision": "accepter"}) +
+                                                  "?jeton=" + Jeton_action(view.request.user, "decider", instance.pk, "accepter"),
                                                   title="Accepter la pièce transmise", icone="fa-check"))
             return self.Create_boutons_actions(html)
 
@@ -134,14 +147,28 @@ class Supprimer(Page, crud.Supprimer):
 
 
 class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
+    def get_objets(self):
+        listepk = [int(valeur) for valeur in self.kwargs.get("listepk").split(";") if valeur.isdigit()]
+        return self.get_queryset().filter(pk__in=listepk)
+
     template_name = "collaborateurs/collaborateur_delete.html"
 
 
 class Saisie_rapide(Page, RedirectView):
     """ Saisie rapide d'une pièce"""
     def get_redirect_url(self, *args, **kwargs):
-        type_piece = TypePieceCollaborateur.objects.get(pk=kwargs["idtype_piece"])
-        collaborateur = Collaborateur.objects.get(pk=kwargs["idcollaborateur"])
+        # Retour à la page d'origine si elle appartient au site, sinon à la liste des pièces
+        retour = self.request.META.get("HTTP_REFERER", "")
+        if not url_has_allowed_host_and_scheme(retour, allowed_hosts={self.request.get_host()}, require_https=self.request.is_secure()):
+            retour = reverse("collaborateur_pieces_liste", kwargs={"idcollaborateur": kwargs["idcollaborateur"]})
+
+        # Vérifie que la demande provient bien d'un lien de Noethysweb
+        if not Verifier_jeton(self.request.GET.get("jeton"), self.request.user, "saisie_rapide", kwargs["idcollaborateur"], kwargs["idtype_piece"]):
+            messages.add_message(self.request, messages.ERROR, "Lien expiré ou invalide : la pièce n'a pas été créée")
+            return retour
+
+        type_piece = get_object_or_404(TypePieceCollaborateur, pk=kwargs["idtype_piece"])
+        collaborateur = get_object_or_404(Collaborateur, pk=kwargs["idcollaborateur"])
 
         # Validité
         date_debut = datetime.date.today()
@@ -151,14 +178,17 @@ class Saisie_rapide(Page, RedirectView):
         piece = PieceCollaborateur.objects.create(type_piece=type_piece, collaborateur=collaborateur,
                                                   date_debut=date_debut, date_fin=date_fin)
         messages.add_message(self.request, messages.SUCCESS, "La pièce '%s' a été créée avec succès" % piece.Get_nom())
-        return self.request.META['HTTP_REFERER']
+        return retour
 
 
 class Decider(Page, RedirectView):
     """ Acceptation ou refus d'une pièce transmise depuis l'espace collaborateur """
     def get_redirect_url(self, *args, **kwargs):
         piece = PieceCollaborateur.objects.filter(pk=kwargs["pk"], collaborateur_id=kwargs["idcollaborateur"], statut="ATTENTE").first()
-        if piece:
+        if piece and not Verifier_jeton(self.request.GET.get("jeton"), self.request.user, "decider", piece.pk, kwargs["decision"]):
+            messages.add_message(self.request, messages.ERROR, "Lien expiré ou invalide : la pièce n'a pas été modifiée")
+            piece = None
+        if piece and kwargs["decision"] in ("accepter", "refuser"):
             piece.statut = "VALIDE" if kwargs["decision"] == "accepter" else "REFUSEE"
             piece.save()
             from core.utils import utils_historique

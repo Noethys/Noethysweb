@@ -5,6 +5,7 @@
 
 import datetime, logging
 from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404
 from django.db.models import Q, Exists, OuterRef, Prefetch
 from django.views.generic.detail import DetailView
 from django.contrib import messages
@@ -14,7 +15,7 @@ from core.views import crud
 from core.views.base import CustomView
 from core.models import Collaborateur, Note, ContratCollaborateur, TypeCongeCollaborateur, DemandeAbsenceCollaborateur, EvenementCollaborateur
 from collaborateurs.forms.collaborateur import Formulaire
-from collaborateurs.utils.utils_collaborateur import LISTE_ONGLETS, Condition_contrat_en_cours, Situation_contrat
+from collaborateurs.utils.utils_collaborateur import LISTE_ONGLETS, ONGLETS_SANS_MODIFICATION, Condition_contrat_en_cours, Situation_contrat, Ajouter_jetons_saisie_rapide
 from collaborateurs.utils import utils_pieces_manquantes
 from collaborateurs.utils import utils_conges, utils_objectif, utils_controle_reglementaire
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ def Peut_acceder_planning_individuel(user=None):
 
 class Page(crud.Page):
     model = Collaborateur
+    menu_code = "collaborateur_liste"
     url_liste = "collaborateur_liste"
     url_ajouter = "collaborateur_ajouter"
     url_modifier = "collaborateur_resume"
@@ -119,7 +121,7 @@ class Liste(Page, crud.Liste):
             return "Du %s au %s" % (contrat.date_debut.strftime("%d/%m/%Y"), contrat.date_fin.strftime("%d/%m/%Y"))
 
         def Get_ville_resid(self, instance, *args, **kwargs):
-            return instance.ville_resid
+            return escape(instance.ville_resid or "")
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [
@@ -143,7 +145,22 @@ class Supprimer(Page, crud.Supprimer):
     pass
 
     def get_object(self):
-        return Collaborateur.objects.get(pk=self.kwargs["idcollaborateur"])
+        # Seuls les collaborateurs du périmètre de l'utilisateur peuvent être supprimés
+        return get_object_or_404(Collaborateur.objects.filter(Q(groupes__superviseurs=self.request.user) | Q(groupes__superviseurs__isnull=True)).distinct(),
+                                 pk=self.kwargs["idcollaborateur"])
+
+
+# Pages de la fiche dont l'onglet ne se déduit pas du nom de l'URL : (code de l'onglet, modification)
+DROITS_PAGES = {
+    "collaborateur_notes_ajouter": ("resume", False),
+    "collaborateur_notes_modifier": ("resume", False),
+    "collaborateur_notes_supprimer": ("resume", False),
+    "collaborateur_historique": ("outils", False),
+    "collaborateur_emails_ajouter": ("outils", False),
+    "collaborateur_sms_ajouter": ("outils", False),
+    "collaborateur_voir_contrat": ("contrats", False),
+    "collaborateur_appliquer_modele_planning": ("evenements", True),
+}
 
 
 class Onglet(CustomView):
@@ -159,18 +176,35 @@ class Onglet(CustomView):
         context['collaborateur'] = Collaborateur.objects.get(pk=self.kwargs['idcollaborateur'])
         return context
 
-    def Onglet_autorise(self, code=""):
+    def Onglet_autorise(self, code="", modification=False):
         if code == "planning":
             # Le planning individuel dépend des permissions du planning (individuel ou général)
             return self.request.user.has_perm("core.planning_individuel") or self.request.user.has_perm("core.planning_equipe")
-        if code == "espace":
-            return self.request.user.has_perm("core.collaborateur_identite")
         if code == "conges":
             # Les congés dépendent des permissions des demandes d'absence et des compteurs de congés
             return self.request.user.has_perm("core.demandes_absences_collaborateurs") or self.request.user.has_perm("core.compteurs_conges_collaborateurs")
+        if modification and code not in ONGLETS_SANS_MODIFICATION:
+            return self.request.user.has_perm("core.collaborateur_%s_modifier" % code)
         return self.request.user.has_perm("core.collaborateur_%s" % code)
 
+    def Get_droit_requis(self):
+        """ Onglet et type d'accès (consultation ou modification) correspondant à la page demandée, déduits du nom de l'URL.
+            Renvoie (None, False) pour une page inconnue : l'accès est alors refusé. """
+        nom = self.request.resolver_match.url_name if self.request.resolver_match else ""
+        if nom in DROITS_PAGES:
+            return DROITS_PAGES[nom]
+        reste = nom[len("collaborateur_"):] if nom.startswith("collaborateur_") else ""
+        for code in sorted([onglet["code"] for onglet in LISTE_ONGLETS], key=len, reverse=True):
+            if reste == code or reste.startswith(code + "_"):
+                return code, reste[len(code):] not in ("", "_liste")
+        return None, False
+
     def test_func_page(self):
+        # Vérifie que l'utilisateur a la permission de consulter ou de modifier cet onglet
+        code, modification = self.Get_droit_requis()
+        if not code or not self.Onglet_autorise(code, modification):
+            return False
+
         # Vérifie que l'utilisateur a une permission d'accéder à ce collaborateur
         idcollaborateur = self.Get_idcollaborateur()
         if idcollaborateur and not Collaborateur.objects.filter((Q(groupes__superviseurs=self.request.user) | Q(groupes__superviseurs__isnull=True)), pk=idcollaborateur).exists():
@@ -191,7 +225,8 @@ class Resume(Onglet, DetailView):
         context['onglet_actif'] = "resume"
 
         # Alertes
-        context['pieces_fournir'] = utils_pieces_manquantes.Get_pieces_manquantes(collaborateur=context["collaborateur"], only_invalides=True)
+        context['pieces_fournir'] = Ajouter_jetons_saisie_rapide(utils_pieces_manquantes.Get_pieces_manquantes(collaborateur=context["collaborateur"], only_invalides=True),
+                                                                  user=self.request.user, collaborateur=context["collaborateur"])
         context['nbre_alertes'] = len(context['pieces_fournir'])
 
         # Synthèse : contrat, congés, solde d'heures, absences à venir, contrôle réglementaire

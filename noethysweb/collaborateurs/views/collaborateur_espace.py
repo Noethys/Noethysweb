@@ -17,7 +17,7 @@ from collaborateurs.utils import utils_espace_collaborateur
 
 def Get_collaborateur(request):
     """ Collaborateur demandé, uniquement s'il est accessible à l'utilisateur (superviseur de l'un de ses groupes ou groupe sans superviseur) """
-    if not request.user.has_perm("core.collaborateur_identite"):
+    if not request.user.has_perm("core.collaborateur_espace_modifier"):
         return None
     return Collaborateur.objects.filter((Q(groupes__superviseurs=request.user) | Q(groupes__superviseurs__isnull=True)), pk=request.POST.get("idcollaborateur") or 0).distinct().first()
 
@@ -28,9 +28,6 @@ class Consulter(Onglet, UpdateView):
     mode = "CONSULTATION"
     model = Collaborateur
     form_class = Formulaire
-
-    def test_func_page(self):
-        return self.request.user.has_perm("core.collaborateur_identite") and super(Consulter, self).test_func_page()
 
     def get_object(self):
         return Collaborateur.objects.select_related("utilisateur").get(pk=self.kwargs["idcollaborateur"])

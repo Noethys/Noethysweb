@@ -15,14 +15,24 @@ from core.utils import utils_fusion_word, utils_dates, utils_questionnaires
 
 def Fusionner(request):
     """ Générer le fichier d'export Word """
+    if not request.user.has_perm("core.collaborateur_contrats"):
+        return JsonResponse({"erreur": "Vous n'avez pas la permission d'accéder aux contrats"}, status=403)
+    try:
+        idcontrat = int(request.POST.get("idcontrat", 0))
+        json.loads(request.POST.get("form_modele", "{}"))
+    except (TypeError, ValueError):
+        return JsonResponse({"erreur": "Données incorrectes"}, status=400)
+    if not ContratCollaborateur.objects.filter(Q(collaborateur__groupes__superviseurs=request.user) | Q(collaborateur__groupes__superviseurs__isnull=True), pk=idcontrat).exists():
+        return JsonResponse({"erreur": "Contrat introuvable"}, status=404)
+
     # Récupération du modèle de document Word
-    form_modele = Form_modele(json.loads(request.POST.get("form_modele")))
+    form_modele = Form_modele(json.loads(request.POST.get("form_modele", "{}")))
     if not form_modele.is_valid():
         return JsonResponse({"erreur": "Veuillez sélectionner un modèle de document"}, status=401)
     modele_document = form_modele.cleaned_data["modele"]
 
     # Récupération du contrat
-    contrat = ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").get(pk=int(request.POST["idcontrat"]))
+    contrat = ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").get(pk=idcontrat)
 
     # Création des valeurs à fusionner
     valeurs = {

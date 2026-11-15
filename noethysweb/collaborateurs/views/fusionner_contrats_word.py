@@ -12,17 +12,25 @@ from core.views import crud
 from core.models import ContratCollaborateur
 from core.utils import utils_dates, utils_questionnaires, utils_fusion_word
 from collaborateurs.forms.contrats_choix_modele import Formulaire as Form_modele
+from django.utils.html import escape
 
 
 def Fusionner(request):
+    if not request.user.has_perm("core.fusionner_contrats_word"):
+        return JsonResponse({"erreur": "Vous n'avez pas la permission d'accéder à cette fonctionnalité"}, status=403)
+
     # Récupération des contrats cochés
-    contrats_coches = json.loads(request.POST.get("contrats_coches"))
+    try:
+        contrats_coches = json.loads(request.POST.get("contrats_coches", "[]"))
+        json.loads(request.POST.get("form_modele", "{}"))
+    except (TypeError, ValueError):
+        return JsonResponse({"erreur": "Données incorrectes"}, status=400)
     if not contrats_coches:
         return JsonResponse({"erreur": "Veuillez cocher au moins un contrat dans la liste"}, status=401)
-    contrats = ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").filter(pk__in=contrats_coches)
+    contrats = ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").filter(Q(collaborateur__groupes__superviseurs=request.user) | Q(collaborateur__groupes__superviseurs__isnull=True), pk__in=contrats_coches).distinct()
 
     # Récupération du modèle de document
-    form_modele = Form_modele(json.loads(request.POST.get("form_modele")))
+    form_modele = Form_modele(json.loads(request.POST.get("form_modele", "{}")))
     if not form_modele.is_valid():
         return JsonResponse({"erreur": "Veuillez sélectionner un modèle de document"}, status=401)
     modele_document = form_modele.cleaned_data["modele"]
@@ -80,7 +88,8 @@ class Liste(Page, crud.Liste):
     model = ContratCollaborateur
 
     def get_queryset(self):
-        return ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").filter(self.Get_filtres("Q"))
+        conditions = Q(collaborateur__groupes__superviseurs=self.request.user) | Q(collaborateur__groupes__superviseurs__isnull=True)
+        return ContratCollaborateur.objects.select_related("collaborateur", "type_contrat", "type_poste").filter(conditions, self.Get_filtres("Q")).distinct()
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
@@ -119,13 +128,13 @@ class Liste(Page, crud.Liste):
             ordering = ["date_debut"]
 
         def Get_nom_collaborateur(self, instance, *args, **kwargs):
-            return instance.collaborateur.Get_nom()
+            return escape(instance.collaborateur.Get_nom())
 
         def Get_nom_type_contrat(self, instance, *args, **kwargs):
-            return instance.type_contrat.nom if instance.type_contrat else ""
+            return escape(instance.type_contrat.nom) if instance.type_contrat else ""
 
         def Get_nom_type_poste(self, instance, *args, **kwargs):
-            return instance.type_poste.nom
+            return escape(instance.type_poste.nom)
 
         def Get_actions_speciales(self, instance, *args, **kwargs):
             html = [

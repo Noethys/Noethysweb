@@ -12,6 +12,10 @@ from collaborateurs.views.collaborateur import Onglet
 
 class Page(Onglet):
     model = Note
+
+    def get_queryset(self):
+        # Les objets ne sont accessibles que depuis la fiche de leur collaborateur
+        return Note.objects.filter(collaborateur_id=self.Get_idcollaborateur())
     url_liste = "collaborateur_resume"
     description_saisie = "Saisissez le texte de la note, choisissez les utilisateurs qui pourront la consulter et ses options d'affichage, puis cliquez sur le bouton Enregistrer."
     objet_singulier = "une note"
