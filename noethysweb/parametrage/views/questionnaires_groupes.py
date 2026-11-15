@@ -14,6 +14,7 @@ from parametrage.forms.questionnaires_groupes import Formulaire
 class Page(crud.Page):
     model = QuestionnaireGroupe
     url_liste = "questionnaires_groupes_liste"
+    menu_code = "questions_liste"
     url_ajouter = "questionnaires_groupes_ajouter"
     url_modifier = "questionnaires_groupes_modifier"
     url_supprimer = "questionnaires_groupes_supprimer"

@@ -12,6 +12,7 @@ from core.utils import utils_dates
 class Page(crud.Page):
     model = Deduction
     url_liste = "prestations_liste"
+    menu_code = "liste_deductions"
     description_liste = "Voici ci-dessous la liste des déductions."
     objet_singulier = "une déduction"
     objet_pluriel = "des déductions"

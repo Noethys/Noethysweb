@@ -241,6 +241,7 @@ class Assistant_base(CustomView, SessionWizardView):
 
 
 class Liste(CustomView, TemplateView):
+    menu_code = "activites_liste"
     template_name = "parametrage/activites_assistant_liste.html"
 
     def get_context_data(self, **kwargs):

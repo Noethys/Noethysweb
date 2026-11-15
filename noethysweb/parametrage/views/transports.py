@@ -10,6 +10,7 @@ from individus.utils import utils_transports
 
 
 class View(CustomView, TemplateView):
+    menu_code = "parametrage_transports"
     template_name = "parametrage/transports.html"
 
     def get_context_data(self, **kwargs):

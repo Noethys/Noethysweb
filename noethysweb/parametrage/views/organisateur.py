@@ -13,6 +13,7 @@ from django.core.cache import cache
 class Page(crud.Page):
     model = Organisateur
     url_liste = "organisateur_modifier"
+    menu_code = "organisateur_ajouter"
     url_ajouter = "organisateur_ajouter"
     url_modifier = "organisateur_modifier"
     url_supprimer = "feries_fixes_supprimer"

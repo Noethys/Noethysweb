@@ -16,6 +16,7 @@ import datetime
 
 
 class View(CustomView, TemplateView):
+    menu_code = "feries_variables_liste"
     template_name = "core/crud/edit.html"
 
     def get_context_data(self, **kwargs):

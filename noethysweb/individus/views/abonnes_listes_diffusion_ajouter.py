@@ -12,6 +12,7 @@ from core.views.mydatatableview import MyDatatable, columns
 
 
 class Liste(crud.Page, crud.Liste):
+    menu_code = "abonnes_listes_diffusion_liste"
     model = Individu
     template_name = "individus/abonnes_listes_diffusion_ajouter.html"
 

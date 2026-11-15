@@ -14,6 +14,7 @@ from individus.utils import utils_transports
 class Page(crud.Page):
     model = TransportArret
     url_liste = "arrets_liste"
+    menu_code = "parametrage_transports"
     url_ajouter = "arrets_ajouter"
     url_modifier = "arrets_modifier"
     url_supprimer = "arrets_supprimer"

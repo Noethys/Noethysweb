@@ -14,6 +14,7 @@ from individus.utils import utils_transports
 class Page(crud.Page):
     model = TransportLieu
     url_liste = "lieux_liste"
+    menu_code = "parametrage_transports"
     url_ajouter = "lieux_ajouter"
     url_modifier = "lieux_modifier"
     url_supprimer = "lieux_supprimer"

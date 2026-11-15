@@ -66,26 +66,32 @@ class View(CustomView, TemplateView):
         return super().get(request, *args, **kwargs)
 
     def Get_resultats(self):
-        texte = self.request.GET.get("champ_recherche")
-        resultats = {"texte": texte}
+        texte = (self.request.GET.get("champ_recherche") or "").strip()
+        resultats = {"texte": texte, "rattachements": Rattachement.objects.none(), "payeurs": Payeur.objects.none(),
+                     "collaborateurs": Collaborateur.objects.none(), "commandes": []}
+        if not texte:
+            return resultats
+        user = self.request.user
 
-        # Recherche dans les individus
-        champs = ("nom_complet", "nom_complet_inverse", "individu__nom", "individu__nom_jfille", "individu__prenom")
-        condition = reduce(or_, [Q(**{'{}__icontains'.format(f): texte}) for f in champs], Q())
-        queryset = Rattachement.objects.select_related('individu', 'famille').annotate(nom_complet=Concat('individu__nom', Value(' '), 'individu__prenom'), nom_complet_inverse=Concat('individu__prenom', Value(' '), 'individu__nom'))
-        resultats["rattachements"] = queryset.filter(condition).order_by("individu__nom", "individu__prenom")[:50]
+        # Recherche dans les individus (si l'utilisateur peut ouvrir les fiches familles)
+        if user.has_perm("core.famille_liste"):
+            champs = ("nom_complet", "nom_complet_inverse", "individu__nom", "individu__nom_jfille", "individu__prenom")
+            condition = reduce(or_, [Q(**{'{}__icontains'.format(f): texte}) for f in champs], Q())
+            queryset = Rattachement.objects.select_related('individu', 'famille').annotate(nom_complet=Concat('individu__nom', Value(' '), 'individu__prenom'), nom_complet_inverse=Concat('individu__prenom', Value(' '), 'individu__nom'))
+            resultats["rattachements"] = queryset.filter(condition).order_by("individu__nom", "individu__prenom")[:50]
 
-        # Recherche dans les payeurs
-        resultats["payeurs"] = Payeur.objects.select_related('famille').filter(nom__icontains=texte).order_by("nom")[:50]
+            # Recherche dans les payeurs
+            resultats["payeurs"] = Payeur.objects.select_related('famille').filter(nom__icontains=texte).order_by("nom")[:50]
 
-        # Recherche dans les collaborateurs
-        champs = ("nom_complet", "nom_complet_inverse", "nom", "nom_jfille", "prenom")
-        condition = reduce(or_, [Q(**{'{}__icontains'.format(f): texte}) for f in champs], Q())
-        queryset = Collaborateur.objects.annotate(nom_complet=Concat('nom', Value(' '), 'prenom'), nom_complet_inverse=Concat('prenom', Value(' '), 'nom'))
-        resultats["collaborateurs"] = queryset.filter(condition).order_by("nom", "prenom")[:50]
+        # Recherche dans les collaborateurs (si l'utilisateur peut ouvrir les fiches collaborateurs, limitée à son périmètre)
+        if user.has_perm("core.collaborateur_liste"):
+            champs = ("nom_complet", "nom_complet_inverse", "nom", "nom_jfille", "prenom")
+            condition = reduce(or_, [Q(**{'{}__icontains'.format(f): texte}) for f in champs], Q())
+            perimetre = Q() if user.is_superuser else Q(groupes__superviseurs=user) | Q(groupes__superviseurs__isnull=True)
+            queryset = Collaborateur.objects.filter(perimetre).distinct().annotate(nom_complet=Concat('nom', Value(' '), 'prenom'), nom_complet_inverse=Concat('prenom', Value(' '), 'nom'))
+            resultats["collaborateurs"] = queryset.filter(condition).order_by("nom", "prenom")[:50]
 
         # Recherche dans le menu
-        resultats["commandes"] = []
         menu_principal = GetMenuPrincipal(user=self.request.user)
         for menu in menu_principal.GetChildren():
             for sous_menu in menu.GetChildren():

@@ -13,6 +13,7 @@ from core.models import PortailParametre
 
 
 class Modifier(CustomView, TemplateView):
+    menu_code = "portail_parametres_modifier"
     template_name = "core/crud/edit.html"
     compatible_demo = False
 

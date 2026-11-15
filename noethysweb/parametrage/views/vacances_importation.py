@@ -31,6 +31,7 @@ def Rechercher_zone_scolaire(cp=""):
 
 
 class View(CustomView, TemplateView):
+    menu_code = "vacances_liste"
     template_name = "parametrage/vacances_importation.html"
 
     def get_context_data(self, **kwargs):

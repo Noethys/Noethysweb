@@ -11,6 +11,7 @@ from core.models import Famille
 
 
 class Page(crud.Page):
+    menu_code = "liste_familles_sans_inscriptions"
     model = Famille
     description_liste = "Retrouvez ici les familles dont aucun membre n'est inscrit à une activité. Cette liste permet par exemple de repérer les fiches incomplètes ou les familles qui ne fréquentent plus la structure, avant de les relancer ou d'effacer leurs données."
 

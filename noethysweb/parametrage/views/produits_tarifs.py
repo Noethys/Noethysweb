@@ -14,6 +14,7 @@ from parametrage.forms.produits_tarifs import Formulaire
 class Page(crud.Page):
     model = TarifProduit
     url_liste = "produits_tarifs_liste"
+    menu_code = "produits_liste"
     url_ajouter = "produits_tarifs_ajouter"
     url_modifier = "produits_tarifs_modifier"
     url_supprimer = "produits_tarifs_supprimer"
