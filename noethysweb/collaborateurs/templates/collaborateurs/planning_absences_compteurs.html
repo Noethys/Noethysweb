@@ -1,0 +1,5 @@
+<tr class="pa_compteurs {{ classe|default:'' }}">
+    <td class="pa_nom" title="Nombre de collaborateurs absents chaque jour (une demi-journée compte pour 0,5). Les demandes en attente ne sont pas comptées.">{{ libelle }}</td>
+    {% for compteur in bloc.compteurs %}<td class="{{ compteur.classes }}{% if compteur.taux > 33 %} pa_eleve{% endif %}" {% if compteur.nbre %}title="{{ compteur.texte }} absent(s) sur {{ bloc.nbre }} ({{ compteur.taux }} %)"{% endif %}>{{ compteur.texte }}</td>{% endfor %}
+    <td class="pa_total"></td>
+</tr>

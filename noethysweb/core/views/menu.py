@@ -502,6 +502,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_gestion_collaborateurs = menu_collaborateurs.Add(titre="Collaborateurs")
     menu_gestion_collaborateurs.Add(code="collaborateur_liste", titre="Liste des collaborateurs", icone="file-text-o")
     menu_gestion_collaborateurs.Add(code="importer_collaborateurs", titre="Importer des collaborateurs", icone="file-text-o")
+    menu_gestion_collaborateurs.Add(code="pieces_manquantes_collaborateurs", titre="Pièces manquantes", icone="file-text-o")
 
     # Liste des collaborateurs
     menu_gestion_contrats = menu_collaborateurs.Add(titre="Contrats")
@@ -518,12 +519,14 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     # Congés et absences
     menu_conges_collaborateurs = menu_collaborateurs.Add(titre="Congés et absences")
     menu_conges_collaborateurs.Add(code="demandes_absences_collaborateurs", titre="Demandes d'absence", icone="file-text-o")
+    menu_conges_collaborateurs.Add(code="planning_absences_collaborateurs", titre="Planning des absences", icone="file-text-o")
     menu_conges_collaborateurs.Add(code="compteurs_conges_collaborateurs", titre="Compteurs de congés", icone="file-text-o")
     menu_conges_collaborateurs.Add(code="heures_declarees_collaborateurs", titre="Heures déclarées", icone="file-text-o")
 
     # Analyse
     menu_analyse_collaborateurs = menu_collaborateurs.Add(titre="Analyse")
     menu_analyse_collaborateurs.Add(code="statistiques_evenements_collaborateurs", titre="Statistiques des évènements", icone="file-text-o")
+    menu_analyse_collaborateurs.Add(code="variables_paie_collaborateurs", titre="Éléments variables de paie", icone="file-text-o")
 
 
 

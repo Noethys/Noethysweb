@@ -526,10 +526,15 @@ COMMANDES = {
     "fusionner_contrats_word": ("file-word-o", "e", "Générer les contrats à partir d'un modèle Word."),
     "appliquer_modele_planning": ("calendar-plus-o", "a", "Appliquer un planning type à des collaborateurs."),
     "planning_equipe": ("tasks", "a", "Gérer les plannings des collaborateurs par date ou par collaborateur."),
+    "planning_individuel": ("calendar-check-o", "a", "Planifier l'année d'un collaborateur et suivre son objectif d'heures."),
+    "soldes_objectifs_collaborateurs": ("exchange", "a", "Comparer le planifié à l'objectif annuel et reporter les soldes sur la période suivante."),
     "statistiques_evenements_collaborateurs": ("bar-chart", "s", "Tableau de bord du temps de travail, des absences et des objectifs des collaborateurs."),
     "demandes_absences_collaborateurs": ("plane", "a", "Saisir et valider les demandes de congé et d'absence."),
     "compteurs_conges_collaborateurs": ("balance-scale", "l", "Consulter les soldes de congés et attribuer les droits."),
     "heures_declarees_collaborateurs": ("clock-o", "a", "Valider les heures réalisées déclarées par les collaborateurs depuis leur espace."),
+    "pieces_manquantes_collaborateurs": ("file-text-o", "l", "Repérer les pièces non fournies ou expirées et relancer les collaborateurs."),
+    "planning_absences_collaborateurs": ("calendar", "l", "Visualiser les congés et absences de l'équipe sur le mois."),
+    "variables_paie_collaborateurs": ("calculator", "e", "Préparer la paie : heures, majorations, congés et absences du mois."),
 }
 
 
@@ -556,6 +561,9 @@ NOUVEAUTES = {
     "demandes_absences_collaborateurs": "2026-11-14",
     "compteurs_conges_collaborateurs": "2026-11-14",
     "heures_declarees_collaborateurs": "2026-11-14",
+    "pieces_manquantes_collaborateurs": "2026-11-15",
+    "planning_absences_collaborateurs": "2026-11-15",
+    "variables_paie_collaborateurs": "2026-11-15",
 }
 
 

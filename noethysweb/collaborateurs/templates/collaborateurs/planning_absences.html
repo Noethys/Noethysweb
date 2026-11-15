@@ -1,0 +1,209 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .pa_categories > div {columns: 1}
+        .pa_barre {display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px}
+        .pa_barre .pa_periode {font-weight: 600; margin: 0 6px}
+        .pa_legende {display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 0 0; font-size: 12px; color: #6c757d}
+        .pa_legende span {display: inline-flex; align-items: center; gap: 5px}
+        .pa_legende i {display: inline-block; width: 14px; height: 14px; border-radius: 2px; border: 1px solid rgba(0, 0, 0, .12)}
+
+        .pa_conteneur {overflow-x: auto; border: 1px solid #dee2e6; border-radius: .25rem}
+        .pa_table {border-collapse: separate; border-spacing: 0; font-size: 12px; width: 100%}
+        .pa_table th, .pa_table td {padding: 0; border-right: 1px solid #edf0f3; border-bottom: 1px solid #edf0f3; text-align: center; height: 26px; min-width: 24px}
+        .pa_table thead th {background: #f8f9fa; font-weight: 600; color: #495057; position: sticky; top: 0; z-index: 2}
+        .pa_table thead tr.pa_ligne_mois th {font-size: 12.5px; text-align: left; padding-left: 6px}
+        .pa_table thead .pa_initiale {display: block; font-size: 10px; font-weight: 400; color: #8a96a3; line-height: 1}
+        .pa_table .pa_nom {position: sticky; left: 0; z-index: 1; background: #ffffff; text-align: left; padding: 0 8px; min-width: 190px; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis}
+        .pa_table thead .pa_nom {z-index: 3; background: #f8f9fa}
+        .pa_table .pa_total {min-width: 46px; padding: 0 4px; font-weight: 600; white-space: nowrap}
+        .pa_table .pa_total small {display: block; font-weight: 400; color: #8a96a3; line-height: 1}
+        .pa_table .pa_debut_mois {border-left: 2px solid #adb5bd}
+
+        /* Jours */
+        .pa_table td.pa_we, .pa_table th.pa_we {background-color: #f1f3f5}
+        .pa_table td.pa_vacances, .pa_table th.pa_vacances {background-color: #fff8d6}
+        .pa_table td.pa_ferie, .pa_table th.pa_ferie {background-color: #e9e3f5}
+        .pa_table td.pa_non_travaille {background-image: radial-gradient(#c3cad2 1px, transparent 1px); background-size: 5px 5px}
+        .pa_table td.pa_hors_contrat {background-color: #dfe3e8}
+        .pa_table th.pa_aujourdhui {background: var(--couleur-principale, #3c8dbc); color: #ffffff}
+        .pa_table th.pa_aujourdhui .pa_initiale {color: #ffffff}
+
+        /* Absences */
+        .pa_cellule {display: flex; height: 22px; margin: 2px; border-radius: 3px; overflow: hidden; position: relative}
+        .pa_cellule > span {flex: 1}
+        .pa_cellule .pa_attente {opacity: .9}
+        .pa_cellule b {position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 600; color: #ffffff; text-shadow: 0 0 2px rgba(0, 0, 0, .45); pointer-events: none}
+
+        /* Blocs et compteurs */
+        .pa_table tr.pa_titre_bloc td {background: #eef1f5; font-weight: 600; text-align: left; padding: 0 8px; height: 24px}
+        .pa_table tr.pa_titre_bloc td.pa_nom {background: #eef1f5}
+        .pa_table tr.pa_compteurs td {font-size: 11px; font-weight: 600; color: #495057; background-color: #fbfbfc}
+        .pa_table tr.pa_compteurs td.pa_nom {font-weight: 400; color: #6c757d; background: #fbfbfc}
+        .pa_table tr.pa_compteurs td.pa_eleve {color: #a8323e; background-color: #fdecee}
+        .pa_table tr.pa_total_general td {border-top: 2px solid #adb5bd}
+        .pa_table tbody tr.pa_ligne:hover td {background-color: rgba(60, 141, 188, .06)}
+        .pa_table tbody tr.pa_ligne:hover td.pa_nom {background-color: #f2f7fb}
+
+        /* Mode sombre */
+        .dark-mode .pa_conteneur {border-color: #4b545c}
+        .dark-mode .pa_table th, .dark-mode .pa_table td {border-color: #3f474e}
+        .dark-mode .pa_table thead th, .dark-mode .pa_table thead .pa_nom {background: #3f474e; color: #e9ecef}
+        .dark-mode .pa_table .pa_nom {background: #343a40}
+        .dark-mode .pa_table td.pa_we, .dark-mode .pa_table th.pa_we {background-color: #3a4047}
+        .dark-mode .pa_table td.pa_vacances, .dark-mode .pa_table th.pa_vacances {background-color: #4a4630}
+        .dark-mode .pa_table td.pa_ferie, .dark-mode .pa_table th.pa_ferie {background-color: #453f55}
+        .dark-mode .pa_table td.pa_hors_contrat {background-color: #2b3035}
+        .dark-mode .pa_table tr.pa_titre_bloc td, .dark-mode .pa_table tr.pa_titre_bloc td.pa_nom {background: #454d55}
+        .dark-mode .pa_table tr.pa_compteurs td, .dark-mode .pa_table tr.pa_compteurs td.pa_nom {background-color: #2f353b; color: #ced4da}
+        .dark-mode .pa_table tr.pa_compteurs td.pa_eleve {background-color: #5a2a30; color: #f1a1aa}
+
+        /* Impression */
+        @media print {
+            .main-sidebar, .main-header, .content-header, .pa_parametres, .pa_barre .btn, .main-footer {display: none !important}
+            .content-wrapper {margin-left: 0 !important}
+            .pa_resultats {flex: 0 0 100%; max-width: 100%}
+            .pa_conteneur {overflow: visible}
+            .pa_table thead th, .pa_table .pa_nom {position: static}
+            .pa_cellule, .pa_table td, .pa_table th {-webkit-print-color-adjust: exact; print-color-adjust: exact}
+        }
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-lg-3 pa_parametres">
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button type="submit" form="form_parametres" class="btn btn-primary btn-block mb-3" title="Actualiser le planning"><i class="fa fa-refresh margin-r-5"></i> Actualiser</button>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-9 pa_resultats">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Planning des absences{% if data %} {{ data.periode }}{% endif %}</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="maximize" title="Agrandir"><i class="fa fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if data %}
+
+                        <div class="pa_barre">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default pa_navigation" data-mois="{{ data.precedent }}" title="Mois précédent"><i class="fa fa-chevron-left"></i></button>
+                                <button type="button" class="btn btn-default pa_navigation" data-mois="aujourdhui" title="Revenir au mois en cours">Aujourd'hui</button>
+                                <button type="button" class="btn btn-default pa_navigation" data-mois="{{ data.suivant }}" title="Mois suivant"><i class="fa fa-chevron-right"></i></button>
+                            </div>
+                            <span class="pa_periode">{% for mois in data.mois %}{{ mois.nom }}{% if not forloop.last %} - {% endif %}{% endfor %}</span>
+                            <button type="button" class="btn btn-default ml-auto" onclick="window.print()" title="Imprimer le planning"><i class="fa fa-print margin-r-5"></i>Imprimer</button>
+                            <a class="btn btn-default" href="{% url 'demandes_absences_collaborateurs' %}" title="Traiter les demandes d'absence"><i class="fa fa-inbox margin-r-5"></i>Demandes d'absence</a>
+                        </div>
+
+                        {% if not data.nbre_collaborateurs %}
+                            <div class="callout callout-info mb-0"><p>Aucun collaborateur ne correspond aux paramètres sélectionnés.</p></div>
+                        {% else %}
+
+                            <div class="pa_conteneur">
+                                <table class="pa_table" aria-label="Planning des absences {{ data.periode }}">
+                                    <thead>
+                                        <tr class="pa_ligne_mois">
+                                            <th class="pa_nom" rowspan="2" scope="col">Collaborateur</th>
+                                            {% for mois in data.mois %}<th colspan="{{ mois.nbre }}" scope="colgroup" {% if not forloop.first %}class="pa_debut_mois"{% endif %}>{{ mois.nom }}</th>{% endfor %}
+                                            <th class="pa_total" rowspan="2" scope="col" title="Jours d'absence validés sur la période (hors jours fériés), puis jours demandés en attente">Jours</th>
+                                        </tr>
+                                        <tr>
+                                            {% for jour in data.dates %}<th scope="col" class="{{ jour.classes }}{% if jour.debut_mois %} pa_debut_mois{% endif %}" title="{{ jour.titre }}">{{ jour.jour }}<span class="pa_initiale">{{ jour.initiale }}</span></th>{% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for bloc in data.blocs %}
+                                            {% if bloc.nom %}
+                                                <tr class="pa_titre_bloc"><td class="pa_nom">{{ bloc.nom }} ({{ bloc.nbre }})</td><td colspan="{{ data.nbre_colonnes|add:-1 }}"></td></tr>
+                                            {% endif %}
+                                            {% for ligne in bloc.lignes %}
+                                                <tr class="pa_ligne">
+                                                    <th scope="row" class="pa_nom" style="font-weight: normal;"><a href="{% url 'collaborateur_conges' idcollaborateur=ligne.collaborateur.pk %}" title="Ouvrir les congés de {{ ligne.collaborateur.Get_nom }}">{{ ligne.collaborateur.Get_nom }}</a></th>
+                                                    {% for cellule in ligne.cellules %}
+                                                        <td{% if cellule.classes %} class="{{ cellule.classes }}"{% endif %}{% if cellule.titre %} title="{{ cellule.titre }}"{% endif %}>
+                                                            {% if cellule.matin or cellule.apres_midi %}
+                                                                <div class="pa_cellule">
+                                                                    {% with cellule.matin as portion %}<span {% if portion %}{% if portion.attente %}class="pa_attente" style="background: repeating-linear-gradient(45deg, {{ portion.couleur }} 0 3px, transparent 3px 6px);"{% else %}style="background: {{ portion.couleur }};"{% endif %}{% endif %}></span>{% endwith %}
+                                                                    {% with cellule.apres_midi as portion %}<span {% if portion %}{% if portion.attente %}class="pa_attente" style="background: repeating-linear-gradient(45deg, {{ portion.couleur }} 0 3px, transparent 3px 6px);"{% else %}style="background: {{ portion.couleur }};"{% endif %}{% endif %}></span>{% endwith %}
+                                                                    {% if cellule.abrege and not cellule.matin.attente %}<b>{{ cellule.abrege }}</b>{% endif %}
+                                                                </div>
+                                                            {% endif %}
+                                                        </td>
+                                                    {% endfor %}
+                                                    <td class="pa_total">{{ ligne.total_str }}{% if ligne.attente_str %}<small title="Jours demandés en attente de validation">+{{ ligne.attente_str }} ?</small>{% endif %}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            {% if bloc.nbre > 1 %}
+                                                {% include "collaborateurs/planning_absences_compteurs.html" with bloc=bloc libelle="Absents" %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if data.total_general %}
+                                            {% include "collaborateurs/planning_absences_compteurs.html" with bloc=data.total_general libelle="Total des absents" classe="pa_total_general" %}
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="pa_legende" aria-label="Légende">
+                                {% for categorie in data.categories %}<span><i style="background: {{ categorie.couleur }};"></i>{{ categorie.nom }} ({{ categorie.abrege }})</span>{% endfor %}
+                                {% if data.afficher_attente %}<span><i style="background: repeating-linear-gradient(45deg, #6c757d 0 3px, transparent 3px 6px);"></i>Demande en attente</span>{% endif %}
+                                <span><i style="background: #f1f3f5;"></i>Week-end</span>
+                                <span><i style="background: #e9e3f5;"></i>Jour férié</span>
+                                <span><i style="background: #fff8d6;"></i>Vacances scolaires</span>
+                                <span><i style="background-color: #ffffff; background-image: radial-gradient(#c3cad2 1px, transparent 1px); background-size: 5px 5px;"></i>Jour non travaillé (contrat)</span>
+                                <span><i style="background: #dfe3e8;"></i>Hors contrat</span>
+                                <span><i style="background: #fdecee;"></i>Plus d'un tiers du groupe absent</span>
+                            </div>
+
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $(function() {
+            // Navigation entre les mois
+            $(".pa_navigation").on("click", function() {
+                var mois = $(this).data("mois");
+                if (mois === "aujourdhui") {
+                    var date = new Date();
+                    mois = date.getFullYear() + "-" + ("0" + (date.getMonth() + 1)).slice(-2);
+                }
+                var select = $("#id_mois");
+                if (!select.find("option[value='" + mois + "']").length) {
+                    toastr.warning("Ce mois n'est pas disponible");
+                    return;
+                }
+                select.val(mois);
+                $("#form_parametres").submit();
+            });
+        });
+    </script>
+
+{% endblock contenu_page %}

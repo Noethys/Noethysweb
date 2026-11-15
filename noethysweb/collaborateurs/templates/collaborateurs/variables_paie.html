@@ -1,0 +1,182 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .vp_barre {display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px}
+        .vp_table {font-size: 12.5px; margin-bottom: 0}
+        .vp_table th {font-size: 11.5px; font-weight: 600; color: #495057; vertical-align: bottom; white-space: nowrap; background: #f8f9fa}
+        .vp_table td, .vp_table th {padding: .4rem .5rem}
+        .vp_table .nombre {text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums}
+        .vp_table .vp_groupe {text-align: center; border-bottom: 2px solid #dee2e6}
+        .vp_table .vp_separateur {border-left: 2px solid #dee2e6}
+        .vp_table tr.vp_total td {font-weight: 700; background: #f8f9fa}
+        .vp_table .vp_negatif {color: #a8323e}
+        .vp_table .vp_positif {color: #2d6a1f}
+        .vp_table .vp_majore {font-weight: 600}
+        .vp_table .vp_poste {display: block; font-size: 11px; color: #6c757d}
+        .vp_table .vp_nom {white-space: nowrap; min-width: 170px}
+        .vp_alerte {color: #c47f00; cursor: help}
+        .vp_regles {font-size: 12px; color: #6c757d; margin: 10px 0 0 0}
+        .dark-mode .vp_table th, .dark-mode .vp_table tr.vp_total td {background: #3f474e; color: #e9ecef}
+        .dark-mode .vp_table .vp_poste, .dark-mode .vp_regles {color: #adb5bd}
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-lg-3">
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button type="submit" form="form_parametres" class="btn btn-primary btn-block mb-3" title="Calculer les éléments variables du mois"><i class="fa fa-refresh margin-r-5"></i> Calculer</button>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-calculator margin-r-5"></i> Éléments variables de paie{% if resultats %} - {{ resultats.titre_mois }}{% endif %}</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="maximize" title="Agrandir"><i class="fa fa-expand"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    {% if not resultats %}
+                        <p>Préparez la paie du mois : heures travaillées, heures complémentaires et supplémentaires avec leurs majorations, heures de dimanche, de jours fériés et de nuit, congés et absences de chaque collaborateur.</p>
+                        <div class="callout callout-info mb-0"><p>Sélectionnez le mois puis cliquez sur <b>Calculer</b>.</p></div>
+
+                    {% elif not resultats.lignes %}
+                        <div class="callout callout-warning mb-0"><p>Aucun collaborateur n'est sous contrat en {{ resultats.titre_mois|lower }} pour les paramètres sélectionnés.</p></div>
+
+                    {% else %}
+
+                        <div class="vp_barre">
+                            <button type="button" class="btn btn-primary" id="vp_excel" title="Exporter le détail au format Excel (variables, semaines, absences)"><i class="fa fa-file-excel-o margin-r-5"></i>Exporter vers Excel</button>
+                            {% if resultats.nbre_alertes %}<span class="vp_alerte ml-2"><i class="fa fa-exclamation-triangle margin-r-5"></i>{{ resultats.nbre_alertes }} collaborateur{{ resultats.nbre_alertes|pluralize }} avec des points à vérifier</span>{% endif %}
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover vp_table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">Collaborateur</th>
+                                        <th rowspan="2" class="nombre" title="Volume hebdomadaire du contrat">Contrat</th>
+                                        <th colspan="5" class="vp_groupe vp_separateur">Temps de travail</th>
+                                        <th colspan="4" class="vp_groupe vp_separateur" title="Calculées par semaine civile : {{ resultats.semaines_textes|join:', ' }}">Heures compl. / sup.</th>
+                                        <th colspan="3" class="vp_groupe vp_separateur">Dont</th>
+                                        {% if resultats.nbre_colonnes_absences %}<th colspan="{{ resultats.nbre_colonnes_absences }}" class="vp_groupe vp_separateur">Congés et absences</th>{% endif %}
+                                    </tr>
+                                    <tr>
+                                        <th class="nombre vp_separateur" title="Nombre de jours avec du temps de travail">Jours</th>
+                                        <th class="nombre">Travaillé</th>
+                                        <th class="nombre" title="Absences comptées comme du temps de travail (catégories d'évènements « compter comme temps de travail »)">Abs. assim.</th>
+                                        <th class="nombre" title="Volume du contrat réparti sur ses jours travaillés, hors jours fériés">Attendu</th>
+                                        <th class="nombre" title="Travaillé + absences assimilées - attendu">Écart</th>
+                                        <th class="nombre vp_separateur">HC +10&nbsp;%</th>
+                                        <th class="nombre">HC +25&nbsp;%</th>
+                                        <th class="nombre">HS +25&nbsp;%</th>
+                                        <th class="nombre">HS +50&nbsp;%</th>
+                                        <th class="nombre vp_separateur">Dim.</th>
+                                        <th class="nombre">Fériés</th>
+                                        <th class="nombre" title="Entre 21h et 6h">Nuit</th>
+                                        {% for colonne in resultats.colonnes_conges %}<th class="nombre{% if forloop.first %} vp_separateur{% endif %}">{{ colonne.nom }}</th>{% endfor %}
+                                        {% for colonne in resultats.colonnes_absences %}<th class="nombre{% if forloop.first and not resultats.colonnes_conges %} vp_separateur{% endif %}">{{ colonne.nom }}</th>{% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ligne in resultats.lignes %}
+                                        <tr>
+                                            <td class="vp_nom"><a href="{% url 'collaborateur_planning' idcollaborateur=ligne.collaborateur.pk %}" title="Ouvrir le planning individuel">{{ ligne.collaborateur.Get_nom }}</a>{% if ligne.alertes %} <i class="fa fa-exclamation-triangle vp_alerte" data-toggle="tooltip" data-html="true" title="{{ ligne.alertes|join:'<br>' }}" aria-label="Points à vérifier : {{ ligne.alertes|join:', ' }}"></i>{% endif %}<span class="vp_poste">{{ ligne.poste }}{% if ligne.type_contrat %} · {{ ligne.type_contrat }}{% endif %}</span></td>
+                                            <td class="nombre">{% if ligne.heures_hebdo %}{{ ligne.heures_hebdo|floatformat:"-2" }} h{% endif %}</td>
+                                            <td class="nombre vp_separateur">{{ ligne.jours_travailles|default:"" }}</td>
+                                            <td class="nombre">{{ ligne.textes.travaille }}</td>
+                                            <td class="nombre">{{ ligne.textes.assimile }}</td>
+                                            <td class="nombre">{{ ligne.textes.attendu }}</td>
+                                            <td class="nombre {% if ligne.ecart < 0 %}vp_negatif{% elif ligne.ecart > 0 %}vp_positif{% endif %}">{% if ligne.ecart > 0 %}+{% endif %}{{ ligne.textes.ecart }}</td>
+                                            <td class="nombre vp_separateur vp_majore">{{ ligne.textes.hc10 }}</td>
+                                            <td class="nombre vp_majore">{{ ligne.textes.hc25 }}</td>
+                                            <td class="nombre vp_majore">{{ ligne.textes.hs25 }}</td>
+                                            <td class="nombre vp_majore">{{ ligne.textes.hs50 }}</td>
+                                            <td class="nombre vp_separateur">{{ ligne.textes.dimanche }}</td>
+                                            <td class="nombre">{{ ligne.textes.ferie }}</td>
+                                            <td class="nombre">{{ ligne.textes.nuit }}</td>
+                                            {% for texte in ligne.textes_conges %}<td class="nombre{% if forloop.first %} vp_separateur{% endif %}">{{ texte }}</td>{% endfor %}
+                                            {% for texte in ligne.textes_absences %}<td class="nombre{% if forloop.first and not ligne.textes_conges %} vp_separateur{% endif %}">{{ texte }}</td>{% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                    <tr class="vp_total">
+                                        <td>Total ({{ resultats.lignes|length }})</td>
+                                        <td></td>
+                                        <td class="vp_separateur"></td>
+                                        <td class="nombre">{{ resultats.totaux.travaille }}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="nombre vp_separateur">{{ resultats.totaux.hc10 }}</td>
+                                        <td class="nombre">{{ resultats.totaux.hc25 }}</td>
+                                        <td class="nombre">{{ resultats.totaux.hs25 }}</td>
+                                        <td class="nombre">{{ resultats.totaux.hs50 }}</td>
+                                        <td class="nombre vp_separateur">{{ resultats.totaux.dimanche }}</td>
+                                        <td class="nombre">{{ resultats.totaux.ferie }}</td>
+                                        <td class="nombre">{{ resultats.totaux.nuit }}</td>
+                                        {% for colonne in resultats.colonnes_conges %}<td{% if forloop.first %} class="vp_separateur"{% endif %}></td>{% endfor %}
+                                        {% for colonne in resultats.colonnes_absences %}<td{% if forloop.first and not resultats.colonnes_conges %} class="vp_separateur"{% endif %}></td>{% endfor %}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <p class="vp_regles">
+                            <i class="fa fa-info-circle margin-r-5"></i>Heures retenues : {% if resultats.realise %}réalisé lorsqu'il est saisi, sinon planifié{% else %}planifié{% endif %}.
+                            Heures complémentaires (temps partiel) et supplémentaires (temps plein, durée légale {{ resultats.duree_legale|floatformat:"-2" }} h) calculées par semaine civile pour les contrats hebdomadaires :
+                            {{ resultats.semaines_textes|join:", " }}. HS +25 % jusqu'à la 8<sup>e</sup> heure au-delà de la durée légale, +50 % ensuite.
+                            HC +10 % dans la limite de 10 % du volume du contrat, +25 % ensuite. Vérifiez ces règles avec votre convention collective ou votre statut.
+                        </p>
+
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $(function() {
+            $(".vp_table [data-toggle='tooltip']").tooltip();
+            $("#vp_excel").on("click", function() {
+                var bouton = $(this).prop("disabled", true);
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_variables_paie_collaborateurs_exporter_excel' %}",
+                    data: $("#form_parametres").serialize(),
+                    datatype: "json",
+                    success: function(data) {
+                        bouton.prop("disabled", false);
+                        window.location.href = data.url;
+                    },
+                    error: function(data) {
+                        bouton.prop("disabled", false);
+                        toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue");
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock contenu_page %}

@@ -1,0 +1,156 @@
+{% extends "core/page.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .pm_compteurs {display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px}
+        .pm_compteurs .badge {font-size: 12.5px; font-weight: 500; padding: 6px 10px}
+        .pm_barre {display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px}
+        .pm_barre .pm_recherche {max-width: 260px}
+        .pm_table td {vertical-align: middle}
+        .pm_table .pm_pieces .badge {font-size: 12px; font-weight: 500; margin: 2px 4px 2px 0; white-space: normal; text-align: left}
+        .pm_table .pm_check {width: 34px; text-align: center}
+        .pm_sans_adresse {color: #a8323e; font-size: 12px}
+        .pm_adresse {color: #6c757d; font-size: 12px}
+        .dark-mode .pm_adresse {color: #adb5bd}
+        .dark-mode .pm_sans_adresse {color: #f1a1aa}
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+        <div class="col-lg-3">
+
+            <!-- Paramètres -->
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5"></i> Paramètres</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button type="submit" form="form_parametres" class="btn btn-primary btn-block mb-3" title="Actualiser les résultats"><i class="fa fa-refresh margin-r-5"></i> Actualiser les résultats</button>
+                    {% crispy form_parametres %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-caret-square-o-right margin-r-5"></i> Résultats</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>{{ box_introduction|safe }}</p>
+
+                    {% if resultats %}
+
+                        {# Boutons de commandes #}
+                        <div class="pm_barre">
+                            <button type="button" class="btn btn-primary" id="pm_envoyer" {% if not resultats.lignes %}disabled{% endif %} title="Préparer un email de rappel pour les collaborateurs cochés"><i class="fa fa-send-o margin-r-5"></i>Envoyer des rappels par email</button>
+                            <input type="search" class="form-control pm_recherche ml-auto" id="pm_recherche" placeholder="Rechercher..." aria-label="Rechercher un collaborateur ou une pièce">
+                        </div>
+
+                        {# Compteurs #}
+                        <div class="pm_compteurs" aria-label="Synthèse">
+                            <span class="badge badge-light">{{ resultats.lignes|length }} collaborateur{{ resultats.lignes|length|pluralize }} concerné{{ resultats.lignes|length|pluralize }} sur {{ resultats.nbre_collaborateurs }}</span>
+                            {% for total in resultats.totaux %}
+                                {% if total.nbre %}<span class="badge badge-{{ total.classe }}">{{ total.label }} : {{ total.nbre }}</span>{% endif %}
+                            {% endfor %}
+                        </div>
+
+                        {% if resultats.lignes %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover pm_table" id="pm_table">
+                                    <thead>
+                                        <tr>
+                                            <th class="pm_check"><input type="checkbox" id="pm_tout" title="Tout cocher" aria-label="Cocher tous les collaborateurs"></th>
+                                            <th>Collaborateur</th>
+                                            <th>Poste</th>
+                                            <th>Pièces</th>
+                                            <th class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ligne in resultats.lignes %}
+                                            <tr data-id="{{ ligne.collaborateur.pk }}">
+                                                <td class="pm_check"><input type="checkbox" class="pm_case" value="{{ ligne.collaborateur.pk }}" aria-label="Cocher {{ ligne.collaborateur.Get_nom }}" {% if not ligne.a_relancer %}disabled title="Aucune pièce à réclamer"{% endif %}></td>
+                                                <td>
+                                                    <a href="{% url 'collaborateur_resume' idcollaborateur=ligne.collaborateur.pk %}">{{ ligne.collaborateur.Get_nom }}</a>
+                                                    <br>{% if ligne.adresse %}<span class="pm_adresse">{{ ligne.adresse }}</span>{% else %}<span class="pm_sans_adresse"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Aucune adresse email</span>{% endif %}
+                                                </td>
+                                                <td>{{ ligne.poste }}</td>
+                                                <td class="pm_pieces">
+                                                    {% for piece in ligne.pieces %}<span class="badge badge-{{ piece.classe }}" title="{{ piece.label_etat|capfirst }}">{{ piece.texte }}</span>{% endfor %}
+                                                </td>
+                                                <td class="text-right text-nowrap">
+                                                    <a class="btn btn-default btn-xs" href="{% url 'collaborateur_pieces_liste' idcollaborateur=ligne.collaborateur.pk %}" title="Ouvrir les pièces de ce collaborateur"><i class="fa fa-file-text-o"></i></a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="callout callout-success mb-0"><p><i class="fa fa-check margin-r-5"></i>Tous les dossiers sont complets pour les paramètres sélectionnés.</p></div>
+                        {% endif %}
+
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $(function() {
+            // Cocher / décocher tout
+            $("#pm_tout").on("change", function() {
+                $("#pm_table tbody tr:visible .pm_case:enabled").prop("checked", this.checked);
+            });
+
+            // Recherche
+            $("#pm_recherche").on("input", function() {
+                var texte = this.value.toLowerCase();
+                $("#pm_table tbody tr").each(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(texte) !== -1);
+                });
+            });
+
+            // Envoi des rappels
+            $("#pm_envoyer").on("click", function() {
+                var ids = $(".pm_case:checked").map(function() {return parseInt(this.value)}).get();
+                if (!ids.length) {
+                    toastr.error("Cochez au moins un collaborateur dans la liste");
+                    return;
+                }
+                var data = $("#form_parametres").serializeArray();
+                data.push({name: "collaborateurs", value: JSON.stringify(ids)});
+                var bouton = $(this).prop("disabled", true);
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_pieces_manquantes_collaborateurs_emails' %}",
+                    data: $.param(data),
+                    datatype: "json",
+                    success: function(data) {
+                        window.location.href = data.url;
+                    },
+                    error: function(data) {
+                        bouton.prop("disabled", false);
+                        toastr.error(data.responseJSON ? data.responseJSON.erreur : "Une erreur est survenue");
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock contenu_page %}
