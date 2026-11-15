@@ -1,0 +1,103 @@
+{% extends "collaborateurs/collaborateur_liste.html" %}
+
+{% block detail_collaborateur %}
+    {{ block.super }}
+
+    {# Proposition d'appliquer le modèle de planning du contrat qui vient d'être créé #}
+    {% if contrat_modele %}
+    {% with contrat=contrat_modele.contrat %}
+    <div class="modal fade" id="ct_modal_modele" tabindex="-1" role="dialog" aria-labelledby="ct_modal_modele_titre">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-lightblue">
+                    <h5 class="modal-title" id="ct_modal_modele_titre"><strong>Appliquer le modèle de planning ?</strong></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="ct-recap">
+                        Contrat enregistré pour <strong>{{ contrat.collaborateur.Get_nom }}</strong><br>
+                        Modèle : <strong>{{ contrat.modele_planning.nom }}</strong> ({{ contrat_modele.cycle }} · {{ contrat_modele.heures }} par semaine)<br>
+                        {% if contrat.date_fin %}Période : du <strong>{{ contrat.date_debut|date:"d/m/Y" }}</strong> au <strong>{{ contrat.date_fin|date:"d/m/Y" }}</strong>
+                        {% else %}Début du contrat : <strong>{{ contrat.date_debut|date:"d/m/Y" }}</strong> · sans date de fin{% endif %}
+                    </div>
+                    {% if not contrat.date_fin %}
+                        <div class="form-group">
+                            <label for="ct_mod_fin" class="font-weight-bold mb-1">Appliquer jusqu'au <span class="text-danger">*</span></label>
+                            <div class="ct-fin">
+                                <input type="date" id="ct_mod_fin" class="form-control" min="{{ contrat.date_debut|date:'Y-m-d' }}" aria-describedby="ct_mod_fin_aide">
+                                <button type="button" class="btn btn-default btn-sm" data-fin="{{ contrat_modele.fin_annee|date:'Y-m-d' }}">Fin d'année</button>
+                                <button type="button" class="btn btn-default btn-sm" data-fin="{{ contrat_modele.fin_scolaire|date:'Y-m-d' }}">Fin d'année scolaire</button>
+                            </div>
+                            <small class="form-text text-muted" id="ct_mod_fin_aide">Le contrat n'a pas de date de fin : indiquez jusqu'à quand créer le planning. Vous pourrez le prolonger plus tard avec « Appliquer un modèle ».</small>
+                        </div>
+                    {% endif %}
+                    <div class="mb-2" role="radiogroup" aria-labelledby="ct_mod_conflit_titre">
+                        <div class="font-weight-bold mb-1" id="ct_mod_conflit_titre">Si des évènements existent déjà sur ces dates</div>
+                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" id="ct_mod_ignorer" name="ct_mod_conflit" value="ignorer" checked>
+                            <label class="custom-control-label" for="ct_mod_ignorer">Conserver l'existant (les créneaux en chevauchement ne sont pas créés)</label></div>
+                        <div class="custom-control custom-radio"><input type="radio" class="custom-control-input" id="ct_mod_remplacer" name="ct_mod_conflit" value="remplacer">
+                            <label class="custom-control-label" for="ct_mod_remplacer">Remplacer les évènements existants</label></div>
+                    </div>
+                    <div class="ct-apercu" id="ct_mod_apercu" aria-live="polite"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Plus tard</button>
+                    <button type="button" class="btn btn-primary" id="ct_mod_appliquer"><i class="fa fa-check margin-r-5"></i>Appliquer le modèle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .ct-recap {background: #f4f6f9; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; line-height: 1.7;}
+        .ct-fin {display: flex; gap: 8px; align-items: center; flex-wrap: wrap;}
+        .ct-fin input {width: 170px;}
+        .ct-apercu {border-radius: 6px; padding: 8px 10px; font-size: 13px; background: #e6f1fb; color: #0c447c;}
+        .ct-apercu:empty {display: none;}
+        .ct-apercu.erreur {background: #fdecea; color: #a32d2d;}
+        .dark-mode .ct-recap {background: #3a3f44;}
+        .dark-mode .ct-apercu {background: #0c3a52; color: #bae6fd;}
+    </style>
+    <script>
+        $(function() {
+            var $modal = $("#ct_modal_modele"), $apercu = $("#ct_mod_apercu"), $bouton = $("#ct_mod_appliquer");
+            var sans_fin = $("#ct_mod_fin").length > 0, minuteur = null;
+            function Donnees(apercu) {
+                return {idcontrat: {{ contrat.pk }}, date_fin: $("#ct_mod_fin").val() || "", conflit: $("input[name='ct_mod_conflit']:checked").val(),
+                        apercu: apercu ? "true" : "false", csrfmiddlewaretoken: "{{ csrf_token }}"};
+            }
+            function Message(xhr) { return (xhr && xhr.responseJSON && xhr.responseJSON.erreur) || "Une erreur est survenue"; }
+            function Texte(data, apercu) {
+                var n = data.nbre_crees || 0, texte = n + " évènement" + (n > 1 ? "s" : "") + (apercu ? (n > 1 ? " seront créés" : " sera créé") : (n > 1 ? " créés" : " créé")) + " " + data.periode;
+                if (data.nbre_supprimes) { texte += ", " + data.nbre_supprimes + " remplacé" + (data.nbre_supprimes > 1 ? "s" : ""); }
+                if (data.nbre_ignores) { texte += ", " + data.nbre_ignores + " ignoré" + (data.nbre_ignores > 1 ? "s" : "") + " (chevauchement)"; }
+                return texte + ".";
+            }
+            function Apercu() {
+                clearTimeout(minuteur);
+                if (sans_fin && !$("#ct_mod_fin").val()) { $apercu.removeClass("erreur").text("Indiquez la date de fin d'application."); $bouton.prop("disabled", true); return; }
+                minuteur = setTimeout(function() {
+                    $.post("{% url 'ajax_contrats_appliquer_modele' %}", Donnees(true)).done(function(data) {
+                        $apercu.removeClass("erreur").html("Aperçu : <strong>" + Texte(data, true) + "</strong>");
+                        $bouton.prop("disabled", !data.nbre_crees && !data.nbre_supprimes);
+                    }).fail(function(xhr) { $apercu.addClass("erreur").text(Message(xhr)); $bouton.prop("disabled", true); });
+                }, 250);
+            }
+            $modal.find("[data-fin]").on("click", function() { $("#ct_mod_fin").val(this.getAttribute("data-fin")); Apercu(); });
+            $("#ct_mod_fin").on("change input", Apercu);
+            $("input[name='ct_mod_conflit']").on("change", Apercu);
+            $bouton.on("click", function() {
+                $bouton.prop("disabled", true);
+                $.post("{% url 'ajax_contrats_appliquer_modele' %}", Donnees(false)).done(function(data) {
+                    $modal.modal("hide");
+                    toastr.success(Texte(data, false));
+                }).fail(function(xhr) { $apercu.addClass("erreur").text(Message(xhr)); $bouton.prop("disabled", false); });
+            });
+            // Retire le paramètre de l'adresse pour ne pas reproposer la fenêtre en cas de rechargement
+            if (window.history && window.history.replaceState) { window.history.replaceState(null, "", window.location.pathname); }
+            $modal.modal("show");
+            Apercu();
+        });
+    </script>
+    {% endwith %}
+    {% endif %}
+{% endblock %}

@@ -33,6 +33,14 @@ class Formulaire(FormulaireBase, forms.Form):
         resolver = getattr(self.request, "resolver_match", None)
         self.fields["modeles"].widget.attrs["idcollaborateur"] = int(resolver.kwargs.get("idcollaborateur", 0)) if resolver else 0
 
+        # Présélection du modèle de planning par défaut du contrat en cours (ou du prochain contrat)
+        if not self.is_bound and self.fields["modeles"].widget.attrs["idcollaborateur"]:
+            from core.models import ContratCollaborateur
+            from collaborateurs.utils.utils_collaborateur import Situation_contrat
+            situation = Situation_contrat(ContratCollaborateur.objects.filter(collaborateur_id=self.fields["modeles"].widget.attrs["idcollaborateur"]))
+            if situation["etat"] in ("EN_COURS", "A_VENIR") and situation["contrat"].modele_planning_id:
+                self.fields["modeles"].initial = [situation["contrat"].modele_planning_id]
+
         self.helper.layout = Layout(
             Commandes(enregistrer_label="<i class='fa fa-check margin-r-5'></i>Appliquer", ajouter=False, annuler_url="{% url 'collaborateur_evenements_liste' idcollaborateur=idcollaborateur %}"),
             Field("periode"),

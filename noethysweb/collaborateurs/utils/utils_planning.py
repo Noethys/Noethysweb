@@ -410,15 +410,29 @@ def Minutes_dans_plage(debut=None, fin=None, plage_debut=None, plage_fin=None):
     return total
 
 
+JOURS_TRAVAILLES_DEFAUT = (0, 1, 2, 3, 4)
+
+
+def Lire_jours_travailles(texte=""):
+    """ Jours habituellement travaillés d'un contrat : "0,1,3,4" -> (0, 1, 3, 4). Du lundi au vendredi si non renseigné. """
+    try:
+        jours = tuple(sorted({int(valeur) for valeur in str(texte or "").split(",") if valeur.strip() != "" and 0 <= int(valeur) <= 6}))
+    except ValueError:
+        jours = ()
+    return jours or JOURS_TRAVAILLES_DEFAUT
+
+
 def Heures_attendues(contrats=[], dates=[], liste_feries=[]):
-    """ Heures attendues par le contrat sur une liste de dates : volume hebdomadaire / 5 par jour ouvré (lundi-vendredi, hors fériés) """
+    """ Heures attendues par le contrat sur une liste de dates (en minutes) : volume hebdomadaire réparti sur les jours travaillés du contrat, hors fériés """
     total = 0.0
     for date in dates:
-        if date.weekday() >= 5 or utils_dates.EstFerie(date, liste_feries):
+        if utils_dates.EstFerie(date, liste_feries):
             continue
         for contrat in contrats:
             if contrat.heures_hebdo and contrat.date_debut <= date and (not contrat.date_fin or date <= contrat.date_fin):
-                total += float(contrat.heures_hebdo) / 5 * 60
+                jours = Lire_jours_travailles(contrat.jours_travailles)
+                if date.weekday() in jours:
+                    total += float(contrat.heures_hebdo) / len(jours) * 60
                 break
     return total
 

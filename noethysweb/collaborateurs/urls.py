@@ -21,6 +21,7 @@ urlpatterns = [
 
     # Collaborateurs
     path('collaborateurs/collaborateurs/liste', collaborateur.Liste.as_view(), name='collaborateur_liste'),
+    path('collaborateurs/collaborateurs/liste/<str:categorie>', collaborateur.Liste.as_view(), name='collaborateur_liste'),
     path('collaborateurs/collaborateurs/ajouter', collaborateur.Ajouter.as_view(), name='collaborateur_ajouter'),
     path('collaborateurs/collaborateurs/supprimer/<int:idcollaborateur>', collaborateur.Supprimer.as_view(), name='collaborateur_supprimer'),
     path('collaborateurs/collaborateurs/resume/<int:idcollaborateur>', collaborateur.Resume.as_view(), name='collaborateur_resume'),
@@ -120,6 +121,7 @@ urlpatterns = [
     path('collaborateurs/planning_individuel/enregistrer_ajustement', secure_ajax(planning_individuel.Enregistrer_ajustement), name='ajax_planning_individuel_enregistrer_ajustement'),
     path('collaborateurs/planning_individuel/supprimer_ajustement', secure_ajax(planning_individuel.Supprimer_ajustement), name='ajax_planning_individuel_supprimer_ajustement'),
     path('collaborateurs/planning_individuel/reporter_solde', secure_ajax(planning_individuel.Reporter_solde), name='ajax_planning_individuel_reporter_solde'),
+    path('collaborateurs/planning_individuel/convertir_recuperation', secure_ajax(planning_individuel.Convertir_recuperation), name='ajax_planning_individuel_convertir_recuperation'),
     path('collaborateurs/planning_individuel/imprimer', secure_ajax(planning_individuel.Imprimer), name='ajax_planning_individuel_imprimer'),
     path('collaborateurs/planning_individuel/envoyer_email', secure_ajax(planning_individuel.Envoyer_email), name='ajax_planning_individuel_envoyer_email'),
     path('collaborateurs/planning_individuel/exporter_excel', secure_ajax(planning_individuel.Exporter_excel), name='ajax_planning_individuel_exporter_excel'),
@@ -141,6 +143,7 @@ urlpatterns = [
     path('collaborateurs/conges/enregistrer_droits', secure_ajax(conges.Enregistrer_droits), name='ajax_conges_enregistrer_droits'),
     path('collaborateurs/conges/supprimer_droit', secure_ajax(conges.Supprimer_droit), name='ajax_conges_supprimer_droit'),
     path('collaborateurs/conges/transferer', secure_ajax(conges.Transferer), name='ajax_conges_transferer'),
+    path('collaborateurs/contrats/appliquer_modele', secure_ajax(collaborateur_contrats.Appliquer_modele_contrat), name='ajax_contrats_appliquer_modele'),
     path('collaborateurs/conges/reporter_soldes', secure_ajax(conges.Reporter_soldes), name='ajax_conges_reporter_soldes'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrat', secure_ajax(collaborateur_voir_contrat.Fusionner), name='ajax_collaborateur_fusionner_contrat'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrats', secure_ajax(fusionner_contrats_word.Fusionner), name='ajax_collaborateur_fusionner_contrats'),

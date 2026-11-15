@@ -499,17 +499,17 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_collaborateurs = menu.Add(code="collaborateurs_toc", titre="Collaborateurs", icone="users")
 
     # Liste des collaborateurs
-    menu_gestion_collaborateurs = menu_collaborateurs.Add(titre="Gestion des collaborateurs")
+    menu_gestion_collaborateurs = menu_collaborateurs.Add(titre="Collaborateurs")
     menu_gestion_collaborateurs.Add(code="collaborateur_liste", titre="Liste des collaborateurs", icone="file-text-o")
     menu_gestion_collaborateurs.Add(code="importer_collaborateurs", titre="Importer des collaborateurs", icone="file-text-o")
 
     # Liste des collaborateurs
-    menu_gestion_contrats = menu_collaborateurs.Add(titre="Gestion des contrats")
+    menu_gestion_contrats = menu_collaborateurs.Add(titre="Contrats")
     menu_gestion_contrats.Add(code="contrats_liste", titre="Liste des contrats", icone="file-text-o")
     menu_gestion_contrats.Add(code="fusionner_contrats_word", titre="Fusionner des contrats vers Word", icone="file-text-o")
 
     # Gestion des évènements
-    menu_gestion_evenements_collaborateurs = menu_collaborateurs.Add(titre="Gestion des évènements")
+    menu_gestion_evenements_collaborateurs = menu_collaborateurs.Add(titre="Evènements")
     menu_gestion_evenements_collaborateurs.Add(code="planning_equipe", titre="Planning général", icone="file-text-o")
     menu_gestion_evenements_collaborateurs.Add(code="planning_individuel", titre="Planning individuel", icone="file-text-o")
     menu_gestion_evenements_collaborateurs.Add(code="soldes_objectifs_collaborateurs", titre="Soldes et reports des objectifs", icone="file-text-o")

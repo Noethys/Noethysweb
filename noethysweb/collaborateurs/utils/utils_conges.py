@@ -79,6 +79,78 @@ def Est_ouvre(date=None, liste_feries=[]):
     return date.weekday() < 5 and not utils_dates.EstFerie(date, liste_feries)
 
 
+# ------------------------------------------------- Jours travaillés et décompte -------------------------------------------------
+
+JOURS_TRAVAILLES_DEFAUT = utils_planning.JOURS_TRAVAILLES_DEFAUT
+Lire_jours_travailles = utils_planning.Lire_jours_travailles
+MAX_JOURS_NON_TRAVAILLES = 7    # Nombre maximal de jours non travaillés consécutifs ajoutés après une absence (week-end, temps partiel)
+
+
+def Contrat_du_jour(contrats=[], date=None):
+    for contrat in contrats:
+        if contrat.date_debut <= date and (not contrat.date_fin or date <= contrat.date_fin):
+            return contrat
+    return None
+
+
+def Jours_travailles(contrats=[], date=None):
+    """ Jours de la semaine habituellement travaillés selon le contrat en cours à la date (lundi au vendredi par défaut) """
+    contrat = Contrat_du_jour(contrats, date)
+    return Lire_jours_travailles(getattr(contrat, "jours_travailles", None)) if contrat else JOURS_TRAVAILLES_DEFAUT
+
+
+def Est_travaille(date=None, contrats=[], liste_feries=[]):
+    """ Jour habituellement travaillé par le collaborateur (et non férié) : jour sur lequel une absence est posée """
+    return date.weekday() in Jours_travailles(contrats, date) and not utils_dates.EstFerie(date, liste_feries)
+
+
+def Decompter_jours(jours={}, mode="OUVRES", contrats=[], liste_feries=[], date_limite=None, matins=None, soirs=None):
+    """ Nombre de jours de congé décomptés pour des jours d'absence {date: 1 ou 0.5}.
+        - TRAVAILLES : seuls les jours habituellement travaillés (contrat) et non fériés comptent.
+        - OUVRES / OUVRABLES : les absences sont regroupées en périodes continues (les jours non travaillés et fériés intercalés
+          ne les interrompent pas). Une période se prolonge jusqu'à la veille de la reprise lorsqu'elle se termine par une journée entière.
+          Tous les jours ouvrés (lundi-vendredi) ou ouvrables (lundi-samedi) non fériés de la période sont comptés, y compris
+          les jours non travaillés du collaborateur (temps partiel) et, en ouvrables, le samedi qui suit une absence finissant le vendredi.
+        matins / soirs : jours où l'absence commence le matin / dure jusqu'au soir (par défaut : les journées entières).
+        Deux jours d'absence ne forment une même période que si le premier dure jusqu'au soir et le second commence le matin. """
+    if not jours:
+        return 0.0
+    ferie = lambda date: utils_dates.EstFerie(date, liste_feries)
+    if mode == "TRAVAILLES":
+        return float(sum(valeur for date, valeur in jours.items() if date.weekday() in Jours_travailles(contrats, date) and not ferie(date)))
+
+    dernier_jour_compte = 4 if mode == "OUVRES" else 5
+    non_travaille = lambda date: date.weekday() not in Jours_travailles(contrats, date) or ferie(date)
+    matins = {date for date, valeur in jours.items() if valeur >= 1} if matins is None else set(matins)
+    soirs = {date for date, valeur in jours.items() if valeur >= 1} if soirs is None else set(soirs)
+    dates = sorted(jours)
+    blocs, bloc = [], [dates[0], dates[0]]
+    for date in dates[1:]:
+        intervalle = [bloc[1] + datetime.timedelta(days=n) for n in range(1, (date - bloc[1]).days)]
+        if all(non_travaille(jour) for jour in intervalle) and bloc[1] in soirs and date in matins:
+            bloc[1] = date
+        else:
+            blocs.append(bloc)
+            bloc = [date, date]
+    blocs.append(bloc)
+
+    total = 0.0
+    for debut, fin in blocs:
+        # Prolongation jusqu'à la veille de la reprise (jours non travaillés qui suivent une journée entière d'absence)
+        if jours[fin] >= 1:
+            for n in range(MAX_JOURS_NON_TRAVAILLES):
+                suivant = fin + datetime.timedelta(days=1)
+                if (date_limite and suivant > date_limite) or not non_travaille(suivant):
+                    break
+                fin = suivant
+        date = debut
+        while date <= fin:
+            if date.weekday() <= dernier_jour_compte and not ferie(date):
+                total += jours.get(date, 1)
+            date += datetime.timedelta(days=1)
+    return total
+
+
 def Texte_periode_demande(demande=None):
     if demande.heure_debut and demande.heure_fin:
         return "%s de %s à %s" % (demande.date_debut.strftime("%d/%m/%Y"), demande.heure_debut.strftime("%Hh%M"), demande.heure_fin.strftime("%Hh%M"))
@@ -103,6 +175,7 @@ def Calculer_demande(demande=None, journee=None, liste_feries=None):
     unite = demande.type_conge.unite
     creneaux, quantite = [], 0.0
     minutes_journee = Minutes_creneau(journee["journee_debut"], journee["journee_fin"])
+    contrats = list(ContratCollaborateur.objects.filter(collaborateur_id=demande.collaborateur_id)) if demande.collaborateur_id else []
 
     if demande.heure_debut or demande.heure_fin:
         # Absence sur une plage horaire d'une seule journée
@@ -112,8 +185,8 @@ def Calculer_demande(demande=None, journee=None, liste_feries=None):
             raise Erreur("Une absence sur une plage horaire doit tenir sur une seule journée")
         if demande.heure_fin <= demande.heure_debut:
             raise Erreur("L'heure de fin doit être postérieure à l'heure de début")
-        if not Est_ouvre(demande.date_debut, liste_feries):
-            raise Erreur("Le %s n'est pas un jour ouvré" % demande.date_debut.strftime("%d/%m/%Y"))
+        if not Est_travaille(demande.date_debut, contrats, liste_feries):
+            raise Erreur("Le %s n'est pas un jour travaillé" % demande.date_debut.strftime("%d/%m/%Y"))
         debut = datetime.datetime.combine(demande.date_debut, demande.heure_debut)
         fin = datetime.datetime.combine(demande.date_debut, demande.heure_fin)
         minutes = (fin - debut).total_seconds() / 60
@@ -122,9 +195,11 @@ def Calculer_demande(demande=None, journee=None, liste_feries=None):
     else:
         if demande.date_debut == demande.date_fin and demande.debut_apres_midi and demande.fin_matin:
             raise Erreur("Une absence d'une seule journée ne peut pas commencer l'après-midi et finir le matin")
+        # Les absences sont posées sur les jours habituellement travaillés ; le décompte en jours dépend du mode du type de congé
+        jours = {}
         date = demande.date_debut
         while date <= demande.date_fin:
-            if Est_ouvre(date, liste_feries):
+            if Est_travaille(date, contrats, liste_feries):
                 if date == demande.date_debut and demande.debut_apres_midi:
                     plage, valeur, journee_entiere = ("am_debut", "am_fin"), 0.5, False
                 elif date == demande.date_fin and demande.fin_matin:
@@ -134,10 +209,17 @@ def Calculer_demande(demande=None, journee=None, liste_feries=None):
                 debut = datetime.datetime.combine(date, journee[plage[0]])
                 fin = datetime.datetime.combine(date, journee[plage[1]])
                 creneaux.append({"debut": debut, "fin": fin, "journee": journee_entiere})
-                quantite += (fin - debut).total_seconds() / 3600 if unite == "HEURES" else valeur
+                jours[date] = valeur
+                if unite == "HEURES":
+                    quantite += (fin - debut).total_seconds() / 3600
             date += datetime.timedelta(days=1)
         if not creneaux:
-            raise Erreur("La période ne contient aucun jour ouvré")
+            raise Erreur("La période ne contient aucun jour travaillé")
+        if unite == "JOURS":
+            # Une demande est une absence continue : chaque jour commence le matin et dure jusqu'au soir, sauf la demi-journée de début (après-midi) et de fin (matin)
+            matins = [date for date in jours if not (date == demande.date_debut and demande.debut_apres_midi)]
+            soirs = [date for date in jours if not (date == demande.date_fin and demande.fin_matin)]
+            quantite = Decompter_jours(jours, demande.type_conge.decompte, contrats, liste_feries, matins=matins, soirs=soirs)
     return {"quantite": Decimal(quantite), "creneaux": creneaux}
 
 
@@ -148,10 +230,10 @@ def Minutes_creneau(debut=None, fin=None):
 # ------------------------------------------------- Compteurs -------------------------------------------------
 
 def Minutes_reference(contrats=[], date=None):
-    """ Durée d'une journée de travail selon le contrat en cours (volume hebdomadaire / 5) """
-    for contrat in contrats:
-        if contrat.date_debut <= date and (not contrat.date_fin or date <= contrat.date_fin) and contrat.heures_hebdo:
-            return float(contrat.heures_hebdo) / 5 * 60
+    """ Durée d'une journée de travail selon le contrat en cours (volume hebdomadaire / nombre de jours travaillés dans la semaine) """
+    contrat = Contrat_du_jour(contrats, date)
+    if contrat and contrat.heures_hebdo:
+        return float(contrat.heures_hebdo) / len(Lire_jours_travailles(contrat.jours_travailles)) * 60
     return MINUTES_JOUR_DEFAUT
 
 
@@ -159,7 +241,7 @@ def Calculer_poses(type_conge=None, collaborateurs=[], periode=None, liste_ferie
     """ Jours ou heures posés par collaborateur : évènements du planning de la catégorie du type de congé sur la période """
     debut = datetime.datetime.combine(periode["debut"], datetime.time(0))
     fin = datetime.datetime.combine(periode["fin"] + datetime.timedelta(days=1), datetime.time(0))
-    minutes_par_jour = {}
+    minutes_par_jour, bornes = {}, {}
     for evenement in EvenementCollaborateur.objects.filter(type_evenement_id=type_conge.categorie_id, collaborateur_id__in=collaborateurs, date_debut__lt=fin, date_fin__gt=debut):
         date = max(evenement.date_debut, debut).date()
         while datetime.datetime.combine(date, datetime.time(0)) < min(evenement.date_fin, fin):
@@ -168,21 +250,32 @@ def Calculer_poses(type_conge=None, collaborateurs=[], periode=None, liste_ferie
             if minutes > 0:
                 cle = (evenement.collaborateur_id, date)
                 minutes_par_jour[cle] = minutes_par_jour.get(cle, 0) + minutes
+                debut_jour = (max(evenement.date_debut, jour_debut) - jour_debut).total_seconds() / 60
+                fin_jour = (min(evenement.date_fin, jour_debut + datetime.timedelta(days=1)) - jour_debut).total_seconds() / 60
+                anciennes = bornes.get(cle, (1440, 0))
+                bornes[cle] = (min(anciennes[0], debut_jour), max(anciennes[1], fin_jour))
             date += datetime.timedelta(days=1)
 
     contrats = {}
     if type_conge.unite == "JOURS":
         for contrat in ContratCollaborateur.objects.filter(collaborateur_id__in=collaborateurs):
             contrats.setdefault(contrat.collaborateur_id, []).append(contrat)
-    poses = {}
+    poses, jours, matins, soirs = {}, {}, {}, {}
     for (idcollaborateur, date), minutes in minutes_par_jour.items():
         if type_conge.unite == "HEURES":
-            valeur = minutes / 60
+            poses[idcollaborateur] = poses.get(idcollaborateur, 0) + minutes / 60
         else:
-            if not Est_ouvre(date, liste_feries):
-                continue
             valeur = 1 if minutes >= SEUIL_JOURNEE * Minutes_reference(contrats.get(idcollaborateur, []), date) else 0.5
-        poses[idcollaborateur] = poses.get(idcollaborateur, 0) + valeur
+            jours.setdefault(idcollaborateur, {})[date] = valeur
+            # Une demi-journée commençant avant midi est un matin, une demi-journée finissant après 13h va jusqu'au soir
+            debut_jour, fin_jour = bornes[(idcollaborateur, date)]
+            if valeur >= 1 or debut_jour <= 12 * 60:
+                matins.setdefault(idcollaborateur, set()).add(date)
+            if valeur >= 1 or fin_jour >= 13 * 60:
+                soirs.setdefault(idcollaborateur, set()).add(date)
+    for idcollaborateur, jours_absence in jours.items():
+        poses[idcollaborateur] = Decompter_jours(jours_absence, type_conge.decompte, contrats.get(idcollaborateur, []), liste_feries, date_limite=periode["fin"],
+                                                 matins=matins.get(idcollaborateur, set()), soirs=soirs.get(idcollaborateur, set()))
     return poses
 
 

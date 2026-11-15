@@ -6,7 +6,7 @@
 from django import forms
 from django.forms import ModelForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset
+from crispy_forms.layout import Layout, Fieldset, HTML
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
@@ -38,6 +38,7 @@ class Formulaire(FormulaireBase, ModelForm):
 
         # Affichage
         self.helper.layout = Layout(
+            HTML(EXTRA_SCRIPT),
             Commandes(annuler_url="{% url 'types_conges_collaborateurs_liste' %}"),
             Fieldset("Généralités",
                 Field("nom"),
@@ -49,7 +50,22 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Compteur",
                 Field("categorie"),
                 Field("unite"),
+                Field("decompte"),
                 Field("mois_debut"),
                 Field("solde_negatif"),
             ),
         )
+
+
+EXTRA_SCRIPT = """
+<script>
+// Le mode de décompte ne concerne que les compteurs en jours
+function On_change_unite() {
+    $('#div_id_decompte').toggle($('#id_unite').val() === "JOURS");
+}
+$(document).ready(function() {
+    $('#id_unite').on("change", On_change_unite);
+    On_change_unite();
+});
+</script>
+"""

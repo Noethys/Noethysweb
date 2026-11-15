@@ -117,9 +117,9 @@ ICONES_RUBRIQUES = {
     "Gestion des achats": "shopping-basket",
     "Trésorerie": "university",
     "Budget": "pie-chart",
-    "Gestion des collaborateurs": "users",
-    "Gestion des contrats": "file-text-o",
-    "Gestion des évènements": "calendar",
+    "Collaborateurs": "users",
+    "Contrats": "file-text-o",
+    "Evènements": "calendar",
 }
 
 

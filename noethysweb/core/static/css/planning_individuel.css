@@ -236,3 +236,8 @@
 .dark-mode .pi-anom-item:hover {background: #3d3420;}
 .dark-mode .pi-pop-anom, .dark-mode .pi-bandeau-anomalies {background: #4a3a12; color: #fde68a; border-color: #6b5316;}
 @media print {.pi-j.anom::after {display: none;}}
+
+/* Conversion du crédit d'heures en récupération */
+.pi-recup-credit {padding: 8px 10px; margin-bottom: 12px; border-radius: 8px; background: #e0f2fe; color: #075985; font-size: 13px;}
+.pi-recup-credit .erreur {color: #991b1b;}
+.dark-mode .pi-recup-credit {background: #0c3a52; color: #bae6fd;}

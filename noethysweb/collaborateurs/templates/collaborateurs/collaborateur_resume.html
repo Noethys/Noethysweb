@@ -24,6 +24,7 @@
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
                 gap: 26px 20px;
+                align-items: start;
             }
             .dark-mode .caracteristiques_papier {
                 background-color: #2b2f33;
@@ -111,6 +112,25 @@
             .etiquette-carac .picto { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 16px; font-size: 13px; font-weight: 600; background: #e8f0fb; color: #1f4f8a; }
             .etiquette-carac .picto.gris { background: #eef0f2; color: #3e4a56; }
 
+            /* Synthèse : contrat, congés, heures, absences, alertes */
+            .etiquette-carac .sous-texte { font-size: 12px; color: #6c757d; }
+            .etiquette-carac .lignes { margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; font-size: 14px; }
+            .etiquette-carac .lignes li { display: flex; align-items: center; gap: 7px; min-width: 0; }
+            .etiquette-carac .lignes .nom { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .etiquette-carac .lignes .val { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+            .etiquette-carac .pastille { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; display: inline-block; }
+            .etiquette-carac .grand { font-size: 22px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+            .etiquette-carac .positif { color: #1e7e34; }
+            .etiquette-carac .negatif { color: #c0392b; }
+            .etiquette-carac .lien-etiquette { font-size: 12px; margin-top: 4px; }
+            .etiquette-carac.alerte { background: #fff4f2; }
+            .etiquette-carac.alerte .libelle { color: #b03a2e; }
+            .dark-mode .etiquette-carac .sous-texte { color: #adb5bd; }
+            .dark-mode .etiquette-carac .positif { color: #6fd08c; }
+            .dark-mode .etiquette-carac .negatif { color: #ff8a80; }
+            .dark-mode .etiquette-carac.alerte { background: #4a3533; }
+            .dark-mode .etiquette-carac.alerte .libelle { color: #ffab9f; }
+
             @media (max-width: 575px) {
                 .etiquette-carac.large { grid-column: auto; }
             }
@@ -128,6 +148,74 @@
                             </ul>
                         </div>
                     {% endif %}
+                    {# Contrat en cours #}
+                    {% if situation_contrat %}
+                        <div class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span>
+                            <span class="libelle">{% if situation_contrat.etat == "EN_COURS" %}Contrat en cours{% elif situation_contrat.etat == "A_VENIR" %}Contrat à venir{% elif situation_contrat.etat == "TERMINE" %}Dernier contrat{% else %}Contrat{% endif %}</span>
+                            {% with contrat=situation_contrat.contrat %}
+                                {% if contrat %}
+                                    <span class="valeur">{% if contrat.type_contrat %}<strong>{{ contrat.type_contrat.nom }}</strong> · {% endif %}{{ contrat.type_poste.nom }}</span>
+                                    <span class="sous-texte">{% if contrat.date_fin %}Du {{ contrat.date_debut|date:"d/m/Y" }} au {{ contrat.date_fin|date:"d/m/Y" }}{% else %}Depuis le {{ contrat.date_debut|date:"d/m/Y" }}{% endif %}{% if contrat.heures_hebdo %} · {{ contrat.heures_hebdo|floatformat:"-2" }} h par semaine{% endif %}{% if situation_contrat.etat == "TERMINE" %} · terminé{% endif %}</span>
+                                {% else %}
+                                    <span class="valeur sous-texte">Aucun contrat saisi</span>
+                                {% endif %}
+                            {% endwith %}
+                            <a class="lien-etiquette" href="{% url 'collaborateur_contrats_liste' idcollaborateur=collaborateur.pk %}">Voir les contrats</a>
+                        </div>
+                    {% endif %}
+
+                    {# Solde d'heures #}
+                    {% if solde_heures %}
+                        <div class="etiquette-carac"><span class="scotch" aria-hidden="true"></span>
+                            <span class="libelle">Solde d'heures</span>
+                            <span class="grand {% if solde_heures.valeur > 0.005 %}positif{% elif solde_heures.valeur < -0.005 %}negatif{% endif %}">{{ solde_heures.texte }}</span>
+                            <span class="sous-texte">Au {% now "d/m/Y" %} · période {{ solde_heures.periode }}</span>
+                            <a class="lien-etiquette" href="{% url 'collaborateur_planning' idcollaborateur=collaborateur.pk %}">Voir le planning</a>
+                        </div>
+                    {% endif %}
+
+                    {# Soldes de congés #}
+                    {% if soldes_conges or demandes_attente %}
+                        <div class="etiquette-carac{% if soldes_conges|length > 1 %} large{% endif %}"><span class="scotch" aria-hidden="true"></span>
+                            <span class="libelle">Congés</span>
+                            <ul class="lignes">
+                                {% for compteur in soldes_conges %}
+                                    <li><span class="pastille" style="background: {{ compteur.couleur }}"></span><span class="nom" title="{{ compteur.nom }} · {{ compteur.periode }}">{{ compteur.nom }}</span><span class="val{% if compteur.solde < 0 %} negatif{% endif %}">{{ compteur.solde_txt }}</span></li>
+                                {% endfor %}
+                            </ul>
+                            {% if demandes_attente %}<span class="sous-texte">{{ demandes_attente }} demande{{ demandes_attente|pluralize }} en attente de validation</span>{% endif %}
+                            <a class="lien-etiquette" href="{% url 'collaborateur_conges' idcollaborateur=collaborateur.pk %}">Voir les congés</a>
+                        </div>
+                    {% endif %}
+
+                    {# Absences à venir #}
+                    {% if absences %}
+                        <div class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span>
+                            <span class="libelle">Absences à venir</span>
+                            <ul class="lignes">
+                                {% for absence in absences %}
+                                    <li><span class="pastille" style="background: {{ absence.couleur }}"></span>
+                                        <span class="nom">{% if absence.debut == absence.fin %}Le {{ absence.debut|date:"D j F" }}{% else %}Du {{ absence.debut|date:"D j F" }} au {{ absence.fin|date:"D j F" }}{% endif %} · {{ absence.nom }}</span>
+                                        {% if absence.attente %}<span class="badge badge-warning">En attente</span>{% endif %}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    {# Contrôle réglementaire #}
+                    {% if nbre_anomalies %}
+                        <div class="etiquette-carac large alerte"><span class="scotch" aria-hidden="true"></span>
+                            <span class="libelle">Contrôle réglementaire · {{ nbre_anomalies }} alerte{{ nbre_anomalies|pluralize }}</span>
+                            <ul class="lignes">
+                                {% for anomalie in anomalies %}
+                                    <li><span class="nom" title="{{ anomalie.texte }}">{{ anomalie.date_fr }} · {{ anomalie.texte }}</span></li>
+                                {% endfor %}
+                            </ul>
+                            <span class="sous-texte">Sur les 30 derniers jours et les 14 prochains{% if nbre_anomalies > 4 %} · {{ nbre_anomalies|add:"-4" }} autre{{ nbre_anomalies|add:"-4"|pluralize }} non affichée{{ nbre_anomalies|add:"-4"|pluralize }}{% endif %}</span>
+                            <a class="lien-etiquette" href="{% url 'collaborateur_planning' idcollaborateur=collaborateur.pk %}">Voir le planning</a>
+                        </div>
+                    {% endif %}
+
                     <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Nom</dt><dd class="valeur mb-0">{{ collaborateur.nom }}</dd></dl>
                     {% if collaborateur.prenom %}<dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Prénom</dt><dd class="valeur mb-0">{{ collaborateur.prenom }}</dd></dl>{% endif %}
                     {% if collaborateur.tel_mobile or collaborateur.tel_domicile or collaborateur.travail_tel %}

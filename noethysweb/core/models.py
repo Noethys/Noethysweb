@@ -4428,6 +4428,10 @@ class ContratCollaborateur(models.Model):
                                         help_text="Période affichée par défaut dans le planning individuel pour le suivi de l'objectif. Laissez vide pour utiliser le paramètre général.")
     profil_reglementaire = models.ForeignKey(ProfilReglementaireCollaborateur, verbose_name="Profil réglementaire", related_name="contrats", on_delete=models.SET_NULL, blank=True, null=True,
                                              help_text="Règles de temps de travail contrôlées dans les plannings. Laissez vide pour appliquer le profil par défaut.")
+    modele_planning = models.ForeignKey("ModelePlanningCollaborateur", verbose_name="Modèle de planning par défaut", related_name="contrats_defaut", on_delete=models.SET_NULL,
+                                        blank=True, null=True, help_text="Modèle proposé à la création du contrat et présélectionné dans l'outil « Appliquer un modèle ».")
+    jours_travailles = models.CharField(verbose_name="Jours habituellement travaillés", max_length=20, default="0,1,2,3,4",
+                                        help_text="Jours de la semaine normalement travaillés (0 = lundi ... 6 = dimanche). Utilisés pour poser les absences et décompter les congés.")
 
     class Meta:
         db_table = "contrats_collaborateur"
@@ -4468,7 +4472,12 @@ class TypeCongeCollaborateur(models.Model):
     nom = models.CharField(verbose_name="Nom", max_length=200)
     abrege = models.CharField(verbose_name="Abréviation", max_length=20, blank=True, null=True)
     unite = models.CharField(verbose_name="Unité du compteur", max_length=20, default="JOURS", choices=[("JOURS", "Jours"), ("HEURES", "Heures")],
-                             help_text="Jours : décompte en jours ouvrés (lundi au vendredi hors jours fériés), avec des demi-journées. Heures : décompte des heures d'absence.")
+                             help_text="Jours : décompte en jours selon le mode choisi ci-dessous, avec des demi-journées. Heures : décompte des heures d'absence.")
+    decompte = models.CharField(verbose_name="Mode de décompte des jours", max_length=20, default="OUVRES",
+                                choices=[("OUVRES", "Jours ouvrés (lundi au vendredi)"), ("OUVRABLES", "Jours ouvrables (lundi au samedi)"), ("TRAVAILLES", "Jours travaillés du collaborateur")],
+                                help_text="Jours ouvrés : du lundi au vendredi hors fériés, y compris les jours non travaillés compris dans l'absence (usage courant du secteur privé, 25 jours par an). "
+                                          "Jours ouvrables : du lundi au samedi hors fériés, le samedi qui suit une absence se terminant le vendredi étant compté (décompte légal du Code du travail, 30 jours par an). "
+                                          "Jours travaillés : seuls les jours habituellement travaillés indiqués sur le contrat sont comptés (fonction publique, temps partiel).")
     categorie = models.ForeignKey(TypeEvenementCollaborateur, verbose_name="Catégorie d'évènement", related_name="types_conges", on_delete=models.PROTECT,
                                   help_text="Catégorie des évènements créés dans le planning lors de la validation d'une demande. Les évènements de cette catégorie sont décomptés du compteur.")
     mois_debut = models.PositiveSmallIntegerField(verbose_name="Début de la période de référence", default=1, choices=CHOIX_MOIS,

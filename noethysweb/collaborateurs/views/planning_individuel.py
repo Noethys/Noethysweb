@@ -105,7 +105,7 @@ def Get_donnees(request):
     calcul = Calcul(collaborateur, periode, parametres)
 
     contrats = [{"d": str(contrat.date_debut), "f": str(contrat.date_fin) if contrat.date_fin else None, "h": float(contrat.heures_hebdo) if contrat.heures_hebdo else None,
-                 "poste": contrat.type_poste.nom, "mode": contrat.get_objectif_mode_display()}
+                 "poste": contrat.type_poste.nom, "mode": contrat.get_objectif_mode_display(), "modele": contrat.modele_planning_id}
                 for contrat in ContratCollaborateur.objects.select_related("type_poste").filter(collaborateur=collaborateur).order_by("date_debut")]
 
     evenements = [utils_planning.Serialiser_evenement(evenement) for evenement in utils_planning.Get_evenements(periode["debut"], periode["fin"], [collaborateur.pk])]
@@ -138,7 +138,7 @@ def Get_conges(user=None, collaborateur=None):
         return None
     types = [type_conge for type_conge in TypeCongeCollaborateur.objects.select_related("categorie").order_by("ordre", "nom") if type_conge.actif]
     compteurs = utils_conges.Get_compteurs([collaborateur.pk], types)
-    return [{key: compteurs[(collaborateur.pk, type_conge.pk)][key] for key in ("nom", "periode", "droits_txt", "poses_txt", "solde", "solde_txt", "attente", "attente_txt")} for type_conge in types]
+    return [{key: compteurs[(collaborateur.pk, type_conge.pk)][key] for key in ("type", "unite", "nom", "periode", "droits_txt", "poses_txt", "solde", "solde_txt", "attente", "attente_txt")} for type_conge in types]
 
 
 @Verifie_permission
@@ -334,6 +334,62 @@ def Reporter_solde(request):
         return JsonResponse({"erreur": "Ce collaborateur n'a pas d'objectif sur cette période"}, status=400)
     suivante = utils_objectif.Periode_suivante(periode, parametres)
     return JsonResponse({"succes": True, "message": "%s : %s reporté sur %s" % (collaborateur.Get_nom(), ajustement.motif, suivante["libelle"])})
+
+
+def Credit_convertible(calcul=None, periode=None):
+    """ Crédit d'heures convertible : écart à la date du jour si la période est en cours (les heures planifiées à venir ne sont pas encore effectuées), solde de la période sinon """
+    if datetime.date.today() <= periode["fin"]:
+        return calcul.planifie_a_date - calcul.objectif_a_date
+    return calcul.solde
+
+
+@Verifie_permission
+def Convertir_recuperation(request):
+    """ Convertit tout ou partie du crédit d'heures en droits sur un compteur de congés en heures (récupération) :
+        un ajustement d'objectif positif retire les heures du solde, un droit positif les ajoute au compteur. """
+    from collaborateurs.utils import utils_conges
+    from core.models import TypeCongeCollaborateur, DroitCongeCollaborateur
+    collaborateur = Get_collaborateur(request, modifiable=True)
+    if not collaborateur:
+        return JsonResponse({"erreur": "Vous n'avez pas l'autorisation de modifier ce collaborateur"}, status=403)
+    if not utils_conges.Peut_acceder(request.user) or not utils_conges.Peut_traiter(request.user, collaborateur.pk):
+        return JsonResponse({"erreur": "Vous n'avez pas l'autorisation de gérer les congés de ce collaborateur"}, status=403)
+    type_conge = TypeCongeCollaborateur.objects.filter(pk=int(request.POST.get("idtype") or 0), unite="HEURES").first()
+    if not type_conge:
+        return JsonResponse({"erreur": "Sélectionnez un compteur de congés en heures"}, status=400)
+    try:
+        valeur = decimal.Decimal(str(request.POST.get("valeur", "")).replace(",", ".").strip())
+    except decimal.InvalidOperation:
+        valeur = None
+    if valeur is None or not valeur.is_finite() or valeur <= 0 or valeur >= 10000:
+        return JsonResponse({"erreur": "Saisissez un nombre d'heures positif (décimales : 1,5 = 1h30)"}, status=400)
+    valeur = valeur.quantize(decimal.Decimal("0.01"))
+
+    parametres = utils_objectif.Get_parametres()
+    periode = Get_periode_demandee(request, collaborateur.pk, parametres)
+    calcul = Calcul(collaborateur, periode, parametres)
+    if not calcul.a_objectif or calcul.unite != "heures":
+        return JsonResponse({"erreur": "La conversion n'est possible que pour un objectif exprimé en heures"}, status=400)
+    credit = Credit_convertible(calcul, periode)
+    if float(valeur) > credit + 0.005:
+        return JsonResponse({"erreur": "Crédit d'heures insuffisant : %s disponible%s" % (utils_objectif.Format_valeur(max(credit, 0), "heures"),
+                             " à ce jour" if datetime.date.today() <= periode["fin"] else "")}, status=400)
+
+    # Date d'effet : aujourd'hui, ou le dernier jour de la période si elle est terminée
+    date = min(datetime.date.today(), periode["fin"])
+    motif_saisi = (request.POST.get("motif") or "").strip()
+    with transaction.atomic():
+        ajustement = AjustementObjectifCollaborateur.objects.create(collaborateur=collaborateur, type="AJUSTEMENT", date=date, valeur=valeur, utilisateur=request.user,
+                                                                   motif=(motif_saisi or "Conversion en %s" % type_conge.nom.lower())[:300])
+        DroitCongeCollaborateur.objects.create(collaborateur=collaborateur, type_conge=type_conge, annee=utils_conges.Annee_de(type_conge, date), valeur=valeur,
+                                               nature="AJUSTEMENT", utilisateur=request.user,
+                                               motif=(motif_saisi or "Conversion du crédit d'heures %s" % periode["libelle"])[:300])
+    utils_historique.Ajouter(titre="Conversion du crédit d'heures en %s" % type_conge.nom.lower(), detail=Texte_ajustement(ajustement), utilisateur=request.user,
+                             collaborateur=collaborateur.pk, objet="Ajustement d'objectif", idobjet=ajustement.pk, classe="AjustementObjectifCollaborateur")
+    reponse = json.loads(Get_objectif(request).content)
+    reponse["conges"] = Get_conges(request.user, collaborateur)
+    reponse["message"] = "%s converties en %s" % (utils_objectif.Format_valeur(float(valeur), "heures"), type_conge.nom.lower())
+    return JsonResponse(reponse)
 
 
 # ------------------------------------------------- Pages -------------------------------------------------

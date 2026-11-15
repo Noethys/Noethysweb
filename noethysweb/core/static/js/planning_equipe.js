@@ -112,7 +112,7 @@
         data.affectations.forEach(function(a) { S.affs.set(a.id, a); S.affOrdre.push(a.id); });
         S.collabs.clear();
         data.collaborateurs.forEach(function(c, index) {
-            c.contrats = c.contrats.map(function(contrat) { return {d: Parse_jour(contrat.d), f: contrat.f ? Parse_jour(contrat.f) : null, h: contrat.h}; });
+            c.contrats = c.contrats.map(function(contrat) { return {d: Parse_jour(contrat.d), f: contrat.f ? Parse_jour(contrat.f) : null, h: contrat.h, j: contrat.j}; });
             c.couleur = COULEURS_AVATAR[index % COULEURS_AVATAR.length];
             c.libelle = c.nom + (c.prenom ? " " + c.prenom : "");
             S.collabs.set(c.id, c);
@@ -157,11 +157,14 @@
         return false;
     }
     function Minutes_attendues(c, jours) {
+        // Volume hebdomadaire du contrat réparti sur ses jours habituellement travaillés (lundi au vendredi par défaut), hors fériés
         var total = 0;
         jours.forEach(function(j) {
-            if (Jour_semaine(j) >= 5 || S.feries.has(j)) { return; }
+            if (S.feries.has(j)) { return; }
             var contrat = Contrat_actif(c, j);
-            if (contrat && contrat.h) { total += contrat.h / 5 * 60; }
+            if (!contrat || !contrat.h) { return; }
+            var jours_contrat = contrat.j && contrat.j.length ? contrat.j : [0, 1, 2, 3, 4];
+            if (jours_contrat.indexOf(Jour_semaine(j)) >= 0) { total += contrat.h / jours_contrat.length * 60; }
         });
         return total;
     }

@@ -201,6 +201,7 @@
         Proteger_echap("pi_modal_evt");
         Proteger_echap("pi_modal_periode");
         Proteger_echap("pi_modal_lot");
+        Proteger_echap("pi_modal_recup");
         Select2($("#pi_collab_select"), {placeholder: "Rechercher un collaborateur…"});
     }
 
@@ -273,7 +274,7 @@
 
     function Charger_donnees(data) {
         S.collab = data.collaborateur;
-        S.contrats = data.collaborateur.contrats.map(function(c) { return {d: Parse_jour(c.d), f: c.f ? Parse_jour(c.f) : null, h: c.h, poste: c.poste, mode: c.mode, d_txt: c.d, f_txt: c.f}; });
+        S.contrats = data.collaborateur.contrats.map(function(c) { return {d: Parse_jour(c.d), f: c.f ? Parse_jour(c.f) : null, h: c.h, poste: c.poste, mode: c.mode, modele: c.modele || null, d_txt: c.d, f_txt: c.f}; });
         S.cats.clear(); S.catOrdre = [];
         data.categories.forEach(function(c) { S.cats.set(c.id, c); S.catOrdre.push(c.id); });
         S.affs.clear(); S.affOrdre = [];
@@ -619,7 +620,8 @@
         });
         if (Modifiable()) {
             html += "<div class='pi-obj-actions'><button type='button' class='pl-lien' data-action='ajust-ajouter'><i class='fa fa-plus' aria-hidden='true'></i> Ajouter un ajustement</button>" +
-                    (o.a_objectif ? "<button type='button' class='pl-lien' data-action='reporter'><i class='fa fa-share' aria-hidden='true'></i> Reporter le solde sur " + Echapper(S.periode_suivante) + "</button>" : "") + "</div>";
+                    (o.a_objectif ? "<button type='button' class='pl-lien' data-action='reporter'><i class='fa fa-share' aria-hidden='true'></i> Reporter le solde sur " + Echapper(S.periode_suivante) + "</button>" : "") +
+                    (Recup_possible() ? "<button type='button' class='pl-lien' data-action='recuperation'><i class='fa fa-exchange' aria-hidden='true'></i> Convertir en récupération</button>" : "") + "</div>";
         }
         return html;
     }
@@ -667,7 +669,8 @@
             "<button type='button' class='pl-lien' data-action='objectif-ajustements'>Ajustements <span class='pi-badge-nb' aria-label='" + Pluriel(nb, "ajustement") + "'>" + nb + "</span></button>";
         if (Modifiable()) {
             html += "<button type='button' class='pl-lien' data-action='ajust-ajouter'><i class='fa fa-plus' aria-hidden='true'></i>Ajouter</button>" +
-                    (o.a_objectif ? "<button type='button' class='pl-lien' data-action='reporter' title='Reporter le solde sur " + Echapper(S.periode_suivante) + "'><i class='fa fa-share' aria-hidden='true'></i>Reporter le solde</button>" : "");
+                    (o.a_objectif ? "<button type='button' class='pl-lien' data-action='reporter' title='Reporter le solde sur " + Echapper(S.periode_suivante) + "'><i class='fa fa-share' aria-hidden='true'></i>Reporter le solde</button>" : "") +
+                    (Recup_possible() ? "<button type='button' class='pl-lien' data-action='recuperation' title='Convertir le crédit d’heures en droits à récupération'><i class='fa fa-exchange' aria-hidden='true'></i>Convertir en récupération</button>" : "");
         }
         $("#pi_entete_objectif").html(html + "</span>");
     }
@@ -1263,7 +1266,10 @@
                                   : "Toute la période " + S.periode.libelle;
         $("#pi_mod_intro").text(portee);
         Frise_modele().reinitialiser();
-        Selecteur_modele().reinitialiser();
+        // Présélection du modèle de planning par défaut du contrat en cours au premier jour concerné
+        var premier = Jours_modele()[0], contrat = S.contrats.filter(function(c) { return c.d <= premier && (c.f === null || c.f >= premier); })[0];
+        Selecteur_modele().reinitialiser(contrat && contrat.modele ? [contrat.modele] : []);
+        Frise_modele().maj();
         $("input[name='pi_mod_conflit'][value='ignorer']").prop("checked", true);
         $("#pi_mod_apercu").prop("hidden", true).text("");
         $("#pi_modal_modele").modal("show");
@@ -1357,6 +1363,42 @@
                 Ajax(CFG.urls.reporter, Donnees_periode()).done(function(data) { toastr.success(data.message); }).fail(function(xhr) { toastr.error(Message_erreur(xhr)); });
             }});
     }
+    // ------------------------------------------------------------------ Conversion du crédit d'heures en récupération
+    function Types_recup() { return (S.conges || []).filter(function(c) { return c.unite === "HEURES"; }); }
+    function Recup_possible() { return Modifiable() && S.objectif && S.objectif.a_objectif && S.objectif.unite !== "jours" && Types_recup().length > 0; }
+    function Credit_heures() {
+        // Même règle que le serveur : écart à date si la période est en cours, solde de la période sinon
+        var totaux = Totaux_planifies(), o = S.objectif;
+        return Aujourdhui() <= Fin_periode() ? totaux.a_date - o.objectif_a_date : totaux.total - o.objectif;
+    }
+    function Ouvrir_recuperation() {
+        if (envoi_en_cours || File_envoi.length) { toastr.info("Enregistrement en cours, réessayez dans un instant"); return; }
+        var types = Types_recup(), credit = Credit_heures();
+        var defaut = types.find(function(c) { return /cup/i.test(c.nom); }) || types[0];
+        $("#pi_rec_type").html(types.map(function(c) {
+            return "<option value='" + c.type + "'" + (c === defaut ? " selected" : "") + ">" + Echapper(c.nom) + " (solde " + Echapper(c.solde_txt) + ")</option>";
+        }).join(""));
+        $("#pi_rec_credit").html(credit > 0.005 ?
+            "Crédit d'heures disponible" + (Aujourdhui() <= Fin_periode() ? " au " + Texte_jour_fr(Aujourdhui()) : " sur la période " + Echapper(S.periode.libelle)) + " : <strong>" + Valeur(credit) + "</strong>" :
+            "<span class='erreur'>Aucun crédit d'heures à convertir" + (Aujourdhui() <= Fin_periode() ? " à ce jour" : "") + " (solde " + Valeur(credit) + ").</span>");
+        $("#pi_rec_valeur").val(credit > 0.005 ? String(Math.floor(credit * 4) / 4).replace(".", ",") : "");
+        $("#pi_rec_motif").val("");
+        $("#pi_rec_info").text("").removeClass("erreur");
+        $("#pi_rec_valider").prop("disabled", credit <= 0.005);
+        $("#pi_modal_objectif").modal("hide");
+        $("#pi_modal_recup").modal("show");
+    }
+    function Valider_recuperation() {
+        var $bouton = $("#pi_rec_valider").prop("disabled", true);
+        Ajax(CFG.urls.recuperation, Donnees_periode({idtype: $("#pi_rec_type").val(), valeur: $("#pi_rec_valeur").val(), motif: $("#pi_rec_motif").val()})).done(function(data) {
+            S.objectif = data.objectif;
+            if (data.conges) { S.conges = data.conges; }
+            $("#pi_modal_recup").modal("hide");
+            toastr.success(data.message);
+            Rafraichir_tout();
+        }).fail(function(xhr) { $("#pi_rec_info").text(Message_erreur(xhr)).addClass("erreur"); }).always(function() { $bouton.prop("disabled", false); });
+    }
+
     function Ouvrir_parametres() {
         var p = S.parametres;
         $("#pi_par_volume").val(String(p.volume_annuel).replace(".", ","));
@@ -1718,6 +1760,8 @@
         $(document).on("click.pi", "[data-ajust-modifier]", function() { Ouvrir_ajustement(+$(this).data("ajust-modifier")); });
         $(document).on("click.pi", "[data-ajust-supprimer]", function() { Supprimer_ajustement(+$(this).data("ajust-supprimer")); });
         $(document).on("click.pi", "[data-action='reporter']", function() { $("#pi_modal_objectif").modal("hide"); Reporter_solde(); });
+        $(document).on("click.pi", "[data-action='recuperation']", Ouvrir_recuperation);
+        $("#pi_rec_valider").on("click", Valider_recuperation);
         $(document).on("click.pi", "[data-action='objectif-detail']", function() {
             $("#pi_modal_objectif").one("shown.bs.modal", function() { $(this).find(".pi-detail").prop("open", true); }).modal("show");
         });

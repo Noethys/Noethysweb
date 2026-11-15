@@ -50,7 +50,8 @@ def Get_donnees(request):
     contrats = {}
     for contrat in ContratCollaborateur.objects.all().order_by("date_debut"):
         contrats.setdefault(contrat.collaborateur_id, []).append({"d": str(contrat.date_debut), "f": str(contrat.date_fin) if contrat.date_fin else None,
-                                                                  "h": float(contrat.heures_hebdo) if contrat.heures_hebdo else None})
+                                                                  "h": float(contrat.heures_hebdo) if contrat.heures_hebdo else None,
+                                                                  "j": list(utils_planning.Lire_jours_travailles(contrat.jours_travailles))})
     postes = {contrat.collaborateur_id: contrat.type_poste.nom for contrat in ContratCollaborateur.objects.select_related("type_poste").order_by("date_debut")}
 
     collaborateurs = []

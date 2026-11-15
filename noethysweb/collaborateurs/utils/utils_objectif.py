@@ -99,6 +99,19 @@ def Nbre_jours(debut=None, fin=None):
     return max(0, (fin - debut).days + 1) if debut and fin else 0
 
 
+def Jours_travailles(debut=None, fin=None, contrat=None, liste_feries=[]):
+    """ Liste des jours habituellement travaillés selon le contrat (lundi au vendredi par défaut), hors jours fériés """
+    from collaborateurs.utils.utils_planning import Lire_jours_travailles
+    jours_semaine = Lire_jours_travailles(getattr(contrat, "jours_travailles", None))
+    jours = []
+    date = debut
+    while date and date <= fin:
+        if date.weekday() in jours_semaine and not utils_dates.EstFerie(date, liste_feries):
+            jours.append(date)
+        date += datetime.timedelta(days=1)
+    return jours
+
+
 def Jours_ouvres(debut=None, fin=None, liste_feries=[]):
     """ Liste des jours du lundi au vendredi hors jours fériés """
     jours = []
@@ -165,7 +178,7 @@ class Calcul_objectif():
         self.avertissements = []
         heures = {"total": 0.0, "a_date": 0.0}
         jours = {"total": 0.0, "a_date": 0.0}
-        self.jours_ouvres_objectif = set()     # jours ouvrés couverts par un contrat avec objectif en heures (pour le forfait journalier)
+        self.jours_ouvres_objectif = set()     # jours travaillés couverts par un contrat avec objectif en heures (pour le forfait journalier)
         self.contrats_objectif = []
 
         for contrat in self.contrats:
@@ -196,11 +209,15 @@ class Calcul_objectif():
                 if not hebdo:
                     self.avertissements.append("%s : le volume horaire hebdomadaire n'est pas renseigné." % texte_contrat)
                     continue
-                ouvres = Jours_ouvres(debut, fin, self.liste_feries)
-                valeur = hebdo / 5 * len(ouvres)
+                # Volume réparti sur les jours habituellement travaillés du contrat (exemple : 28 h sur 4 jours = 7 h par jour travaillé)
+                from collaborateurs.utils.utils_planning import Lire_jours_travailles
+                nbre_jours_semaine = len(Lire_jours_travailles(contrat.jours_travailles))
+                travailles = Jours_travailles(debut, fin, contrat, self.liste_feries)
+                valeur = hebdo / nbre_jours_semaine * len(travailles)
                 heures["total"] += valeur
-                heures["a_date"] += hebdo / 5 * len([date for date in ouvres if date <= limite])
-                self.detail.append({"texte": "%s : %s h / 5 × %d jours ouvrés" % (texte_contrat, Format_nombre(hebdo), len(ouvres)), "valeur": valeur, "unite": "heures"})
+                heures["a_date"] += hebdo / nbre_jours_semaine * len([date for date in travailles if date <= limite])
+                self.detail.append({"texte": "%s : %s h / %d jours × %d jours travaillés" % (texte_contrat, Format_nombre(hebdo), nbre_jours_semaine, len(travailles)),
+                                    "valeur": valeur, "unite": "heures"})
 
             elif mode == "ANNUALISE":
                 volume_annuel = volume if volume else self.parametres["volume_annuel"]
@@ -229,7 +246,7 @@ class Calcul_objectif():
                 self.detail.append({"texte": texte, "valeur": valeur, "unite": "heures"})
 
             self.contrats_objectif.append(contrat)
-            for date in Jours_ouvres(debut, fin, self.liste_feries):
+            for date in Jours_travailles(debut, fin, contrat, self.liste_feries):
                 self.jours_ouvres_objectif.add(date)
 
         # Unité : jours si tous les contrats avec objectif sont au forfait jours

@@ -10,11 +10,11 @@ def Creer_profils(apps, schema_editor):
     if ProfilReglementaireCollaborateur.objects.exists():
         return
     ProfilReglementaireCollaborateur.objects.create(
-        nom="Fonction publique territoriale", defaut=True, duree_max_jour=600, amplitude_max_jour=720, repos_quotidien_min=660, duree_max_semaine=2880,
+        nom="Fonction publique territoriale", defaut=False, duree_max_jour=600, amplitude_max_jour=720, repos_quotidien_min=660, duree_max_semaine=2880,
         moyenne_max_12_semaines=2640, repos_hebdo_min=2100, pause_duree=20, pause_apres=360, jours_consecutifs_max=6,
         observations="Garanties minimales du décret n° 2000-815 du 25 août 2000. Valeurs à vérifier et à adapter (dérogations, accords locaux).")
     ProfilReglementaireCollaborateur.objects.create(
-        nom="Code du travail", defaut=False, duree_max_jour=600, amplitude_max_jour=780, repos_quotidien_min=660, duree_max_semaine=2880,
+        nom="Code du travail", defaut=True, duree_max_jour=600, amplitude_max_jour=780, repos_quotidien_min=660, duree_max_semaine=2880,
         moyenne_max_12_semaines=2640, repos_hebdo_min=2100, pause_duree=20, pause_apres=360, jours_consecutifs_max=6,
         observations="Durées maximales et repos du Code du travail. Valeurs à vérifier et à adapter (convention collective, accords d'entreprise).")
     ProfilReglementaireCollaborateur.objects.create(

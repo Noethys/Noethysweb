@@ -336,6 +336,32 @@
     </div>
 </div>
 
+<div class="modal fade pi-modal" id="pi_modal_recup" tabindex="-1" role="dialog" aria-labelledby="pi_modal_recup_titre">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pi_modal_recup_titre"><strong>Convertir le crédit d'heures en récupération</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="pl-muted pl-petit">Les heures converties sont retirées du solde d'heures (sous forme d'un ajustement de l'objectif) et ajoutées au compteur de congés choisi. Le collaborateur pourra ensuite les poser comme une absence.</p>
+                <div class="pi-recup-credit" id="pi_rec_credit" aria-live="polite"></div>
+                <div class="form-row">
+                    <div class="form-group col-md-7"><label for="pi_rec_type">Compteur de destination</label><select id="pi_rec_type" class="form-control"></select></div>
+                    <div class="form-group col-md-5"><label for="pi_rec_valeur">Heures à convertir</label><input type="text" id="pi_rec_valeur" class="form-control" inputmode="decimal" aria-describedby="pi_rec_aide">
+                        <small class="form-text text-muted" id="pi_rec_aide">Décimales : 1,5 = 1h30</small></div>
+                </div>
+                <div class="form-group mb-0"><label for="pi_rec_motif">Motif <span class="pl-muted">(facultatif)</span></label><input type="text" id="pi_rec_motif" class="form-control" maxlength="300" placeholder="Ex. : heures supplémentaires du séjour de printemps"></div>
+                <div class="pl-alerte mt-2" id="pi_rec_info" role="alert" aria-live="assertive"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="pi_rec_valider"><i class="fa fa-exchange margin-r-5"></i>Convertir</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade pi-modal" id="pi_modal_objectif" tabindex="-1" role="dialog" aria-labelledby="pi_modal_objectif_titre">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

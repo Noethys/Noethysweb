@@ -58,6 +58,8 @@ class Liste(Page, crud.Liste):
             return """<i class="fa fa-circle margin-r-5" style="color: %s"></i> %s""" % (instance.categorie.couleur, instance.categorie.nom)
 
         def Get_unite(self, instance, *args, **kwargs):
+            if instance.unite == "JOURS":
+                return {"OUVRES": "Jours ouvrés", "OUVRABLES": "Jours ouvrables", "TRAVAILLES": "Jours travaillés"}.get(instance.decompte, "Jours")
             return instance.get_unite_display()
 
         def Get_periode(self, instance, *args, **kwargs):
