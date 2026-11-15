@@ -1778,9 +1778,15 @@
             Rafraichir_tout();
         });
 
-        // Panneau latéral (accordéon : plusieurs sections peuvent être ouvertes)
+        // Panneau latéral (accordéon : une seule section ouverte à la fois)
         $("#pi_app").on("click", ".pl-acc-tete", function() {
             var ouvert = $(this).attr("aria-expanded") === "true";
+            if (!ouvert) {
+                $(this).closest(".pl-accordeon").find(".pl-acc-tete").not(this).each(function() {
+                    $(this).attr("aria-expanded", "false");
+                    $("#" + $(this).attr("aria-controls")).prop("hidden", true);
+                });
+            }
             $(this).attr("aria-expanded", String(!ouvert));
             $("#" + $(this).attr("aria-controls")).prop("hidden", ouvert);
         });

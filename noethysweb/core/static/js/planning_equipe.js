@@ -801,7 +801,7 @@
             var icone = ligne.sans ? "<i class='fa fa-info-circle pl-muted' aria-hidden='true'></i>" :
                 "<span class='pl-s-icone' aria-hidden='true'" + (ligne.couleur ? " style='background:" + Echapper(ligne.couleur) + ";color:#fff'" : "") + "><i class='fa fa-sitemap'></i></span>";
             return "<div class='pl-l pl-l-sous" + (ligne.sans ? " sans" : "") + "' style='" + style + ";padding-left:" + indent_sous + "px' data-index='" + ligne.index + "'>" + icone +
-                "<span class='pl-s-nom'>" + Echapper(ligne.libelle) + "</span><span class='pl-muted'>· " + Duree(ligne.total) + "</span>" + Html_bouton_note_aff(ligne) + Html_remplissage(ligne) + "</div>";
+                Html_titre_menu(ligne.cle, Echapper(ligne.libelle), "pl-s-nom") + "<span class='pl-muted'>· " + Duree(ligne.total) + "</span>" + Html_bouton_note_aff(ligne) + Html_remplissage(ligne) + "</div>";
         }
         // Ligne d'évènements
         var evts = Ligne_evts(ligne);
@@ -880,16 +880,21 @@
             " aria-label='" + Echapper("Consommations prévues : " + resume.join(", ")) + "' aria-haspopup='dialog'>" + html + "</button>";
     }
 
+    function Html_titre_menu(cle, contenu, classe, attributs) {
+        // Nom d'une ligne de regroupement : bouton ouvrant le menu de sélection du groupe
+        return "<button type='button' class='pl-titre-menu " + classe + "' data-action='menu_groupe' data-cle='" + Echapper(cle) + "' aria-haspopup='menu' title='Sélectionner les évènements de ce groupe'" + (attributs || "") + ">" + contenu + "</button>";
+    }
+
     function Html_titre_groupe(ligne) {
         if (V.mode === "date") {
-            var html = "<span class='pl-g-titre'>" + Echapper(Texte_jour_long(ligne.jour)) + "</span>";
+            var html = Html_titre_menu(ligne.cle, Echapper(Texte_jour_long(ligne.jour)), "pl-g-titre");
             var ferie = S.feries.get(ligne.jour), vacances = Vacances_de(ligne.jour);
             if (ferie) { html += "<span class='pl-badge pl-badge-ferie'><i class='fa fa-flag' aria-hidden='true'></i>" + Echapper(ferie) + "</span>"; }
             if (vacances) { html += "<span class='pl-badge pl-badge-vacances'>" + Echapper(vacances.nom) + "</span>"; }
             return html;
         }
         var collab = S.collabs.get(ligne.c);
-        return Html_avatar(ligne.c, true) + "<span class='pl-g-titre'>" + Echapper(collab.libelle) + "</span>" + (collab.modifiable ? "" : "<i class='fa fa-lock pl-muted' title='Lecture seule'></i>");
+        return Html_avatar(ligne.c, true) + Html_titre_menu(ligne.cle, Echapper(collab.libelle), "pl-g-titre") + (collab.modifiable ? "" : "<i class='fa fa-lock pl-muted' title='Lecture seule'></i>");
     }
 
     function Html_droite_groupe(ligne) {
@@ -941,10 +946,10 @@
 
     function Html_replie(ligne, style) {
         var g = ligne.groupe;
-        var titre = V.mode === "date" ? "<span class='pl-g-titre'>" + Texte_jour_court(g.jour) + "</span>" + (S.feries.has(g.jour) ? "<span class='pl-badge pl-badge-ferie' title='" + Echapper(S.feries.get(g.jour)) + "'>Férié</span>" : "") +
+        var titre = V.mode === "date" ? Html_titre_menu(g.cle, Texte_jour_court(g.jour), "pl-g-titre") + (S.feries.has(g.jour) ? "<span class='pl-badge pl-badge-ferie' title='" + Echapper(S.feries.get(g.jour)) + "'>Férié</span>" : "") +
             (!S.feries.has(g.jour) && Vacances_de(g.jour) ? "<span class='pl-badge pl-badge-vacances' title='" + Echapper(Vacances_de(g.jour).nom) + "'>Vac.</span>" : "") +
             (Notes_du_jour(g.jour).length ? "<i class='fa fa-sticky-note pl-icone-note' title='" + Echapper(Texte_notes_du_jour(g.jour)) + "'></i>" : "")
-            : Html_avatar(g.c, true) + "<span class='pl-g-titre' style='overflow:hidden;text-overflow:ellipsis'>" + Echapper(S.collabs.get(g.c).libelle) + "</span>";
+            : Html_avatar(g.c, true) + Html_titre_menu(g.cle, Echapper(S.collabs.get(g.c).libelle), "pl-g-titre", " style='overflow:hidden;text-overflow:ellipsis'");
         var abs = g.absents ? "<span class='pl-badge pl-badge-abs'>" + g.absents + " abs.</span>" : "";
         return "<div class='pl-l pl-l-groupe pl-l-replie' style='" + style + ";padding:0' data-index='" + ligne.index + "'>" +
             "<div class='pl-lbl-ligne' style='padding-left:10px;gap:6px;cursor:default'><button type='button' class='pl-plier' data-action='plier' data-cle='" + g.cle + "' aria-expanded='false' aria-label='Déplier'><i class='fa fa-chevron-right' aria-hidden='true'></i></button>" + titre + abs + "</div>" +
@@ -1590,6 +1595,11 @@
             Echapper(collab ? collab.libelle : "") + " · " + Texte_jour_court(Jour_de(evt.s)) + "<br><span class='pl-tt-muted'>" + Echapper(cat.nom) + (evt.t ? " · " + Echapper(evt.t) : "") + "</span>";
         if (evt.aff) { html += "<br><span class='pl-tt-muted'>" + Echapper(Chemin_aff(evt.aff)) + "</span>"; }
         if (evt.rs !== null) { html += "<br>Réalisé : " + Heure(evt.rs) + "–" + Heure(evt.re) + " (" + Duree(evt.re - evt.rs) + ")"; }
+        var anomalies = Anomalies.par_evt.get(evt.id) || [];
+        if (anomalies.length) {
+            html += "<div class='pl-tt-anomalies'><i class='fa fa-exclamation-triangle' aria-hidden='true'></i> " + (anomalies.length > 1 ? anomalies.length + " alertes réglementaires" : "Alerte réglementaire") + " :" +
+                anomalies.map(function(a) { return "<br>• " + Echapper(a.texte); }).join("") + "</div>";
+        }
         return html;
     }
 
@@ -2032,7 +2042,73 @@
         Ouvrir_menu(x, y, html);
     }
 
+    // Évènements d'une ligne de regroupement (date, collaborateur, affectation et ses sous-affectations)
+    function Ids_uniques(evts) {
+        var ids = [];
+        evts.forEach(function(evt) { if (ids.indexOf(evt.id) < 0) { ids.push(evt.id); } });
+        return ids;
+    }
+    function Evts_groupe(ligne, sans_sous_niveaux) {
+        var evts = [];
+        if (ligne.type === "g" || ligne.type === "r") {
+            var g = ligne.type === "r" ? ligne.groupe : ligne;
+            if (V.mode === "date") { M.collabs.forEach(function(c) { evts = evts.concat(Evts_visibles(c, g.jour)); }); }
+            else { V.dates.forEach(function(jour) { evts = evts.concat(Evts_visibles(g.c, jour)); }); }
+            return evts;
+        }
+        // Sous-groupe d'affectation : lignes du même groupe rattachées à l'affectation (ou à ses descendantes)
+        var prefixe = ligne.cle.split("|")[0] + "|";
+        M.lignes.forEach(function(l) {
+            if (l.type !== "l" || l.cle.indexOf(prefixe) !== 0) { return; }
+            var dans = ligne.sans ? l.aff === null : (sans_sous_niveaux ? l.aff === ligne.aff : (l.aff !== null && l.aff !== undefined && Dans_sous_arbre(l.aff, ligne.aff)));
+            if (dans) { evts = evts.concat(Ligne_evts(l)); }
+        });
+        return evts;
+    }
+
+    function Libelle_groupe(ligne) {
+        if (ligne.type === "s") { return ligne.sans ? "Sans affectation" : Chemin_aff(ligne.aff); }
+        var g = ligne.type === "r" ? ligne.groupe : ligne;
+        return V.mode === "date" ? Texte_jour_long(g.jour) : S.collabs.get(g.c).libelle;
+    }
+
+    function Menu_groupe(x, y, ligne) {
+        Menu_actions = {};
+        function Item_selection(code, icone, libelle, ids) {
+            return Item(code, icone, libelle, String(ids.length), {desactive: !ids.length, action: function(e) {
+                var ajouter = e && (e.ctrlKey || e.metaKey);
+                Selectionner(ajouter ? Array.from(V.selection).concat(ids) : ids, false);
+                toastr.info(V.selection.size + " évènement" + (V.selection.size > 1 ? "s sélectionnés" : " sélectionné"));
+            }});
+        }
+        var html = "<div class='pl-menu-titre'>" + Echapper(Libelle_groupe(ligne)) + "</div>";
+        var ids = Ids_uniques(Evts_groupe(ligne, false));
+        var libelle = ligne.type === "s" ? (ligne.sans ? "Sélectionner les évènements sans affectation" : "Sélectionner les évènements de cette affectation")
+                                         : (V.mode === "date" ? "Sélectionner les évènements de cette date" : "Sélectionner les évènements de ce collaborateur");
+        html += Item_selection("groupe", ligne.type === "s" ? "sitemap" : (V.mode === "date" ? "calendar-o" : "user"), libelle, ids);
+        if (ligne.type === "s" && !ligne.sans) {
+            // Affectation ayant des sous-affectations affichées : sélection limitée à ce seul niveau
+            var ids_niveau = Ids_uniques(Evts_groupe(ligne, true));
+            if (ids_niveau.length !== ids.length) { html += Item_selection("niveau", "level-down", "Sélectionner ce niveau seulement (sans les sous-affectations)", ids_niveau); }
+        }
+        html += SEP + Item_selection("tout", "check-square-o", "Tout sélectionner", Ids_uniques(Evts_affiches()));
+        if (V.selection.size) { html += Item("vider", "square-o", "Désélectionner tout", "Échap", {action: function() { Selectionner([], false); }}); }
+        html += SEP + "<div class='pl-menu-titre' style='font-weight:500'>Ctrl+clic : ajouter à la sélection</div>";
+        Ouvrir_menu(x, y, html);
+    }
+
+    function Ouvrir_menu_groupe(bouton, x, y) {
+        var cle = bouton.getAttribute("data-cle");
+        var ligne = M.lignes.find(function(l) { return l.cle === cle; }) || M.lignes.find(function(l) { return l.type === "r" && l.groupe.cle === cle; });
+        if (!ligne) { return; }
+        Masquer_tooltip();
+        if (x === undefined) { var rect = bouton.getBoundingClientRect(); x = rect.left; y = rect.bottom + 2; }
+        Menu_groupe(x, y, ligne);
+    }
+
     function Context_menu(e) {
+        var titre_groupe = e.target.closest("[data-action='menu_groupe']");
+        if (titre_groupe) { e.preventDefault(); Ouvrir_menu_groupe(titre_groupe, e.clientX, e.clientY); return; }
         var barre = e.target.closest(".pl-barre");
         var piste_el = e.target.closest(".pl-piste");
         var libelle = e.target.closest(".pl-lbl-ligne");
@@ -2122,6 +2198,7 @@
             }
             if (action === "note") { Ouvrir_note(+this.getAttribute("data-jour"), this.getAttribute("data-aff") ? +this.getAttribute("data-aff") : null); }
             if (action === "remplissage") { Ouvrir_detail_remplissage(this); }
+            if (action === "menu_groupe") { e.stopPropagation(); Ouvrir_menu_groupe(this); return; }
             if (action === "masquer") { V.masques.add(+this.getAttribute("data-c")); Apres_changement_collabs(); }
             if (action === "anomalies") {
                 e.stopPropagation();

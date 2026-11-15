@@ -242,6 +242,9 @@
 .pl-l-sous {background: var(--pl-fond-sous); border-bottom: 1px solid var(--pl-bordure-legere); gap: 7px; font-size: 13px;}
 .pl-l-sous .pl-s-nom {font-weight: 700;}
 .pl-l-sous.sans .pl-s-nom {font-weight: 600; font-style: italic; color: var(--pl-muted);}
+.pl-titre-menu {border: 0; background: none; padding: 1px 4px; margin: 0 -4px; border-radius: 6px; color: inherit; font: inherit; text-align: left; cursor: pointer; min-width: 0;}
+.pl-titre-menu:hover {background: rgba(var(--pl-primaire-rgb), 0.10); color: var(--pl-primaire);}
+.pl-titre-menu:focus-visible {outline: 2px solid var(--pl-primaire); outline-offset: 1px;}
 .pl-l-sous .pl-s-icone {width: 18px; height: 18px; border-radius: 5px; background: rgba(var(--pl-primaire-rgb), 0.14); color: var(--pl-primaire); display: inline-flex; align-items: center; justify-content: center; font-size: 10px;}
 .pl-badge {height: 20px; padding: 0 7px; border-radius: 5px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;}
 .pl-badge-ferie {background: var(--pl-ferie-fond); color: var(--pl-ferie-texte);}
@@ -324,6 +327,7 @@
 .pl-tooltip {position: fixed; z-index: 1080; max-width: 300px; background: #0f172a; color: #fff; border-radius: 9px; padding: 9px 11px; font-size: 12px; line-height: 1.5; box-shadow: 0 12px 28px rgba(15,23,42,0.35); pointer-events: none;}
 .pl-tooltip strong {font-size: 13px;}
 .pl-tooltip .pl-tt-muted {color: #cbd5e1;}
+.pl-tooltip .pl-tt-anomalies {margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.18); color: #fcd34d;}
 .pl-menu {position: fixed; z-index: 1070; min-width: 250px; max-width: 320px; background: var(--pl-carte); border: 1px solid var(--pl-bordure); border-radius: 10px; box-shadow: var(--pl-ombre); padding: 6px; max-height: 80vh; overflow: auto;}
 .pl-menu-titre {padding: 6px 12px 8px; font-size: 12px; font-weight: 700; color: var(--pl-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .pl-menu-sep {height: 1px; background: var(--pl-bordure); margin: 4px 6px;}

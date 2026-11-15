@@ -221,7 +221,7 @@
 
 /* ---------------- Contrôle réglementaire ---------------- */
 .pi-j.anom::after {content: ""; position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 9px 9px 0; border-color: transparent #d97706 transparent transparent; pointer-events: none;}
-.pi-anom-liste {display: flex; flex-direction: column;}
+.pi-anom-liste {display: flex; flex-direction: column; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; padding-right: 2px;}
 .pi-anom-item {display: flex; gap: 7px; align-items: flex-start; width: 100%; text-align: left; padding: 5px 4px; border: 0; border-bottom: 1px solid var(--pl-bordure-legere); background: transparent; color: var(--pl-texte); font-size: 12px; cursor: pointer;}
 .pi-anom-item:hover {background: #fffbeb;}
 .pi-anom-item i {color: #d97706; margin-top: 2px;}
