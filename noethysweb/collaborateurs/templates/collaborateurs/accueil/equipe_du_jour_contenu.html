@@ -1,0 +1,30 @@
+{% with donnees=collaborateurs_equipe_du_jour %}
+<div class="px-3 pt-2 small text-muted">{{ donnees.date|date:"l j F Y"|capfirst }}</div>
+<div class="row no-gutters px-2 py-2 text-center">
+    <div class="col-4 px-1"><div class="wc-chiffre"><div class="small text-muted">Présents</div><div class="wc-valeur">{{ donnees.nbre_presents }}</div></div></div>
+    <div class="col-4 px-1"><div class="wc-chiffre"><div class="small text-muted">Absents</div><div class="wc-valeur{% if donnees.nbre_absents %} text-warning{% endif %}">{{ donnees.nbre_absents }}</div></div></div>
+    <div class="col-4 px-1"><div class="wc-chiffre"><div class="small text-muted">Heures planifiées</div><div class="wc-valeur">{{ donnees.heures }}</div></div></div>
+</div>
+{% if donnees.lignes %}
+    <ul class="list-group list-group-flush">
+        {% for ligne in donnees.lignes %}
+            <li class="list-group-item py-2" style="border-left: 4px solid {{ ligne.couleur }};">
+                <strong class="d-block text-truncate">{{ ligne.nom }}{% if ligne.chemin %} <span class="text-muted font-weight-normal small">· {{ ligne.chemin }}</span>{% endif %}</strong>
+                <ul class="list-unstyled mb-0 small">
+                    {% for creneau in ligne.creneaux %}
+                        <li class="d-flex align-items-baseline pl-2 pt-1">
+                            <span class="text-muted text-truncate flex-grow-1" style="min-width: 0;" title="{{ creneau.noms_complets }}">{{ creneau.noms }}</span>
+                            <span class="ml-2 text-nowrap" style="font-variant-numeric: tabular-nums;">{{ creneau.horaires }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="text-center text-muted small py-3">Aucun collaborateur planifié ce jour.</div>
+{% endif %}
+{% if donnees.absents %}
+    <div class="px-3 py-2 small border-top"><i class="fa fa-user-times text-warning mr-1" aria-hidden="true"></i><span class="text-muted">Absents :</span> {{ donnees.absents }}</div>
+{% endif %}
+{% endwith %}

@@ -1,0 +1,26 @@
+{# Calendrier d'un widget collaborateurs et rechargement du contenu. Paramètres : id_widget, id_champ, url, selecteur #}
+{% if collaborateurs_datepicker_media.code == code_widget %}{{ collaborateurs_datepicker_media.html|safe }}{% endif %}
+<div class="wc-selecteur">{{ selecteur }}</div>
+<script>
+    $(function() {
+        var widget = $("#{{ id_widget }}");
+        var date_affichee = moment().format("YYYY-MM-DD");
+        function Charger(date) {
+            if (!date || date === date_affichee) { return; }
+            date_affichee = date;
+            widget.find(".wc-contenu").attr("aria-busy", "true").css("opacity", 0.5);
+            $.ajax({
+                type: "POST",
+                url: "{{ url }}",
+                data: {date: date, csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function(html) { widget.find(".wc-contenu").html(html); },
+                error: function() { toastr.error("Impossible de charger les données de cette date"); },
+                complete: function() { widget.find(".wc-contenu").attr("aria-busy", "false").css("opacity", 1); }
+            });
+        }
+        // Sélection dans le calendrier, flèches veille / lendemain ou saisie au clavier
+        $("#{{ id_champ }}").on("changeDate", function(e) {
+            if (e.date) { Charger(moment(e.date).format("YYYY-MM-DD")); }
+        });
+    });
+</script>

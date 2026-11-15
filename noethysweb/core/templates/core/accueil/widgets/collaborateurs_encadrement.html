@@ -1,0 +1,23 @@
+{% if collaborateurs_encadrement %}
+<style>
+    #widget_collaborateurs_encadrement .wc-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .5rem; }
+    #widget_collaborateurs_encadrement .card-header { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+    #widget_collaborateurs_encadrement .card-tools { margin-left: auto; display: flex; align-items: center; }
+    #widget_collaborateurs_encadrement .wc-selecteur .input-group { width: 190px; flex-wrap: nowrap; }
+</style>
+
+<div class="card card-outline card-{% if collaborateurs_encadrement.nbre_depassements %}danger{% else %}primary{% endif %}" id="widget_collaborateurs_encadrement">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fa fa-tachometer margin-r-5" aria-hidden="true"></i>Taux d'encadrement</h3>
+        <div class="card-tools">
+            {% url 'ajax_accueil_collaborateurs_encadrement' as url %}
+            {% include "collaborateurs/accueil/selecteur_date.html" with id_widget="widget_collaborateurs_encadrement" id_champ="collaborateurs_encadrement_date" code_widget="collaborateurs_encadrement" url=url selecteur=collaborateurs_encadrement_selecteur %}
+            <a href="{% url 'planning_equipe' %}" class="btn btn-tool" title="Ouvrir le planning" aria-label="Ouvrir le planning"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Réduire"><i class="fa fa-minus" aria-hidden="true"></i></button>
+        </div>
+    </div>
+    <div class="card-body p-0 wc-contenu" aria-live="polite">
+        {% include "collaborateurs/accueil/encadrement_contenu.html" %}
+    </div>
+</div>
+{% endif %}

@@ -1,0 +1,43 @@
+{% if collaborateurs_heures_declarees %}{% with donnees=collaborateurs_heures_declarees %}
+<style>
+    #widget_collaborateurs_heures_declarees .wc-liste { max-height: 360px; overflow-y: auto; }
+    #widget_collaborateurs_heures_declarees .wc-item, #widget_collaborateurs_heures_declarees .wc-item:hover { padding: .6rem 1rem; color: inherit; }
+</style>
+
+<div class="card card-outline card-{% if donnees.total %}warning{% else %}success{% endif %}" id="widget_collaborateurs_heures_declarees">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fa fa-clock-o margin-r-5" aria-hidden="true"></i>
+            Heures déclarées à valider
+            {% if donnees.total %}<span class="badge badge-warning ml-1">{{ donnees.total }}</span>{% endif %}
+        </h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Réduire"><i class="fa fa-minus" aria-hidden="true"></i></button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if donnees.lignes %}
+            <div class="list-group list-group-flush wc-liste">
+                {% for ligne in donnees.lignes %}
+                    <a href="{% url 'heures_declarees_collaborateurs' %}" class="list-group-item list-group-item-action wc-item d-flex align-items-center" title="Valider les déclarations">
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <strong class="d-block text-truncate">{{ ligne.nom }}</strong>
+                            <div class="text-muted small text-truncate">{{ ligne.evenement.date_debut|date:"D j b" }} · prévu {{ ligne.evenement.date_debut|time:"H:i" }}–{{ ligne.evenement.date_fin|time:"H:i" }} · déclaré {{ ligne.evenement.declare_debut|time:"H:i" }}–{{ ligne.evenement.declare_fin|time:"H:i" }}</div>
+                        </div>
+                        <span class="badge badge-{{ ligne.classe }} ml-2" title="Ecart entre la durée déclarée et la durée prévue">{{ ligne.texte_ecart }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+            <div class="card-footer text-center p-2">
+                <a href="{% url 'heures_declarees_collaborateurs' %}" class="small">{% if donnees.total > donnees.lignes|length %}Voir les {{ donnees.total }} déclarations{% else %}Valider les déclarations{% endif %} <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+        {% else %}
+            <div class="text-center py-4 px-3">
+                <i class="fa fa-check-circle text-success" style="font-size: 32px;" aria-hidden="true"></i>
+                <div class="mt-2"><strong>Aucune déclaration en attente</strong></div>
+                <div class="text-muted small">Les heures déclarées par les collaborateurs ont toutes été traitées.</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}{% endif %}

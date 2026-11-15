@@ -1,0 +1,45 @@
+{% if collaborateurs_pieces_manquantes %}{% with donnees=collaborateurs_pieces_manquantes %}
+<style>
+    #widget_collaborateurs_pieces_manquantes .wc-liste { max-height: 360px; overflow-y: auto; }
+    #widget_collaborateurs_pieces_manquantes .wc-item, #widget_collaborateurs_pieces_manquantes .wc-item:hover { padding: .6rem 1rem; color: inherit; }
+    #widget_collaborateurs_pieces_manquantes .wc-icone { width: 22px; flex: none; text-align: center; font-size: 16px; }
+</style>
+
+<div class="card card-outline card-{% if donnees.total %}warning{% else %}success{% endif %}" id="widget_collaborateurs_pieces_manquantes">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fa fa-folder-open-o margin-r-5" aria-hidden="true"></i>
+            Pièces manquantes ou expirées
+            {% if donnees.total %}<span class="badge badge-warning ml-1">{{ donnees.total }}</span>{% endif %}
+        </h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Réduire"><i class="fa fa-minus" aria-hidden="true"></i></button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if donnees.lignes %}
+            <div class="list-group list-group-flush wc-liste">
+                {% for ligne in donnees.lignes %}
+                    <a href="{% url 'collaborateur_pieces_liste' idcollaborateur=ligne.collaborateur.pk %}" class="list-group-item list-group-item-action wc-item d-flex align-items-center" title="Ouvrir les pièces du collaborateur">
+                        <span class="wc-icone mr-2 text-{{ ligne.classe }}" aria-hidden="true"><i class="fa {% if ligne.classe == 'danger' %}fa-times-circle{% elif ligne.etat == 'ATTENTE' %}fa-hourglass-half{% else %}fa-exclamation-triangle{% endif %}"></i></span>
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <strong class="d-block text-truncate">{{ ligne.nom }}</strong>
+                            <div class="text-muted small text-truncate">{{ ligne.piece }}</div>
+                        </div>
+                        <span class="badge badge-{{ ligne.classe }} ml-2">{{ ligne.label }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+            <div class="card-footer text-center p-2">
+                <a href="{% url 'pieces_manquantes_collaborateurs' %}" class="small">{% if donnees.total > donnees.lignes|length %}Voir les {{ donnees.total }} pièces ({{ donnees.nbre_collaborateurs }} collaborateur{{ donnees.nbre_collaborateurs|pluralize }}){% else %}Ouvrir les pièces manquantes{% endif %} <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+        {% else %}
+            <div class="text-center py-4 px-3">
+                <i class="fa fa-check-circle text-success" style="font-size: 32px;" aria-hidden="true"></i>
+                <div class="mt-2"><strong>Dossiers complets</strong></div>
+                <div class="text-muted small">Aucune pièce manquante ni expiration dans les 30 prochains jours.</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}{% endif %}

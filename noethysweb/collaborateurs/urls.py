@@ -6,7 +6,7 @@
 from django.urls import include, path
 from core.views import toc
 from core.decorators import secure_ajax
-from collaborateurs.views import collaborateur, collaborateur_identite, collaborateur_questionnaire, collaborateur_coords, collaborateur_qualifications, \
+from collaborateurs.views import accueil_widgets, collaborateur, collaborateur_identite, collaborateur_questionnaire, collaborateur_coords, collaborateur_qualifications, \
                                 collaborateur_pieces, collaborateur_notes, collaborateur_contrats, collaborateur_evenements, \
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
@@ -159,5 +159,7 @@ urlpatterns = [
     path('collaborateurs/pieces_manquantes/envoyer_emails', secure_ajax(pieces_manquantes.Envoyer_emails), name='ajax_pieces_manquantes_collaborateurs_emails'),
     path('collaborateurs/editions/generer/<str:code>', secure_ajax(editions.Generer), name='ajax_editions_collaborateurs_generer'),
     path('collaborateurs/variables_paie/exporter_excel', secure_ajax(variables_paie.Exporter_excel), name='ajax_variables_paie_collaborateurs_exporter_excel'),
+    path('collaborateurs/accueil/equipe_du_jour', secure_ajax(accueil_widgets.Get_equipe_du_jour), name='ajax_accueil_collaborateurs_equipe_du_jour'),
+    path('collaborateurs/accueil/encadrement', secure_ajax(accueil_widgets.Get_encadrement), name='ajax_accueil_collaborateurs_encadrement'),
 
 ]

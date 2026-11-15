@@ -1,0 +1,24 @@
+{% with donnees=collaborateurs_encadrement %}
+<div class="px-3 pt-2 small text-muted">{{ donnees.date|date:"l j F Y"|capfirst }}</div>
+{% if donnees.lignes %}
+    <div class="wc-grille p-2">
+        {% for ligne in donnees.lignes %}
+            <div class="wc-jauge border rounded p-2{% if ligne.classe == 'danger' %} border-danger{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="small" style="min-width: 0;"><strong>{{ ligne.nom }}</strong>{% if ligne.chemin %}<span class="d-block text-muted text-truncate">{{ ligne.chemin }}</span>{% endif %}</span>
+                    <span class="badge badge-{{ ligne.classe }} ml-1">{% if ligne.taux %}1 / {{ ligne.taux }}{% else %}Aucun{% endif %}</span>
+                </div>
+                <div class="progress progress-xs my-2" role="progressbar" aria-label="Taux d'encadrement de {{ ligne.nom }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ ligne.pourcentage }}">
+                    <div class="progress-bar bg-{{ ligne.classe }}" style="width: {{ ligne.pourcentage }}%"></div>
+                </div>
+                <div class="small {% if ligne.classe == 'danger' %}text-danger{% else %}text-muted{% endif %}">
+                    {{ ligne.nbre_collaborateurs }} collab. · {{ ligne.pic }} réservé{{ ligne.pic|pluralize }} · max 1/{{ ligne.seuil }}{% if ligne.manque %} · manque {{ ligne.manque }}{% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center text-muted small py-4">Aucune affectation avec un taux d'encadrement maximal et des consommations réservées ce jour.</div>
+{% endif %}
+<div class="px-3 pb-2 small text-muted">Collaborateurs planifiés rapportés au pic des consommations réservées.</div>
+{% endwith %}

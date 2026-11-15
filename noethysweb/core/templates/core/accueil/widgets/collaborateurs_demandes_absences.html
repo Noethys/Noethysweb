@@ -1,0 +1,45 @@
+{% if collaborateurs_demandes_absences %}{% with donnees=collaborateurs_demandes_absences %}
+<style>
+    #widget_collaborateurs_demandes_absences .wc-liste { max-height: 360px; overflow-y: auto; }
+    #widget_collaborateurs_demandes_absences .wc-item, #widget_collaborateurs_demandes_absences .wc-item:hover { padding: .6rem 1rem; color: inherit; }
+    #widget_collaborateurs_demandes_absences .wc-avatar { width: 34px; height: 34px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; }
+</style>
+
+<div class="card card-outline card-{% if donnees.nbre_urgents %}danger{% elif donnees.total %}warning{% else %}success{% endif %}" id="widget_collaborateurs_demandes_absences">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fa fa-plane margin-r-5" aria-hidden="true"></i>
+            Demandes d'absence à traiter
+            {% if donnees.total %}<span class="badge badge-{% if donnees.nbre_urgents %}danger{% else %}warning{% endif %} ml-1">{{ donnees.total }}</span>{% endif %}
+        </h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Réduire" aria-label="Réduire"><i class="fa fa-minus" aria-hidden="true"></i></button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if donnees.lignes %}
+            <div class="list-group list-group-flush wc-liste">
+                {% for ligne in donnees.lignes %}
+                    <a href="{% url 'collaborateur_conges' idcollaborateur=ligne.demande.collaborateur_id %}" class="list-group-item list-group-item-action wc-item d-flex align-items-center" title="Ouvrir les congés du collaborateur">
+                        <div class="wc-avatar bg-primary mr-3" aria-hidden="true">{{ ligne.initiales }}</div>
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <strong class="d-block text-truncate">{{ ligne.nom }}</strong>
+                            <div class="text-muted small text-truncate">{{ ligne.type_conge }} · {{ ligne.periode }} · {{ ligne.duree }}</div>
+                        </div>
+                        <span class="badge badge-{% if ligne.urgent %}danger{% else %}light{% endif %} ml-2">{{ ligne.delai }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+            <div class="card-footer text-center p-2">
+                <a href="{% url 'demandes_absences_collaborateurs' %}" class="small">{% if donnees.total > donnees.lignes|length %}Voir les {{ donnees.total }} demandes{% else %}Ouvrir les demandes d'absence{% endif %} <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+        {% else %}
+            <div class="text-center py-4 px-3">
+                <i class="fa fa-check-circle text-success" style="font-size: 32px;" aria-hidden="true"></i>
+                <div class="mt-2"><strong>Aucune demande en attente</strong></div>
+                <div class="text-muted small">Toutes les demandes d'absence ont été traitées.</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}{% endif %}

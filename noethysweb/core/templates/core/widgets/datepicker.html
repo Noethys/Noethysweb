@@ -351,8 +351,11 @@ function maj_datepicker_{{ id }}(data){
 
 {% else %}
 
-    <div class="input-group date">
+    <div class="input-group date{% if taille_groupe %} input-group-{{ taille_groupe }}{% endif %}">
         {% if bootstrap_version != 5 %}<div class="input-group-prepend">{% endif %}
+            {% if fleches_encadrantes %}
+                <button id="datepicker_moins_{{ id }}" title="Sélectionner la veille" aria-label="Sélectionner la veille" class="btn btn-default" type="button"><i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+            {% endif %}
             {% if afficher_check %}
                 <span class="input-group-text">
                     <input name="checkbox_{{ name }}" type="text" value="{% if value %}true{% else %}false{% endif %}" hidden>
@@ -368,9 +371,13 @@ function maj_datepicker_{{ id }}(data){
                data-date-format="{{ format }}" name="{{ name }}" id="{{ id }}"
                value="{{ value|date:djformat }}"
                {% if disabled %}disabled="disabled"{% endif %} {% if required %}required{% endif %}
-                {% if aria_describedby %}aria-describedby="{{ aria_describedby }}"{% endif %}
+                {% if aria_describedby %}aria-describedby="{{ aria_describedby }}"{% endif %} {% if aria_label %}aria-label="{{ aria_label }}"{% endif %}
         />
-        {% if afficher_fleches %}
+        {% if fleches_encadrantes %}
+            {% if bootstrap_version != 5 %}<div class="input-group-append">{% endif %}
+                <button id="datepicker_plus_{{ id }}" title="Sélectionner le lendemain" aria-label="Sélectionner le lendemain" class="btn btn-default" type="button"><i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+            {% if bootstrap_version != 5 %}</div>{% endif %}
+        {% elif afficher_fleches %}
             {% if bootstrap_version != 5 %}<div class="input-group-append">{% endif %}
                 <button id="datepicker_moins_{{ id }}" title="Sélectionner la veille" class="btn btn-default" type="button"><i class="fa fa-chevron-left"></i></button>
                 <button id="datepicker_plus_{{ id }}" title="Sélectionner le lendemain" class="btn btn-default" type="button"><i class="fa fa-chevron-right"></i></button>
