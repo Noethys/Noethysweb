@@ -145,25 +145,44 @@ def Update():
     # Efface le numéro de version du cache
     cache.delete('version_application')
 
-    # AutoReloadWSGI
-    logger.debug("AutoReloadWSGI...")
-    AutoReloadWSGI()
+    # Important : le rechargement WSGI doit être la DERNIERE étape. Modifier wsgi.py redémarre le
+    # processus mod_wsgi qui exécute cette mise à jour : s'il est fait avant les migrations, celles-ci
+    # sont interrompues en cours de route. Sous MySQL/MariaDB, les créations de tables ne sont pas
+    # annulées : la base reste alors dans un état intermédiaire (migration à moitié appliquée).
+    resultat = True
 
     # Mise à jour du répertoire Static
     logger.debug("Collectstatic...")
-    # clear=True : vide le répertoire STATIC_ROOT avant la copie pour supprimer les fichiers obsolètes
-    call_command("collectstatic", verbosity=0, interactive=False, clear=True)
+    try:
+        # clear=True : vide le répertoire STATIC_ROOT avant la copie pour supprimer les fichiers obsolètes
+        call_command("collectstatic", verbosity=0, interactive=False, clear=True)
+    except Exception:
+        logger.exception("Erreur lors du collectstatic")
+        resultat = False
 
     # Mise à jour de la DB
     logger.debug("Migration DB...")
-    call_command("migrate")
+    try:
+        call_command("migrate", interactive=False)
+    except Exception:
+        logger.exception("Erreur lors de la migration de la base de donnees : lancez 'python3 manage.py migrate' pour voir le detail")
+        resultat = False
 
     # Mise à jour des permissions
-    logger.debug("Mise à jour des permissions...")
-    call_command("update_permissions")
+    if resultat:
+        logger.debug("Mise à jour des permissions...")
+        try:
+            call_command("update_permissions")
+        except Exception:
+            logger.exception("Erreur lors de la mise a jour des permissions")
+            resultat = False
 
-    logger.debug("Mise a jour terminee.")
-    return True
+    # AutoReloadWSGI : toujours en dernier
+    logger.debug("AutoReloadWSGI...")
+    AutoReloadWSGI()
+
+    logger.debug("Mise a jour terminee." if resultat else "Mise a jour terminee avec des erreurs.")
+    return resultat
 
 
 def Installer_fichiers(zfile=None, liste_fichiers=[], prefixe="", chemin_dest="", version_online_txt=""):
