@@ -42,7 +42,6 @@ class App:
             chemin_requirements = os.path.join(self.repertoire_app, "lib", "requirements.txt")
         subprocess.call([sys.executable, "-m", "pip", "install", "-r", chemin_requirements, "--upgrade"])
         self.pip_install_package("django-cryptography-django5")
-        self.Remplacer_texte(nom_fichier="virtualenv/Lib/site-packages/upload_form/forms.py", texte="ugettext_lazy", remplacement="gettext_lazy")
 
     def Remplacer_texte(self, nom_fichier="", texte="", remplacement=""):
         print("Replacement texte dans le fichier %s..." % nom_fichier)

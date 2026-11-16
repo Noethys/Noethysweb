@@ -5,13 +5,11 @@
 
 import os, uuid
 from django import forms
-from django.urls import reverse_lazy
 from django.conf import settings
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from crispy_forms.bootstrap import Field
 from core.forms.base import FormulaireBase
-from upload_form.forms import UploadForm
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -31,67 +29,48 @@ class Formulaire(FormulaireBase, forms.Form):
         )
 
 
-class Formulaire_importation(UploadForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.accept = settings.MY_UPLOAD_FORM_ACCEPT
-        self.max_image_size = settings.MY_UPLOAD_FORM_MAX_IMAGE_SIZE
+def Analyser_photo(fichier=None, uuid_lot=None):
+    """ Détecte les visages d'une photo et enregistre chaque portrait dans media/temp/<uuid_lot> """
+    import cv2
+    import numpy as np
+    from PIL import Image
 
-    def form_valid(self, request):
-        fichiers = self.files.getlist('files')
-        uuid_lot = self.Analyse_photos(fichiers=fichiers)
-        return uuid_lot
+    # Recherche l'algorithme de détection
+    face_detector = None
+    try:
+        face_detector = "{base_path}/data/haarcascade_frontalface_default.xml".format(base_path=cv2.__path__[0])
+    except:
+        pass
+    if not face_detector:
+        face_detector = "/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml"
 
-    def get_action(self, request=None):
-        return reverse_lazy("ajax_importer_photos_individus")
+    # Charge l'algorithme de détection
+    detector = cv2.CascadeClassifier(face_detector)
 
-    def Analyse_photos(self, fichiers=[]):
-        import cv2
-        import numpy as np
-        from PIL import Image
+    # Charge l'image
+    fichier.seek(0)
+    image = np.asarray(bytearray(fichier.read()), dtype="uint8")
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    if image is None:
+        raise ValueError("Image illisible")
+    image_nb = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image_couleur = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image_pil = Image.fromarray(image_couleur)
 
-        # Création du nom du répertoire
-        uuid_lot = uuid.uuid4()
+    # Création du répertoire temp
+    rep_destination = os.path.join(settings.MEDIA_ROOT, "temp", str(uuid_lot))
+    if not os.path.exists(rep_destination):
+        os.makedirs(rep_destination)
 
-        # Recherche l'algorithme de détection
-        face_detector = None
-        try:
-            face_detector = "{base_path}/data/haarcascade_frontalface_default.xml".format(base_path=cv2.__path__[0])
-        except:
-            pass
-        if not face_detector:
-            face_detector = "/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml"
+    # Analyse l'image
+    rects = detector.detectMultiScale(image_nb, scaleFactor=1.1, minNeighbors=5, minSize=(80, 80))
+    for (x, y, w, h) in rects:
+        # Ajout d'une marge
+        marge = w * 10//100
+        x, y, w, h = x-marge, y-marge, w+marge*2, h+marge*2
 
-        # Charge l'algorithme de détection
-        detector = cv2.CascadeClassifier(face_detector)
+        # Découpe chaque portrait
+        img = image_pil.crop((x, y, x + w, y + h))
+        img.save(os.path.join(rep_destination, "%s.jpg" % uuid.uuid4()))
 
-        for fichier in fichiers:
-
-            # Charge l'image
-            image = np.asarray(bytearray(fichier.file.read()), dtype="uint8")
-            image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-            image_nb = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            image_couleur = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            image_pil = Image.fromarray(image_couleur)
-
-            # Création du répertoire temp
-            rep_destination = os.path.join(settings.MEDIA_ROOT, "temp", str(uuid_lot))
-            if not os.path.exists(rep_destination):
-                os.makedirs(rep_destination)
-
-            # Analyse l'image
-            rects = detector.detectMultiScale(image_nb, scaleFactor=1.1, minNeighbors=5, minSize=(80, 80))
-            for (x, y, w, h) in rects:
-                # Ajout d'une marge
-                marge = w * 10//100
-                x, y, w, h = x-marge, y-marge, w+marge*2, h+marge*2
-
-                # Découpe chaque portrait
-                img = image_pil.crop((x, y, x + w, y + h))
-                nom_fichier = os.path.join(rep_destination, "%s.jpg" % uuid.uuid4())
-                img.save(os.path.join(settings.MEDIA_ROOT, nom_fichier))
-
-                # Tracé du cadre rouge sur la photo originale
-                cv2.rectangle(image_couleur, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
-        return uuid_lot
+    return len(rects)

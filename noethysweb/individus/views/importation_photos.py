@@ -3,8 +3,8 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import os, json, shutil
-from django.urls import reverse_lazy
+import os, re, json, shutil, uuid
+from django.urls import reverse_lazy, reverse
 from django.conf import settings
 from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib import messages
@@ -13,19 +13,28 @@ from django.views.generic import TemplateView
 from core.views.base import CustomView
 from core.models import Individu
 from individus.forms.importation_photos_selection import Formulaire as form_selection_individu
-from individus.forms.importation_photos import Formulaire, Formulaire_importation
+from core.forms.envoi_photos import Formulaire_envoi_photo, Get_contexte_zone_envoi
+from individus.forms.importation_photos import Formulaire, Analyser_photo
 
 
 def Importer_photos_individus(request):
-    assert request.method == 'POST'
-    assert request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-    form = Formulaire_importation(request.POST, request.FILES)
-    if form.is_valid():
-        uuid_lot = form.form_valid(request)
-        url = reverse_lazy("importation_photos", kwargs={"uuid_lot": uuid_lot})
-        return JsonResponse({'action': 'redirect', 'url': url})
-    else:
-        return JsonResponse({'action': 'replace', 'html': form.as_html(request)})
+    """ Reçoit une photo envoyée par la zone d'envoi et en extrait les visages """
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "erreur": "Requête invalide"}, status=400)
+    if not request.user.has_perm("core.importation_photos"):
+        return JsonResponse({"ok": False, "erreur": "Vous n'avez pas l'autorisation d'importer des photos"}, status=403)
+    try:
+        uuid_lot = uuid.UUID(request.POST.get("lot", ""))
+    except ValueError:
+        return JsonResponse({"ok": False, "erreur": "Lot invalide"}, status=400)
+    form = Formulaire_envoi_photo(request.POST, request.FILES)
+    if not form.is_valid():
+        return JsonResponse({"ok": False, "erreur": form.Get_erreur()}, status=400)
+    try:
+        nbre_visages = Analyser_photo(fichier=form.cleaned_data["fichier"], uuid_lot=uuid_lot)
+    except Exception:
+        return JsonResponse({"ok": False, "erreur": "Analyse de la photo impossible"}, status=400)
+    return JsonResponse({"ok": True, "nbre_visages": nbre_visages})
 
 
 def Get_individus(request):
@@ -45,16 +54,26 @@ class View(CustomView, TemplateView):
         context = super(View, self).get_context_data(**kwargs)
         context['page_titre'] = "Importer des photos individuelles"
         context['box_titre'] = "Sélection des photos"
-        context['box_introduction'] = "Importez des photos comportant un ou plusieurs individus (photo de groupe par exemple) : l'application détecte les visages, les découpe et vous propose de les associer aux fiches individuelles. Commencez par sélectionner la ou les photos à analyser et cliquez sur Envoyer."
+        context['box_introduction'] = "Importez des photos comportant un ou plusieurs individus (photo de groupe par exemple) : l'application détecte les visages, les découpe et vous propose de les associer aux fiches individuelles. Commencez par sélectionner la ou les photos à analyser et cliquez sur Analyser les photos."
         context['form'] = kwargs.get("form", Formulaire())
         context['form_selection_individu'] = form_selection_individu()
-        context['formulaire_upload'] = Formulaire_importation()
-        context['formulaire_upload_as_html'] = context['formulaire_upload'].as_html(self.request)
+
+        # Zone d'envoi des photos : toutes les photos envoyées partagent le même lot
+        uuid_lot = str(uuid.uuid4())
+        context['zone_envoi'] = Get_contexte_zone_envoi(url=reverse("ajax_importer_photos_individus"), libelle_bouton="Analyser les photos",
+                                                        url_fin=reverse("importation_photos", kwargs={"uuid_lot": uuid_lot}), extra={"lot": uuid_lot})
 
         # Lecture d'un lot de photos
         if "uuid_lot" in self.kwargs and "-" in self.kwargs["uuid_lot"]:
-            rep = os.path.join(settings.MEDIA_ROOT, "temp", self.kwargs["uuid_lot"])
-            context['liste_portraits'] = [os.path.join("temp", self.kwargs["uuid_lot"], str(fichier)) for fichier in os.listdir(rep)]
+            try:
+                rep = os.path.join(settings.MEDIA_ROOT, "temp", str(uuid.UUID(self.kwargs["uuid_lot"])))
+            except ValueError:
+                rep = None
+            if rep and os.path.isdir(rep):
+                context['liste_portraits'] = [os.path.join("temp", self.kwargs["uuid_lot"], str(fichier)) for fichier in os.listdir(rep)]
+            else:
+                context['liste_portraits'] = []
+                messages.add_message(self.request, messages.ERROR, "Ce lot de photos est introuvable")
 
         return context
 
@@ -67,20 +86,42 @@ class View(CustomView, TemplateView):
         if not form.cleaned_data.get("data") and not validation:
             return self.render_to_response(self.get_context_data(form=form))
 
-        # Enregistrement des photos
-        data = json.loads(form.cleaned_data.get("data"))
-        for dict_temp in data:
-            # Envoi l'image vers le répertoire media/individus
-            image_origine = os.path.join(settings.MEDIA_ROOT, dict_temp["url"])
-            url_destination = dict_temp["url"].replace("temp/%s" % self.kwargs["uuid_lot"], "individus/")
-            if not os.path.isdir(os.path.join(settings.MEDIA_ROOT, "individus")):
-                os.mkdir(os.path.join(settings.MEDIA_ROOT, "individus"))
-            image_destination = os.path.join(settings.MEDIA_ROOT, url_destination)
-            shutil.move(image_origine, image_destination, url_destination)
-            # Modifie l'image de la fiche individuelle
-            individu = Individu.objects.get(pk=int(dict_temp["idindividu"]))
-            individu.photo = url_destination
-            individu.save()
+        # Vérification du lot
+        try:
+            uuid_lot = str(uuid.UUID(self.kwargs.get("uuid_lot", "")))
+            data = json.loads(form.cleaned_data.get("data"))
+        except (ValueError, TypeError):
+            messages.add_message(request, messages.ERROR, "Données invalides")
+            return HttpResponseRedirect(reverse_lazy("importation_photos"))
+        rep_lot = os.path.join(settings.MEDIA_ROOT, "temp", uuid_lot)
+        rep_individus = os.path.join(settings.MEDIA_ROOT, "individus")
+        os.makedirs(rep_individus, exist_ok=True)
 
-        messages.add_message(request, messages.SUCCESS, "%d photos ont été importées avec succès" % len(data))
+        # Enregistrement des photos
+        nbre_photos = 0
+        for dict_temp in data:
+            # Le nom du portrait doit être celui généré lors de l'analyse : aucun autre chemin n'est accepté
+            url = str(dict_temp.get("url", "")).replace("\\", "/")
+            nom_portrait = url.rsplit("/", 1)[-1]
+            if not re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.jpg", nom_portrait) or \
+                    url != "temp/%s/%s" % (uuid_lot, nom_portrait):
+                continue
+            image_origine = os.path.join(rep_lot, nom_portrait)
+            if not os.path.isfile(image_origine):
+                continue
+            try:
+                individu = Individu.objects.get(pk=int(dict_temp["idindividu"]))
+            except (KeyError, ValueError, TypeError, Individu.DoesNotExist):
+                continue
+            # Envoi l'image vers le répertoire media/individus
+            shutil.move(image_origine, os.path.join(rep_individus, nom_portrait))
+            # Modifie l'image de la fiche individuelle
+            individu.photo = "individus/%s" % nom_portrait
+            individu.save()
+            nbre_photos += 1
+
+        # Suppression des portraits non attribués
+        shutil.rmtree(rep_lot, ignore_errors=True)
+
+        messages.add_message(request, messages.SUCCESS, "%d photos ont été importées avec succès" % nbre_photos)
         return HttpResponseRedirect(reverse_lazy("individus_toc"))

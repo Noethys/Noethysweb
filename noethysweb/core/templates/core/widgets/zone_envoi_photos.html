@@ -1,0 +1,35 @@
+{% comment %}
+    Zone d'envoi de photos.
+    Paramètres : url (vue AJAX qui reçoit chaque photo), url_fin (page affichée après l'envoi),
+    libelle_bouton, extra (dictionnaire de champs envoyés avec chaque photo).
+    Charger aussi css/zone_envoi_photos.css et js/zone_envoi_photos.js dans la page.
+{% endcomment %}
+<div class="zone-envoi mt-3"
+     data-url="{{ zone_envoi.url }}"
+     data-url-fin="{{ zone_envoi.url_fin }}"
+     data-libelle-bouton="{{ zone_envoi.libelle_bouton }}"
+     data-dimension-max="{{ zone_envoi.dimension_max }}"
+     data-taille-max="{{ zone_envoi.taille_max }}"
+     data-extra="{{ zone_envoi.extra_json }}">
+    {% csrf_token %}
+    <label class="zone-envoi-depot" tabindex="0">
+        <input type="file" class="zone-envoi-input d-none" accept="image/*" multiple>
+        <span class="zone-envoi-complet">
+            <i class="fa fa-cloud-upload" aria-hidden="true"></i><br>
+            Glissez vos photos ici ou <span class="zone-envoi-lien">parcourez vos fichiers</span>
+            <div class="zone-envoi-aide">Images uniquement, {{ zone_envoi.taille_max }} Mo maximum par photo. Les grandes photos sont réduites à {{ zone_envoi.dimension_max }} px avant l'envoi.</div>
+        </span>
+        <span class="zone-envoi-compact"><i class="fa fa-plus margin-r-5" aria-hidden="true"></i>Ajouter d'autres photos</span>
+    </label>
+    <div class="zone-envoi-entete"><span class="zone-envoi-resume"></span></div>
+    <div class="zone-envoi-liste"></div>
+    <div class="zone-envoi-actions">
+        <button type="button" class="btn btn-danger zone-envoi-effacer"><i class="fa fa-ban margin-r-5"></i>Tout effacer</button>
+        <button type="button" class="btn btn-primary zone-envoi-envoyer"><i class="fa fa-upload margin-r-5"></i><span class="libelle"></span></button>
+    </div>
+    <div class="zone-envoi-progression" style="display: none;">
+        <div class="progress"><div class="progress-bar" role="progressbar" style="width: 0%"></div></div>
+        <div class="zone-envoi-progression-texte"></div>
+    </div>
+    <div class="zone-envoi-message" role="alert"></div>
+</div>

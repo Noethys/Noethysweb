@@ -1,0 +1,68 @@
+/* Zone d'envoi de photos (core/static/js/zone_envoi_photos.js) */
+.zone-envoi-depot {
+    display: block;
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    color: #6c757d;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    margin-bottom: 0;
+    font-weight: normal;
+    transition: border-color .15s, background-color .15s;
+}
+.zone-envoi-depot:hover, .zone-envoi-depot:focus, .zone-envoi-depot.survol {
+    border-color: #3c8dbc;
+    background-color: #eef6fb;
+    outline: none;
+}
+.zone-envoi-depot .fa-cloud-upload { font-size: 36px; color: #3c8dbc; }
+.zone-envoi-depot .zone-envoi-lien { color: #3c8dbc; text-decoration: underline; }
+.zone-envoi-depot .zone-envoi-aide { font-size: 12px; margin-top: 4px; }
+.zone-envoi-depot .zone-envoi-compact { display: none; }
+.zone-envoi-depot.compacte { padding: 8px; }
+.zone-envoi-depot.compacte .zone-envoi-complet { display: none; }
+.zone-envoi-depot.compacte .zone-envoi-compact { display: inline; }
+.zone-envoi.en-cours .zone-envoi-depot { display: none; }
+.zone-envoi-entete { display: flex; justify-content: flex-end; font-size: 12px; color: #6c757d; margin: 6px 0; min-height: 18px; }
+.zone-envoi-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.zone-envoi-vignette { border: 1px solid #dee2e6; border-radius: 6px; overflow: hidden; background: #fff; font-size: 12px; }
+.zone-envoi-vignette.avec-erreur { border-color: #dc3545; }
+.zone-envoi-image {
+    position: relative;
+    height: 80px;
+    background: #f1f3f5 center / cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #dc3545;
+    font-size: 22px;
+}
+.zone-envoi-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #28a745;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+    line-height: 20px;
+    text-align: center;
+}
+.zone-envoi-infos { display: flex; justify-content: space-between; align-items: center; gap: 4px; padding: 4px 6px; }
+.zone-envoi-nom { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zone-envoi-pourcent { color: #6c757d; white-space: nowrap; }
+.zone-envoi-retirer { border: 0; background: none; color: #dc3545; padding: 0 2px; cursor: pointer; }
+.zone-envoi-mini-barre { height: 4px; background: #e9ecef; margin: 0 6px 6px; border-radius: 2px; overflow: hidden; }
+.zone-envoi-mini-barre span { display: block; height: 100%; background: #3c8dbc; transition: width .2s; }
+.statut-ok .zone-envoi-mini-barre span { background: #28a745; }
+.zone-envoi-erreur { color: #dc3545; font-size: 11px; padding: 0 6px 6px; }
+.zone-envoi-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.zone-envoi-progression { margin-top: 12px; }
+.zone-envoi-progression .progress { height: 8px; }
+.zone-envoi-progression-texte { font-size: 12px; color: #6c757d; margin-top: 4px; }
+.zone-envoi-message { color: #dc3545; margin-top: 10px; }
+.zone-envoi-message:empty { display: none; }

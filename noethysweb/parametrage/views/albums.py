@@ -3,24 +3,51 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
+import datetime
+from PIL import Image
 from django.urls import reverse_lazy, reverse
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect, JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.models import Album, Photo
-from parametrage.forms.albums import Formulaire_album, Formulaire_photo, Formulaire_importation
+from core.forms.envoi_photos import Formulaire_envoi_photo, Get_contexte_zone_envoi
+from parametrage.forms.albums import Formulaire_album, Formulaire_photo
+
+
+def Lire_date_exif(photo):
+    """ Lit la date de prise de vue dans les données EXIF de la photo enregistrée """
+    try:
+        with photo.fichier.open("rb") as fichier:
+            valeur = Image.open(fichier).getexif().get_ifd(0x8769).get(36867)
+        return datetime.datetime.strptime(valeur, "%Y:%m:%d %H:%M:%S") if valeur else None
+    except Exception:
+        return None
 
 
 def Importer_photos_album(request):
-    assert request.method == 'POST'
-    assert request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-    form = Formulaire_importation(request.POST, request.FILES, idalbum=request.POST.get("idalbum"))
-    if form.is_valid():
-        url = form.form_valid(request)
-        return JsonResponse({'action': 'redirect', 'url': url})
-    else:
-        return JsonResponse({'action': 'replace', 'html': form.as_html(request)})
+    """ Reçoit une photo envoyée par la zone d'envoi """
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "erreur": "Requête invalide"}, status=400)
+    if not request.user.has_perm("core.albums_liste"):
+        return JsonResponse({"ok": False, "erreur": "Vous n'avez pas l'autorisation d'ajouter des photos"}, status=403)
+    try:
+        idalbum = int(request.POST.get("idalbum", ""))
+    except ValueError:
+        return JsonResponse({"ok": False, "erreur": "Album introuvable"}, status=400)
+    condition_structure = Q(structure__in=request.user.structures.all()) | Q(structure__isnull=True)
+    album = Album.objects.filter(condition_structure, pk=idalbum).first()
+    if not album:
+        return JsonResponse({"ok": False, "erreur": "Album introuvable"}, status=400)
+    form = Formulaire_envoi_photo(request.POST, request.FILES)
+    if not form.is_valid():
+        return JsonResponse({"ok": False, "erreur": form.Get_erreur()}, status=400)
+    photo = Photo.objects.create(album=album, fichier=form.cleaned_data["fichier"])
+    date_creation = form.cleaned_data.get("date_prise") or Lire_date_exif(photo)
+    if date_creation:
+        photo.date_creation = date_creation
+        photo.save(update_fields=["date_creation"])
+    return JsonResponse({"ok": True})
 
 
 class Page(crud.Page):
@@ -112,8 +139,8 @@ class Consulter(Page, crud.Liste):
         context['url_supprimer_plusieurs'] = reverse_lazy(self.url_supprimer_plusieurs, kwargs={"idalbum": self.kwargs["pk"], "listepk": "xxx"})
         context['album'] = Album.objects.get(pk=self.kwargs["pk"])
         context['photos'] = Photo.objects.filter(album_id=self.kwargs["pk"]).order_by("date_creation", "pk")
-        context['formulaire_upload'] = Formulaire_importation(idalbum=self.kwargs["pk"])
-        context['formulaire_upload_as_html'] = context['formulaire_upload'].as_html(self.request)
+        context['zone_envoi'] = Get_contexte_zone_envoi(url=reverse("ajax_importer_photos_album"), libelle_bouton="Envoyer",
+                                                        url_fin=reverse(self.url_consulter, kwargs={"pk": self.kwargs["pk"]}), extra={"idalbum": self.kwargs["pk"]})
         return context
 
     def post(self, request, *args, **kwargs):

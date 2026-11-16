@@ -16,7 +16,6 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, HTML, Fieldset
 from crispy_forms.bootstrap import Field
 from django_summernote.widgets import SummernoteInplaceWidget
-from upload_form.forms import UploadForm
 from PIL import Image
 
 
@@ -85,33 +84,3 @@ class Formulaire_photo(FormulaireBase, ModelForm):
             Field("date_creation"),
             Field("fichier"),
         )
-
-
-class Formulaire_importation(UploadForm):
-    idalbum = forms.IntegerField(label="", widget=forms.HiddenInput())
-
-    def __init__(self, *args, **kwargs):
-        self.idalbum = kwargs.pop("idalbum")
-        super().__init__(*args, **kwargs)
-        self.accept = settings.MY_UPLOAD_FORM_ACCEPT
-        self.max_image_size = settings.MY_UPLOAD_FORM_MAX_IMAGE_SIZE
-        self.fields["idalbum"].initial = self.idalbum
-
-    def form_valid(self, request):
-        fichiers = self.files.getlist('files')
-        for fichier in fichiers:
-            photo = Photo.objects.create(album_id=self.idalbum, fichier=fichier)
-            try:
-                date_creation = Image.open(settings.BASE_DIR + photo.fichier.url)._getexif()[36867]
-            except:
-                date_creation = None
-            if date_creation:
-                photo.date_creation = datetime.datetime.strptime(date_creation, "%Y:%m:%d %H:%M:%S")
-                photo.save()
-        return self.get_success_url(request)
-
-    def get_success_url(self, request=None):
-        return reverse_lazy("albums_consulter", kwargs={"pk": self.idalbum})
-
-    def get_action(self, request=None):
-        return reverse_lazy("ajax_importer_photos_album")

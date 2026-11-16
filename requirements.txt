@@ -13,7 +13,6 @@ django-resized
 django-select2
 django-summernote
 django-extensions
-django-upload-form
 django-dbbackup
 django-storages
 django-crontab

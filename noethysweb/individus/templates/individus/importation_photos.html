@@ -3,6 +3,11 @@
 {% load static %}
 {% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/zone_envoi_photos.css' %}">
+{% endblock styles %}
+
 {% block contenu_page %}
 
 
@@ -16,38 +21,8 @@
             {% block box_contenu %}
                 {% crispy form %}
 
-                <style>
-                    .uploadform_drop_area {
-                        padding: 0px;
-                        background-color: #f8f9fa !important;
-                        border-radius: 10px;
-                    }
-                    .uploadform_drop_area label img {
-                        height: 30px;
-                        color: #444 !important;
-                    }
-                    .uploadform_drop_area label p {
-                        font-size: 12px;
-                        margin-bottom: 0px;
-                    }
-                    .uploadform_drop_area .file_list_input label {
-                        width: 95%;
-                        padding: 10px;
-                        font-size: 1.8em;
-                        background-color: #eaeaea;
-                        border-radius: 10px;
-                    }
-                    .file_list_wrapper {
-                        margin-bottom: 15px;
-                    }
-                </style>
-
-                {# Zone d'envoi des fichiers #}
-                {% if formulaire_upload_as_html %}
-                    <div id="form-container" class="mt-3 mb-0">
-                        {{ formulaire_upload_as_html }}
-                    </div>
-                {% endif %}
+                {# Zone d'envoi des photos #}
+                {% include 'core/widgets/zone_envoi_photos.html' %}
 
             {% endblock %}
         {% endembed %}
@@ -117,7 +92,7 @@
 
 {% block scripts %}
     {{ block.super }}
-    {{ formulaire_upload.media }}
+    <script src="{% static 'js/zone_envoi_photos.js' %}"></script>
 
     <script>
 

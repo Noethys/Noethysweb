@@ -50,12 +50,10 @@ CAPTCHA_LETTER_ROTATION = (-55, 55)
 CAPTCHA_CHALLENGE_FUNCT = "core.utils.utils_captcha.random_digit_challenge"
 CAPTCHA_FLITE_PATH = "/usr/bin/flite"
 
-# UPLOAD PHOTOS
-UPLOAD_FORM_PARALLEL_UPLOAD = False
-UPLOAD_FORM_MAX_FILE_SIZE_MB = 10
-UPLOAD_FORM_ALLOWED_FILE_TYPES = ".jpg .jpeg .png .gif .bmp .tif .tiff .pic .doc .docx .odt .dot .xls .xlsx .pdf .dwg .dxf .txt .mp4"
-MY_UPLOAD_FORM_ACCEPT = "image/*"
-MY_UPLOAD_FORM_MAX_IMAGE_SIZE = 1920
+# ENVOI DE PHOTOS (albums, importation de photos individuelles)
+PHOTOS_TAILLE_MAX_MO = 10           # Taille maximale d'une photo après réduction
+PHOTOS_DIMENSION_MAX = 2000         # Les photos plus grandes sont réduites dans le navigateur avant l'envoi
+PHOTOS_PIXELS_MAX = 40000000        # Refus des images dont la taille décodée dépasserait 40 mégapixels
 
 # DIVERS
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -111,7 +109,6 @@ INSTALLED_APPS = [
     'axes',
     'captcha',
     'django_extensions',
-    'upload_form',
     'dbbackup',
     'django_crontab',
     'django_cleanup.apps.CleanupConfig',
