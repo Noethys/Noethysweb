@@ -13,6 +13,7 @@ from django.utils.html import escape
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
 from core.views.base import CustomView
+from core.utils import utils_parametres
 from core.models import Collaborateur, Note, ContratCollaborateur, TypeCongeCollaborateur, DemandeAbsenceCollaborateur, EvenementCollaborateur
 from collaborateurs.forms.collaborateur import Formulaire
 from collaborateurs.utils.utils_collaborateur import LISTE_ONGLETS, ONGLETS_SANS_MODIFICATION, Condition_contrat_en_cours, Situation_contrat, Ajouter_jetons_saisie_rapide
@@ -44,7 +45,7 @@ class Page(crud.Page):
 
 
 # Choix d'affichage de la liste des collaborateurs : (code, libellé)
-CHOIX_SITUATION = [("", "Collaborateurs en poste"), ("sans_contrat", "Collaborateurs sans contrat en cours"), ("tous", "Tous les collaborateurs")]
+CHOIX_SITUATION = [("en_poste", "Collaborateurs en poste"), ("sans_contrat", "Collaborateurs sans contrat en cours"), ("tous", "Tous les collaborateurs")]
 
 
 class Liste(Page, crud.Liste):
@@ -52,13 +53,23 @@ class Liste(Page, crud.Liste):
     template_name = "core/crud/liste_avec_categorie.html"
 
     def Get_categorie(self):
-        categorie = self.kwargs.get("categorie", "")
-        return categorie if categorie in dict(CHOIX_SITUATION) else ""
+        """ Choix d'affichage : celui de l'URL (mémorisé pour l'utilisateur), sinon le dernier choix mémorisé """
+        if not hasattr(self, "_categorie"):
+            choix_valides = dict(CHOIX_SITUATION)
+            memorise = utils_parametres.Get(nom="situation", categorie="liste_collaborateurs", utilisateur=self.request.user, valeur="en_poste")
+            categorie = self.kwargs.get("categorie")
+            if categorie in choix_valides:
+                if categorie != memorise:
+                    utils_parametres.Set(nom="situation", categorie="liste_collaborateurs", utilisateur=self.request.user, valeur=categorie)
+            else:
+                categorie = memorise if memorise in choix_valides else "en_poste"
+            self._categorie = categorie
+        return self._categorie
 
     def get_queryset(self):
         conditions = (Q(groupes__superviseurs=self.request.user) | Q(groupes__superviseurs__isnull=True))
         en_cours = Exists(ContratCollaborateur.objects.filter(Condition_contrat_en_cours(prefixe=""), collaborateur=OuterRef("pk")))
-        situation = {"": en_cours, "sans_contrat": ~en_cours, "tous": Q()}[self.Get_categorie()]
+        situation = {"en_poste": en_cours, "sans_contrat": ~en_cours, "tous": Q()}[self.Get_categorie()]
         contrats = Prefetch("contratcollaborateur_set", queryset=ContratCollaborateur.objects.select_related("type_contrat", "type_poste"))
         try:
             return Collaborateur.objects.filter(conditions, situation, self.Get_filtres("Q")).prefetch_related(contrats).distinct()
