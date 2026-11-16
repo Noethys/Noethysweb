@@ -4,8 +4,10 @@
 #  Distribué sous licence GNU GPL.
 
 import json, importlib, datetime, time
+from decimal import Decimal
 from django.urls import reverse_lazy, reverse
-from django.db.models import Q, Sum, Count
+from django.db.models import Q, Sum, Count, Value, DecimalField
+from django.db.models.functions import Coalesce
 from django.http import HttpResponseRedirect, JsonResponse
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
@@ -96,7 +98,7 @@ class Liste(Page, crud.Liste):
     model = PesLot
 
     def get_queryset(self):
-        return PesLot.objects.select_related("modele").filter(self.Get_filtres("Q")).annotate(nbre_pieces=Count("pespiece"), montant_pieces=Sum("pespiece__montant"))
+        return PesLot.objects.select_related("modele").filter(self.Get_filtres("Q")).annotate(nbre_pieces=Count("pespiece"), montant_pieces=Coalesce(Sum("pespiece__montant"), Value(Decimal("0.00")), output_field=DecimalField(max_digits=10, decimal_places=2)))
 
     def get_context_data(self, **kwargs):
         context = super(Liste, self).get_context_data(**kwargs)
