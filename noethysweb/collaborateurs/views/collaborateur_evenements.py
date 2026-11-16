@@ -59,7 +59,7 @@ class Page(Onglet):
 
 class Liste(Page, crud.Liste):
     model = EvenementCollaborateur
-    template_name = "collaborateurs/collaborateur_liste.html"
+    template_name = "collaborateurs/collaborateur_evenements_liste.html"
 
     def get_queryset(self):
         return EvenementCollaborateur.objects.select_related("type_evenement").filter(Q(collaborateur_id=self.Get_idcollaborateur()) & self.Get_filtres("Q"))
@@ -69,6 +69,14 @@ class Liste(Page, crud.Liste):
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['active_checkbox'] = True
+
+        # Bouton du lien iCal : mêmes règles d'accès que le planning individuel
+        from collaborateurs.views.planning_individuel import Peut_acceder
+        from collaborateurs.utils import utils_planning
+        idcollaborateur = self.Get_idcollaborateur()
+        context['lien_ical_actif'] = Peut_acceder(self.request.user) and idcollaborateur in utils_planning.Get_ids_modifiables(self.request.user)
+        if context['lien_ical_actif']:
+            context['boutons_liste'].append({"label": "Agenda en ligne (iCal)", "classe": "btn btn-default", "href": "#", "onclick": "return Ouvrir_ical_collaborateur();", "icone": "fa fa-calendar"})
         return context
 
     class datatable_class(MyDatatable):
