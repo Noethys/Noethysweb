@@ -153,12 +153,16 @@ class GeoBlockMiddleware:
         if self.reader is None:
             return self.get_response(request)
 
+        if "/collaborateurs/planning/ical/" in request.path:
+            return self.get_response(request)
+
         # Vérifie la fraîcheur de la base à chaque requête
         is_stale, age_days = self._is_db_stale()
         if is_stale:
             logger.warning(
                 "Base GeoIP obsolète (%.0f jours, seuil %d) — blocage géographique désactivé temporairement",
                 age_days if age_days is not None else -1, self.max_db_age_days)
+            return self.get_response(request)
 
         ip = self.get_client_ip(request)
 
