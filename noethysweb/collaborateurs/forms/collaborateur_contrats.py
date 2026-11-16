@@ -25,6 +25,21 @@ CHAMPS_REPRIS = ["type_contrat", "type_poste", "heures_hebdo", "jours_travailles
 JOURS_SEMAINE_CONTRAT = [("0", "Lundi"), ("1", "Mardi"), ("2", "Mercredi"), ("3", "Jeudi"), ("4", "Vendredi"), ("5", "Samedi"), ("6", "Dimanche")]
 
 
+def Get_infos_modeles_planning():
+    """ Durée du cycle et heures par semaine de chaque modèle de planning """
+    from collaborateurs.utils import utils_modeles_planning
+    return {modele["id"]: modele for modele in utils_modeles_planning.Get_liste_modeles()["modeles"]}
+
+
+def Libelle_modele_planning(modele=None, infos=None):
+    """ Libellé d'un modèle de planning dans la liste déroulante du contrat """
+    from collaborateurs.utils import utils_objectif
+    if infos is None:
+        infos = Get_infos_modeles_planning()
+    info = infos.get(modele.pk)
+    return "%s (%s · %s par semaine)" % (modele.nom, info["cycle"], utils_objectif.Format_heures(info["heures"])) if info else modele.nom
+
+
 class Formulaire(FormulaireBase, ModelForm):
     jours_travailles = forms.MultipleChoiceField(label="Jours travaillés", choices=JOURS_SEMAINE_CONTRAT, widget=forms.CheckboxSelectMultiple, required=True,
                                                  help_text="Cochez les jours habituellement travaillés. Ils servent à poser les absences et à décompter les congés "
@@ -76,12 +91,8 @@ class Formulaire(FormulaireBase, ModelForm):
             self.fields[nom_champ].queryset = self.fields[nom_champ].queryset.order_by("nom")
 
         # Modèles de planning : nom, durée du cycle et heures par semaine
-        from collaborateurs.utils import utils_modeles_planning, utils_objectif
-        infos = {modele["id"]: modele for modele in utils_modeles_planning.Get_liste_modeles()["modeles"]}
-        def Libelle_modele(modele):
-            info = infos.get(modele.pk)
-            return "%s (%s · %s par semaine)" % (modele.nom, info["cycle"], utils_objectif.Format_heures(info["heures"])) if info else modele.nom
-        self.fields["modele_planning"].label_from_instance = Libelle_modele
+        infos = Get_infos_modeles_planning()
+        self.fields["modele_planning"].label_from_instance = lambda modele: Libelle_modele_planning(modele, infos)
 
         self.helper = FormHelper()
         self.helper.form_id = 'collaborateurs_contrats_form'
@@ -109,6 +120,7 @@ class Formulaire(FormulaireBase, ModelForm):
                 Field("heures_hebdo"),
                 InlineCheckboxes("jours_travailles", template="collaborateurs/champ_cases_en_ligne.html"),
                 Field("modele_planning"),
+                *self.Get_creation_modele_planning(idcollaborateur or self.instance.collaborateur_id),
                 Field("profil_reglementaire"),
             ),
             Fieldset("Objectif de temps de travail",
@@ -136,6 +148,14 @@ class Formulaire(FormulaireBase, ModelForm):
                 key = "question_%d" % reponse.question_id
                 if key in self.fields:
                     self.fields[key].initial = reponse.Get_reponse_for_ctrl()
+
+    def Get_creation_modele_planning(self, idcollaborateur=None):
+        """ Bouton et modale de création d'un modèle de planning, sélectionné aussitôt dans le contrat """
+        if not (self.request and self.request.user.has_perm("core.modeles_plannings_collaborateurs_liste")):
+            return []
+        from django.urls import reverse
+        html = HTML_CREATION_MODELE_PLANNING.replace("URL_CREER_MODELE", reverse("ajax_modeles_plannings_collaborateurs_creer_modale")).replace("ID_COLLABORATEUR", str(int(idcollaborateur or 0)))
+        return [HTML(html)]
 
     def Get_bandeau_reprise(self):
         """ Bandeau signalant que les données du précédent contrat ont été reproduites """
@@ -192,3 +212,99 @@ class Formulaire(FormulaireBase, ModelForm):
                 QuestionnaireReponse.objects.update_or_create(donnee=instance.pk, question_id=idquestion, defaults={'reponse': valeur})
 
         return instance
+
+
+# Le bloc HTML de crispy est interprété comme un template Django : ne pas utiliser de doubles accolades ni de {# dans ce code
+HTML_CREATION_MODELE_PLANNING = """
+<div class="modal fade" id="modal_creer_modele_planning" tabindex="-1" role="dialog" aria-labelledby="modal_creer_modele_planning_titre">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="modal_creer_modele_planning_titre"><strong>Nouveau modèle de planning</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="cmp_erreurs" class="alert alert-danger" role="alert" hidden></div>
+                <div id="cmp_contenu"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="cmp_valider"><i class="fa fa-check margin-r-5"></i>Créer et sélectionner</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function() {
+        var url_creer = "URL_CREER_MODELE", idcollaborateur = ID_COLLABORATEUR;
+        var $modale = $("#modal_creer_modele_planning").appendTo("body");
+        var $champ = $("#id_modele_planning");
+        var html_chargement = "<p class='text-muted'><i class='fa fa-spinner fa-spin margin-r-5'></i>Chargement du formulaire…</p>";
+
+        // Bouton à droite de la liste déroulante
+        var $ligne = $("<div class='d-flex align-items-start'></div>"), $colonne = $("<div style='flex: 1; min-width: 0;'></div>");
+        $champ.before($ligne);
+        $colonne.append($champ.add($champ.next(".select2")));
+        $ligne.append($colonne).append("<button type='button' class='btn btn-default ml-2 text-nowrap' id='cmp_ouvrir'><i class='fa fa-plus margin-r-5'></i>Nouveau modèle</button>");
+
+        function Afficher_erreurs(erreurs) {
+            $("#cmp_erreurs").html(erreurs.join("<br>")).prop("hidden", !erreurs.length);
+            if (erreurs.length) { $modale.scrollTop(0); }
+        }
+
+        // Ouverture : chargement du formulaire existant des modèles de planning
+        $("#cmp_ouvrir").on("click", function() {
+            Afficher_erreurs([]);
+            $("#cmp_contenu").html(html_chargement);
+            $modale.modal("show");
+            $.ajax({url: url_creer, type: "GET", data: {idcollaborateur: idcollaborateur}, dataType: "json"}).done(function(data) {
+                $("body > #modal_ligne").remove();
+                $("#cmp_contenu").html(data.form_html);
+                // La sous-modale de saisie d'un évènement doit être hors de la modale pour s'afficher correctement
+                $("#cmp_contenu #modal_ligne").appendTo("body");
+                $("#cmp_contenu .django-select2").djangoSelect2();
+            }).fail(function(xhr) {
+                $("#cmp_contenu").empty();
+                Afficher_erreurs((xhr.responseJSON && xhr.responseJSON.erreur) || ["Impossible de charger le formulaire"]);
+            });
+        });
+
+        // Les listes Select2 et la sous-modale doivent pouvoir prendre le focus
+        $modale.on("shown.bs.modal", function(e) { if (e.target === this) { $(document).off("focusin.bs.modal"); } });
+
+        // Sous-modale de saisie d'un évènement au-dessus de la modale
+        $(document).on("show.bs.modal", "#modal_ligne", function() {
+            if (!$modale.hasClass("show")) { return; }
+            $(this).css("z-index", 1060);
+            setTimeout(function() { $(".modal-backdrop").last().css("z-index", 1055); }, 0);
+        });
+        $(document).on("hidden.bs.modal", "#modal_ligne", function() {
+            if ($modale.hasClass("show")) { $("body").addClass("modal-open"); $(document).off("focusin.bs.modal"); }
+        });
+
+        // Fermeture : suppression du formulaire et de la sous-modale
+        $modale.on("hidden.bs.modal", function(e) {
+            if (e.target !== this) { return; }
+            $("#cmp_contenu").empty();
+            $("body > #modal_ligne").remove();
+        });
+
+        // Touche Entrée dans un champ : même action que le bouton
+        $(document).on("submit", "#cmp_contenu form", function(e) { e.preventDefault(); $("#cmp_valider").trigger("click"); });
+
+        // Validation : création du modèle puis sélection dans le contrat
+        $("#cmp_valider").on("click", function() {
+            var $form = $("#cmp_contenu form"), $bouton = $(this);
+            if (!$form.length) { return; }
+            $bouton.prop("disabled", true);
+            $.ajax({url: url_creer, type: "POST", data: $form.serialize(), dataType: "json"}).done(function(data) {
+                $champ.append(new Option(data.libelle, data.idmodele, true, true)).trigger("change");
+                $modale.modal("hide");
+                toastr.success("Le modèle « " + $("<div>").text(data.nom).html() + " » a été créé et sélectionné");
+            }).fail(function(xhr) {
+                Afficher_erreurs((xhr.responseJSON && xhr.responseJSON.erreur) || ["Une erreur est survenue"]);
+            }).always(function() { $bouton.prop("disabled", false); });
+        });
+    });
+</script>
+"""

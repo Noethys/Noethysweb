@@ -11,7 +11,10 @@ from django.contrib import messages
 from crispy_forms.utils import render_crispy_form
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
-from core.models import ModelePlanningCollaborateur, LigneModelePlanningCollaborateur
+from django.db import transaction
+from django.utils.html import escape
+from core.models import ModelePlanningCollaborateur, LigneModelePlanningCollaborateur, Collaborateur
+from core.utils import utils_historique
 from parametrage.forms.modeles_plannings_collaborateurs import Formulaire
 from parametrage.forms.lignes_modeles_plannings_collaborateurs import Formulaire as Formulaire_ligne
 
@@ -54,6 +57,69 @@ def Get_form_ligne(request):
     return JsonResponse({"valeur": dict_retour, "index": form.cleaned_data["index"]})
 
 
+def Enregistrer_lignes(modele=None, lignes=[]):
+    """ Enregistre les lignes d'un modèle de planning et supprime celles qui ont été retirées """
+    lignes_existantes = list(LigneModelePlanningCollaborateur.objects.filter(modele=modele))
+
+    # Sauvegarde des lignes
+    for ligne in lignes:
+        idligne = ligne["idligne"] if ligne["idligne"] else None
+        LigneModelePlanningCollaborateur.objects.update_or_create(pk=idligne, defaults={"modele": modele,
+            "semaine": (ligne.get("semaine") or None) if modele.nb_semaines > 1 else None, "jour": ligne["jour"], "periode": ligne["periode"], "heure_debut": ligne["heure_debut"], "heure_fin": ligne["heure_fin"],
+            "type_evenement_id": ligne["type_evenement"], "titre": ligne["titre"], "affectation_id": ligne.get("affectation") or None})
+
+    # Suppression des lignes supprimées
+    for ligne in lignes_existantes:
+        if ligne.pk not in [int(item["idligne"]) for item in lignes if item["idligne"]]:
+            ligne.delete()
+
+
+def Creer_modele_modale(request):
+    """ Création d'un modèle de planning depuis une modale (ex : formulaire d'un contrat de collaborateur) """
+    if not request.user.has_perm("core.modeles_plannings_collaborateurs_liste"):
+        return JsonResponse({"erreur": ["Vous n'avez pas l'autorisation de créer des modèles de planning"]}, status=403)
+
+    # Affichage du formulaire
+    if request.method == "GET":
+        initial = {}
+        idcollaborateur = request.GET.get("idcollaborateur", "")
+        collaborateur = Collaborateur.objects.filter(pk=int(idcollaborateur)).first() if idcollaborateur.isdigit() else None
+        if collaborateur:
+            initial = {"nom": "Semaine type - %s" % collaborateur.Get_nom(), "disponibilite": "RESTREINT", "collaborateurs": [collaborateur.pk]}
+        form = Formulaire(request=request, mode="modale", initial=initial)
+        return JsonResponse({"form_html": render_crispy_form(form, context=csrf(request))})
+
+    # Validation du formulaire
+    form = Formulaire(request.POST, request=request, mode="modale")
+    valide = form.is_valid()
+    try:
+        lignes = json.loads(request.POST.get("lignes") or "[]")
+    except ValueError:
+        lignes = []
+    erreurs = []
+    if not lignes:
+        erreurs.append("Vous devez saisir au moins un évènement")
+    if not valide:
+        for nom_champ, liste_erreurs in form.errors.items():
+            if nom_champ == "lignes" and not lignes:
+                continue
+            label = form.fields[nom_champ].label if nom_champ in form.fields else ""
+            for erreur in liste_erreurs:
+                erreurs.append("<b>%s</b> : %s" % (escape(label), escape(erreur)) if label else escape(erreur))
+    if erreurs:
+        return JsonResponse({"erreur": erreurs}, status=400)
+
+    # Enregistrement
+    with transaction.atomic():
+        modele = form.save()
+        Enregistrer_lignes(modele=modele, lignes=lignes)
+    utils_historique.Ajouter(titre="Ajouter un modèle de planning", detail=modele.nom, utilisateur=request.user,
+                             objet=modele._meta.verbose_name.capitalize(), idobjet=modele.pk, classe=modele._meta.object_name)
+
+    from collaborateurs.forms.collaborateur_contrats import Libelle_modele_planning
+    return JsonResponse({"idmodele": modele.pk, "nom": modele.nom, "libelle": Libelle_modele_planning(modele)})
+
+
 class Page(crud.Page):
     model = ModelePlanningCollaborateur
     url_liste = "modeles_plannings_collaborateurs_liste"
@@ -80,21 +146,7 @@ class Page(crud.Page):
 
         # Sauvegarde
         self.object = form.save()
-
-        # Récupération des lignes existantes
-        lignes_existantes = list(LigneModelePlanningCollaborateur.objects.filter(modele=self.object))
-
-        # Sauvegarde des lignes
-        for ligne in lignes:
-            idligne = ligne["idligne"] if ligne["idligne"] else None
-            LigneModelePlanningCollaborateur.objects.update_or_create(pk=idligne, defaults={"modele": self.object,
-                "semaine": (ligne.get("semaine") or None) if self.object.nb_semaines > 1 else None, "jour": ligne["jour"], "periode": ligne["periode"], "heure_debut": ligne["heure_debut"], "heure_fin": ligne["heure_fin"],
-                "type_evenement_id": ligne["type_evenement"], "titre": ligne["titre"], "affectation_id": ligne.get("affectation") or None})
-
-        # Suppression des lignes supprimées
-        for ligne in lignes_existantes:
-            if ligne.pk not in [int(item["idligne"]) for item in lignes if item["idligne"]]:
-                ligne.delete()
+        Enregistrer_lignes(modele=self.object, lignes=lignes)
 
         return super().form_valid(form)
 

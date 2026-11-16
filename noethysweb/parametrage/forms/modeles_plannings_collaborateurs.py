@@ -96,12 +96,17 @@ class Formulaire(FormulaireBase, ModelForm):
             "heure_fin": str(ligne.heure_fin), "type_evenement": ligne.type_evenement_id, "titre": ligne.titre, "affectation": ligne.affectation_id}
             for ligne in lignes])
 
+        # Mode modale (création depuis un contrat) : sans boutons de page ni observations (identifiant déjà utilisé par le formulaire du contrat)
+        modale = self.mode == "modale"
+        if modale:
+            del self.fields["observations"]
+
         # Affichage
         self.helper.layout = Layout(
-            Commandes(annuler_url="{% url 'modeles_plannings_collaborateurs_liste' %}"),
+            *([] if modale else [Commandes(annuler_url="{% url 'modeles_plannings_collaborateurs_liste' %}")]),
             Fieldset("Généralités",
                 Field("nom"),
-                Field("observations"),
+                *([] if modale else [Field("observations")]),
                 Field("inclure_feries"),
             ),
             Fieldset("Cycle",

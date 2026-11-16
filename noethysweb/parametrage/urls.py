@@ -745,6 +745,7 @@ urlpatterns = [
     path('parametrage/affectations_collaborateurs/deplacer', secure_ajax(affectations_collaborateurs.Deplacer), name='ajax_affectations_collaborateurs_deplacer'),
     path('parametrage/affectations_collaborateurs/supprimer', secure_ajax(affectations_collaborateurs.Supprimer), name='ajax_affectations_collaborateurs_supprimer'),
     path('parametrage/modeles_plannings_collaborateurs/get_form_ligne', secure_ajax(modeles_plannings_collaborateurs.Get_form_ligne), name='ajax_modeles_plannings_collaborateurs_form_ligne'),
+    path('parametrage/modeles_plannings_collaborateurs/creer_modale', secure_ajax(modeles_plannings_collaborateurs.Creer_modele_modale), name='ajax_modeles_plannings_collaborateurs_creer_modale'),
     path('parametrage/transports/arrets/liste/bus/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_bus'),
     path('parametrage/transports/arrets/liste/car/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_car'),
     path('parametrage/transports/arrets/liste/navette/deplacer_lignes', secure_ajax(arrets.Deplacer.as_view()), name='ajax_deplacer_lignes_arrets_navette'),
