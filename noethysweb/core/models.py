@@ -3534,7 +3534,7 @@ class PesPiece(models.Model):
 
 class Consentement(models.Model):
     idconsentement = models.AutoField(verbose_name="ID", db_column='IDconsentement', primary_key=True)
-    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.PROTECT, blank=True, null=True)
+    famille = models.ForeignKey(Famille, verbose_name="Famille", on_delete=models.CASCADE, blank=True, null=True)
     unite_consentement = models.ForeignKey(UniteConsentement, verbose_name="Unité de consentement", on_delete=models.PROTECT)
     horodatage = models.DateTimeField(verbose_name="Date", auto_now_add=True)
 
