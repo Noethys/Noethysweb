@@ -93,7 +93,7 @@ COLONNES_LISTE = [
 
 
 class Formulaire_liste(Formulaire_base):
-    titre = forms.CharField(label="Titre", required=True, initial="Liste des collaborateurs", max_length=200)
+    titre = forms.CharField(label="Titre", required=True, initial="Listing des collaborateurs", max_length=200)
     colonnes = forms.MultipleChoiceField(label="Colonnes", widget=forms.CheckboxSelectMultiple, required=True, choices=COLONNES_LISTE,
                                          initial=["nom", "prenom", "poste", "type_contrat", "contrat_debut", "contrat_fin", "tel_mobile", "travail_mail"])
     tri = forms.ChoiceField(label="Tri", choices=[("nom", "Nom"), ("poste", "Poste"), ("contrat_debut", "Début du contrat"), ("ville_resid", "Ville")], initial="nom")

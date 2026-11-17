@@ -28,7 +28,7 @@ class Parametre():
         if self.type == "char_2lignes":
             return forms.CharField(label=self.label, required=self.required, help_text=self.help_text, widget=forms.Textarea(attrs={'rows': 2}))
         if self.type == "adresse_exp":
-            return forms.ChoiceField(label=self.label, choices=[(None, "Aucune")] + [(adresse_exp.pk, adresse_exp.adresse) for adresse_exp in AdresseMail.objects.all().order_by("adresse")], required=self.required, help_text=self.help_text)
+            return forms.ChoiceField(label=self.label, choices=[(None, "Aucune")] + [(adresse_exp.pk, "%s (%s)" % (adresse_exp.adresse, adresse_exp.get_moteur_display())) for adresse_exp in AdresseMail.objects.all().order_by("adresse")], required=self.required, help_text=self.help_text)
         if self.type == "image_fond":
             return forms.ChoiceField(label=self.label, choices=[(None, "Image par défaut")] + [(image.pk, image.titre) for image in ImageFond.objects.all().order_by("titre")], required=self.required, help_text=self.help_text)
         if self.type == "comptes_bancaires":

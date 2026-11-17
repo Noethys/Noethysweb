@@ -528,7 +528,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
 
     # Editions
     menu_editions_collaborateurs = menu_collaborateurs.Add(titre="Editions")
-    menu_editions_collaborateurs.Add(code="edition_liste_collaborateurs", titre="Liste des collaborateurs", icone="file-text-o")
+    menu_editions_collaborateurs.Add(code="edition_liste_collaborateurs", titre="Listing des collaborateurs", icone="file-text-o")
     menu_editions_collaborateurs.Add(code="fiches_collaborateurs", titre="Fiches des collaborateurs", icone="file-text-o")
     menu_editions_collaborateurs.Add(code="trombinoscope_collaborateurs", titre="Trombinoscope", icone="file-text-o")
     menu_editions_collaborateurs.Add(code="liste_telephonique_collaborateurs", titre="Liste téléphonique", icone="file-text-o")

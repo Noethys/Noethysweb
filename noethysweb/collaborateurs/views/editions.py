@@ -84,7 +84,7 @@ class Edition_telephones(Edition):
 
 class Edition_liste(Edition):
     code = "edition_liste_collaborateurs"
-    titre = "Liste des collaborateurs"
+    titre = "Listing des collaborateurs"
     introduction = "Composez une liste des collaborateurs en choisissant les colonnes et le tri, puis imprimez-la en PDF ou exportez-la vers Excel."
     Formulaire = formulaires.Formulaire_liste
     exports = ("pdf", "xlsx")
