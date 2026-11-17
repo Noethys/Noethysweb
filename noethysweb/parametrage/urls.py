@@ -55,6 +55,7 @@ urlpatterns = [
     path('parametrage/activites/liste', activites.Liste.as_view(), name='activites_liste'),
     path('parametrage/activites/ajouter', activites.Ajouter.as_view(), name='activites_ajouter'),
     path('parametrage/activites/supprimer/<int:idactivite>', activites.Supprimer.as_view(), name='activites_supprimer'),
+    path('parametrage/activites/supprimer_plusieurs/<str:listepk>', activites.Supprimer_plusieurs.as_view(), name='activites_supprimer_plusieurs'),
     path('parametrage/activites/resume/<int:idactivite>', activites.Resume.as_view(), name='activites_resume'),
     path('parametrage/activites/dupliquer/<int:pk>', activites.Dupliquer.as_view(), name='activites_dupliquer'),
     path('parametrage/activites/import_export', activites_import_export.View.as_view(), name='activites_import_export'),

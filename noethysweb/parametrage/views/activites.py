@@ -23,6 +23,7 @@ class Page(crud.Page):
     url_modifier = "activites_resume"
     url_supprimer = "activites_supprimer"
     url_dupliquer = "activites_dupliquer"
+    url_supprimer_plusieurs = "activites_supprimer_plusieurs"
     description_liste = "Les activités sont au cœur de l'application : accueil de loisirs, cantine, périscolaire, club, séjour, stage... Cliquez sur le nom d'une activité pour accéder à son paramétrage complet (groupes, unités, calendrier, tarifs, portail...). Pour créer une nouvelle activité, vous pouvez aussi utiliser les assistants de paramétrage, plus rapides pour les cas courants."
     description_saisie = "Saisissez les informations principales de la nouvelle activité puis cliquez sur le bouton Enregistrer. Vous pourrez ensuite compléter son paramétrage rubrique par rubrique : groupes, catégories de tarifs, unités de consommation, calendrier et tarifs."
     objet_singulier = "une activité"
@@ -46,10 +47,12 @@ class Liste(Page, crud.Liste):
         context['impression_introduction'] = ""
         context['impression_conclusion'] = ""
         context['afficher_menu_brothers'] = True
+        context['active_checkbox'] = True
         return context
 
     class datatable_class(MyDatatable):
         filtres = ["idactivite", "nom", "date_debut", "date_fin"]
+        check = columns.CheckBoxSelectColumn(label="")
         groupes = columns.TextColumn("Groupes d'activités", sources=None, processor='Get_groupes')
         actions = columns.TextColumn("Actions", sources=None, processor='Get_actions_speciales')
         periode = columns.DisplayColumn("Validité", sources="date_fin", processor='Get_validite')
@@ -57,7 +60,7 @@ class Liste(Page, crud.Liste):
 
         class Meta:
             structure_template = MyDatatable.structure_template
-            columns = ["idactivite", "nom", "periode", "groupes", "nbre_inscrits", "actions"]
+            columns = ["check", "idactivite", "nom", "periode", "groupes", "nbre_inscrits", "actions"]
             processors = {
                 'date_debut': helpers.format_date('%d/%m/%Y'),
                 'date_fin': helpers.format_date('%d/%m/%Y'),
@@ -97,6 +100,22 @@ class Supprimer(Page, crud.Supprimer):
 
     def get_object(self):
         return Activite.objects.get(pk=self.kwargs['idactivite'])
+
+
+class Supprimer_plusieurs(Page, crud.Supprimer_plusieurs):
+
+    def get_objets(self):
+        """ Limite la sélection aux activités des structures de l'utilisateur """
+        listepk = [int(id) for id in self.kwargs.get("listepk").split(";")]
+        return Activite.objects.filter(pk__in=listepk, structure__in=self.request.user.structures.all())
+
+    def Check_protections(self, objets=[]):
+        """ Reprend la protection ManyToMany de la suppression unitaire (articles du portail) """
+        protections = []
+        for activite in objets.annotate(nbre_articles=Count("article_activites")):
+            if activite.nbre_articles:
+                protections.append("L'activité '%s' est rattachée à %d article(s)" % (activite.nom, activite.nbre_articles))
+        return protections
 
 
 class Onglet(CustomView):
