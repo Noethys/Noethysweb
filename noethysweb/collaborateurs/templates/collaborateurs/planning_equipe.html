@@ -202,6 +202,7 @@
                                 <button type="button" role="menuitem" data-diffusion="excel"><i class="fa fa-file-excel-o" aria-hidden="true"></i>Récapitulatif des heures (Excel)…</button>
                             </div>
                         </div>
+                        <button type="button" class="pl-btn pl-btn-icone" id="pl_email_btn" aria-haspopup="dialog" aria-label="Envoyer un email aux collaborateurs" title="Envoyer un email aux collaborateurs"><i class="fa fa-envelope-o" aria-hidden="true"></i></button>
                         <button type="button" class="pl-btn pl-btn-icone" id="pl_actualiser" aria-label="Actualiser" title="Actualiser"><i class="fa fa-refresh" aria-hidden="true"></i></button>
                         <button type="button" class="pl-btn pl-btn-icone" id="pl_plein_ecran" aria-label="Plein écran" title="Plein écran"><i class="fa fa-expand" aria-hidden="true"></i></button>
                         <button type="button" class="pl-btn pl-btn-icone" id="pl_reglages_btn" aria-label="Réglages d'affichage" title="Réglages d'affichage"><i class="fa fa-cog" aria-hidden="true"></i></button>
@@ -434,6 +435,53 @@
     </div>
 </div>
 
+<div class="modal fade" id="pl_modal_email" tabindex="-1" role="dialog" aria-labelledby="pl_modal_email_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-lightblue">
+                <h5 class="modal-title" id="pl_modal_email_titre"><strong>Envoyer un email aux collaborateurs</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Choisissez les destinataires, puis rédigez votre message dans l'éditeur d'emails : il pourra être relu avant l'envoi. <span id="pl_email_periode"></span></p>
+                <div class="pl-label">Destinataires</div>
+                <div class="pl-email-entete">
+                    <div class="pl-seg" role="group" aria-label="Source des destinataires">
+                        <button type="button" class="pl-seg-btn" data-email-source="affiches" aria-pressed="true"></button>
+                        <button type="button" class="pl-seg-btn" data-email-source="selection" aria-pressed="false"></button>
+                    </div>
+                    <span class="pl-espace"></span>
+                    <span class="pl-email-compteur" id="pl_email_compteur" aria-live="polite"></span>
+                </div>
+                <div class="pl-email-outils">
+                    <div class="pl-email-recherche">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                        <input type="search" class="form-control" id="pl_email_recherche" placeholder="Rechercher un collaborateur, un poste…" aria-label="Rechercher un collaborateur">
+                    </div>
+                    <button type="button" class="pl-lien" id="pl_email_tout_cocher">Tout cocher</button>
+                    <button type="button" class="pl-lien" id="pl_email_tout_decocher">Tout décocher</button>
+                </div>
+                <div class="pl-email-liste" id="pl_email_liste" role="group" aria-label="Collaborateurs destinataires"></div>
+                <div class="pl-label">Options</div>
+                <div class="form-inline mb-2">
+                    <label for="pl_email_priorite" class="mr-2 font-weight-normal">Adresse utilisée :</label>
+                    <select id="pl_email_priorite" class="form-control form-control-sm">
+                        <option value="pro">Professionnelle en priorité, sinon personnelle</option>
+                        <option value="perso">Personnelle en priorité, sinon professionnelle</option>
+                        <option value="pro_seul">Professionnelle uniquement</option>
+                    </select>
+                </div>
+                <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="pl_email_joindre"><label class="custom-control-label" for="pl_email_joindre">Joindre à chacun son planning individuel de la période (PDF)</label></div>
+            </div>
+            <div class="modal-footer">
+                <span class="pl-muted pl-petit mr-auto" id="pl_email_sans"></span>
+                <button type="button" class="btn btn-primary" id="pl_email_valider"></button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="pl_modal_diffusion" tabindex="-1" role="dialog" aria-labelledby="pl_modal_diffusion_titre">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -584,6 +632,7 @@
                 reglages: "{% url 'ajax_planning_equipe_memoriser_reglages' %}",
                 imprimer: "{% url 'ajax_planning_equipe_imprimer' %}",
                 emails: "{% url 'ajax_planning_equipe_envoyer_emails' %}",
+                email_libre: "{% url 'ajax_planning_equipe_envoyer_email_libre' %}",
                 excel: "{% url 'ajax_planning_equipe_exporter_recapitulatif' %}",
                 ical: "{% url 'ajax_planning_equipe_get_lien_ical' %}"
             }

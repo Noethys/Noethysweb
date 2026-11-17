@@ -62,6 +62,7 @@ def Get_donnees(request):
             "groupes": [groupe.pk for groupe in collaborateur.groupes.all()], "qualifications": [qualification.pk for qualification in collaborateur.qualifications.all()],
             "contrats": contrats.get(collaborateur.pk, []), "modifiable": collaborateur.pk in ids_modifiables,
             "mail": bool(collaborateur.travail_mail or collaborateur.mail),
+            "mail_pro": collaborateur.travail_mail or "", "mail_perso": collaborateur.mail or "",
         })
 
     affichage = utils_parametres.Get(nom="affichage", categorie=CATEGORIE_PARAMETRES, utilisateur=request.user, valeur={}) or {}
@@ -308,6 +309,68 @@ def Envoyer_emails(request):
         mail.delete()
         return JsonResponse({"erreur": "Aucun des collaborateurs sélectionnés n'a d'adresse email"}, status=400)
     return JsonResponse({"url": reverse("editeur_emails", kwargs={"pk": mail.pk}), "sans_adresse": sans_adresse})
+
+
+PRIORITES_ADRESSE = ("pro", "perso", "pro_seul")
+
+
+def Adresse_collaborateur(collaborateur=None, priorite="pro"):
+    """ Adresse email du collaborateur : professionnelle en priorité (pro), personnelle en priorité (perso) ou professionnelle uniquement (pro_seul) """
+    if priorite == "pro_seul":
+        return collaborateur.travail_mail or None
+    if priorite == "perso":
+        return collaborateur.mail or collaborateur.travail_mail or None
+    return collaborateur.travail_mail or collaborateur.mail or None
+
+
+@Verifie_permission
+def Envoyer_email_libre(request):
+    """ Prépare un email au texte libre pour les collaborateurs cochés, puis renvoie vers l'éditeur d'emails """
+    collaborateurs = utils_planning.Filtrer_ids_visibles(request.user, Get_liste_ids(request))
+    if not collaborateurs:
+        return JsonResponse({"erreur": "Aucun collaborateur sélectionné"}, status=400)
+    priorite = request.POST.get("priorite") if request.POST.get("priorite") in PRIORITES_ADRESSE else "pro"
+    joindre_planning = request.POST.get("joindre_planning") == "true"
+    dates = Get_liste_dates(request)
+    if joindre_planning and not dates:
+        return JsonResponse({"erreur": "Aucune date sélectionnée pour le planning joint"}, status=400)
+
+    modele_email = ModeleEmail.objects.filter(categorie="saisie_libre", defaut=True).first()
+    mail = Mail.objects.create(
+        categorie="saisie_libre",
+        objet=modele_email.objet if modele_email else "",
+        html=modele_email.html if modele_email else "",
+        adresse_exp=request.user.Get_adresse_exp_defaut(),
+        selection="NON_ENVOYE",
+        verrouillage_destinataires=True,
+        utilisateur=request.user,
+    )
+
+    if joindre_planning:
+        from collaborateurs.utils import utils_impression_planning
+        nom_document = utils_impression_planning.TYPES_DOCUMENTS["individuel"][0]
+        parametres = {"dates": dates, "type": "individuel", "afficher_realise": request.POST.get("afficher_realise") == "true",
+                      "afficher_affectations": True, "afficher_notes": False, "grouper_affectations": False}
+
+    sans_adresse, sans_document = [], []
+    for collaborateur in Collaborateur.objects.filter(pk__in=collaborateurs).order_by("nom", "prenom"):
+        adresse = Adresse_collaborateur(collaborateur, priorite)
+        if not adresse:
+            sans_adresse.append(collaborateur.Get_nom())
+            continue
+        destinataire = Destinataire.objects.create(categorie="collaborateur", collaborateur=collaborateur, adresse=adresse, valeurs=json.dumps({}))
+        if joindre_planning:
+            impression = utils_impression_planning.Impression(titre="Planning de %s" % collaborateur.Get_nom(), dict_donnees=dict(parametres, collaborateurs=[collaborateur.pk]))
+            if impression.erreurs:
+                sans_document.append(collaborateur.Get_nom())
+            else:
+                destinataire.documents.add(DocumentJoint.objects.create(nom=nom_document, fichier=impression.Get_nom_fichier()))
+        mail.destinataires.add(destinataire)
+
+    if not mail.destinataires.exists():
+        mail.delete()
+        return JsonResponse({"erreur": "Aucun des collaborateurs sélectionnés n'a d'adresse email"}, status=400)
+    return JsonResponse({"url": reverse("editeur_emails", kwargs={"pk": mail.pk}), "sans_adresse": sans_adresse, "sans_document": sans_document})
 
 
 @Verifie_permission

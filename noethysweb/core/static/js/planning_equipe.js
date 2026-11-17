@@ -3160,6 +3160,99 @@
           .always(function() { $bouton.prop("disabled", false).html("<i class='fa fa-check margin-r-5'></i>Valider"); });
     }
 
+    // ------------------------------------------------------------------ Email libre aux collaborateurs
+    var Email = {source: "affiches", decoches: new Set(), recherche: ""};
+    var EMAIL_BOUTON = "<i class='fa fa-pencil margin-r-5' aria-hidden='true'></i>Rédiger le message (<span id='pl_email_nb'>0</span>)";
+    function Adresse_email(c, priorite) {
+        // Même règle que Adresse_collaborateur() côté serveur
+        if (priorite === "pro_seul") { return c.mail_pro ? {adresse: c.mail_pro, type: "pro"} : null; }
+        var ordre = priorite === "perso" ? [["perso", c.mail_perso], ["pro", c.mail_pro]] : [["pro", c.mail_pro], ["perso", c.mail_perso]];
+        for (var i = 0; i < ordre.length; i++) { if (ordre[i][1]) { return {adresse: ordre[i][1], type: ordre[i][0]}; } }
+        return null;
+    }
+    function Email_ids_source() {
+        return Email.source === "selection" ? Collabs_selection() : Collabs_visibles();
+    }
+    function Email_destinataires() {
+        var priorite = $("#pl_email_priorite").val();
+        return Email_ids_source().filter(function(id) {
+            var c = S.collabs.get(id);
+            return c && Adresse_email(c, priorite) && !Email.decoches.has(id);
+        });
+    }
+    function Email_correspond(c) {
+        var q = Email.recherche.toLowerCase();
+        return !q || (c.libelle + " " + (c.poste || "")).toLowerCase().indexOf(q) >= 0;
+    }
+    function Ouvrir_email() {
+        var visibles = Collabs_visibles(), selection = Collabs_selection();
+        if (!visibles.length) { toastr.warning("Aucun collaborateur affiché"); return; }
+        Email.source = "affiches"; Email.decoches = new Set(); Email.recherche = "";
+        $("#pl_email_recherche").val("");
+        $("[data-email-source='affiches']").text("Collaborateurs affichés (" + visibles.length + ")");
+        $("[data-email-source='selection']").text("Évènements sélectionnés (" + selection.length + ")").prop("disabled", !selection.length);
+        $("#pl_email_periode").text(V.dates.length ? "Période affichée : " + (V.dates.length > 1 ? "du " + Texte_jour_fr(V.dates[0]) + " au " + Texte_jour_fr(V.dates[V.dates.length - 1]) : Texte_jour_long(V.dates[0])) + "." : "");
+        $("#pl_email_joindre").prop("checked", false).prop("disabled", !V.dates.length);
+        $("#pl_email_valider").html(EMAIL_BOUTON);
+        Rendu_email();
+        $("#pl_modal_email").modal("show");
+    }
+    function Rendu_email() {
+        var priorite = $("#pl_email_priorite").val();
+        $("[data-email-source]").each(function() { $(this).attr("aria-pressed", String(this.getAttribute("data-email-source") === Email.source)); });
+        var html = [];
+        Email_ids_source().forEach(function(id) {
+            var c = S.collabs.get(id);
+            if (!c || !Email_correspond(c)) { return; }
+            var adresse = Adresse_email(c, priorite);
+            var coche = adresse && !Email.decoches.has(id);
+            html.push("<label class='pl-email-ligne" + (adresse ? "" : " sans") + "'>" +
+                "<input type='checkbox' data-id='" + id + "'" + (coche ? " checked" : "") + (adresse ? "" : " disabled") + ">" +
+                "<span class='pl-email-identite'><strong>" + Echapper(c.libelle) + "</strong><small>" + Echapper(c.poste || "") + "</small></span>" +
+                (adresse ? "<span class='pl-email-adresse' title='" + Echapper(adresse.adresse) + "'>" + Echapper(adresse.adresse) + "</span>" +
+                           "<span class='pl-email-badge " + adresse.type + "'>" + (adresse.type === "pro" ? "Pro" : "Perso") + "</span>"
+                         : "<span class='pl-email-aucune'>Aucune adresse email</span>") +
+                "</label>");
+        });
+        $("#pl_email_liste").html(html.length ? html.join("") : "<p class='pl-email-vide'>Aucun collaborateur ne correspond à la recherche.</p>");
+        Maj_compteur_email();
+    }
+    function Maj_compteur_email() {
+        var priorite = $("#pl_email_priorite").val();
+        var ids = Email_ids_source(), nbre = Email_destinataires().length;
+        var sans = ids.filter(function(id) { var c = S.collabs.get(id); return c && !Adresse_email(c, priorite); }).length;
+        $("#pl_email_compteur").html("<strong>" + nbre + "</strong> destinataire" + (nbre > 1 ? "s" : "") + " sur " + ids.length);
+        $("#pl_email_sans").text(sans ? (sans > 1 ? sans + " collaborateurs sans adresse email ne recevront pas" : "1 collaborateur sans adresse email ne recevra pas") + " le message." : "");
+        $("#pl_email_nb").text(nbre);
+        $("#pl_email_valider").prop("disabled", !nbre);
+    }
+    function Cocher_tous_email(cocher) {
+        Email_ids_source().forEach(function(id) {
+            var c = S.collabs.get(id);
+            if (!c || !Email_correspond(c)) { return; }
+            if (cocher) { Email.decoches.delete(id); } else { Email.decoches.add(id); }
+        });
+        Rendu_email();
+    }
+    function Valider_email() {
+        var ids = Email_destinataires();
+        if (!ids.length) { toastr.warning("Aucun destinataire"); return; }
+        var donnees = {collaborateurs: JSON.stringify(ids), priorite: $("#pl_email_priorite").val(),
+                       joindre_planning: $("#pl_email_joindre").is(":checked") ? "true" : "false",
+                       dates: JSON.stringify(V.dates.map(Iso_jour)), afficher_realise: V.realise ? "true" : "false"};
+        var $bouton = $("#pl_email_valider").prop("disabled", true).html("<i class='fa fa-spinner fa-spin margin-r-5'></i>Préparation…");
+        Ajax(CFG.urls.email_libre, donnees).done(function(data) {
+            $("#pl_modal_email").modal("hide");
+            if (data.sans_adresse && data.sans_adresse.length) { toastr.warning("Sans adresse email : " + data.sans_adresse.join(", ")); }
+            if (data.sans_document && data.sans_document.length) { toastr.warning("Planning non joint : " + data.sans_document.join(", ")); }
+            window.location = data.url;
+        }).fail(function(xhr) {
+            toastr.error(Message_erreur(xhr));
+            $bouton.html(EMAIL_BOUTON);
+            Maj_compteur_email();
+        });
+    }
+
     // ------------------------------------------------------------------ Lien iCal
     var Ical_collab = null;
     function Ouvrir_ical(c) {
@@ -3385,6 +3478,19 @@
         $("#pl_diff_valider").on("click", Valider_diffusion);
         $("#pl_modal_diffusion").on("change", "input[name='pl_diff_type']", Maj_options_diffusion);
         $("#pl_modal_diffusion").on("dblclick", ".pl-type-doc", Valider_diffusion);
+
+        $("#pl_email_btn").on("click", Ouvrir_email);
+        $("#pl_email_valider").on("click", Valider_email);
+        $("#pl_email_priorite").on("change", Rendu_email);
+        $("#pl_email_recherche").on("input", function() { Email.recherche = $.trim(this.value); Rendu_email(); });
+        $("#pl_email_tout_cocher").on("click", function() { Cocher_tous_email(true); });
+        $("#pl_email_tout_decocher").on("click", function() { Cocher_tous_email(false); });
+        $("#pl_modal_email").on("click", "[data-email-source]", function() { Email.source = this.getAttribute("data-email-source"); Rendu_email(); });
+        $("#pl_email_liste").on("change", "input[type=checkbox]", function() {
+            var id = +this.getAttribute("data-id");
+            if (this.checked) { Email.decoches.delete(id); } else { Email.decoches.add(id); }
+            Maj_compteur_email();
+        });
 
         $("#pl_ical_copier").on("click", function() {
             var champ = document.getElementById("pl_ical_url");

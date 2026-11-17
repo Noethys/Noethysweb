@@ -571,3 +571,33 @@
 .pl-filtre-cats {max-height: 220px; overflow-y: auto; padding-right: 4px;}
 .pl-leg-liste {max-height: 260px; overflow-y: auto; padding-right: 4px;}
 #pl_cat_defaut_menu {max-height: min(360px, 60vh); overflow-y: auto;}
+
+/* Fenêtre d'envoi d'un email aux collaborateurs */
+.pl-email-entete {display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 10px;}
+.pl-email-compteur {font-size: 13px; color: #5b6472;}
+.pl-email-compteur strong {color: inherit; font-size: 14px;}
+.pl-email-outils {display: flex; align-items: center; gap: 14px; margin-bottom: 10px;}
+.pl-email-outils .pl-lien {font-size: 13px; --pl-primaire: rgb(var(--couleur-principale-rgb, 60, 141, 188));}
+.pl-email-recherche {position: relative; flex: 1 1 0;}
+.pl-email-recherche i {position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #5b6472;}
+.pl-email-recherche input {padding-left: 32px;}
+.pl-email-liste {border: 1px solid #e2e6ec; border-radius: 8px; max-height: 330px; overflow-y: auto; margin-bottom: 6px;}
+.pl-email-ligne {display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin: 0; border-top: 1px solid #eef0f3; font-weight: 400; cursor: pointer;}
+.pl-email-ligne:first-child {border-top: 0;}
+.pl-email-ligne:hover {background: rgba(var(--couleur-principale-rgb, 60, 141, 188), 0.05);}
+.pl-email-ligne input {width: 16px; height: 16px; margin: 0; flex-shrink: 0; accent-color: rgb(var(--couleur-principale-rgb, 60, 141, 188));}
+.pl-email-ligne.sans {opacity: 0.65; cursor: default;}
+.pl-email-ligne.sans:hover {background: transparent;}
+.pl-email-identite {flex: 1 1 0; min-width: 0; display: flex; flex-direction: column;}
+.pl-email-identite small {font-size: 12px; color: #5b6472;}
+.pl-email-adresse {font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 45%;}
+.pl-email-badge {font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; background: #f1f4f8; color: #374151;}
+.pl-email-badge.pro {background: #dbeafe; color: #1e40af;}
+.pl-email-aucune {font-size: 13px; font-weight: 600; color: #a3172b;}
+.pl-email-vide {margin: 0; padding: 24px; text-align: center; color: #5b6472;}
+.dark-mode .pl-email-liste {border-color: #4b545c;}
+.dark-mode .pl-email-ligne {border-top-color: #3f474e;}
+.dark-mode .pl-email-identite small, .dark-mode .pl-email-compteur, .dark-mode .pl-email-recherche i, .dark-mode .pl-email-vide {color: #b6bec8;}
+.dark-mode .pl-email-badge {background: #3d444b; color: #e5e7eb;}
+.dark-mode .pl-email-badge.pro {background: #1e3a5f; color: #bfdbfe;}
+.dark-mode .pl-email-aucune {color: #ffb3bc;}
