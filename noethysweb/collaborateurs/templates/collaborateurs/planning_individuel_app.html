@@ -128,9 +128,37 @@
                 </div>
 
                 {% if pi_mode == "fiche" %}
-                    <div class="pi-entete-objectif" id="pi_entete_objectif"></div>
-                    <div class="pi-bandeau" id="pi_bandeau" aria-live="polite"></div>
-                    <div class="pi-legende-chips" id="pi_legende_chips" aria-label="Catégories (cliquez pour masquer ou afficher)"></div>
+                    <div class="pi-entete-ligne">
+                        <div class="pi-entete-objectif" id="pi_entete_objectif"></div>
+                        <div class="pi-entete-outils">
+                            <span class="pi-statut-icone" id="pi_statut_icone" role="status" hidden></span>
+                            <div class="pi-aide">
+                                <button type="button" class="pl-lien pi-aide-btn" id="pi_aide_btn" aria-expanded="false" aria-controls="pi_aide_pop" aria-label="Légende et raccourcis" title="Légende et raccourcis"><i class="fa fa-question-circle" aria-hidden="true"></i></button>
+                                <div class="pl-pop pl-pop-droite pi-aide-pop" id="pi_aide_pop" role="region" aria-label="Légende et raccourcis" tabindex="-1" hidden>
+                                    <p class="pi-aide-titre">Légende</p>
+                                    <div class="pi-aide-legende">
+                                        <span class="pl-badge pl-badge-vacances">Vacances scolaires</span>
+                                        <span class="pl-badge pl-badge-ferie">Jour férié</span>
+                                        <span class="pl-badge pl-badge-contrat">Hachuré : hors contrat</span>
+                                    </div>
+                                    <p class="pi-aide-texte">Fond coloré : catégorie principale du jour · Barre : répartition des heures · Coin orange : alerte réglementaire</p>
+                                    <p class="pi-aide-titre">Raccourcis</p>
+                                    <ul class="pi-aide-liste">
+                                        <li><b>Glisser</b> : sélectionner plusieurs jours</li>
+                                        <li><b>Double-clic</b> : voir et modifier la journée</li>
+                                        <li><b>Clic droit</b> : actions</li>
+                                        <li><b>Ctrl+C / Ctrl+V</b> : copier-coller</li>
+                                        <li><b>Suppr</b> : effacer</li>
+                                        <li><b>Flèches</b> : se déplacer · <b>Maj + flèches</b> : sélectionner · <b>Entrée</b> : voir la journée</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pi-synthese" id="pi_synthese">
+                        <div class="pi-bandeau" id="pi_bandeau" aria-live="polite"></div>
+                        <div class="pi-legende-chips" id="pi_legende_chips" aria-label="Catégories (cliquez pour masquer ou afficher)"></div>
+                    </div>
                 {% endif %}
 
                 <div class="pi-corps" id="pi_corps" tabindex="0" aria-label="Planning de l'année : flèches pour se déplacer, Maj + flèches pour sélectionner, Entrée pour voir la journée, menu contextuel pour les actions">

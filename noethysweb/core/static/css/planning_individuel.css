@@ -3,7 +3,7 @@
     Distribué sous licence GNU GPL.
     Planning individuel des collaborateurs (complète planning_equipe.css) */
 
-.pi-app {--pi-cellule: 34px;}
+.pi-app {--pi-cellule: 26px;}
 .pi-app .pl-side {max-width: 320px;}
 .pi-app .pl-acc-corps .pl-label:first-child {margin-top: 0;}
 .pi-titre-periode {font-size: 16px; font-weight: 700; min-width: 92px; text-align: center; font-variant-numeric: tabular-nums;}
@@ -27,21 +27,21 @@
 .pi-pile i {display: block; height: 100%;}
 
 /* ---------------- Vue calendrier ---------------- */
-.pi-cal-grille {display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 14px; padding: 14px;}
-.pi-cal-mois {border: 1px solid var(--pl-bordure); border-radius: 10px; padding: 10px 10px 8px; background: var(--pl-carte);}
+.pi-cal-grille {display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 10px; padding: 10px 14px;}
+.pi-cal-mois {border: 1px solid var(--pl-bordure); border-radius: 10px; padding: 8px 8px 6px; background: var(--pl-carte);}
 .pi-cal-mois.courant {border-color: rgba(var(--pl-primaire-rgb), 0.6); box-shadow: 0 0 0 1px rgba(var(--pl-primaire-rgb), 0.35);}
-.pi-cal-tete {display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 6px;}
+.pi-cal-tete {display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 4px;}
 .pi-cal-tete h3 {font-size: 14px; font-weight: 700; margin: 0; text-transform: capitalize;}
 .pi-cal-tete span {font-size: 12px; font-weight: 700; color: var(--pl-muted); font-variant-numeric: tabular-nums;}
 .pi-cal-jours {display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px;}
 .pi-cal-jl {font-size: 10px; font-weight: 700; color: var(--pl-muted); text-align: center; padding-bottom: 2px;}
-.pi-cal-c {height: var(--pi-cellule); border-radius: 6px; display: flex; flex-direction: column; align-items: center; padding-top: 4px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--pl-texte);}
+.pi-cal-c {height: var(--pi-cellule); border-radius: 5px; display: flex; flex-direction: column; align-items: center; padding-top: 2px; font-size: 11.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--pl-texte);}
 .pi-cal-c.vide {cursor: default; background: transparent;}
 .pi-cal-c.we {color: #8a94a3;}
 .pi-cal-c.ferie {color: var(--pl-ferie-texte);}
 .pi-cal-c.ferie::before {content: ""; position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: 3px; background: var(--pl-ferie);}
 .pi-cal-c.vac::after {content: ""; position: absolute; left: 3px; right: 3px; top: 0; height: 3px; border-radius: 2px; background: var(--pl-vacances);}
-.pi-cal-c .pi-pile {width: 72%; margin-top: auto; margin-bottom: 5px;}
+.pi-cal-c .pi-pile {width: 72%; height: 3px; margin-top: auto; margin-bottom: 3px;}
 
 /* ---------------- Vue colonnes (un mois par colonne) ---------------- */
 .pi-tableau-box {overflow: auto; max-height: calc(100vh - 260px); min-height: 360px;}
@@ -49,25 +49,25 @@
 .pi-co {border-collapse: separate; border-spacing: 0; width: 100%; min-width: 980px; table-layout: fixed; font-size: 12px;}
 .pi-co th, .pi-co td {padding: 0; border-bottom: 1px solid var(--pl-bordure-legere); border-left: 1px solid var(--pl-bordure-legere);}
 .pi-co th:first-child, .pi-co td:first-child {border-left: 0;}
-.pi-co thead th {position: sticky; top: 0; z-index: 2; background: var(--pl-fond-doux); height: 42px; border-bottom: 1px solid var(--pl-bordure); text-align: left; padding: 0 6px;
+.pi-co thead th {position: sticky; top: 0; z-index: 2; background: var(--pl-fond-doux); height: 28px; border-bottom: 1px solid var(--pl-bordure); text-align: center; padding: 0 6px;
     font-size: 13px; font-weight: 700; line-height: 1.15; text-transform: capitalize;}
 .pi-co thead th small {display: block; font-size: 11px; font-weight: 600; color: var(--pl-muted); font-variant-numeric: tabular-nums; text-transform: none;}
 .pi-co thead th.courant {color: var(--pl-primaire); box-shadow: inset 0 -2px 0 var(--pl-primaire);}
-.pi-co td {height: 27px;}
+.pi-co td {height: 19px;}
 .pi-co td.nx {background: repeating-linear-gradient(135deg, rgba(148, 163, 184, 0.16) 0 4px, transparent 4px 8px); cursor: default;}
 .pi-co td.vac {box-shadow: inset 3px 0 0 var(--pl-vacances);}
 .pi-co td.vac.sel {box-shadow: inset 3px 0 0 var(--pl-vacances), inset 0 0 0 2px var(--pl-primaire);}
 .pi-co td.lundi {border-top: 1px solid #cfd6df;}
-.pi-co-c {display: flex; align-items: center; gap: 4px; height: 100%; padding: 0 4px; min-width: 0;}
-.pi-co-jl {width: 9px; font-size: 9.5px; font-weight: 700; color: var(--pl-muted); text-align: center; flex-shrink: 0;}
-.pi-co-n {width: 15px; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0;}
+.pi-co-c {display: flex; align-items: center; gap: 3px; height: 100%; padding: 0 3px; min-width: 0;}
+.pi-co-jl {width: 9px; font-size: 9px; font-weight: 700; color: var(--pl-muted); text-align: center; flex-shrink: 0;}
+.pi-co-n {width: 14px; font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0;}
 .pi-co td.we .pi-co-jl, .pi-co td.we .pi-co-n {color: #8a94a3;}
 .pi-co td.ferie .pi-co-jl, .pi-co td.ferie .pi-co-n {color: var(--pl-ferie-texte);}
-.pi-pastille-jour {flex: 1 1 0; min-width: 0; height: 19px; line-height: 19px; border-radius: 5px; color: #fff; font-size: 11px; font-weight: 700; display: block; text-align: center;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 3px; box-shadow: 0 1px 1px rgba(15, 23, 42, 0.12); font-variant-numeric: tabular-nums;}
+.pi-pastille-jour {flex: 1 1 0; min-width: 0; height: 15px; line-height: 15px; border-radius: 4px; color: #fff; font-size: 10px; font-weight: 700; display: block; text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 3px; font-variant-numeric: tabular-nums;}
 .pi-pastille-jour.ferie {background: transparent; color: var(--pl-ferie-texte); box-shadow: none;}
 .pi-pastille-jour.multi {background-image: linear-gradient(90deg, transparent 0 calc(100% - 6px), rgba(255, 255, 255, 0.45) calc(100% - 6px));}
-.pi-co tfoot td {position: sticky; bottom: 0; z-index: 1; background: var(--pl-fond-doux); height: 40px; border-top: 2px solid var(--pl-bordure); padding: 0 6px; font-weight: 700;
+.pi-co tfoot td {position: sticky; bottom: 0; z-index: 1; background: var(--pl-fond-doux); height: 34px; border-top: 2px solid var(--pl-bordure); padding: 0 6px; font-weight: 700;
     font-variant-numeric: tabular-nums; font-size: 13px; line-height: 1.15;}
 .pi-co tfoot td small {display: block; font-size: 11px; font-weight: 600; color: var(--pl-muted);}
 
@@ -156,6 +156,7 @@
 .pi-bandeau-carte span {font-size: 12px; color: var(--pl-muted);}
 .pi-bandeau-carte .pi-jauge {margin: 4px 0 0;}
 .pi-bandeau-carte.action {justify-content: center; align-items: flex-start; flex: 0 1 auto;}
+.pi-synthese {margin-bottom: 4px;}
 .pi-legende-chips {display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px 0;}
 
 /* Légende */
@@ -178,10 +179,17 @@
 
 /* Mode fiche : le panneau latéral est remplacé par le bandeau */
 .pi-mode-fiche .pl-side {display: none;}
-.pi-mode-fiche .pi-tableau-box {max-height: calc(100vh - 330px);}
+.pi-mode-fiche .pi-tableau-box {max-height: var(--pi-hauteur-dispo, calc(100vh - 330px));}
+/* Mode fiche : présentation compacte pour afficher l'année entière (légende et aide dans l'infobulle « ? ») */
+.pi-mode-fiche .pl-toolbar {padding: 6px 14px;}
+.pi-mode-fiche .pl-toolbar .pl-btn {height: 30px;}
+.pi-mode-fiche .pl-toolbar .pl-btn-icone {width: 30px;}
+.pi-mode-fiche .pl-toolbar .pl-seg-btn {height: 24px;}
+.pi-mode-fiche .pi-co tbody td {border-bottom: 0;}
+@media screen {.pi-mode-fiche .pi-legende-bas, .pi-mode-fiche .pl-footer {display: none;}}
 
 @media print {
-    .pi-app .pl-side, .pi-app .pl-toolbar, .pi-app .pl-footer, .pi-actions {display: none !important;}
+    .pi-app .pl-side, .pi-app .pl-toolbar, .pi-app .pl-footer, .pi-actions, .pi-entete-outils {display: none !important;}
     .pi-tableau-box {max-height: none !important; overflow: visible !important;}
 }
 
@@ -199,12 +207,36 @@
 .pi-actions.pi-masque {display: none !important;}
 
 /* Ligne de titre de l'objectif (fiche collaborateur) */
-.pi-entete-objectif {display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 12px 14px 0; font-size: 12px; min-width: 0;}
+.pi-entete-ligne {display: flex; align-items: flex-start; gap: 10px; padding: 8px 14px 0; margin-bottom: 2px; min-width: 0;}
+.pi-entete-objectif {flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; min-width: 0;}
+.pi-entete-outils {display: flex; align-items: center; gap: 10px; height: 22px; flex-shrink: 0;}
+.pi-statut-icone {font-size: 14px; color: var(--pl-muted); cursor: default;}
+.pi-statut-icone[data-etat="ok"] {color: #16a34a;}
+.pi-aide {position: relative;}
+.pi-aide-btn {font-size: 15px; display: inline-flex; align-items: center;}
+.pi-aide-pop {width: 360px; max-width: calc(100vw - 32px); padding: 10px 14px; font-size: 12px; color: var(--pl-texte);}
+.pi-aide-pop:focus {outline: none;}
+.pi-aide-titre {margin: 0 0 6px; font-size: 11px; font-weight: 700; color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.03em;}
+.pi-aide-titre:not(:first-child) {margin-top: 10px;}
+.pi-aide-legende {display: flex; flex-wrap: wrap; gap: 6px;}
+.pi-aide-texte {margin: 6px 0 0; color: var(--pl-muted);}
+.pi-aide-liste {margin: 0; padding-left: 16px; line-height: 1.6;}
 .pi-entete-titre {margin: 0; font-size: 11px; font-weight: 700; color: var(--pl-muted); text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap;}
 .pi-entete-sep {width: 1px; height: 14px; background: var(--pl-bordure);}
 .pi-entete-contrat {color: var(--pl-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 45%;}
 .pi-entete-liens {display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 16px;}
 .pi-entete-liens .pl-lien {display: inline-flex; align-items: center; gap: 5px; font-size: 12px;}
+.pi-replier {display: inline-flex; align-items: center; gap: 6px; padding: 2px 4px 2px 0; border: 0; background: transparent; color: inherit; font: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; border-radius: 4px;}
+.pi-replier:hover {color: var(--pl-texte);}
+.pi-replier:focus-visible {outline: 2px solid var(--pl-primaire); outline-offset: 2px;}
+.pi-replier i {font-size: 10px; transition: transform 0.15s;}
+.pi-replier[aria-expanded="false"] i {transform: rotate(-90deg);}
+.pi-synthese-compacte {display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--pl-muted); font-variant-numeric: tabular-nums; white-space: nowrap;}
+.pi-synthese-compacte b {color: var(--pl-texte);}
+.pi-alertes-compactes {display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; border: 1px solid #fcd34d; border-radius: 11px; background: #fffbeb; color: #b45309; font-size: 12px; font-weight: 700; cursor: pointer;}
+.pi-alertes-compactes:hover {background: #fef3c7;}
+.dark-mode .pi-alertes-compactes {background: #4a3a12; color: #fde68a; border-color: #6b5316;}
+@media (prefers-reduced-motion: reduce) {.pi-replier i {transition: none;}}
 .pi-badge-nb {display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--pl-primaire); color: #fff; font-size: 11px; font-weight: 700;}
 
 /* Menu et fenêtre de diffusion */
@@ -220,7 +252,7 @@
 .pi-diff-colonnes legend.pl-label {width: auto; padding: 0; margin: 10px 0 6px; background: none; border: 0; font-size: 12px;}
 
 /* ---------------- Contrôle réglementaire ---------------- */
-.pi-j.anom::after {content: ""; position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 9px 9px 0; border-color: transparent #d97706 transparent transparent; pointer-events: none;}
+.pi-anom-coin {position: absolute; z-index: 1; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 9px 9px 0; border-color: transparent #d97706 transparent transparent; pointer-events: none;}
 .pi-anom-liste {display: flex; flex-direction: column; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; padding-right: 2px;}
 .pi-anom-item {display: flex; gap: 7px; align-items: flex-start; width: 100%; text-align: left; padding: 5px 4px; border: 0; border-bottom: 1px solid var(--pl-bordure-legere); background: transparent; color: var(--pl-texte); font-size: 12px; cursor: pointer;}
 .pi-anom-item:hover {background: #fffbeb;}
@@ -235,7 +267,7 @@
 .pi-bandeau-anomalies strong {color: #b45309;}
 .dark-mode .pi-anom-item:hover {background: #3d3420;}
 .dark-mode .pi-pop-anom, .dark-mode .pi-bandeau-anomalies {background: #4a3a12; color: #fde68a; border-color: #6b5316;}
-@media print {.pi-j.anom::after {display: none;}}
+@media print {.pi-anom-coin {display: none;}}
 
 /* Conversion du crédit d'heures en récupération */
 .pi-recup-credit {padding: 8px 10px; margin-bottom: 12px; border-radius: 8px; background: #e0f2fe; color: #075985; font-size: 13px;}

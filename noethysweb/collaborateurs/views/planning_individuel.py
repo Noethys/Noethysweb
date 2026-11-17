@@ -22,7 +22,8 @@ from collaborateurs.views.collaborateur import Onglet
 PERMISSION = "core.planning_individuel"
 CATEGORIE_PREFERENCES = "planning_individuel"
 PREFERENCES_DEFAUT = {"vue": "calendrier", "journee_debut": "09:00", "journee_fin": "17:00", "matin_debut": "08:30", "matin_fin": "12:00",
-                      "am_debut": "13:30", "am_fin": "17:00", "ignorer_non_ouvres": True}
+                      "am_debut": "13:30", "am_fin": "17:00", "ignorer_non_ouvres": True,
+                      "synthese_repliee": False}
 VUES = ("calendrier", "colonnes", "mois")
 
 

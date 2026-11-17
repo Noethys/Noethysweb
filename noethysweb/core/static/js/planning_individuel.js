@@ -466,8 +466,10 @@
         evts.forEach(function(evt) { var c = S.cats.get(evt.cat); titre += "\n" + Heure_courte(evt.s) + "–" + Heure_courte(evt.e) + " " + (c ? c.nom : "") + (evt.t ? " (" + evt.t + ")" : ""); });
         if (valeur) { titre += "\nTotal compté : " + Valeur(valeur); }
         anomalies.forEach(function(a) { titre += "\n⚠ " + a.texte; });
+        // Le coin d'alerte est un élément à part : les pseudo-éléments sont déjà utilisés par les marques férié et vacances
+        var coin = anomalies.length ? "<span class='pi-anom-coin' aria-hidden='true'></span>" : "";
         return {classes: classes, cat: cat, total: total, nb_cats: par_cat.size, pile: pile, texte: texte, titre: titre, ferie: ferie, valeur: valeur, js: js,
-                fond: cat ? Teinte(cat.couleur) : ""};
+                fond: cat ? Teinte(cat.couleur) : "", coin: coin};
     }
     var cache_teintes = {};
     function Teinte(couleur) {
@@ -509,7 +511,7 @@
             for (var d = 0; d < mo.nbre; d++) {
                 var j = mo.debut + d, c = Infos_cellule(j);
                 html += "<div class='" + c.classes.join(" ") + " pi-cal-c' data-j='" + j + "' role='gridcell' aria-selected='" + V.selection.has(j) + "' title='" + Echapper(c.titre) + "'" +
-                        (c.fond && !c.ferie ? " style='background-color:" + c.fond + "'" : "") + ">" + (d + 1) + c.pile + "</div>";
+                        (c.fond && !c.ferie ? " style='background-color:" + c.fond + "'" : "") + ">" + (d + 1) + c.pile + c.coin + "</div>";
             }
             html += "</div></section>";
         });
@@ -526,8 +528,7 @@
         var mois = Mois_de_la_periode(), totaux = Totaux_planifies(), auj = Infos_jour(Aujourdhui());
         var html = "<div class='pi-tableau-box'><table class='pi-co' role='grid' aria-label='Planning annuel, une colonne par mois'><thead><tr>";
         mois.forEach(function(mo) {
-            html += "<th scope='col' class='" + (mo.a === auj.a && mo.m === auj.m ? "courant" : "") + "'>" + MOIS[mo.m] + (mo.m === 0 || mo === mois[0] ? " " + mo.a : "") +
-                    "<small>" + Valeur(totaux.par_mois[mo.cle] || 0) + "</small></th>";
+            html += "<th scope='col' class='" + (mo.a === auj.a && mo.m === auj.m ? "courant" : "") + "'>" + MOIS[mo.m] + (mo.m === 0 || mo === mois[0] ? " " + mo.a : "") + "</th>";
         });
         html += "</tr></thead><tbody>";
         for (var d = 0; d < 31; d++) {
@@ -537,7 +538,7 @@
                 var j = mo.debut + d, c = Infos_cellule(j);
                 if (c.js === 0 && d > 0) { c.classes.push("lundi"); }
                 html += "<td class='" + c.classes.join(" ") + "' data-j='" + j + "' role='gridcell' aria-selected='" + V.selection.has(j) + "' title='" + Echapper(c.titre) + "'>" +
-                        "<div class='pi-co-c'><span class='pi-co-jl'>" + JOURS_LETTRES[c.js] + "</span><span class='pi-co-n'>" + Pad(d + 1) + "</span>" + Html_pastille_jour(c) + "</div></td>";
+                        "<div class='pi-co-c'><span class='pi-co-jl'>" + JOURS_LETTRES[c.js] + "</span><span class='pi-co-n'>" + Pad(d + 1) + "</span>" + Html_pastille_jour(c) + "</div>" + c.coin + "</td>";
             });
             html += "</tr>";
         }
@@ -562,7 +563,7 @@
                 if (c.js === 0) { c.classes.push("lundi"); }
                 var texte = c.ferie && !c.cat ? "Férié" : (c.cat ? (Regle(c.cat.id) === 0 || Regle(c.cat.id) === "F" ? Abrege(c.cat.nom) : Duree(c.total)) : "");
                 html += "<td class='" + c.classes.join(" ") + "' data-j='" + j + "' role='gridcell' aria-selected='" + V.selection.has(j) + "' title='" + Echapper(c.titre) + "'" +
-                        (c.fond && !c.ferie ? " style='background-color:" + c.fond + "'" : "") + "><span class='pi-mj-jl'>" + JOURS_LETTRES[c.js] + "</span><span class='pi-mj-v'>" + Echapper(texte) + "</span>" + c.pile + "</td>";
+                        (c.fond && !c.ferie ? " style='background-color:" + c.fond + "'" : "") + "><span class='pi-mj-jl'>" + JOURS_LETTRES[c.js] + "</span><span class='pi-mj-v'>" + Echapper(texte) + "</span>" + c.pile + c.coin + "</td>";
             }
             cumul += totaux.par_mois[mo.cle] || 0;
             html += "<td class='pi-mj-total'>" + Valeur(totaux.par_mois[mo.cle] || 0) + "<small>cumul " + Valeur(cumul) + "</small></td></tr>";
@@ -661,8 +662,10 @@
     }
     function Rendu_entete_objectif() {
         // Ligne de titre de l'objectif (fiche collaborateur) : rappel du contrat et accès directs
-        var o = S.objectif, nb = o.ajustements.length, contrats = Resume_contrats();
-        var html = "<h3 class='pi-entete-titre'>Objectif " + Echapper(S.periode.libelle) + "</h3>" +
+        var o = S.objectif, nb = o.ajustements.length, contrats = Resume_contrats(), repliee = Synthese_repliee();
+        var html = "<h3 class='pi-entete-titre'><button type='button' class='pi-replier' data-action='replier-synthese' aria-expanded='" + !repliee + "' aria-controls='pi_synthese' " +
+            "title='" + (repliee ? "Afficher" : "Masquer") + " le résumé (objectif, alertes, catégories)'><i class='fa fa-chevron-down' aria-hidden='true'></i>Objectif " + Echapper(S.periode.libelle) + "</button></h3>" +
+            (repliee ? Html_synthese_compacte() : "") +
             (contrats ? "<span class='pi-entete-sep' aria-hidden='true'></span><span class='pi-entete-contrat' title='" + Echapper(contrats) + "'>" + Echapper(contrats) + "</span>" : "") +
             "<span class='pl-espace'></span><span class='pi-entete-liens'>" +
             "<button type='button' class='pl-lien' data-action='objectif-detail'><i class='fa fa-bullseye' aria-hidden='true'></i>Détail du calcul</button>" +
@@ -673,6 +676,32 @@
                     (Recup_possible() ? "<button type='button' class='pl-lien' data-action='recuperation' title='Convertir le crédit d’heures en droits à récupération'><i class='fa fa-exchange' aria-hidden='true'></i>Convertir en récupération</button>" : "");
         }
         $("#pi_entete_objectif").html(html + "</span>");
+        $("#pi_synthese").prop("hidden", repliee);
+        Ajuster_hauteur();
+    }
+    function Synthese_repliee() { return !!(S.prefs && S.prefs.synthese_repliee); }
+    function Html_synthese_compacte() {
+        // Résumé sur une ligne affiché quand le bandeau est replié
+        var o = S.objectif, totaux = Totaux_planifies(), n = Anomalies.liste.length, morceaux = [];
+        if (o.a_objectif) {
+            var solde = totaux.total - o.objectif;
+            morceaux.push("<span><b>" + Valeur(totaux.total) + "</b> / " + Valeur(o.objectif) + "</span>");
+            morceaux.push("<span>Solde <b>" + (solde >= 0 ? "+" : "") + Valeur(solde) + "</b></span>");
+        } else {
+            morceaux.push("<span><b>" + Valeur(totaux.total) + "</b> planifiées</span>");
+        }
+        var html = "<span class='pi-entete-sep' aria-hidden='true'></span><span class='pi-synthese-compacte'>" + morceaux.join("<span aria-hidden='true'>·</span>") + "</span>";
+        if (n) {
+            html += "<button type='button' class='pi-alertes-compactes' data-action='aller-anomalie' title='Aller à la première alerte'><i class='fa fa-exclamation-triangle' aria-hidden='true'></i>" + n + " alerte" + (n > 1 ? "s" : "") + "</button>";
+        }
+        return html;
+    }
+    function Basculer_synthese() {
+        var repliee = !Synthese_repliee();
+        S.prefs.synthese_repliee = repliee;
+        Rendu_entete_objectif();
+        $("#pi_entete_objectif .pi-replier").trigger("focus");
+        Memoriser_preferences({synthese_repliee: repliee, vue: V.vue});
     }
 
     // ------------------------------------------------------------------ Légende, collaborateur, barre d'outils
@@ -756,11 +785,31 @@
     }
 
     function Statut(texte) {
-        var $s = $("#pi_statut");
-        if (texte !== undefined) { $s.html(texte); return; }
-        if (envoi_en_cours || File_envoi.length) { $s.html("<i class='fa fa-refresh fa-spin' aria-hidden='true'></i> Enregistrement…"); return; }
-        if (derniere_sauvegarde) { $s.html("<i class='fa fa-check' aria-hidden='true'></i> Enregistré à " + Pad(derniere_sauvegarde.getHours()) + ":" + Pad(derniere_sauvegarde.getMinutes())); return; }
-        $s.text(Modifiable() ? "" : "Consultation seule");
+        var html;
+        if (texte !== undefined) { html = texte; }
+        else if (envoi_en_cours || File_envoi.length) { html = "<i class='fa fa-refresh fa-spin' aria-hidden='true'></i> Enregistrement…"; }
+        else if (derniere_sauvegarde) { html = "<i class='fa fa-check' aria-hidden='true'></i> Enregistré à " + Pad(derniere_sauvegarde.getHours()) + ":" + Pad(derniere_sauvegarde.getMinutes()); }
+        else { html = Modifiable() ? "" : Echapper("Consultation seule"); }
+        $("#pi_statut").html(html);
+        Statut_icone(html);
+    }
+    function Statut_icone(html) {
+        // Mode fiche : la barre du bas est masquée, l'état est résumé par une icône sur la ligne Objectif
+        var $i = $("#pi_statut_icone");
+        if (!$i.length) { return; }
+        var texte = $("<div>").html(html).text().trim();
+        var icone = /fa-spin/.test(html) ? "fa-refresh fa-spin" : (/fa-check/.test(html) ? "fa-check-circle" : "fa-lock");
+        $i.prop("hidden", !texte).attr({title: texte, "data-etat": /fa-spin/.test(html) ? "encours" : (/fa-check/.test(html) ? "ok" : "info")})
+          .html(texte ? "<i class='fa " + icone + "' aria-hidden='true'></i><span class='sr-only'>" + Echapper(texte) + "</span>" : "");
+    }
+
+    function Ajuster_hauteur() {
+        // Mode fiche : le tableau occupe toute la hauteur restante de la fenêtre (au lieu d'une valeur fixe)
+        if (CFG.mode !== "fiche") { return; }
+        var app = document.getElementById("pi_app"), corps = document.getElementById("pi_corps");
+        if (!app || !corps) { return; }
+        var haut = corps.getBoundingClientRect().top + window.pageYOffset;
+        app.style.setProperty("--pi-hauteur-dispo", Math.max(360, Math.floor(window.innerHeight - haut - 16)) + "px");
     }
 
     function Rafraichir_tout() {
@@ -773,6 +822,7 @@
         Rendu_anomalies();
         Rendu_conges();
         Rendu_actions();
+        Ajuster_hauteur();
         if (V.pop_jour !== null) { Ouvrir_jour(V.pop_jour, null, true); }
         Demander_anomalies();
     }
@@ -830,6 +880,7 @@
         $("#pi_anomalies").html(html);
         // Bandeau (mode fiche)
         $("#pi_bandeau_anomalies").remove();
+        if (CFG.mode === "fiche" && Synthese_repliee() && S.charge) { Rendu_entete_objectif(); }
         if (CFG.mode === "fiche" && n) {
             $("#pi_bandeau").append("<button type='button' class='pi-bandeau-carte pi-bandeau-anomalies' id='pi_bandeau_anomalies' title='" + Echapper(liste.map(function(a) { return Texte_jour_court(a.jour) + " : " + a.texte; }).join("\n")) + "'>" +
                 "<small>Contrôle réglementaire</small><strong><i class='fa fa-exclamation-triangle' aria-hidden='true'></i> " + n + "</strong><span>alerte" + (n > 1 ? "s" : "") + " sur la période</span></button>");
@@ -1422,6 +1473,7 @@
     var Diff_action = null;
     var DIFF_OPTIONS = {annuel: [], bilan: [], calendrier: ["notes"], individuel: ["affs", "realise"], recapitulatif: []};
     var DIFF_TITRES = {imprimer: "Imprimer le planning", email: "Envoyer le planning par email", excel: "Exporter vers Excel"};
+    function Fermer_aide() { $("#pi_aide_pop").prop("hidden", true); $("#pi_aide_btn").attr("aria-expanded", "false"); }
     function Fermer_menu_diffusion() { $("#pi_diffusion_menu").prop("hidden", true); $("#pi_diffusion_btn").attr("aria-expanded", "false"); }
     function Ouvrir_diffusion(action) {
         if (!S.charge) { return; }
@@ -1739,6 +1791,19 @@
         $("#pi_modal_evt").on("shown.bs.modal", Verifier_evt_modale);
         $("#pi_anomalies").on("click", "[data-anomalie]", function() { var a = Anomalies.liste[+this.getAttribute("data-anomalie")]; if (a) { Aller_anomalie(a); } });
         $("#pi_bandeau").on("click", "#pi_bandeau_anomalies", function() { if (Anomalies.liste.length) { Aller_anomalie(Anomalies.liste[0]); } });
+        $("#pi_entete_objectif").on("click", "[data-action='replier-synthese']", Basculer_synthese);
+        $(window).on("resize.pi", Debounce(Ajuster_hauteur, 100));
+        // Légende et raccourcis (mode fiche)
+        $("#pi_aide_btn").on("click", function(e) {
+            e.stopPropagation();
+            var ouvrir = $("#pi_aide_pop").prop("hidden");
+            $("#pi_aide_pop").prop("hidden", !ouvrir);
+            $(this).attr("aria-expanded", String(ouvrir));
+            if (ouvrir) { $("#pi_aide_pop").trigger("focus"); }
+        });
+        $("#pi_aide_pop").on("keydown", function(e) { if (e.key === "Escape") { Fermer_aide(); $("#pi_aide_btn").trigger("focus"); e.preventDefault(); e.stopPropagation(); } });
+        $(document).on("mousedown.pi", function(e) { if (!$(e.target).closest("#pi_aide_pop, #pi_aide_btn").length) { Fermer_aide(); } });
+        $("#pi_entete_objectif").on("click", "[data-action='aller-anomalie']", function() { if (Anomalies.liste.length) { Aller_anomalie(Anomalies.liste[0]); } });
         $("#pi_modal_evt").on("keydown", "input", function(e) { if (e.key === "Enter") { Valider_evt(); e.preventDefault(); } });
 
         // Modale période
