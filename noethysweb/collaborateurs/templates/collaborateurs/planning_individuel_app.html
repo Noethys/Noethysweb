@@ -167,8 +167,9 @@
 
                 <div class="pi-actions" id="pi_actions" role="toolbar" aria-label="Actions sur la sélection" hidden>
                     <span id="pi_actions_texte" aria-live="polite"></span>
-                    <button type="button" class="pl-btn pl-btn-primaire" id="pi_act_periode"><i class="fa fa-calendar-plus-o" aria-hidden="true"></i>Créer une période</button>
                     <button type="button" class="pl-btn" id="pi_act_modele"><i class="fa fa-th-list" aria-hidden="true"></i>Modèle</button>
+                    <button type="button" class="pl-btn" id="pi_act_periode" title="Saisir une période sur les jours sélectionnés"><i class="fa fa-calendar-plus-o" aria-hidden="true"></i>Saisir</button>
+                    <button type="button" class="pl-btn" id="pi_act_lot"><i class="fa fa-pencil" aria-hidden="true"></i>Modifier</button>
                     <button type="button" class="pl-btn" id="pi_act_copier" title="Ctrl+C"><i class="fa fa-copy" aria-hidden="true"></i>Copier</button>
                     <button type="button" class="pl-btn" id="pi_act_coller" title="Ctrl+V" disabled><i class="fa fa-paste" aria-hidden="true"></i>Coller</button>
                     <button type="button" class="pl-btn pl-btn-icone" id="pi_act_effacer" aria-label="Effacer les évènements de la sélection (Suppr)" title="Effacer les évènements (Suppr)"><i class="fa fa-trash" aria-hidden="true"></i></button>
@@ -240,7 +241,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-lightblue">
-                <h5 class="modal-title" id="pi_modal_periode_titre"><strong>Créer une période</strong></h5>
+                <h5 class="modal-title" id="pi_modal_periode_titre"><strong>Saisir des évènements</strong></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">
@@ -276,7 +277,7 @@
             </div>
             <div class="modal-footer">
                 <div class="custom-control custom-checkbox mr-auto"><input type="checkbox" class="custom-control-input" id="pi_per_memoriser"><label class="custom-control-label" for="pi_per_memoriser">Mémoriser ces horaires par défaut</label></div>
-                <button type="button" class="btn btn-primary" id="pi_per_valider"><i class="fa fa-check margin-r-5"></i>Créer</button>
+                <button type="button" class="btn btn-primary" id="pi_per_valider"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
             </div>
         </div>

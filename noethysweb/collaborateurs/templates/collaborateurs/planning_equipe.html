@@ -94,6 +94,14 @@
                         <select id="pl_filtre_aff" class="form-control form-control-sm"></select>
                         <label for="pl_filtre_qualif" class="pl-label">Qualification des collaborateurs</label>
                         <select id="pl_filtre_qualif" class="form-control form-control-sm"></select>
+                        <div class="pl-filtre-vides">
+                            <label class="pl-switch"><input type="checkbox" id="pl_filtre_vides"><span class="pl-switch-piste" aria-hidden="true"></span>Masquer les lignes sans évènement</label>
+                            <p class="pl-filtre-vides-info" id="pl_filtre_vides_info" aria-live="polite" hidden></p>
+                            <div class="custom-control custom-checkbox pl-filtre-vides-option" id="pl_filtre_jours_vides_bloc" hidden>
+                                <input type="checkbox" class="custom-control-input" id="pl_filtre_jours_vides">
+                                <label class="custom-control-label" for="pl_filtre_jours_vides">Masquer aussi les jours sans évènement</label>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -221,7 +229,7 @@
                     <nav class="pl-minimap" id="pl_minimap" aria-label="Navigation rapide" hidden></nav>
                     <div class="pl-barre-sel" id="pl_barre_sel" role="toolbar" aria-label="Actions sur la sélection" hidden>
                         <span id="pl_bs_texte" aria-live="polite"></span>
-                        <button type="button" class="pl-btn pl-btn-primaire" data-sel-action="lot"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>Modifier par lot</button>
+                        <button type="button" class="pl-btn" data-sel-action="lot" title="Modifier par lot les évènements sélectionnés"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>Modifier</button>
                         <button type="button" class="pl-btn" data-sel-action="dupliquer" title="Ctrl+D"><i class="fa fa-clone" aria-hidden="true"></i>Dupliquer</button>
                         <button type="button" class="pl-btn" data-sel-action="realise"><i class="fa fa-check-square-o" aria-hidden="true"></i>Réalisé = prévu</button>
                         <button type="button" class="pl-btn pl-btn-icone" data-sel-action="supprimer" aria-label="Supprimer les évènements sélectionnés (Suppr)" title="Supprimer (Suppr)"><i class="fa fa-trash" aria-hidden="true"></i></button>
@@ -629,6 +637,7 @@
                 copie: "{% url 'ajax_planning_equipe_copier_periode' %}",
                 note: "{% url 'ajax_planning_equipe_enregistrer_note' %}",
                 affichage: "{% url 'ajax_planning_equipe_memoriser_affichage' %}",
+                dates: "{% url 'ajax_planning_equipe_memoriser_dates' %}",
                 reglages: "{% url 'ajax_planning_equipe_memoriser_reglages' %}",
                 imprimer: "{% url 'ajax_planning_equipe_imprimer' %}",
                 emails: "{% url 'ajax_planning_equipe_envoyer_emails' %}",

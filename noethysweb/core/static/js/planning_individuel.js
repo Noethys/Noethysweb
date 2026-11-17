@@ -762,10 +762,13 @@
     function Rendu_actions() {
         var $barre = $("#pi_actions");
         if (!V.selection.size || !Modifiable()) { $barre.prop("hidden", true); return; }
-        var jours = Jours_selectionnes(), n = jours.length;
-        var texte = n === 1 ? Texte_jour_court(jours[0]) : Pluriel(n, "jour") + " sélectionné" + (n > 1 ? "s" : "") + " (" + Texte_jour_court(jours[0]) + " → " + Texte_jour_court(jours[n - 1]) + ")";
-        $("#pi_actions_texte").text(texte);
+        var jours = Jours_selectionnes(), n = jours.length, total = 0;
+        // Temps compté sur les jours sélectionnés (mêmes règles que les jauges d'objectif)
+        jours.forEach(function(j) { total += Valeur_jour(j); });
+        $("#pi_actions_texte").text(Pluriel(n, "jour") + " sélectionné" + (n > 1 ? "s" : "") + " · " + Valeur(total));
         $("#pi_act_coller").prop("disabled", !Presse_papier);
+        var sans_evt = !Evts_selection().length;
+        $("#pi_act_lot").prop("disabled", sans_evt).attr("title", sans_evt ? "Aucun évènement à modifier sur la sélection" : "Modifier par lot les évènements des jours sélectionnés");
         $barre.prop("hidden", false);
         Positionner_actions();
     }
@@ -1744,6 +1747,7 @@
         // Barre d'actions de la sélection
         $("#pi_act_periode").on("click", function() { Ouvrir_periode(); });
         $("#pi_act_modele").on("click", Ouvrir_modele);
+        $("#pi_act_lot").on("click", Ouvrir_lot);
         $("#pi_act_copier").on("click", Copier_selection);
         $("#pi_act_coller").on("click", Coller);
         $("#pi_act_effacer").on("click", Effacer_selection);

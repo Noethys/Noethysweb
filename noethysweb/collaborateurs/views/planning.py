@@ -79,6 +79,7 @@ def Get_donnees(request):
         "peut_regler_tous": utils_planning.Peut_regler_pour_tous(request.user),
         "affichage": affichage,
         "aujourdhui": str(datetime.date.today()),
+        "dates_session": request.session.get(CLE_SESSION_DATES, []),
     })
 
 
@@ -121,6 +122,17 @@ def Memoriser_affichage(request):
     except ValueError:
         return JsonResponse({"erreur": "Données incorrectes"}, status=400)
     utils_parametres.Set(nom="affichage", categorie=CATEGORIE_PARAMETRES, utilisateur=request.user, valeur=affichage)
+    return JsonResponse({"succes": True})
+
+
+CLE_SESSION_DATES = "planning_equipe_dates"
+
+
+@Verifie_permission
+def Memoriser_dates(request):
+    """ Mémorise les dates affichées pour la durée de la session de l'utilisateur (jusqu'à sa déconnexion) """
+    dates = [date for date in Get_liste_dates(request) if date][:400]
+    request.session[CLE_SESSION_DATES] = [str(date) for date in dates]
     return JsonResponse({"succes": True})
 
 

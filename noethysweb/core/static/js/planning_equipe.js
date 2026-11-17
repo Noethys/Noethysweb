@@ -85,7 +85,7 @@
         mode_collabs: "auto",       // collaborateurs affichés : "auto" (sous contrat ou avec évènements sur la période) ou "manuel" (liste fixe)
         groupes_auto: [], connus_avant: new Set(),
         info_actualisation: null,   // bandeau affiché après « Actualiser » (changements détectés)
-        filtres: {cats: new Set(), aff: null, qualif: null},
+        filtres: {cats: new Set(), aff: null, qualif: null, vides: false, jours_vides: false},
         plage: {auto: true, debut: 420, fin: 1140},
         panneau: "dates",          // section ouverte du panneau latéral (accordéon)
         bascules: new Map(),        // groupe -> déplié (true) / replié (false) choisi par l'utilisateur
@@ -571,7 +571,7 @@
             mode: V.mode, sous: V.sous, titres: V.titres, affs: V.affs, realise: V.realise, densite: V.densite, vue: V.vue,
             affiches: V.affiches, masques: Array.from(V.masques), pas: V.pas, cat_defaut: V.cat_defaut,
             mode_collabs: V.mode_collabs, groupes_auto: V.groupes_auto, connus: Array.from(S.collabs.keys()),
-            filtres: {cats: Array.from(V.filtres.cats), aff: V.filtres.aff, qualif: V.filtres.qualif},
+            filtres: {cats: Array.from(V.filtres.cats), aff: V.filtres.aff, qualif: V.filtres.qualif, vides: V.filtres.vides, jours_vides: V.filtres.jours_vides},
             plage: V.plage.auto ? {auto: true} : {auto: false, debut: V.plage.debut, fin: V.plage.fin},
             legende: V.legende, panneau: V.panneau
         };
@@ -599,6 +599,8 @@
             V.filtres.cats = new Set((a.filtres.cats || []).filter(function(id) { return S.cats.has(id); }));
             V.filtres.aff = S.affs.has(a.filtres.aff) ? a.filtres.aff : null;
             V.filtres.qualif = S.qualifs.some(function(q) { return q.id === a.filtres.qualif; }) ? a.filtres.qualif : null;
+            V.filtres.vides = a.filtres.vides === true;
+            V.filtres.jours_vides = a.filtres.jours_vides === true;
         }
         V.plage = {auto: R.plage_auto !== false, debut: R.plage_debut, fin: R.plage_fin};
         if (a.plage && a.plage.auto === false && a.plage.fin > a.plage.debut) { V.plage = {auto: false, debut: a.plage.debut, fin: a.plage.fin}; }
@@ -768,7 +770,34 @@
         var collabs = Collabs_visibles();
         var dates = V.dates;
         var lignes = [], groupes = [];
-        var nbre_lignes_estime = collabs.length * dates.length;
+
+        var groupes_def = V.mode === "date"
+            ? dates.map(function(j) { return {cle: "d" + j, jour: j, unites: collabs.map(function(c) { return {c: c, jour: j}; })}; })
+            : collabs.map(function(c) { return {cle: "c" + c, c: c, unites: dates.map(function(j) { return {c: c, jour: j}; })}; });
+
+        // Filtre « Masquer les lignes sans évènement » (évènements visibles : les filtres de catégorie et d'affectation s'appliquent)
+        M.lignes_masquees = 0;
+        if (V.filtres.vides) {
+            var Avec_evts = function(u) { return Evts_visibles(u.c, u.jour).length > 0; };
+            var Retirer_vides = function(g) {
+                var avant = g.unites.length;
+                g.unites = g.unites.filter(Avec_evts);
+                M.lignes_masquees += avant - g.unites.length;
+            };
+            if (V.mode === "date") {
+                // Par date : seuls les collaborateurs ayant des évènements ce jour-là (l'en-tête de la date est conservé)
+                groupes_def.forEach(Retirer_vides);
+            } else {
+                // Par collaborateur : retire ceux sans aucun évènement sur les dates affichées, et en option leurs jours vides
+                groupes_def = groupes_def.filter(function(g) {
+                    if (!g.unites.some(Avec_evts)) { M.lignes_masquees += g.unites.length; return false; }
+                    if (V.filtres.jours_vides) { Retirer_vides(g); }
+                    return true;
+                });
+            }
+        }
+
+        var nbre_lignes_estime = groupes_def.reduce(function(total, g) { return total + g.unites.length; }, 0);
         M.densite = Densite_effective(nbre_lignes_estime);
         var h_ligne = HAUTEURS[M.densite] + (M.etroit ? (M.densite === "confortable" ? 18 : 16) : 0);
         var top = 0;
@@ -778,10 +807,6 @@
             top += ligne.h;
             lignes.push(ligne);
         }
-
-        var groupes_def = V.mode === "date"
-            ? dates.map(function(j) { return {cle: "d" + j, jour: j, unites: collabs.map(function(c) { return {c: c, jour: j}; })}; })
-            : collabs.map(function(c) { return {cle: "c" + c, c: c, unites: dates.map(function(j) { return {c: c, jour: j}; })}; });
 
         groupes_def.forEach(function(g, index) {
             var total = 0, attendu = 0, absents = 0;
@@ -1014,7 +1039,7 @@
     }
 
     function Html_groupe(ligne, style) {
-        var sous = V.mode === "date" ? "· " + ligne.nbre + " collaborateur" + (ligne.nbre > 1 ? "s" : "") + " · " + Duree(ligne.total) : "· " + Duree(ligne.total) + " sur la sélection";
+        var sous = V.mode === "date" ? (ligne.nbre ? "· " + ligne.nbre + " collaborateur" + (ligne.nbre > 1 ? "s" : "") + " · " + Duree(ligne.total) : "· Aucun évènement ce jour") : "· " + Duree(ligne.total) + " sur la sélection";
         return "<div class='pl-l pl-l-groupe' style='" + style + "' data-index='" + ligne.index + "'>" +
             "<button type='button' class='pl-plier' data-action='plier' data-cle='" + ligne.cle + "' aria-expanded='true' aria-label='Replier'><i class='fa fa-chevron-down' aria-hidden='true'></i></button>" +
             Html_titre_groupe(ligne) + "<span class='pl-g-sous'>" + sous + "</span><div class='pl-g-droite'>" + Html_droite_groupe(ligne) + "</div></div>";
@@ -1067,6 +1092,7 @@
         $canvas.empty();
         M.rendues = new Map();
         var vide = !M.collabs.length ? "Aucun collaborateur affiché. Ajoutez des collaborateurs dans le panneau de gauche." : (!V.dates.length ? "Sélectionnez une ou plusieurs dates dans le calendrier." : "");
+        if (!vide && !M.groupes.length && V.filtres.vides) { vide = "Aucun évènement sur les dates affichées. Désactivez « Masquer les lignes sans évènement » dans les filtres pour voir les lignes vides."; }
         $("#pl_vide").prop("hidden", !vide).text(vide);
         Rendu_visible();
         Rendu_minimap();
@@ -1294,6 +1320,8 @@
         var options = "<option value=''>Toutes</option>";
         S.qualifs.forEach(function(q) { options += "<option value='" + q.id + "'" + (q.id === V.filtres.qualif ? " selected" : "") + ">" + Echapper(q.nom) + "</option>"; });
         $("#pl_filtre_qualif").html(options);
+        $("#pl_filtre_vides").prop("checked", V.filtres.vides);
+        $("#pl_filtre_jours_vides").prop("checked", V.filtres.jours_vides);
     }
 
     // ------------------------------------------------------------------ Accordéon du panneau latéral
@@ -1318,6 +1346,10 @@
             var q = S.qualifs.find(function(x) { return x.id === V.filtres.qualif; });
             parties.push("Qualification : " + (q ? q.nom : ""));
         }
+        if (V.filtres.vides) { nbre++; parties.push("Lignes sans évènement masquées"); }
+        var masquees = V.filtres.vides && V.vue === "frise" ? M.lignes_masquees || 0 : 0;
+        $("#pl_filtre_vides_info").text(masquees ? masquees + " ligne" + (masquees > 1 ? "s" : "") + " masquée" + (masquees > 1 ? "s" : "") : "Aucune ligne masquée").prop("hidden", !V.filtres.vides || V.vue !== "frise");
+        $("#pl_filtre_jours_vides_bloc").prop("hidden", !V.filtres.vides || V.mode !== "collab");
         $("#pl_acc_resume_filtres").text(parties.length ? parties.join(" · ") : "Aucun filtre");
         $("#pl_acc_badge_filtres").text(nbre).prop("hidden", !nbre);
     }
@@ -1507,11 +1539,14 @@
     }
 
     // ------------------------------------------------------------------ Dates
+    // Les dates affichées sont mémorisées dans la session de l'utilisateur (retrouvées à la prochaine ouverture du planning, jusqu'à la déconnexion)
+    var Memoriser_dates = Debounce(function() { Ajax(CFG.urls.dates, {dates: JSON.stringify(V.dates.map(Iso_jour))}); }, 600);
     function Changer_dates(jours) {
         var uniques = Array.from(new Set(jours)).sort(function(a, b) { return a - b; });
         if (uniques.length > 400) { toastr.warning("La sélection est limitée à 400 jours"); uniques = uniques.slice(0, 400); }
         var avant = V.dates.length;
         V.dates = uniques;
+        Memoriser_dates();
         V.bascules.clear();
         if (R.synthese_auto && R.synthese_mode === "basculer" && uniques.length > R.synthese_jours && avant <= R.synthese_jours) { V.vue = "synthese"; }
         Rendu_calendrier();
@@ -2473,7 +2508,9 @@
         });
         $("#pl_filtre_aff").on("change", function() { V.filtres.aff = this.value ? +this.value : null; Rafraichir_tout(); Memoriser_affichage(); });
         $("#pl_filtre_qualif").on("change", function() { V.filtres.qualif = this.value ? +this.value : null; Rafraichir_tout(); Memoriser_affichage(); });
-        $("#pl_filtres_reinit").on("click", function() { V.filtres = {cats: new Set(), aff: null, qualif: null}; Rendu_filtres(); Rafraichir_tout(); Memoriser_affichage(); });
+        $("#pl_filtre_vides").on("change", function() { V.filtres.vides = this.checked; Rafraichir_tout(); Memoriser_affichage(); });
+        $("#pl_filtre_jours_vides").on("change", function() { V.filtres.jours_vides = this.checked; Rafraichir_tout(); Memoriser_affichage(); });
+        $("#pl_filtres_reinit").on("click", function() { V.filtres = {cats: new Set(), aff: null, qualif: null, vides: false, jours_vides: false}; Rendu_filtres(); Rafraichir_tout(); Memoriser_affichage(); });
         $(".pl-acc-tete").on("click", function() {
             var code = this.getAttribute("data-panneau");
             V.panneau = V.panneau === code ? null : code;
@@ -3535,12 +3572,15 @@
             Brancher_modales();
             Rendu_collaborateurs();
             Rendu_filtres();
-            // Dates initiales : semaine en cours (du lundi au vendredi)
-            var lundi = Lundi(Aujourdhui());
-            var jours = [lundi, lundi + 1, lundi + 2, lundi + 3, lundi + 4];
-            var infos = Infos_jour(lundi);
+            // Dates initiales : celles mémorisées pendant la session, sinon la semaine en cours (du lundi au vendredi)
+            var jours = (data.dates_session || []).map(Parse_jour).filter(function(j) { return !isNaN(j); });
+            if (!jours.length) {
+                var lundi = Lundi(Aujourdhui());
+                jours = [lundi, lundi + 1, lundi + 2, lundi + 3, lundi + 4];
+            }
+            var infos = Infos_jour(jours[0]);
             V.mois_cal = {a: infos.a, m: infos.m};
-            V.ancre_cal = lundi;
+            V.ancre_cal = jours[0];
             Changer_dates(jours);
         }).fail(function(xhr) {
             $("#pl_statut").html("<span class='text-danger'>" + Echapper(Message_erreur(xhr, "Impossible de charger le planning")) + "</span>");

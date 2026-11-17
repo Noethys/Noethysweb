@@ -112,6 +112,7 @@ urlpatterns = [
     path('collaborateurs/planning_equipe/copier_periode', secure_ajax(planning.Copier_periode), name='ajax_planning_equipe_copier_periode'),
     path('collaborateurs/planning_equipe/enregistrer_note', secure_ajax(planning.Enregistrer_note), name='ajax_planning_equipe_enregistrer_note'),
     path('collaborateurs/planning_equipe/memoriser_affichage', secure_ajax(planning.Memoriser_affichage), name='ajax_planning_equipe_memoriser_affichage'),
+    path('collaborateurs/planning_equipe/memoriser_dates', secure_ajax(planning.Memoriser_dates), name='ajax_planning_equipe_memoriser_dates'),
     path('collaborateurs/planning_equipe/memoriser_reglages', secure_ajax(planning.Memoriser_reglages), name='ajax_planning_equipe_memoriser_reglages'),
     path('collaborateurs/planning_equipe/imprimer', secure_ajax(planning.Imprimer), name='ajax_planning_equipe_imprimer'),
     path('collaborateurs/planning_equipe/envoyer_emails', secure_ajax(planning.Envoyer_emails), name='ajax_planning_equipe_envoyer_emails'),
