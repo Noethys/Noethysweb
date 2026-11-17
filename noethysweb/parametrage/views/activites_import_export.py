@@ -182,38 +182,44 @@ def Importer(parametres):
                             correspondances.setdefault(objet_instance._meta.object_name, {})
                             correspondances[objet_instance._meta.object_name][objet_instance.pk] = nouvel_objet.pk
 
-                            # Duplication des champs manytomany
-                            for field in classe._meta.get_fields():
-                                if field.__class__.__name__ == "ManyToManyField":
-                                    getattr(nouvel_objet, field.name).set(getattr(objet_instance, field.name).all(), through_defaults=Get_correspondances(correspondances, objet_instance))
+                            # Mémorisation pour la duplication ultérieure des champs manytomany
+                            liste_manytomany.append((classe, nouvel_objet, instance.m2m_data))
                 if liste_ajouts:
                     classe.objects.bulk_create(liste_ajouts)
 
             # Duplications avec enregistrement à l'unité
+            liste_manytomany = []
             tables = [ResponsableActivite, Agrement, Groupe, Unite, Evenement, CategorieTarif, NomTarif, UniteRemplissage, Tarif, TarifLigne, PortailPeriode]
             for classe in tables:
                 Copie_classe(classe=classe)
+
+            # Duplication des champs manytomany à partir des données du fichier (et non de la base de destination)
+            noms_classes_dupliquees = [classe._meta.object_name for classe in tables]
+            for classe, nouvel_objet, m2m_data in liste_manytomany:
+                for field in classe._meta.many_to_many:
+                    anciens_pk = m2m_data.get(field.name, [])
+                    nom_classe_liee = field.related_model._meta.object_name
+                    if nom_classe_liee in noms_classes_dupliquees:
+                        # Objet propre à l'activité : on récupère le nouvel ID
+                        nouveaux_pk = [correspondances.get(nom_classe_liee, {}).get(pk) for pk in anciens_pk]
+                        getattr(nouvel_objet, field.name).set([pk for pk in nouveaux_pk if pk])
+                    else:
+                        # Objet commun (cotisations, caisses...) : conservé uniquement s'il existe dans la base
+                        getattr(nouvel_objet, field.name).set(field.related_model.objects.filter(pk__in=anciens_pk))
 
             # Duplications avec enregistrement groupé
             for classe in (Ouverture, Remplissage):
                 Copie_classe(classe=classe, bulk=True)
 
-            # Unite de remplissage
-            for instance in UniteRemplissage.objects.filter(activite=activite):
-                instance.unites.set(Unite.objects.filter(pk__in=[correspondances["Unite"][obj.pk] for obj in instance.unites.all()]))
-
-            # Tarif
-            for objet in Tarif.objects.filter(activite=activite):
-                objet.categories_tarifs.set(CategorieTarif.objects.filter(pk__in=[correspondances["CategorieTarif"][obj.pk] for obj in objet.categories_tarifs.all()]))
-                objet.groupes.set(Groupe.objects.filter(pk__in=[correspondances["Groupe"][obj.pk] for obj in objet.groupes.all()]))
-
-            # CombiTarif
-            for instance in CombiTarif.objects.filter(tarif_id__in=correspondances.get("Tarif", [])):
-                nouvel_objet = deepcopy(instance)
-                nouvel_objet.pk = None
-                nouvel_objet.tarif_id = correspondances["Tarif"][instance.tarif_id]
-                nouvel_objet.groupe_id = correspondances["Groupe"][instance.groupe_id] if instance.groupe_id else None
-                nouvel_objet.save()
-                nouvel_objet.unites.set(Unite.objects.filter(pk__in=[correspondances["Unite"][obj.pk] for obj in instance.unites.all()]))
+            # CombiTarif (lus dans le fichier)
+            for instance in dict_objets.get("CombiTarif", []):
+                objet_instance = instance.object
+                if objet_instance.tarif_id in correspondances.get("Tarif", {}):
+                    nouvel_objet = deepcopy(objet_instance)
+                    nouvel_objet.pk = None
+                    nouvel_objet.tarif_id = correspondances["Tarif"][objet_instance.tarif_id]
+                    nouvel_objet.groupe_id = correspondances.get("Groupe", {}).get(objet_instance.groupe_id) if objet_instance.groupe_id else None
+                    nouvel_objet.save()
+                    nouvel_objet.unites.set([correspondances["Unite"][pk] for pk in instance.m2m_data.get("unites", []) if pk in correspondances.get("Unite", {})])
 
     return {"resultat": "ok", "action": "IMPORTER"}
