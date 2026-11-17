@@ -82,6 +82,9 @@
     var V = {
         mode: "date", sous: "aucun", titres: true, affs: true, realise: false, densite: "auto", vue: "frise",
         affiches: [], masques: new Set(), dates: [], pas: 15, cat_defaut: null,
+        mode_collabs: "auto",       // collaborateurs affichés : "auto" (sous contrat ou avec évènements sur la période) ou "manuel" (liste fixe)
+        groupes_auto: [], connus_avant: new Set(),
+        info_actualisation: null,   // bandeau affiché après « Actualiser » (changements détectés)
         filtres: {cats: new Set(), aff: null, qualif: null},
         plage: {auto: true, debut: 420, fin: 1140},
         panneau: "dates",          // section ouverte du panneau latéral (accordéon)
@@ -110,10 +113,13 @@
         data.categories.forEach(function(c) { S.cats.set(c.id, c); });
         S.affs.clear(); S.affOrdre = [];
         data.affectations.forEach(function(a) { S.affs.set(a.id, a); S.affOrdre.push(a.id); });
+        // Lors d'une actualisation, chaque collaborateur garde la couleur d'avatar qu'il avait
+        var couleurs = new Map();
+        S.collabs.forEach(function(c) { couleurs.set(c.id, c.couleur); });
         S.collabs.clear();
         data.collaborateurs.forEach(function(c, index) {
             c.contrats = c.contrats.map(function(contrat) { return {d: Parse_jour(contrat.d), f: contrat.f ? Parse_jour(contrat.f) : null, h: contrat.h, j: contrat.j}; });
-            c.couleur = COULEURS_AVATAR[index % COULEURS_AVATAR.length];
+            c.couleur = couleurs.get(c.id) || COULEURS_AVATAR[index % COULEURS_AVATAR.length];
             c.libelle = c.nom + (c.prenom ? " " + c.prenom : "");
             S.collabs.set(c.id, c);
         });
@@ -338,9 +344,61 @@
     }
 
     function Actualiser() {
+        // Recharge les données de référence (collaborateurs, contrats, groupes, catégories...) puis les évènements.
         // Les identifiants restent valides : l'historique d'annulation est conservé
-        S.charges.clear();
-        Charger_jours(V.dates, true);
+        var avant = new Map();
+        S.collabs.forEach(function(c) { avant.set(c.id, {libelle: c.libelle, contrats: JSON.stringify(c.contrats)}); });
+        V.info_actualisation = null;
+        $("#pl_statut").html("<i class='fa fa-spinner fa-spin'></i>Actualisation…");
+        Ajax(CFG.urls.donnees).done(function(data) {
+            Charger_donnees_reference(data);
+            Nettoyer_affichage();
+            Rendu_collaborateurs();
+            Init_ajout_collabs();
+            Init_groupes_auto();
+            Rendu_filtres();
+            S.charges.clear();
+            Charger_jours(V.dates, true).done(function() { Bilan_actualisation(avant); });
+        }).fail(function(xhr) {
+            toastr.error(Message_erreur(xhr, "Impossible d'actualiser le planning"));
+            Statut();
+        });
+    }
+
+    function Nettoyer_affichage() {
+        // Retire de l'affichage ce qui n'existe plus après un rechargement des données de référence
+        V.affiches = V.affiches.filter(function(id) { return S.collabs.has(id); });
+        V.masques = new Set(Array.from(V.masques).filter(function(id) { return S.collabs.has(id); }));
+        var ids_groupes = new Set(S.groupes.map(function(g) { return g.id; }));
+        V.groupes_auto = V.groupes_auto.filter(function(id) { return ids_groupes.has(id); });
+        V.filtres.cats = new Set(Array.from(V.filtres.cats).filter(function(id) { return id === -1 || S.cats.has(id); }));
+        if (V.filtres.aff !== null && !S.affs.has(V.filtres.aff)) { V.filtres.aff = null; }
+        if (V.filtres.qualif !== null && !S.qualifs.some(function(q) { return q.id === V.filtres.qualif; })) { V.filtres.qualif = null; }
+        if (V.cat_defaut && !S.cats.has(V.cat_defaut)) { V.cat_defaut = null; }
+    }
+
+    function Bilan_actualisation(avant) {
+        var nouveaux = [], contrats = [];
+        S.collabs.forEach(function(c) {
+            if (!avant.has(c.id)) { nouveaux.push(c.id); }
+            else if (avant.get(c.id).contrats !== JSON.stringify(c.contrats)) { contrats.push(c.id); }
+        });
+        var Noms = function(ids) { return ids.map(function(id) { return "<strong>" + Echapper(S.collabs.get(id).libelle) + "</strong>"; }).join(", "); };
+        var affiches = new Set(V.affiches), parties = [], a_ajouter = [];
+        if (V.mode_collabs === "auto") {
+            var nouveaux_affiches = nouveaux.filter(function(id) { return affiches.has(id); });
+            if (nouveaux_affiches.length) { parties.push(nouveaux_affiches.length + " nouveau" + (nouveaux_affiches.length > 1 ? "x collaborateurs affichés" : " collaborateur affiché") + " : " + Noms(nouveaux_affiches)); }
+        } else {
+            // Mode manuel : on propose d'ajouter les collaborateurs (nouveaux ou dont le contrat a changé) concernés par la période
+            var concernes = new Set(Calculer_affiches_auto());
+            a_ajouter = nouveaux.concat(contrats).filter(function(id) { return concernes.has(id) && !affiches.has(id); });
+            if (a_ajouter.length) { parties.push((a_ajouter.length > 1 ? "Collaborateurs concernés par la période, non affichés : " : "Collaborateur concerné par la période, non affiché : ") + Noms(a_ajouter)); }
+        }
+        if (contrats.length) { parties.push(contrats.length + " contrat" + (contrats.length > 1 ? "s mis" : " mis") + " à jour (" + contrats.map(function(id) { return Echapper(S.collabs.get(id).libelle); }).join(", ") + ")"); }
+        var maintenant = new Date();
+        V.info_actualisation = parties.length ? {texte: parties.join(" · "), ajouts: a_ajouter} : null;
+        Rafraichir_tout();
+        toastr.success("Planning actualisé à " + Pad(maintenant.getHours()) + ":" + Pad(maintenant.getMinutes()));
     }
 
     // ------------------------------------------------------------------ Modifications, annulation et enregistrement
@@ -512,6 +570,7 @@
         var affichage = {
             mode: V.mode, sous: V.sous, titres: V.titres, affs: V.affs, realise: V.realise, densite: V.densite, vue: V.vue,
             affiches: V.affiches, masques: Array.from(V.masques), pas: V.pas, cat_defaut: V.cat_defaut,
+            mode_collabs: V.mode_collabs, groupes_auto: V.groupes_auto, connus: Array.from(S.collabs.keys()),
             filtres: {cats: Array.from(V.filtres.cats), aff: V.filtres.aff, qualif: V.filtres.qualif},
             plage: V.plage.auto ? {auto: true} : {auto: false, debut: V.plage.debut, fin: V.plage.fin},
             legende: V.legende, panneau: V.panneau
@@ -528,6 +587,12 @@
         if (a.vue === "frise" || a.vue === "synthese") { V.vue = a.vue; }
         if (Array.isArray(a.affiches)) { V.affiches = a.affiches.filter(function(id) { return S.collabs.has(id); }); }
         if (Array.isArray(a.masques)) { V.masques = new Set(a.masques.filter(function(id) { return S.collabs.has(id); })); }
+        // Sélection automatique par défaut, y compris pour les préférences enregistrées avant l'apparition de ce mode
+        V.mode_collabs = a.mode_collabs === "manuel" ? "manuel" : "auto";
+        var ids_groupes = new Set(S.groupes.map(function(g) { return g.id; }));
+        V.groupes_auto = Array.isArray(a.groupes_auto) ? a.groupes_auto.filter(function(id) { return ids_groupes.has(id); }) : [];
+        // Collaborateurs connus lors de la dernière visite (badge « Nouveau » pour les autres)
+        V.connus_avant = new Set(Array.isArray(a.connus) ? a.connus : Array.from(S.collabs.keys()));
         V.pas = [5, 10, 15, 30, 60].indexOf(a.pas) >= 0 ? a.pas : (R.pas || 15);
         if (a.cat_defaut && S.cats.has(a.cat_defaut)) { V.cat_defaut = a.cat_defaut; }
         if (a.filtres) {
@@ -540,7 +605,7 @@
         if (a.legende === "cat" || a.legende === "aff") { V.legende = a.legende; }
         if (["dates", "collabs", "filtres", "legende", null].indexOf(a.panneau) >= 0 && a.hasOwnProperty("panneau")) { V.panneau = a.panneau; }
 
-        if (!V.affiches.length) {
+        if (V.mode_collabs === "manuel" && !V.affiches.length) {
             // Par défaut : collaborateurs sous contrat aujourd'hui, sinon tous
             var jour = Aujourdhui();
             S.collabs.forEach(function(c) { if (Contrat_actif(c.id, jour)) { V.affiches.push(c.id); } });
@@ -556,6 +621,35 @@
     // ------------------------------------------------------------------ Modèle d'affichage
     var M = {lignes: [], hauteur: 0, groupes: [], plage: {debut: 420, fin: 1140}, densite: "confortable", largeur_piste: 600, rendues: new Map()};
     var $canvas, $scroll, $axe, $sticky, $minimap, $synthese;
+
+    function Calculer_affiches_auto() {
+        // Collaborateurs sous contrat sur la période affichée ou ayant des évènements sur l'une des dates affichées
+        if (!V.dates.length) { return []; }
+        var debut = V.dates[0], fin = V.dates[V.dates.length - 1], dates = new Set(V.dates), ids = new Set();
+        S.collabs.forEach(function(c) {
+            if (c.contrats.some(function(contrat) { return contrat.d <= fin && (contrat.f === null || contrat.f >= debut); })) { ids.add(c.id); }
+        });
+        S.evts.forEach(function(evt) {
+            if (ids.has(evt.c) || !S.collabs.has(evt.c)) { return; }
+            for (var j = Math.max(Jour_de(evt.s), debut), j2 = Math.min(Jour_de(evt.e - 1), fin); j <= j2; j++) {
+                if (dates.has(j)) { ids.add(evt.c); return; }
+            }
+        });
+        if (V.groupes_auto.length) {
+            ids.forEach(function(id) {
+                var c = S.collabs.get(id);
+                if (!V.groupes_auto.some(function(g) { return c.groupes.indexOf(g) >= 0; })) { ids.delete(id); }
+            });
+        }
+        return Array.from(ids);
+    }
+    function Maj_affiches_auto() {
+        if (V.mode_collabs !== "auto") { return; }
+        var liste = Calculer_affiches_auto();
+        var avant = V.affiches.slice().sort(function(a, b) { return a - b; }).join(","), apres = liste.slice().sort(function(a, b) { return a - b; }).join(",");
+        V.affiches = liste;
+        if (avant !== apres) { Rendu_collaborateurs(); }
+    }
 
     function Collabs_visibles() {
         return V.affiches.filter(function(id) {
@@ -1170,16 +1264,23 @@
     // ------------------------------------------------------------------ Collaborateurs et filtres
     function Rendu_collaborateurs() {
         var html = "";
+        var auto = V.mode_collabs === "auto";
         V.affiches.slice().sort(function(a, b) { return S.collabs.get(a).libelle.localeCompare(S.collabs.get(b).libelle); }).forEach(function(id) {
             var c = S.collabs.get(id), masque = V.masques.has(id);
             html += "<li class='" + (masque ? "masque" : "") + "'>" + Html_avatar(id, true) + "<span class='pl-collab-nom' title='" + Echapper(c.libelle + (c.poste ? " – " + c.poste : "")) + "'>" + Echapper(c.libelle) + "</span>" +
+                (V.connus_avant.has(id) ? "" : "<span class='pl-badge-nouveau' title='Nouveau depuis votre dernière visite'>Nouveau</span>") +
                 (c.modifiable ? "" : "<i class='fa fa-lock pl-muted' title='Lecture seule' aria-label='Lecture seule'></i>") +
                 "<button type='button' class='pl-mini-btn' data-collab-masquer='" + id + "' aria-label='" + (masque ? "Afficher " : "Masquer ") + Echapper(c.libelle) + "' title='" + (masque ? "Afficher" : "Masquer") + "'><i class='fa " + (masque ? "fa-eye-slash" : "fa-eye") + "'></i></button>" +
-                "<button type='button' class='pl-mini-btn' data-collab-retirer='" + id + "' aria-label='Retirer " + Echapper(c.libelle) + "' title='Retirer'><i class='fa fa-times'></i></button></li>";
+                (auto ? "" : "<button type='button' class='pl-mini-btn' data-collab-retirer='" + id + "' aria-label='Retirer " + Echapper(c.libelle) + "' title='Retirer'><i class='fa fa-times'></i></button>") + "</li>";
         });
-        $("#pl_collabs_liste").html(html || "<li class='pl-muted pl-petit'>Aucun collaborateur affiché.</li>");
-        var visibles = V.affiches.length - V.masques.size;
-        $("#pl_collabs_compte").text(visibles + " affiché" + (visibles > 1 ? "s" : "") + (V.masques.size ? " · " + V.masques.size + " masqué" + (V.masques.size > 1 ? "s" : "") : ""));
+        var vide = auto ? "Aucun collaborateur sous contrat ou avec des évènements sur la période." : "Aucun collaborateur affiché.";
+        $("#pl_collabs_liste").html(html || "<li class='pl-muted pl-petit'>" + vide + "</li>");
+        var masques = V.affiches.filter(function(id) { return V.masques.has(id); }).length, visibles = V.affiches.length - masques;
+        $("#pl_collabs_compte").text((auto ? "Automatique · " : "Manuel · ") + visibles + " affiché" + (visibles > 1 ? "s" : "") + (masques ? " · " + masques + " masqué" + (masques > 1 ? "s" : "") : ""));
+        $("[data-selection]").each(function() { this.setAttribute("aria-pressed", String(this.getAttribute("data-selection") === V.mode_collabs)); });
+        $("#pl_collabs_auto").prop("hidden", !auto);
+        $("#pl_collabs_manuel").prop("hidden", auto);
+        $("#pl_collabs_vider").prop("hidden", auto);
     }
 
     function Rendu_filtres() {
@@ -1256,7 +1357,12 @@
     }
 
     function Rendu_banniere() {
-        var messages = [];
+        var messages = [], info = V.info_actualisation;
+        if (info) {
+            messages.push("<i class='fa " + (info.ajouts.length ? "fa-user-plus" : "fa-refresh") + "' aria-hidden='true'></i><span><strong>Planning actualisé.</strong> " + info.texte + ".</span><span class='pl-espace'></span>" +
+                (info.ajouts.length ? "<button type='button' class='pl-btn' data-banniere='ajouter'>Ajouter à l'affichage</button><button type='button' class='pl-lien' data-banniere='fermer'>Ignorer</button>"
+                                    : "<button type='button' class='pl-lien' data-banniere='fermer'>OK</button>"));
+        }
         var n = V.dates.length;
         if (R.synthese_auto && n > R.synthese_jours && V.vue === "frise") {
             messages.push("<i class='fa fa-info-circle' aria-hidden='true'></i><span><strong>Très longue période :</strong> la vue synthèse est plus adaptée au-delà de " + R.synthese_jours + " jours.</span>" +
@@ -1373,6 +1479,7 @@
     }
 
     function Rafraichir_tout() {
+        Maj_affiches_auto();
         if (V.vue === "frise") {
             $("#pl_corps").prop("hidden", false);
             $synthese.prop("hidden", true).empty();
@@ -2029,7 +2136,9 @@
         if (V.mode === "date") {
             html += "<div class='pl-menu-titre'>" + Echapper(collab.libelle) + (collab.poste ? " · " + Echapper(collab.poste) : "") + "</div>";
             html += Item("masquer", "eye-slash", "Masquer ce collaborateur", "", {action: function() { V.masques.add(ligne.c); Apres_changement_collabs(); }});
-            html += Item("retirer", "times", "Retirer de l'affichage", "", {action: function() { V.affiches = V.affiches.filter(function(id) { return id !== ligne.c; }); Apres_changement_collabs(); }});
+            if (V.mode_collabs === "manuel") {
+                html += Item("retirer", "times", "Retirer de l'affichage", "", {action: function() { V.affiches = V.affiches.filter(function(id) { return id !== ligne.c; }); Apres_changement_collabs(); }});
+            }
         } else {
             html += "<div class='pl-menu-titre'>" + Echapper(Texte_jour_long(ligne.jour)) + "</div>";
             html += Item("note", "sticky-note-o", "Note de la journée…", "", {action: function() { Ouvrir_note(ligne.jour); }});
@@ -2141,6 +2250,14 @@
         Init_ajout_collabs();
         Rafraichir_tout();
         Memoriser_affichage();
+    }
+
+    function Init_groupes_auto() {
+        var $select = $("#pl_collabs_groupes");
+        if ($select.data("select2")) { $select.select2("destroy"); }
+        $select.empty();
+        S.groupes.forEach(function(g) { $select.append(new Option(g.nom, g.id, false, V.groupes_auto.indexOf(g.id) >= 0)); });
+        $select.select2({placeholder: S.groupes.length ? "Tous les groupes" : "Aucun groupe paramétré", language: "fr", width: "100%", theme: "bootstrap4", disabled: !S.groupes.length});
     }
 
     function Init_ajout_collabs() {
@@ -2312,6 +2429,20 @@
 
         // Collaborateurs
         Init_ajout_collabs();
+        Init_groupes_auto();
+        $("[data-selection]").on("click", function() {
+            var mode = this.getAttribute("data-selection");
+            if (mode === V.mode_collabs) { return; }
+            V.mode_collabs = mode;
+            // En passant en manuel, la liste calculée actuelle devient le point de départ de la liste fixe
+            if (mode === "auto") { V.affiches = Calculer_affiches_auto(); }
+            Apres_changement_collabs();
+        });
+        $("#pl_collabs_groupes").on("change", function() {
+            V.groupes_auto = ($(this).val() || []).map(Number);
+            V.affiches = Calculer_affiches_auto();
+            Apres_changement_collabs();
+        });
         $("#pl_collabs_ajout").on("select2:select", function(e) {
             var valeur = e.params.data.id, ajouts = [];
             if (valeur === "tous") { S.collabs.forEach(function(c) { ajouts.push(c.id); }); }
@@ -2424,6 +2555,13 @@
             var action = this.getAttribute("data-banniere");
             if (action === "synthese") { V.vue = "synthese"; Memoriser_affichage(); }
             if (action === "deplier" || action === "replier") { M.groupes.forEach(function(g) { V.bascules.set(g.cle, action === "deplier"); }); }
+            if (action === "ajouter" && V.info_actualisation) {
+                V.info_actualisation.ajouts.forEach(function(id) { if (V.affiches.indexOf(id) < 0) { V.affiches.push(id); } V.masques.delete(id); });
+                V.info_actualisation = null;
+                Apres_changement_collabs();
+                return;
+            }
+            if (action === "fermer") { V.info_actualisation = null; }
             Rafraichir_tout();
         });
 
@@ -3285,6 +3423,8 @@
         Ajax(CFG.urls.donnees).done(function(data) {
             Charger_donnees_reference(data);
             Restaurer_affichage(data.affichage);
+            // Mémorise les collaborateurs connus pour que le badge « Nouveau » ne s'affiche qu'une fois
+            if (Array.from(S.collabs.keys()).some(function(id) { return !V.connus_avant.has(id); })) { Memoriser_affichage(); }
             Brancher_evenements();
             Brancher_modales();
             Rendu_collaborateurs();

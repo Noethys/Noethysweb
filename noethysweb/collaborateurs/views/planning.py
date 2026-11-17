@@ -46,16 +46,17 @@ def Get_liste_dates(request, nom="dates"):
 def Get_donnees(request):
     """ Données de référence du planning """
     ids_modifiables = utils_planning.Get_ids_modifiables(request.user)
+    ids_visibles = utils_planning.Get_ids_visibles(request.user)
 
     contrats = {}
-    for contrat in ContratCollaborateur.objects.all().order_by("date_debut"):
+    for contrat in ContratCollaborateur.objects.filter(collaborateur_id__in=ids_visibles).order_by("date_debut"):
         contrats.setdefault(contrat.collaborateur_id, []).append({"d": str(contrat.date_debut), "f": str(contrat.date_fin) if contrat.date_fin else None,
                                                                   "h": float(contrat.heures_hebdo) if contrat.heures_hebdo else None,
                                                                   "j": list(utils_planning.Lire_jours_travailles(contrat.jours_travailles))})
-    postes = {contrat.collaborateur_id: contrat.type_poste.nom for contrat in ContratCollaborateur.objects.select_related("type_poste").order_by("date_debut")}
+    postes = {contrat.collaborateur_id: contrat.type_poste.nom for contrat in ContratCollaborateur.objects.select_related("type_poste").filter(collaborateur_id__in=ids_visibles).order_by("date_debut")}
 
     collaborateurs = []
-    for collaborateur in Collaborateur.objects.prefetch_related("groupes", "qualifications").order_by("nom", "prenom"):
+    for collaborateur in Collaborateur.objects.prefetch_related("groupes", "qualifications").filter(pk__in=ids_visibles).order_by("nom", "prenom"):
         collaborateurs.append({
             "id": collaborateur.pk, "nom": collaborateur.nom, "prenom": collaborateur.prenom or "", "poste": postes.get(collaborateur.pk, ""),
             "groupes": [groupe.pk for groupe in collaborateur.groupes.all()], "qualifications": [qualification.pk for qualification in collaborateur.qualifications.all()],
@@ -86,7 +87,7 @@ def Get_evenements(request):
     date_fin = Parse_date(request.POST["date_fin"])
     if not date_debut or not date_fin or date_fin < date_debut or (date_fin - date_debut).days > 400:
         return JsonResponse({"erreur": "Période incorrecte"}, status=400)
-    collaborateurs = None if request.POST.get("collaborateurs", "tous") == "tous" else Get_liste_ids(request)
+    collaborateurs = utils_planning.Filtrer_ids_visibles(request.user, None if request.POST.get("collaborateurs", "tous") == "tous" else Get_liste_ids(request))
     evenements = [utils_planning.Serialiser_evenement(evenement) for evenement in utils_planning.Get_evenements(date_debut, date_fin, collaborateurs)]
     notes = [{"date": str(note.date), "aff": note.affectation_id, "texte": note.texte} for note in NotePlanningCollaborateur.objects.filter(date__gte=date_debut, date__lte=date_fin)]
     resultat = {"evenements": evenements, "notes": notes, "remplissages": utils_planning.Get_remplissages(date_debut, date_fin),
@@ -102,10 +103,11 @@ def Get_anomalies(request):
     date_fin = Parse_date(request.POST.get("date_fin"))
     if not date_debut or not date_fin or date_fin < date_debut or (date_fin - date_debut).days > 400:
         return JsonResponse({"erreur": "Période incorrecte"}, status=400)
-    collaborateurs = None if request.POST.get("collaborateurs", "tous") == "tous" else Get_liste_ids(request)
+    collaborateurs = utils_planning.Filtrer_ids_visibles(request.user, None if request.POST.get("collaborateurs", "tous") == "tous" else Get_liste_ids(request))
     simulation = utils_controle_reglementaire.Lire_simulation(request.POST.get("simulation"))
     if simulation is None:
         return JsonResponse({"erreur": "Données incorrectes"}, status=400)
+    simulation = [evt for evt in simulation if evt["c"] in collaborateurs]
     anomalies = utils_controle_reglementaire.Get_anomalies(date_debut=date_debut, date_fin=date_fin, collaborateurs=collaborateurs,
                                                            simulation=simulation, supprimes=Get_liste_ids(request, "supprimes"))
     return JsonResponse({"anomalies": anomalies})
@@ -171,7 +173,7 @@ def Enregistrer(request):
 @Verifie_permission
 def Appliquer_modele(request):
     modeles = Get_liste_ids(request, "modeles")
-    collaborateurs = Get_liste_ids(request)
+    collaborateurs = utils_planning.Filtrer_ids_visibles(request.user, Get_liste_ids(request))
     dates = Get_liste_dates(request)
     if not modeles or not collaborateurs or not dates:
         return JsonResponse({"erreur": "Sélectionnez au moins un modèle, un collaborateur et une date"}, status=400)
@@ -198,7 +200,7 @@ def Copier_periode(request):
     source_debut = Parse_date(request.POST.get("source_debut"))
     source_fin = Parse_date(request.POST.get("source_fin"))
     destination_debut = Parse_date(request.POST.get("destination_debut"))
-    collaborateurs = Get_liste_ids(request)
+    collaborateurs = utils_planning.Filtrer_ids_visibles(request.user, Get_liste_ids(request))
     if not source_debut or not source_fin or not destination_debut or source_fin < source_debut or not collaborateurs:
         return JsonResponse({"erreur": "Paramètres de copie incorrects"}, status=400)
     if (source_fin - source_debut).days > 92:
@@ -237,7 +239,7 @@ def Enregistrer_note(request):
 
 def Get_parametres_edition(request):
     dates = Get_liste_dates(request)
-    collaborateurs = Get_liste_ids(request)
+    collaborateurs = utils_planning.Filtrer_ids_visibles(request.user, Get_liste_ids(request))
     if not dates or not collaborateurs:
         return None
     from collaborateurs.utils.utils_impression_planning import TYPES_DOCUMENTS

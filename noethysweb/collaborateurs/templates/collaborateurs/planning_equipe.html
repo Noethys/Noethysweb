@@ -54,12 +54,24 @@
                         </button>
                     </h2>
                     <div class="pl-acc-corps" id="pl_acc_corps_collabs" role="region" aria-labelledby="pl_acc_tete_collabs" hidden>
-                        <label for="pl_collabs_ajout" class="sr-only">Ajouter un collaborateur ou un groupe</label>
-                        <select id="pl_collabs_ajout" style="width: 100%;"></select>
+                        <div class="pl-seg pl-seg-plein" role="group" aria-label="Mode de sélection des collaborateurs">
+                            <button type="button" class="pl-seg-btn" data-selection="auto" aria-pressed="true"><i class="fa fa-magic" aria-hidden="true"></i> Automatique</button>
+                            <button type="button" class="pl-seg-btn" data-selection="manuel" aria-pressed="false"><i class="fa fa-hand-pointer-o" aria-hidden="true"></i> Manuel</button>
+                        </div>
+                        <div id="pl_collabs_auto">
+                            <p class="pl-collabs-aide">Collaborateurs <strong>sous contrat</strong> ou <strong>ayant des évènements</strong> sur la période affichée. La liste se met à jour quand vous changez de dates.</p>
+                            <label for="pl_collabs_groupes" class="pl-label">Limiter aux groupes</label>
+                            <select id="pl_collabs_groupes" multiple style="width: 100%;"></select>
+                        </div>
+                        <div id="pl_collabs_manuel" hidden>
+                            <p class="pl-collabs-aide">Liste fixe : les nouveaux collaborateurs ne sont pas ajoutés automatiquement.</p>
+                            <label for="pl_collabs_ajout" class="sr-only">Ajouter un collaborateur ou un groupe</label>
+                            <select id="pl_collabs_ajout" style="width: 100%;"></select>
+                        </div>
                         <ul id="pl_collabs_liste" class="pl-collabs-liste"></ul>
                         <div class="pl-ligne-actions">
                             <button type="button" class="pl-lien" id="pl_collabs_tout_afficher">Tout afficher</button>
-                            <button type="button" class="pl-lien" id="pl_collabs_vider">Tout retirer</button>
+                            <button type="button" class="pl-lien" id="pl_collabs_vider" hidden>Tout retirer</button>
                         </div>
                     </div>
                 </section>

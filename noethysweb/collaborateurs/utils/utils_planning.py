@@ -45,11 +45,23 @@ def Format_datetime(valeur):
 # ------------------------------------------------- Droits -------------------------------------------------
 
 def Get_ids_modifiables(user=None):
-    """ Collaborateurs dont l'utilisateur peut modifier le planning : ceux des groupes qu'il supervise ou des groupes sans superviseur """
-    if user.is_superuser:
-        return set(Collaborateur.objects.values_list("pk", flat=True))
+    """ Collaborateurs dont l'utilisateur peut modifier le planning : ceux des groupes qu'il supervise ou des groupes sans superviseur.
+        Pas d'exception pour les superutilisateurs : ils sont limités à leur périmètre, comme dans la liste des collaborateurs. """
     conditions = Q(groupes__superviseurs=user) | Q(groupes__superviseurs__isnull=True)
     return set(Collaborateur.objects.filter(conditions).values_list("pk", flat=True).distinct())
+
+
+def Get_ids_visibles(user=None):
+    """ Collaborateurs dont l'utilisateur peut consulter le planning (mêmes règles que pour la modification) """
+    return Get_ids_modifiables(user)
+
+
+def Filtrer_ids_visibles(user=None, ids=None):
+    """ Restreint une liste d'IDs aux collaborateurs visibles. ids=None : tous les collaborateurs visibles """
+    visibles = Get_ids_visibles(user)
+    if ids is None:
+        return sorted(visibles)
+    return [idcollaborateur for idcollaborateur in ids if idcollaborateur in visibles]
 
 
 def Peut_regler_pour_tous(user=None):

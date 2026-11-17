@@ -170,6 +170,7 @@
 /* Bannière */
 .pl-banniere {display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 10px 14px 0; padding: 8px 12px; border-radius: 8px; background: rgba(var(--pl-primaire-rgb), 0.09); font-size: 13px;}
 .pl-banniere .pl-espace {min-width: 10px;}
+.pl-banniere .pl-btn {height: 28px;}
 
 /* ---------------- Calendrier ---------------- */
 .pl-cal-nav {display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;}
@@ -198,6 +199,9 @@
 .pl-collabs-liste li {display: flex; align-items: center; gap: 8px; padding: 4px 0;}
 .pl-collabs-liste li.masque {opacity: 0.5;}
 .pl-collabs-liste li.masque .pl-collab-nom {text-decoration: line-through;}
+.pl-collabs-aide {margin: 0 0 8px; font-size: 12px; line-height: 1.4; color: var(--pl-muted);}
+.pl-badge-nouveau {height: 18px; padding: 0 6px; border-radius: 5px; background: #dcfce7; color: #166534; font-size: 10px; font-weight: 800; display: inline-flex; align-items: center; flex-shrink: 0;}
+.dark-mode .pl-badge-nouveau {background: #14532d; color: #bbf7d0;}
 .pl-collab-nom {flex: 1 1 0; font-size: 13px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
 .pl-mini-btn {width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: var(--pl-muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;}
 .pl-mini-btn:hover {background: var(--pl-fond-groupe); color: var(--pl-texte);}
@@ -534,8 +538,6 @@
 .pl-anom-badge:hover {background: #fde68a;}
 .pl-anom-badge:focus-visible {outline: 2px solid #b45309; outline-offset: 1px;}
 .pl-lbl-ligne .pl-anom-badge {margin-left: 4px;}
-.pl-barre.anomalie {outline: 2px dashed #d97706; outline-offset: 1px;}
-.pl-barre.anomalie.sel {outline: 2px solid #0b1220;}
 .pl-btn-anomalies {background: #fef3c7; border-color: #fcd34d; color: #92400e; font-weight: 600;}
 .pl-btn-anomalies:hover:not(:disabled) {background: #fde68a;}
 .pl-evt-regles:not([hidden]) {display: flex; gap: 8px; align-items: flex-start; margin-top: 8px;}
