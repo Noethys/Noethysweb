@@ -21,6 +21,7 @@ CATEGORIES = [
     ("rappel_pieces_manquantes", "Rappel pièces manquantes"),
     ("rappel_vaccinations_manquantes", "Rappel vaccinations manquantes"),
     ("rappel_pieces_collaborateurs", "Rappel pièces manquantes des collaborateurs"),
+    ("collaborateur_agenda_ical", "Lien de l'agenda iCal d'un collaborateur"),
     ("portail", "Rappel des données du compte internet"),
     ("portail_demande_inscription", "Portail - Demande d'une inscription"),
     ("portail_demande_reservation", "Portail - Demande d'une réservation"),
@@ -181,6 +182,15 @@ MOTSCLES = {
         ("{COLLABORATEUR_NOM}", "Nom du collaborateur"),
         ("{COLLABORATEUR_PRENOM}", "Prénom du collaborateur"),
         ("{LISTE_PIECES_MANQUANTES}", "Liste des pièces manquantes"),
+    ],
+
+    "collaborateur_agenda_ical": [
+        ("{COLLABORATEUR_CIVILITE}", "Civilité du collaborateur"),
+        ("{COLLABORATEUR_NOM}", "Nom du collaborateur"),
+        ("{COLLABORATEUR_PRENOM}", "Prénom du collaborateur"),
+        ("{LIEN_ICAL}", "Lien de l'agenda iCal (adresse cliquable)"),
+        ("{URL_ICAL}", "Adresse de l'agenda iCal (texte brut)"),
+        ("{CONTENU_AGENDA}", "Données intégrées à l'agenda"),
     ],
 
     "rappel_vaccinations_manquantes": [

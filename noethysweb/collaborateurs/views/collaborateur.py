@@ -188,8 +188,8 @@ class Onglet(CustomView):
         return context
 
     def Onglet_autorise(self, code="", modification=False):
-        if code == "planning":
-            # Le planning individuel dépend des permissions du planning (individuel ou général)
+        if code in ("planning", "agenda"):
+            # Le planning individuel et l'agenda iCal dépendent des permissions du planning (individuel ou général)
             return self.request.user.has_perm("core.planning_individuel") or self.request.user.has_perm("core.planning_equipe")
         if code == "conges":
             # Les congés dépendent des permissions des demandes d'absence et des compteurs de congés

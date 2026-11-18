@@ -1481,7 +1481,6 @@
     function Ouvrir_diffusion(action) {
         if (!S.charge) { return; }
         if (action === "ecran") { window.print(); return; }
-        if (action === "ical") { Ouvrir_ical(); return; }
         Diff_action = action;
         Fermer_jour(); Fermer_menu();
         $("#pi_diff_titre").text(DIFF_TITRES[action] + " · " + S.collab.nom + " " + S.collab.prenom);
@@ -1541,18 +1540,6 @@
             if (Diff_action === "excel" || Diff_action === "email") { window.location = data.url; }
         }).fail(function(xhr) { toastr.error(Message_erreur(xhr)); })
           .always(function() { $bouton.prop("disabled", false).html("<i class='fa fa-check margin-r-5'></i>Valider"); });
-    }
-    function Ouvrir_ical() {
-        $("#pi_ical_intro").text("Abonnez l'agenda de " + S.collab.nom + " " + S.collab.prenom + " (Google Agenda, Outlook, téléphone…) avec ce lien. Les évènements s'y mettent à jour automatiquement.");
-        Action_ical("obtenir", true);
-    }
-    function Action_ical(action, ouvrir) {
-        Ajax(CFG.urls.ical, {idcollaborateur: CFG.idcollaborateur, action: action}).done(function(data) {
-            if (!data.url) { $("#pi_modal_ical").modal("hide"); toastr.success("Le lien d'agenda a été désactivé"); return; }
-            $("#pi_ical_url").val(data.url);
-            if (ouvrir) { $("#pi_modal_ical").modal("show"); }
-            if (action === "regenerer") { toastr.success("Nouveau lien généré : l'ancien ne fonctionne plus"); }
-        }).fail(function(xhr) { toastr.error(Message_erreur(xhr)); });
     }
 
     // ------------------------------------------------------------------ Navigation
@@ -1735,13 +1722,6 @@
         $("#pi_modal_diffusion").on("focus", ".pl-inline-champs select", function() { $("input[name='pi_diff_portee'][value='mois']").prop("checked", true); Maj_diffusion(); });
         $("#pi_modal_diffusion").on("dblclick", ".pl-type-doc", Valider_diffusion);
         $("#pi_diff_valider").on("click", Valider_diffusion);
-        $("#pi_ical_copier").on("click", function() {
-            var champ = document.getElementById("pi_ical_url");
-            champ.select();
-            if (navigator.clipboard) { navigator.clipboard.writeText(champ.value).then(function() { toastr.success("Lien copié"); }); } else { document.execCommand("copy"); toastr.success("Lien copié"); }
-        });
-        $("#pi_ical_regenerer").on("click", function() { Action_ical("regenerer"); });
-        $("#pi_ical_revoquer").on("click", function() { Action_ical("revoquer"); });
         $("#pi_parametres_btn").on("click", Ouvrir_parametres);
 
         // Barre d'actions de la sélection

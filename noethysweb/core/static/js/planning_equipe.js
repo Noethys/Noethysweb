@@ -2180,8 +2180,7 @@
             html += Item("seule", "calendar-o", "Afficher uniquement cette date", "", {action: function() { Changer_dates([ligne.jour]); }});
         }
         html += Item("ligne", "arrows-h", "Sélectionner toute la ligne", "", {action: function() { Selectionner_ligne(ligne); }});
-        html += SEP + Item("ical", "calendar", "Lien d'agenda en ligne (iCal)…", "", {desactive: !collab.modifiable, action: function() { Ouvrir_ical(ligne.c); }});
-        html += Item("fiche", "user", "Ouvrir la fiche du collaborateur", "", {action: function() { window.open(CFG.url_fiche.replace(/0$/, String(ligne.c)), "_blank"); }});
+        html += SEP + Item("fiche", "user", "Ouvrir la fiche du collaborateur", "", {action: function() { window.open(CFG.url_fiche.replace(/0$/, String(ligne.c)), "_blank"); }});
         if (CFG.url_planning_individuel) { html += Item("planning_individuel", "calendar-check-o", "Ouvrir le planning individuel", "", {action: function() { window.location.href = CFG.url_planning_individuel + "?idcollaborateur=" + ligne.c; }}); }
         Ouvrir_menu(x, y, html);
     }
@@ -3290,22 +3289,6 @@
         });
     }
 
-    // ------------------------------------------------------------------ Lien iCal
-    var Ical_collab = null;
-    function Ouvrir_ical(c) {
-        Ical_collab = c;
-        $("#pl_ical_intro").text("Abonnez l'agenda de " + S.collabs.get(c).libelle + " (Google Agenda, Outlook, téléphone…) avec ce lien. Les évènements s'y mettent à jour automatiquement.");
-        Action_ical("obtenir", true);
-    }
-    function Action_ical(action, ouvrir) {
-        Ajax(CFG.urls.ical, {idcollaborateur: Ical_collab, action: action}).done(function(data) {
-            if (!data.url) { $("#pl_modal_ical").modal("hide"); toastr.success("Le lien d'agenda a été désactivé"); return; }
-            $("#pl_ical_url").val(data.url);
-            if (ouvrir) { $("#pl_modal_ical").modal("show"); }
-            if (action === "regenerer") { toastr.success("Nouveau lien généré : l'ancien ne fonctionne plus"); }
-        }).fail(function(xhr) { toastr.error(Message_erreur(xhr)); });
-    }
-
     // ------------------------------------------------------------------ Réglages
     var Reglages_portee = "utilisateur";
     function Ouvrir_reglages() {
@@ -3528,14 +3511,6 @@
             if (this.checked) { Email.decoches.delete(id); } else { Email.decoches.add(id); }
             Maj_compteur_email();
         });
-
-        $("#pl_ical_copier").on("click", function() {
-            var champ = document.getElementById("pl_ical_url");
-            champ.select();
-            (navigator.clipboard ? navigator.clipboard.writeText(champ.value) : $.Deferred().resolve(document.execCommand("copy"))).then(function() { toastr.success("Lien copié"); });
-        });
-        $("#pl_ical_regenerer").on("click", function() { Action_ical("regenerer", false); });
-        $("#pl_ical_revoquer").on("click", function() { Action_ical("revoquer", false); });
 
         $("[data-portee]").on("click", function() {
             Reglages_portee = this.getAttribute("data-portee");

@@ -12,13 +12,14 @@ LISTE_ONGLETS = [
     {"code": "qualifications", "label": "Qualifications", "icone": "fa-graduation-cap", "url": "collaborateur_qualifications"},
     {"code": "pieces", "label": "Pièces", "icone": "fa-file-text-o", "url": "collaborateur_pieces_liste"},
     {"code": "espace", "label": "Espace collaborateur", "icone": "fa-globe", "url": "collaborateur_espace"},
+    {"code": "agenda", "label": "Agenda iCal", "icone": "fa-calendar-plus-o", "url": "collaborateur_agenda"},
     {"code": "outils", "label": "Outils", "icone": "fa-wrench", "url": "collaborateur_outils"},
     {"code": "contrats", "label": "Contrats", "icone": "fa-edit", "url": "collaborateur_contrats_liste"},
     {"code": "evenements", "label": "Evènements", "icone": "fa-calendar", "url": "collaborateur_evenements_liste"},
     {"code": "conges", "label": "Congés", "icone": "fa-plane", "url": "collaborateur_conges"},
     {"code": "planning", "label": "Planning", "icone": "fa-calendar-o", "url": "collaborateur_planning"},
 ]
-ONGLETS_SANS_PERMISSION = ("planning", "conges")       # Ces onglets dépendent des permissions du planning et des congés
+ONGLETS_SANS_PERMISSION = ("planning", "agenda", "conges")       # Ces onglets dépendent des permissions du planning et des congés
 ONGLETS_SANS_MODIFICATION = ("resume", "outils")
 
 

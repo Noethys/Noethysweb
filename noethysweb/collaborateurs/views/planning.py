@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, datetime, json, secrets
+import logging, datetime, json
 logger = logging.getLogger(__name__)
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden, Http404
 from django.views.generic import TemplateView
@@ -395,24 +395,6 @@ def Exporter_recapitulatif(request):
     return JsonResponse({"url": url})
 
 
-@Verifie_permission
-def Get_lien_ical(request):
-    collaborateur = Collaborateur.objects.filter(pk=int(request.POST.get("idcollaborateur", 0))).first()
-    if not collaborateur:
-        return JsonResponse({"erreur": "Collaborateur introuvable"}, status=404)
-    if collaborateur.pk not in utils_planning.Get_ids_modifiables(request.user):
-        return JsonResponse({"erreur": "Vous n'avez pas l'autorisation de gérer le planning de ce collaborateur"}, status=403)
-    if request.POST.get("action") == "revoquer":
-        collaborateur.token_ical = None
-        collaborateur.save(update_fields=["token_ical"])
-        return JsonResponse({"url": None})
-    if not collaborateur.token_ical or request.POST.get("action") == "regenerer":
-        collaborateur.token_ical = secrets.token_urlsafe(32)
-        collaborateur.save(update_fields=["token_ical"])
-    url = request.build_absolute_uri(reverse("planning_equipe_ical", kwargs={"token": collaborateur.token_ical}))
-    return JsonResponse({"url": url})
-
-
 def Ical(request, token=""):
     """ Agenda iCal d'un collaborateur, accessible sans authentification par son lien secret """
     if not token or len(token) < 20:
@@ -420,6 +402,10 @@ def Ical(request, token=""):
     collaborateur = Collaborateur.objects.filter(token_ical=token).first()
     if not collaborateur:
         raise Http404
+    # Date du dernier accès (affichée dans la fiche collaborateur), mémorisée au plus toutes les 10 minutes
+    maintenant = datetime.datetime.now()
+    if not collaborateur.ical_dernier_acces or collaborateur.ical_dernier_acces < maintenant - datetime.timedelta(minutes=10):
+        Collaborateur.objects.filter(pk=collaborateur.pk).update(ical_dernier_acces=maintenant)
     from collaborateurs.utils import utils_export_planning
     contenu = utils_export_planning.Generer_ical(collaborateur)
     reponse = HttpResponse(contenu, content_type="text/calendar; charset=utf-8")

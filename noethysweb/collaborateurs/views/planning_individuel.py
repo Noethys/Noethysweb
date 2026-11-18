@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import logging, datetime, json, decimal, secrets, calendar
+import logging, datetime, json, decimal, calendar
 logger = logging.getLogger(__name__)
 from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
@@ -620,20 +620,3 @@ def Exporter_excel(request):
         return JsonResponse({"url": utils_export_planning.Exporter(dates=parametres["dates"], collaborateurs=[collaborateur.pk])})
     periode = Get_periode_demandee(request, collaborateur.pk, utils_objectif.Get_parametres())
     return JsonResponse({"url": utils_export_planning.Exporter_bilan(collaborateur=collaborateur, periode=periode)})
-
-
-@Verifie_permission
-def Get_lien_ical(request):
-    """ Lien secret de l'agenda iCal du collaborateur (mêmes règles que le planning général) """
-    collaborateur = Get_collaborateur(request, modifiable=True)
-    if not collaborateur:
-        return JsonResponse({"erreur": "Vous n'avez pas l'autorisation de gérer l'agenda de ce collaborateur"}, status=403)
-    action = request.POST.get("action")
-    if action == "revoquer":
-        collaborateur.token_ical = None
-        collaborateur.save(update_fields=["token_ical"])
-        return JsonResponse({"url": None})
-    if not collaborateur.token_ical or action == "regenerer":
-        collaborateur.token_ical = secrets.token_urlsafe(32)
-        collaborateur.save(update_fields=["token_ical"])
-    return JsonResponse({"url": request.build_absolute_uri(reverse("planning_equipe_ical", kwargs={"token": collaborateur.token_ical}))})

@@ -160,15 +160,36 @@ def Plier_ligne_ical(ligne=""):
 
 
 def Generer_ical(collaborateur=None):
-    """ Contenu iCalendar des évènements d'un collaborateur (60 jours passés, 365 jours à venir) """
+    """ Contenu iCalendar des évènements d'un collaborateur (60 jours passés, 365 jours à venir), selon les données choisies
+        dans la rubrique Agenda iCal de sa fiche : affectation, absences, notes de journée, lieu """
+    from core.models import TypeCongeCollaborateur, NotePlanningCollaborateur
     categories = {categorie.pk: categorie for categorie in TypeEvenementCollaborateur.objects.all()}
+    categories_absences = set(TypeCongeCollaborateur.objects.values_list("categorie_id", flat=True))
     arbre = Arbre()
     aujourdhui = datetime.date.today()
+    date_debut, date_fin = aujourdhui - datetime.timedelta(days=60), aujourdhui + datetime.timedelta(days=365)
     maintenant = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     fuseau = settings.TIME_ZONE
+
+    # Affectation choisie : elle-même et ses sous-affectations
+    affectations = None
+    nom_agenda = "Planning - %s" % collaborateur.Get_nom()
+    if collaborateur.ical_affectation_id and collaborateur.ical_affectation_id in arbre.affectations:
+        affectations = {collaborateur.ical_affectation_id} | set(arbre.Get_descendants(collaborateur.ical_affectation_id))
+        nom_agenda += " - %s" % arbre.Get_chemin(collaborateur.ical_affectation_id)
+
     lignes = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Noethysweb//Planning des collaborateurs//FR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
-              "X-WR-CALNAME:%s" % Echapper_ical("Planning - %s" % collaborateur.Get_nom()), "X-WR-TIMEZONE:%s" % fuseau]
-    for evenement in utils_planning.Get_evenements(aujourdhui - datetime.timedelta(days=60), aujourdhui + datetime.timedelta(days=365), [collaborateur.pk]):
+              "X-WR-CALNAME:%s" % Echapper_ical(nom_agenda), "X-WR-TIMEZONE:%s" % fuseau,
+              "REFRESH-INTERVAL;VALUE=DURATION:PT1H", "X-PUBLISHED-TTL:PT1H"]
+
+    jours = {}
+    for evenement in utils_planning.Get_evenements(date_debut, date_fin, [collaborateur.pk]):
+        absence = evenement.type_evenement_id in categories_absences
+        if absence and not collaborateur.ical_absences:
+            continue
+        # Les absences sont conservées même si elles ne sont pas rattachées à l'affectation choisie
+        if affectations is not None and not absence and evenement.affectation_id not in affectations:
+            continue
         categorie = categories.get(evenement.type_evenement_id)
         resume = evenement.titre or (categorie.nom if categorie else "Evènement")
         description = []
@@ -185,8 +206,49 @@ def Generer_ical(collaborateur=None):
             "DTEND;TZID=%s:%s" % (fuseau, evenement.date_fin.strftime("%Y%m%dT%H%M%S")),
             "SUMMARY:%s" % Echapper_ical(resume),
             "DESCRIPTION:%s" % Echapper_ical(" - ".join(description)),
-            "END:VEVENT",
         ])
+        if collaborateur.ical_lieu and evenement.affectation_id:
+            lignes.append("LOCATION:%s" % Echapper_ical(arbre.Get_chemin(evenement.affectation_id)))
+        lignes.append("END:VEVENT")
+        # Mémorise les journées travaillées et leurs affectations (pour les notes de journée)
+        if not absence:
+            date, derniere = evenement.date_debut.date(), (evenement.date_fin - datetime.timedelta(minutes=1)).date()
+            while date <= min(derniere, date_fin):
+                jours.setdefault(date, set())
+                if evenement.affectation_id:
+                    jours[date].add(evenement.affectation_id)
+                date += datetime.timedelta(days=1)
+
+    # Notes de journée : notes générales et notes des affectations (ou de leurs affectations parentes) des journées travaillées
+    if collaborateur.ical_notes and jours:
+        for note in NotePlanningCollaborateur.objects.filter(date__in=list(jours.keys())).order_by("date", "pk"):
+            if note.affectation_id:
+                ancetres = set()
+                for idaffectation in jours[note.date]:
+                    affectation = arbre.affectations.get(idaffectation)
+                    while affectation:
+                        ancetres.add(affectation.pk)
+                        affectation = arbre.affectations.get(affectation.parent_id)
+                if note.affectation_id not in ancetres:
+                    continue
+            texte = (note.texte or "").strip()
+            titre = texte.splitlines()[0] if texte else ""
+            if len(titre) > 60:
+                titre = titre[:57] + "..."
+            if note.affectation_id:
+                texte = "%s : %s" % (arbre.Get_chemin(note.affectation_id), texte)
+            lignes.extend([
+                "BEGIN:VEVENT",
+                "UID:note-planning-collaborateurs-%d@noethysweb" % note.pk,
+                "DTSTAMP:%s" % maintenant,
+                "DTSTART;VALUE=DATE:%s" % note.date.strftime("%Y%m%d"),
+                "DTEND;VALUE=DATE:%s" % (note.date + datetime.timedelta(days=1)).strftime("%Y%m%d"),
+                "SUMMARY:%s" % Echapper_ical("Note : %s" % titre),
+                "DESCRIPTION:%s" % Echapper_ical(texte),
+                "TRANSP:TRANSPARENT",
+                "END:VEVENT",
+            ])
+
     lignes.append("END:VCALENDAR")
     return "\r\n".join(Plier_ligne_ical(ligne) for ligne in lignes) + "\r\n"
 

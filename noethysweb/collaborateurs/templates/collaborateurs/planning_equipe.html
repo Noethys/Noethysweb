@@ -536,31 +536,6 @@
     </div>
 </div>
 
-<div class="modal fade" id="pl_modal_ical" tabindex="-1" role="dialog" aria-labelledby="pl_modal_ical_titre">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-lightblue">
-                <h5 class="modal-title" id="pl_modal_ical_titre"><strong>Agenda en ligne (iCal)</strong></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="modal-body">
-                <p id="pl_ical_intro"></p>
-                <label for="pl_ical_url" class="sr-only">Lien de l'agenda</label>
-                <div class="input-group">
-                    <input type="text" id="pl_ical_url" class="form-control" readonly>
-                    <div class="input-group-append"><button type="button" class="btn btn-default" id="pl_ical_copier"><i class="fa fa-copy margin-r-5"></i>Copier</button></div>
-                </div>
-                <p class="pl-muted pl-petit mt-2">Ce lien secret donne accès aux évènements du collaborateur (60 jours passés et 12 mois à venir) sans identifiant. Régénérez-le si vous pensez qu'il a été diffusé à tort : l'ancien lien cessera de fonctionner.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-danger mr-auto" id="pl_ical_revoquer">Désactiver le lien</button>
-                <button type="button" class="btn btn-default" id="pl_ical_regenerer"><i class="fa fa-refresh margin-r-5"></i>Régénérer</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Fermer</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="modal fade" id="pl_modal_reglages" tabindex="-1" role="dialog" aria-labelledby="pl_modal_reglages_titre">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -642,8 +617,7 @@
                 imprimer: "{% url 'ajax_planning_equipe_imprimer' %}",
                 emails: "{% url 'ajax_planning_equipe_envoyer_emails' %}",
                 email_libre: "{% url 'ajax_planning_equipe_envoyer_email_libre' %}",
-                excel: "{% url 'ajax_planning_equipe_exporter_recapitulatif' %}",
-                ical: "{% url 'ajax_planning_equipe_get_lien_ical' %}"
+                excel: "{% url 'ajax_planning_equipe_exporter_recapitulatif' %}"
             }
         };
     </script>

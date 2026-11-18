@@ -11,7 +11,8 @@ from collaborateurs.views import accueil_widgets, collaborateur, collaborateur_i
                                 collaborateur_appliquer_modele_planning, liste_contrats, collaborateur_outils, collaborateur_historique, \
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
                                 fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel, statistiques_evenements, conges, \
-                                collaborateur_espace, heures_declarees, pieces_manquantes, planning_absences, variables_paie, editions
+                                collaborateur_espace, heures_declarees, pieces_manquantes, planning_absences, variables_paie, editions, \
+                                collaborateur_agenda
 
 
 urlpatterns = [
@@ -64,6 +65,7 @@ urlpatterns = [
 
     path('collaborateurs/collaborateurs/outils/<int:idcollaborateur>', collaborateur_outils.View.as_view(), name='collaborateur_outils'),
     path('collaborateurs/collaborateurs/planning/<int:idcollaborateur>', planning_individuel.Onglet_planning.as_view(), name='collaborateur_planning'),
+    path('collaborateurs/collaborateurs/agenda/<int:idcollaborateur>', collaborateur_agenda.Consulter.as_view(), name='collaborateur_agenda'),
     path('collaborateurs/collaborateurs/conges/<int:idcollaborateur>', conges.Onglet_conges.as_view(), name='collaborateur_conges'),
     path('collaborateurs/collaborateurs/espace/<int:idcollaborateur>', collaborateur_espace.Consulter.as_view(), name='collaborateur_espace'),
     path('collaborateurs/collaborateurs/espace/modifier/<int:idcollaborateur>', collaborateur_espace.Modifier.as_view(), name='collaborateur_espace_modifier'),
@@ -118,7 +120,6 @@ urlpatterns = [
     path('collaborateurs/planning_equipe/envoyer_emails', secure_ajax(planning.Envoyer_emails), name='ajax_planning_equipe_envoyer_emails'),
     path('collaborateurs/planning_equipe/envoyer_email_libre', secure_ajax(planning.Envoyer_email_libre), name='ajax_planning_equipe_envoyer_email_libre'),
     path('collaborateurs/planning_equipe/exporter_recapitulatif', secure_ajax(planning.Exporter_recapitulatif), name='ajax_planning_equipe_exporter_recapitulatif'),
-    path('collaborateurs/planning_equipe/get_lien_ical', secure_ajax(planning.Get_lien_ical), name='ajax_planning_equipe_get_lien_ical'),
     path('collaborateurs/planning_individuel/get_donnees', secure_ajax(planning_individuel.Get_donnees), name='ajax_planning_individuel_get_donnees'),
     path('collaborateurs/planning_individuel/get_anomalies', secure_ajax(planning_individuel.Get_anomalies), name='ajax_planning_individuel_get_anomalies'),
     path('collaborateurs/planning_individuel/get_objectif', secure_ajax(planning_individuel.Get_objectif), name='ajax_planning_individuel_get_objectif'),
@@ -133,13 +134,13 @@ urlpatterns = [
     path('collaborateurs/planning_individuel/imprimer', secure_ajax(planning_individuel.Imprimer), name='ajax_planning_individuel_imprimer'),
     path('collaborateurs/planning_individuel/envoyer_email', secure_ajax(planning_individuel.Envoyer_email), name='ajax_planning_individuel_envoyer_email'),
     path('collaborateurs/planning_individuel/exporter_excel', secure_ajax(planning_individuel.Exporter_excel), name='ajax_planning_individuel_exporter_excel'),
-    path('collaborateurs/planning_individuel/get_lien_ical', secure_ajax(planning_individuel.Get_lien_ical), name='ajax_planning_individuel_get_lien_ical'),
     path('collaborateurs/planning_individuel/reporter_soldes', secure_ajax(planning_individuel.Reporter_soldes), name='ajax_planning_individuel_reporter_soldes'),
 
     # Congés et absences
     path('collaborateurs/collaborateurs/espace/regenerer_identifiant', secure_ajax(collaborateur_espace.Regenerer_identifiant), name='ajax_collaborateur_espace_regenerer_identifiant'),
     path('collaborateurs/collaborateurs/espace/regenerer_mdp', secure_ajax(collaborateur_espace.Regenerer_mdp), name='ajax_collaborateur_espace_regenerer_mdp'),
     path('collaborateurs/collaborateurs/espace/envoyer_codes', secure_ajax(collaborateur_espace.Envoyer_codes), name='ajax_collaborateur_espace_envoyer_codes'),
+    path('collaborateurs/collaborateurs/agenda/action', secure_ajax(collaborateur_agenda.Action), name='ajax_collaborateur_agenda_action'),
     path('collaborateurs/heures_declarees/decider', secure_ajax(heures_declarees.Decider), name='ajax_heures_declarees_decider'),
     path('collaborateurs/conges/get_demandes', secure_ajax(conges.Get_demandes), name='ajax_conges_get_demandes'),
     path('collaborateurs/conges/calculer', secure_ajax(conges.Calculer), name='ajax_conges_calculer'),

@@ -4249,6 +4249,13 @@ class Collaborateur(models.Model):
     qualifications = models.ManyToManyField(TypeQualificationCollaborateur, verbose_name="Qualifications", related_name="collaborateur_qualifications", blank=True)
     groupes = models.ManyToManyField(GroupeCollaborateurs, verbose_name="Groupes associés", related_name="collaborateur_groupes", blank=True)
     token_ical = models.CharField(verbose_name="Jeton de l'agenda iCal", max_length=64, blank=True, null=True, unique=True)
+    ical_affectation = models.ForeignKey("AffectationCollaborateur", verbose_name="Affectation de l'agenda iCal", related_name="collaborateurs_ical", on_delete=models.SET_NULL, blank=True, null=True,
+                                         help_text="Si renseignée, seuls les évènements de cette affectation et de ses sous-affectations sont intégrés à l'agenda iCal.")
+    ical_absences = models.BooleanField(verbose_name="Inclure les absences et congés validés", default=True)
+    ical_notes = models.BooleanField(verbose_name="Inclure les notes de journée", default=False)
+    ical_lieu = models.BooleanField(verbose_name="Indiquer l'affectation comme lieu de l'évènement", default=True)
+    ical_date_creation = models.DateTimeField(verbose_name="Date de création du lien iCal", blank=True, null=True)
+    ical_dernier_acces = models.DateTimeField(verbose_name="Dernier accès à l'agenda iCal", blank=True, null=True)
     utilisateur = models.OneToOneField(Utilisateur, verbose_name="Compte de l'espace collaborateur", related_name="collaborateur", on_delete=models.SET_NULL, blank=True, null=True)
     internet_actif = models.BooleanField(verbose_name="Accès à l'espace collaborateur activé", default=True)
     internet_identifiant = encrypt(models.CharField(verbose_name="Identifiant", max_length=200, blank=True, null=True))

@@ -117,7 +117,6 @@
                                 <button type="button" role="menuitem" data-diffusion="email"><i class="fa fa-envelope-o" aria-hidden="true"></i><span>Envoyer par email…<small>Au collaborateur, avec le PDF en pièce jointe</small></span></button>
                                 <button type="button" role="menuitem" data-diffusion="excel"><i class="fa fa-file-excel-o" aria-hidden="true"></i><span>Exporter vers Excel…<small>Bilan annuel ou récapitulatif paie</small></span></button>
                                 <div class="pl-menu-sep" role="separator"></div>
-                                <button type="button" role="menuitem" data-diffusion="ical" class="pi-edition"><i class="fa fa-link" aria-hidden="true"></i><span>Agenda en ligne (iCal)…<small>Lien à ajouter au téléphone du collaborateur</small></span></button>
                                 <button type="button" role="menuitem" data-diffusion="ecran"><i class="fa fa-desktop" aria-hidden="true"></i><span>Imprimer l'écran<small>Impression rapide de la vue affichée</small></span></button>
                             </div>
                         </div>
@@ -487,31 +486,6 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="pi_diff_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade pi-modal" id="pi_modal_ical" tabindex="-1" role="dialog" aria-labelledby="pi_modal_ical_titre">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-lightblue">
-                <h5 class="modal-title" id="pi_modal_ical_titre"><strong>Agenda en ligne (iCal)</strong></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="modal-body">
-                <p id="pi_ical_intro"></p>
-                <label for="pi_ical_url" class="sr-only">Lien de l'agenda</label>
-                <div class="input-group">
-                    <input type="text" id="pi_ical_url" class="form-control" readonly>
-                    <div class="input-group-append"><button type="button" class="btn btn-default" id="pi_ical_copier"><i class="fa fa-copy margin-r-5"></i>Copier</button></div>
-                </div>
-                <p class="pl-muted pl-petit mt-2">Ce lien secret donne accès aux évènements du collaborateur (60 jours passés et 12 mois à venir) sans identifiant. Régénérez-le si vous pensez qu'il a été diffusé à tort : l'ancien lien cessera de fonctionner.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-danger mr-auto" id="pi_ical_revoquer">Désactiver le lien</button>
-                <button type="button" class="btn btn-default" id="pi_ical_regenerer"><i class="fa fa-refresh margin-r-5"></i>Régénérer</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Fermer</button>
             </div>
         </div>
     </div>

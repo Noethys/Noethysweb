@@ -1,0 +1,190 @@
+{% extends "collaborateurs/collaborateur.html" %}
+{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .ag-barre {display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;}
+        .ag-bloc {border: 1px solid #dee2e6; border-radius: 4px; padding: 12px 14px; margin-bottom: 14px;}
+        .ag-bloc-titre {font-weight: 600; margin: 0 0 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 1rem;}
+        .ag-infos {font-size: 13px; color: #6c757d; margin-left: auto; font-weight: normal;}
+        .ag-url {font-family: SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;}
+        .ag-option {display: flex; align-items: center; gap: 8px; margin-bottom: 6px;}
+        .ag-option input {margin: 0;}
+        .ag-option label {margin: 0; font-weight: normal;}
+        .ag-affectation {max-width: 360px;}
+        .ag-inactif {text-align: center; padding: 24px 12px; color: #6c757d;}
+        .ag-inactif .fa {font-size: 32px; display: block; margin-bottom: 8px; color: #adb5bd;}
+        .ag-aide {font-size: 13px; color: #6c757d; margin: 4px 0 0 24px;}
+    </style>
+{% endblock styles %}
+
+{% block detail_collaborateur %}
+    <div class="col-md-9">
+        {% embed 'core/box.html' %}
+            {% block box_theme %}card-outline card-lightblue{% endblock %}
+            {% block box_titre %}{{ box_titre }}{% endblock %}
+            {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
+            {% block box_contenu %}
+
+                {# Boutons d'action #}
+                {% if peut_modifier %}
+                <div class="ag-barre">
+                    {% if url_ical %}
+                        <button type="button" class="btn btn-primary" id="ag_envoyer"><i class="fa fa-envelope-o margin-r-5"></i>Envoyer par email</button>
+                        <button type="button" class="btn btn-default" id="ag_regenerer"><i class="fa fa-refresh margin-r-5"></i>Régénérer le lien</button>
+                        <button type="button" class="btn btn-outline-danger" id="ag_desactiver"><i class="fa fa-chain-broken margin-r-5"></i>Désactiver</button>
+                    {% else %}
+                        <button type="button" class="btn btn-success" id="ag_activer"><i class="fa fa-link margin-r-5"></i>Activer le lien iCal</button>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {# Lien d'abonnement #}
+                <div class="ag-bloc">
+                    <h3 class="ag-bloc-titre">
+                        Lien d'abonnement
+                        {% if url_ical %}<span class="badge badge-success">Actif</span>{% else %}<span class="badge badge-secondary">Désactivé</span>{% endif %}
+                        {% if url_ical %}
+                            <span class="ag-infos">
+                                {% if collaborateur.ical_date_creation %}Créé le {{ collaborateur.ical_date_creation|date:"d/m/Y" }}{% endif %}
+                                · {% if collaborateur.ical_dernier_acces %}dernier accès le {{ collaborateur.ical_dernier_acces|date:"d/m/Y à H:i" }}{% else %}jamais consulté{% endif %}
+                                {% if date_dernier_envoi %}· envoyé par email le {{ date_dernier_envoi|date:"d/m/Y" }}{% endif %}
+                            </span>
+                        {% endif %}
+                    </h3>
+                    {% if url_ical %}
+                        <label for="ag_url" class="sr-only">Lien de l'agenda iCal</label>
+                        <div class="input-group">
+                            <input type="text" id="ag_url" class="form-control ag-url" value="{{ url_ical }}" readonly>
+                            <div class="input-group-append"><button type="button" class="btn btn-default" id="ag_copier" title="Copier le lien"><i class="fa fa-copy margin-r-5"></i>Copier</button></div>
+                        </div>
+                        <p class="text-muted small mt-2 mb-0">Ce lien secret donne accès au planning sans identifiant. Régénérez-le s'il a été diffusé à tort : l'ancien lien cessera de fonctionner et le collaborateur devra s'abonner à nouveau.</p>
+                    {% else %}
+                        <div class="ag-inactif">
+                            <i class="fa fa-calendar-times-o" aria-hidden="true"></i>
+                            Aucun lien iCal n'est actif pour ce collaborateur. Cliquez sur « Activer le lien iCal » pour en créer un.
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Données à intégrer #}
+                <div class="ag-bloc mb-0">
+                    <h3 class="ag-bloc-titre">Données à intégrer à l'agenda</h3>
+                    <fieldset id="ag_parametres" {% if not peut_modifier %}disabled{% endif %}>
+                        <legend class="sr-only">Données à intégrer à l'agenda</legend>
+                        <div class="ag-option">
+                            <input type="radio" name="ag_portee" id="ag_portee_tous" value="tous" {% if not collaborateur.ical_affectation_id %}checked{% endif %}>
+                            <label for="ag_portee_tous">Tous les évènements du collaborateur</label>
+                        </div>
+                        <div class="ag-option">
+                            <input type="radio" name="ag_portee" id="ag_portee_affectation" value="affectation" {% if collaborateur.ical_affectation_id %}checked{% endif %}>
+                            <label for="ag_portee_affectation">Uniquement les évènements de l'affectation :</label>
+                            <select id="ag_affectation" class="form-control form-control-sm ag-affectation" aria-label="Affectation" {% if not collaborateur.ical_affectation_id %}disabled{% endif %}>
+                                <option value="">-- Sélectionnez une affectation --</option>
+                                {% for affectation in choix_affectations %}
+                                    <option value="{{ affectation.id }}" {% if affectation.id == collaborateur.ical_affectation_id %}selected{% endif %}>{{ affectation.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <p class="ag-aide">Les sous-affectations de l'affectation sélectionnée sont incluses.</p>
+
+                        <hr class="my-2">
+                        <div class="ag-option">
+                            <input type="checkbox" id="ag_absences" {% if collaborateur.ical_absences %}checked{% endif %}>
+                            <label for="ag_absences">Inclure les absences et congés validés</label>
+                        </div>
+                        <div class="ag-option">
+                            <input type="checkbox" id="ag_notes" {% if collaborateur.ical_notes %}checked{% endif %}>
+                            <label for="ag_notes">Inclure les notes de journée du planning</label>
+                        </div>
+                        <p class="ag-aide mt-0 mb-2">Notes générales et notes des affectations du collaborateur, pour les journées où il travaille.</p>
+                        <div class="ag-option">
+                            <input type="checkbox" id="ag_lieu" {% if collaborateur.ical_lieu %}checked{% endif %}>
+                            <label for="ag_lieu">Indiquer l'affectation comme lieu de l'évènement</label>
+                        </div>
+                    </fieldset>
+                    {% if peut_modifier %}<p class="text-muted small mt-2 mb-0"><i class="fa fa-info-circle margin-r-5"></i>Les modifications sont enregistrées automatiquement et s'appliquent au lien existant : il est inutile de le renvoyer au collaborateur.</p>{% endif %}
+                </div>
+
+            {% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        (function() {
+            var URL_ACTION = "{% url 'ajax_collaborateur_agenda_action' %}";
+            var IDCOLLABORATEUR = {{ collaborateur.pk }};
+            var ADRESSES = [{% for adresse in adresses %}{text: "{{ adresse.label|escapejs }} : {{ adresse.adresse|escapejs }}", value: "{{ adresse.code }}"}{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+            function Envoyer_action(action, donnees) {
+                return $.ajax({url: URL_ACTION, type: "POST", dataType: "json",
+                               data: $.extend({idcollaborateur: IDCOLLABORATEUR, action: action, csrfmiddlewaretoken: "{{ csrf_token }}"}, donnees || {})})
+                    .fail(function(xhr) { toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Une erreur est survenue"); });
+            }
+
+            function Confirmer(titre, message, label, classe, callback) {
+                bootbox.confirm({title: titre, message: message, buttons: {confirm: {label: label, className: classe}, cancel: {label: "Annuler"}},
+                                 callback: function(ok) { if (ok) { callback(); } }});
+            }
+
+            function Enregistrer_parametres() {
+                var portee = $("input[name='ag_portee']:checked").val();
+                $("#ag_affectation").prop("disabled", portee !== "affectation");
+                var affectation = portee === "affectation" ? $("#ag_affectation").val() : "";
+                if (portee === "affectation" && !affectation) {
+                    $("#ag_affectation").focus();
+                    return;
+                }
+                Envoyer_action("parametres", {
+                    affectation: affectation,
+                    absences: $("#ag_absences").is(":checked") ? 1 : 0,
+                    notes: $("#ag_notes").is(":checked") ? 1 : 0,
+                    lieu: $("#ag_lieu").is(":checked") ? 1 : 0
+                }).done(function() { toastr.success("Paramètres de l'agenda enregistrés"); });
+            }
+
+            function Preparer_email(adresse) {
+                Envoyer_action("envoyer", {adresse: adresse || ""}).done(function(data) { window.location.href = data.url; });
+            }
+
+            $(function() {
+                $("#ag_activer").on("click", function() {
+                    Envoyer_action("activer").done(function() { window.location.reload(); });
+                });
+                $("#ag_regenerer").on("click", function() {
+                    Confirmer("Régénérer le lien", "Un nouveau lien va être créé. L'ancien lien cessera immédiatement de fonctionner : le collaborateur devra s'abonner à nouveau avec le nouveau lien. Continuer ?",
+                              "Régénérer", "btn-primary", function() {
+                        Envoyer_action("regenerer").done(function() { window.location.reload(); });
+                    });
+                });
+                $("#ag_desactiver").on("click", function() {
+                    Confirmer("Désactiver le lien", "Le lien cessera immédiatement de fonctionner et le planning n'apparaîtra plus dans l'agenda du collaborateur. Continuer ?",
+                              "Désactiver", "btn-danger", function() {
+                        Envoyer_action("desactiver").done(function() { window.location.reload(); });
+                    });
+                });
+                $("#ag_envoyer").on("click", function() {
+                    if (!ADRESSES.length) {
+                        toastr.error("Ce collaborateur n'a pas d'adresse email (fiche collaborateur > Coordonnées)");
+                        return;
+                    }
+                    if (ADRESSES.length === 1) { Preparer_email(ADRESSES[0].value); return; }
+                    bootbox.prompt({title: "Envoyer le lien à quelle adresse ?", inputType: "select", inputOptions: ADRESSES, value: ADRESSES[0].value,
+                                    buttons: {confirm: {label: "Continuer"}, cancel: {label: "Annuler"}},
+                                    callback: function(valeur) { if (valeur) { Preparer_email(valeur); } }});
+                });
+                $("#ag_copier").on("click", function() {
+                    var champ = document.getElementById("ag_url");
+                    champ.select();
+                    if (navigator.clipboard) { navigator.clipboard.writeText(champ.value).then(function() { toastr.success("Lien copié"); }); }
+                    else { document.execCommand("copy"); toastr.success("Lien copié"); }
+                });
+                $("input[name='ag_portee'], #ag_affectation, #ag_absences, #ag_notes, #ag_lieu").on("change", Enregistrer_parametres);
+            });
+        })();
+    </script>
+{% endblock scripts %}
