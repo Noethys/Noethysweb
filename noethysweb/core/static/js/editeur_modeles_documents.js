@@ -1993,7 +1993,8 @@
 
     function champ_reconnu(code) {
         if (!CODES_CONNUS.size || !REGEX_CODE_CHAMP.test(code)) { return true; }
-        return CODES_CONNUS.has(code) || REGEX_CHAMPS_DYNAMIQUES.test(code);
+        // Champs numérotés : {INSCRIPTION_2_ACTIVITE} correspond au champ générique {INSCRIPTION_x_ACTIVITE}
+        return CODES_CONNUS.has(code) || CODES_CONNUS.has(code.replace(/_\d+_/, "_x_")) || REGEX_CHAMPS_DYNAMIQUES.test(code);
     }
 
     function contenu_avec_champs(objet) {
@@ -2120,7 +2121,7 @@
             while ((m = REGEX_CHAMP.exec(ligne)) !== null) {
                 resultat += ligne.slice(dernier, m.index);
                 const code = m[0];
-                const exemple = EXEMPLES[code];
+                const exemple = EXEMPLES[code] !== undefined ? EXEMPLES[code] : EXEMPLES[code.replace(/_\d+_/, "_x_")];
                 const remplacement = exemple !== undefined ? exemple : code;
                 const couleur = exemple !== undefined ? COULEUR_EXEMPLE : ((objet.__fond || champ_reconnu(code)) ? COULEUR_CHAMP : COULEUR_CHAMP_INCONNU);
                 for (let c = resultat.length; c < resultat.length + remplacement.length; c++) {

@@ -179,8 +179,8 @@ def GetNomsChampsPossibles(mode="individu+famille"):
         ("PERE", "le père"),
         ("MERE", "la mère"),
         ("CONJOINT", "le ou la conjointe"),
-        ("ENFANT", "l'enfant n°x"),
-        ("AUTRE_LIEN", "l'autre lien n°x"),
+        ("ENFANT_x", "l'enfant n°x"),
+        ("AUTRE_LIEN_x", "l'autre lien n°x"),
     ]
     listeLiens = [
         ("Nombre d'enfants de l'individu", "2", "{NBRE_ENFANTS}"),
