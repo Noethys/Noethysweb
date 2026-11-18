@@ -62,13 +62,13 @@ def Enregistrer_quotient_api_particulier(request):
     """ Enregistrement du quotient trouvé """""
     form = Formulaire(json.loads(request.POST.get("form")), request=request, idfamille=request.POST["idfamille"])
     if not form.is_valid():
-        liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+        liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in form.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
     # Validation et recalcul des prestations si besoins
     resultat, form = Validation_form(form, request=request, idfamille=request.POST["idfamille"], verbe_action="Ajouter", confirmation_possible=False)
     if not resultat:
-        liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+        liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in form.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
     return JsonResponse({"succes": True})

@@ -52,7 +52,7 @@ def Get_form_parametres(request):
 def Valid_form_parametres(request):
     form = Formulaire_parametres(request.POST, request=request)
     if not form.is_valid():
-        liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+        liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in form.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
     utils_parametres.Set(nom="parametres", categorie="planning_locations", utilisateur=request.user, valeur=json.dumps(form.cleaned_data))
@@ -163,7 +163,7 @@ def Valid_form_detail_location(request):
     if resultat == True or isinstance(resultat, Location):
         return JsonResponse({"succes": True})
     else:
-        liste_erreurs = ", ".join([erreur[0].message for field, erreur in resultat.errors.as_data().items()])
+        liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in resultat.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
 
@@ -193,7 +193,7 @@ def Supprimer_occurences(request):
     idlocation = int(request.POST["idlocation"])
     form = Form_supprimer_occurences(request.POST, request=request, mode="planning_locations")
     if not form.is_valid():
-        liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+        liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in form.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
     # Supprime les occurences

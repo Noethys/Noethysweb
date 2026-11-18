@@ -76,7 +76,7 @@ def Valid_form_detail_achat(request):
     if resultat == True or isinstance(resultat, AchatDemande):
         return JsonResponse({"succes": True})
     else:
-        liste_erreurs = ", ".join([erreur[0].message for field, erreur in resultat.errors.as_data().items()])
+        liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in resultat.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
 

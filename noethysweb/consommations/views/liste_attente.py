@@ -193,7 +193,7 @@ def Valider_form_modifier_reservation(request):
     # Validation du formulaire de modification
     form = Formulaire_modifier_reservation(request.POST, request=request)
     if not form.is_valid():
-        liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+        liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in form.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
     # Modification des consommations de la réservation

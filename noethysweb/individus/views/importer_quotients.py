@@ -26,7 +26,7 @@ def Rechercher(request):
     if not form.is_valid():
         html = "{% load crispy_forms_tags %} {% crispy form %}<script>init_page();</script>"
         data = Template(html).render(RequestContext(request, {"form": form}))
-        liste_messages_erreurs = [erreur[0].message for field, erreur in form.errors.as_data().items()]
+        liste_messages_erreurs = [str(erreur[0].message) for field, erreur in form.errors.as_data().items()]
         return JsonResponse({"html": data, "erreur": "Veuillez corriger les erreurs suivantes : %s." % ", ".join(liste_messages_erreurs)}, status=401)
 
     parametres = form.cleaned_data
@@ -120,14 +120,14 @@ def Enregistrer(request):
 
         form = Formulaire_quotient(data=data, idfamille=famille.pk)
         if not form.is_valid():
-            liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+            liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in form.errors.as_data().items()])
             dict_resultats[famille] = liste_erreurs
             continue
 
         # Validation et recalcul des prestations si besoins
         resultat, form = Validation_form(form, request=request, idfamille=famille.pk, verbe_action="Ajouter")
         if not resultat:
-            liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+            liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in form.errors.as_data().items()])
             dict_resultats[famille] = liste_erreurs
             continue
 

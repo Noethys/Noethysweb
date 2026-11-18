@@ -108,7 +108,7 @@ def Recherche_factures(request):
     if not form.is_valid():
         html = "{% load crispy_forms_tags %} {% crispy form %} {% include 'core/messages.html' %}<script>init_page();</script>"
         data = Template(html).render(RequestContext(request, {"form": form}))
-        liste_messages_erreurs = [erreur[0].message for field, erreur in form.errors.as_data().items()]
+        liste_messages_erreurs = [str(erreur[0].message) for field, erreur in form.errors.as_data().items()]
         return JsonResponse({"html": data, "erreur": "Veuillez corriger les erreurs suivantes : %s." % ", ".join(liste_messages_erreurs)}, status=401)
 
     # Mémorisation de la date prestations antérieures

@@ -22,7 +22,7 @@ def Appliquer(request):
     # Récupération des paramètres
     form = Formulaire_options(request.POST)
     if not form.is_valid():
-        messages_erreurs = [erreur[0].message for field, erreur in form.errors.as_data().items()]
+        messages_erreurs = [str(erreur[0].message) for field, erreur in form.errors.as_data().items()]
         return JsonResponse({"erreur": ". ".join(messages_erreurs)}, status=401)
 
     # Récupération des rattachements cochés

@@ -34,7 +34,7 @@ def Valid_form_page(request):
     # Vérification du form
     form = Formulaire_page(request.POST, request=request, idsondage=int(request.POST["sondage"]), instance=page)
     if not form.is_valid():
-        liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+        liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in form.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
     instance = form.save()
@@ -65,7 +65,7 @@ def Valid_form_question(request):
     # Vérification du form
     form = Formulaire_question(request.POST, request=request, idpage=int(request.POST["page"]), instance=question)
     if not form.is_valid():
-        liste_erreurs = ", ".join([erreur[0].message for field, erreur in form.errors.as_data().items()])
+        liste_erreurs = ", ".join([str(erreur[0].message) for field, erreur in form.errors.as_data().items()])
         return JsonResponse({"erreur": liste_erreurs}, status=401)
 
     instance = form.save()

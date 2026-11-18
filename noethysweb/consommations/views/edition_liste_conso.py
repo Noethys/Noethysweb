@@ -46,7 +46,7 @@ def Get_donnees(request):
 
     # Validation du form paramètres
     if not form_parametres.is_valid():
-        liste_erreurs = [erreur[0].message for field, erreur in form_parametres.errors.as_data().items()]
+        liste_erreurs = [str(erreur[0].message) for field, erreur in form_parametres.errors.as_data().items()]
         return JsonResponse({"erreur": "Veuillez corriger les erreurs suivantes : %s" % ", ".join(liste_erreurs)}, status=401)
 
     # Préparation des paramètres
