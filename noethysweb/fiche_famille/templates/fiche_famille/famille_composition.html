@@ -378,6 +378,9 @@
     .postit-dossier ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
     .postit-dossier li { display: flex; align-items: baseline; gap: 6px; font-family: "Caveat", "Segoe Print", "Bradley Hand", cursive; font-weight: 600; font-size: 19px; line-height: 1.1; }
     .postit-dossier li .fa { font-size: 11px; color: #c0392b; }
+    .postit-dossier .postit-plus { background: none; border: 0; padding: 0; margin-top: 6px; font-size: 13px; font-weight: 600; color: #6b5404; text-decoration: underline; cursor: pointer; }
+    .postit-dossier .postit-plus:hover, .postit-dossier .postit-plus:focus { color: #3f3104; }
+    .postit-dossier.bleu .postit-plus { color: #1d4a7a; }
     .postit-dossier li a { color: #3f3104; }
     .postit-dossier li a:hover { color: #3f3104; text-decoration: underline; }
     .postit-dossier.vert { background: linear-gradient(170deg, #d9f2c9, #bfe6a8); color: #24521a; }
@@ -604,51 +607,31 @@
                 {% if pieces_fournir %}
                     <div class="postit-dossier pd-1"><span class="scotch" aria-hidden="true"></span>
                         <span class="postit-titre"><i class="fa fa-file-text-o" aria-hidden="true"></i> Pièces à fournir</span>
-                        <ul>
-                            {% for item in pieces_fournir %}
-                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
-                            {% endfor %}
-                        </ul>
+                        {% include 'fiche_famille/famille_postit_liste.html' with items=pieces_fournir %}
                     </div>
                 {% endif %}
                 {% if cotisations_manquantes %}
                     <div class="postit-dossier pd-2"><span class="scotch" aria-hidden="true"></span>
                         <span class="postit-titre"><i class="fa fa-id-card-o" aria-hidden="true"></i> Adhésions manquantes</span>
-                        <ul>
-                            {% for item in cotisations_manquantes %}
-                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
-                            {% endfor %}
-                        </ul>
+                        {% include 'fiche_famille/famille_postit_liste.html' with items=cotisations_manquantes %}
                     </div>
                 {% endif %}
                 {% if informations_manquantes %}
                     <div class="postit-dossier pd-3"><span class="scotch" aria-hidden="true"></span>
                         <span class="postit-titre"><i class="fa fa-info-circle" aria-hidden="true"></i> Informations manquantes</span>
-                        <ul>
-                            {% for item in informations_manquantes %}
-                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
-                            {% endfor %}
-                        </ul>
+                        {% include 'fiche_famille/famille_postit_liste.html' with items=informations_manquantes %}
                     </div>
                 {% endif %}
                 {% if vaccinations_manquantes %}
                     <div class="postit-dossier pd-4"><span class="scotch" aria-hidden="true"></span>
                         <span class="postit-titre"><i class="fa fa-medkit" aria-hidden="true"></i> Vaccinations manquantes</span>
-                        <ul>
-                            {% for item in vaccinations_manquantes %}
-                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
-                            {% endfor %}
-                        </ul>
+                        {% include 'fiche_famille/famille_postit_liste.html' with items=vaccinations_manquantes %}
                     </div>
                 {% endif %}
                 {% if assurances_manquantes %}
                     <div class="postit-dossier pd-5"><span class="scotch" aria-hidden="true"></span>
                         <span class="postit-titre"><i class="fa fa-shield" aria-hidden="true"></i> Assurances manquantes</span>
-                        <ul>
-                            {% for item in assurances_manquantes %}
-                                <li><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
-                            {% endfor %}
-                        </ul>
+                        {% include 'fiche_famille/famille_postit_liste.html' with items=assurances_manquantes %}
                     </div>
                 {% endif %}
                 {% if nbre_messages_non_lus %}
@@ -694,6 +677,13 @@
              $('.categories_verticales').removeClass("cacher");
         }
     });
+
+{# Etiquettes de l'état du dossier : déplie ou replie les lignes au-delà des 5 premières #}
+$(document).on('click', '.postit-dossier .postit-plus', function(){
+    var deplie = $(this).attr('aria-expanded') === 'true';
+    $(this).closest('.postit-dossier').find('li.postit-replie').prop('hidden', deplie);
+    $(this).attr('aria-expanded', deplie ? 'false' : 'true').text(deplie ? $(this).data('texte') : 'Réduire');
+});
 
 {# Passe la vignette au premier plan quand son menu contextuel est ouvert #}
 $(document).on('show.bs.dropdown', '.vignette-epinglee', function(){

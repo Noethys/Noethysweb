@@ -74,18 +74,23 @@ def Get_vaccins_manquants_famille(famille=None, date_reference=None):
     conditions &= (Q(activite__date_fin__isnull=True) | Q(activite__date_fin__gte=date_reference))
     inscriptions = Inscription.objects.select_related("activite", "individu").filter(conditions)
 
-    # Recherche des vaccinations manquantes
+    # Recherche des vaccinations manquantes, regroupées par individu (une ligne par individu)
+    from core.utils.utils_texte import Convert_liste_to_texte_virgules
     liste_resultats = []
     for (famille_inscription, individu), liste_vaccinations in Get_vaccins_obligatoires_by_inscriptions(inscriptions=inscriptions).items():
-        for vaccination in liste_vaccinations:
-            liste_resultats.append({
-                "label": "%s de %s" % (vaccination["label"], individu.prenom or individu.nom),
-                "valide": False,
-                "titre": "Cliquez ici pour accéder à la page médicale de l'individu",
-                "href": reverse_lazy("individu_medical_liste", kwargs={"idfamille": famille.pk, "idindividu": individu.pk}),
-            })
+        noms = [vaccination["label"] for vaccination in liste_vaccinations]
+        if not noms:
+            continue
+        # Au-delà de 3 vaccins, seul le nombre est affiché : le détail figure dans l'infobulle
+        detail = Convert_liste_to_texte_virgules(noms) if len(noms) <= 3 else "%d vaccins" % len(noms)
+        liste_resultats.append({
+            "label": "%s : %s" % (individu.prenom or individu.nom, detail),
+            "valide": False,
+            "titre": "Vaccins manquants : %s. Cliquez ici pour accéder à la page médicale de l'individu." % ", ".join(noms),
+            "href": reverse_lazy("individu_medical_liste", kwargs={"idfamille": famille.pk, "idindividu": individu.pk}),
+        })
 
-    return liste_resultats
+    return sorted(liste_resultats, key=lambda resultat: resultat["label"])
 
 
 def Get_tous_vaccins():

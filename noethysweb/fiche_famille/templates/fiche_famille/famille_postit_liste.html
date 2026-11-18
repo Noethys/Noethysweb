@@ -1,0 +1,11 @@
+{# Liste d'une étiquette de l'état du dossier : au-delà de 6 lignes, seules les 5 premières sont affichées, les suivantes sont repliées #}
+{% with total=items|length %}
+<ul>
+    {% for item in items %}
+        <li{% if total > 6 and forloop.counter > 5 %} class="postit-replie" hidden{% endif %}><i class="fa fa-close" aria-hidden="true"></i> {% if item.href %}<a href="{{ item.href }}"{% if item.titre %} title="{{ item.titre }}"{% endif %}>{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}</li>
+    {% endfor %}
+</ul>
+{% if total > 6 %}
+    <button type="button" class="postit-plus" aria-expanded="false" data-texte="+ {{ total|add:'-5' }} autre{{ total|add:'-5'|pluralize }}…">+ {{ total|add:"-5" }} autre{{ total|add:"-5"|pluralize }}…</button>
+{% endif %}
+{% endwith %}
