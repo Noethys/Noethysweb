@@ -1,3 +1,22 @@
+Version 1.3.6.8 (18/11/2026) :
+
+Nouveautés
+- Fiche collaborateur : nouvelle rubrique Agenda iCal (lien d'abonnement personnel et envoi du lien par email)
+- Collaborateurs > Planning général : envoi d'emails aux collaborateurs avec leur planning individuel en PDF
+- Fiche collaborateur > Contrats : création d'un modèle de planning depuis le formulaire du contrat
+- Paramétrage > Activités : ajout de la suppression par lot
+Améliorations
+- Collaborateurs : améliorations diverses sur les plannings général et individuel
+- Fiche famille > Résumé : affichage plus compact des vaccinations manquantes et des étiquettes de l'état du dossier
+- Importation des photos et albums : nouvelle zone d'envoi par glisser-déposer
+- Suppression de la librairie django-upload
+Corrections
+- Paramétrage > Activités : correction de l'import des activités
+- Paramétrage > Modèles de documents : champs numérotés non reconnus dans l'éditeur
+- Paramétrage : impossible de supprimer une unité de consentement utilisée
+- Facturation : tri sur la colonne Montant dans les listes des prélèvements et des exports vers le Trésor Public
+- Mise à jour de l'application : correction du rechargement WSGI
+
 Version 1.3.6.7 (15/11/2026) :
 
 Nouveautés
