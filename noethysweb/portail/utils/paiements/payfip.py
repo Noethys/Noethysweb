@@ -16,7 +16,7 @@ from django.db import transaction
 from django.conf import settings
 from eopayment import Payment
 from eopayment.payfip_ws import normalize_objet
-from core.models import Facture, Paiement
+from core.models import Facture, Paiement, PesPiece
 from portail.utils.paiements.commun import ETATS_PAIEMENTS, Centimes_en_montant, Erreur, Get_factures_ventilation, Enregistrement_reglement
 
 # Adresses IP d'émission des notifications PayFiP (guide de mise en oeuvre PayFiP régie URL, DGFiP, juin 2025)
@@ -37,7 +37,9 @@ def Creer_paiement(request=None, demande=None, parametres_portail={}):
     """ Création du paiement et renvoi de l'URL de la page de paiement PayFiP """
     famille = demande.famille
     payfip_mode = parametres_portail.get("payfip_mode")
-    payfip_ws = parametres_portail.get("payfip_protocole") == "ws"
+    payfip_contrat = parametres_portail.get("payfip_contrat")
+    # PayFiP Rôle (ORMC) ne fonctionne qu'en mode URL
+    payfip_ws = parametres_portail.get("payfip_protocole") == "ws" and payfip_contrat != "role"
     logger.debug("PAYFIP Création du paiement : famille=%s payfip_mode=%s payfip_ws=%s", famille, payfip_mode, payfip_ws)
 
     # Code SAISIE : T=test, X=validation/activation, A=production (mode URL) ou W=production (web service)
@@ -61,17 +63,31 @@ def Creer_paiement(request=None, demande=None, parametres_portail={}):
         return Erreur("Aucune régie n'a été paramétrée. Contactez l'administrateur du portail.")
 
     objet = normalize_objet("Paiement %s" % facture.regie.nom)
-    refdet = "%s%06d" % (facture.prefixe.prefixe if facture.prefixe else "", facture.numero)
+    exer = str(facture.date_debut.year)
+    if payfip_contrat == "role":
+        # REFDET Rôle ORMC (21 car.) : Exer (4) + ROLREC (2 premiers car. du CodProdLoc) + ROLDEB ("00") + ROLDET (n° de facture sur 13 chiffres)
+        piece_pes = PesPiece.objects.select_related("lot", "lot__modele").filter(facture=facture).order_by("-lot__pk").first()
+        if not piece_pes:
+            logger.debug("PAYFIP (%s): facture %s absente des lots PES", famille, facture.numero)
+            return Erreur("Cette facture n'a pas encore été transmise à la trésorerie. Elle ne peut pas encore être payée en ligne.")
+        rolrec = (piece_pes.lot.modele.code_prodloc or "")[:2]
+        exer = str(piece_pes.lot.exercice)[:4]
+        refdet = "%s%s00%013d" % (exer, rolrec, facture.numero)
+        if not re.fullmatch(r"[0-9]{4}[A-Za-z0-9]{2}00[0-9]{13}", refdet):
+            logger.error("PAYFIP (%s): REFDET Rôle non conforme (%s)", famille, refdet)
+            return Erreur("La référence de cette facture n'est pas compatible avec PayFiP. Contactez l'administrateur du portail.")
+    else:
+        refdet = "%s%06d" % (facture.prefixe.prefixe if facture.prefixe else "", facture.numero)
     try:
         if payfip_ws:
             # Web service : transaction identifiée par un idOp non devinable, résultat vérifié auprès de la DGFiP au retour
             p = Get_payment_payfip_ws(request=request, numcli=facture.regie.numclitipi, saisie=saisie)
-            idtransaction, url_inutilisee, url_paiement = p.request(amount=demande.montant, exer=str(facture.date_debut.year),
+            idtransaction, url_inutilisee, url_paiement = p.request(amount=demande.montant, exer=exer,
                                                                     refdet=refdet, subject=objet, email=famille.mail)
         else:
             # Mode URL : la notification n'est pas signée, elle sera filtrée par adresse IP et contrôlée (voir retour_payfip)
             p = Payment("tipi", {"numcli": facture.regie.numclitipi, "automatic_return_url": request.build_absolute_uri(reverse("retour_payfip"))})
-            idtransaction, url_inutilisee, url_paiement = p.request(amount=str(demande.montant), exer=str(facture.date_debut.year),
+            idtransaction, url_inutilisee, url_paiement = p.request(amount=str(demande.montant), exer=exer,
                                                                     refdet=refdet, objet=objet, email=famille.mail, saisie=saisie)
     except Exception as err:
         logger.error("PAYFIP (%s): erreur lors de la création du paiement : %s", famille, err)
