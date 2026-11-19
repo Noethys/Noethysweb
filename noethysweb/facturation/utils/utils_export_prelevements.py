@@ -19,6 +19,28 @@ def Formate_identifiant_sepa(texte="", longueur=35):
     return texte[:longueur].strip()
 
 
+def Formate_texte_sepa(texte=""):
+    """ Translittère un texte dans le jeu de caractères latin restreint SEPA (exigé par la DGFiP) """
+    remplacements = {"&": "ET", "œ": "oe", "Œ": "OE", "æ": "ae", "Æ": "AE", "ß": "ss",
+                     "\u2018": "'", "\u2019": "'", "\u02bc": "'", "`": "'", "\u00b4": "'",
+                     "\u2010": "-", "\u2011": "-", "\u2012": "-", "\u2013": "-", "\u2014": "-", "_": "-"}
+    texte = texte or ""
+    for avant, apres in remplacements.items():
+        texte = texte.replace(avant, apres)
+    texte = unicodedata.normalize("NFKD", texte).encode("ascii", "ignore").decode("ascii")
+    texte = re.sub(r"[^A-Za-z0-9+?/\-:().,' ]", " ", texte)
+    return re.sub(r" {2,}", " ", texte).strip()
+
+
+def Nettoyer_noeuds_texte(noeud):
+    """ Applique Formate_texte_sepa à tous les noeuds texte du document XML """
+    for enfant in noeud.childNodes:
+        if enfant.nodeType == enfant.TEXT_NODE:
+            enfant.data = Formate_texte_sepa(enfant.data)
+        else:
+            Nettoyer_noeuds_texte(enfant)
+
+
 class Exporter():
     def __init__(self, idlot=None, request=None):
         self.idlot = idlot
@@ -51,6 +73,11 @@ class Exporter():
 
         # Vérifie qu'une séquence est bien définie pour chaque pièce
         self.erreurs.extend(["La séquence n'a pas été définie pour la famille %s" % piece.famille.nom for piece in self.pieces if not piece.sequence])
+
+        # La DGFiP n'accepte qu'un seul bloc PmtInf (donc une seule séquence) par fichier
+        if self.lot.modele.format == "public_dft" and len(self.liste_lots) > 1:
+            self.erreurs.append("Le format DFT n'accepte qu'une seule séquence par fichier. Ce lot contient les séquences %s : créez un lot distinct pour chaque séquence." % ", ".join([dict_lot["sequence"] for dict_lot in self.liste_lots]))
+            return False
 
         # Création du nom du fichier
         if self.lot.modele.format == "public_dft":
@@ -636,6 +663,9 @@ class Exporter():
                     Ustrd = doc.createElement("Ustrd")
                     RmtInf.appendChild(Ustrd)
                     Ustrd.appendChild(doc.createTextNode(self.lot.motif))
+
+        # Suppression des caractères non autorisés par la norme SEPA (accents, &, etc.)
+        Nettoyer_noeuds_texte(doc.documentElement)
 
         # Génération du XML
         xml = doc.toprettyxml(encoding=self.lot.modele.encodage.upper())
