@@ -1,11 +1,9 @@
 Noethysweb
 ==================
 Noethysweb est la version fullweb de Noethys, le logiciel de gestion libre et gratuit de gestion multi-activités pour 
-les accueils de loisirs, crèches, garderies périscolaires, cantines, TAP ou NAP, clubs sportifs et culturels...
+les accueils de loisirs, crèches, garderies périscolaires, cantines, clubs sportifs et culturels...
 
 Plus d'infos sur www.noethys.com
-
-###### Actuellement en test : Soyez vigilants lors d'une utilisation en production.
 
 Installation
 ------------------------
@@ -19,7 +17,6 @@ Installation
 - Allez dans le répertoire *noethysweb/noethysweb* et renommez le fichier *settings_production_modele.py* en *settings_production.py*.
 - Personnalisez le fichier *settings_production.py* selon vos besoins.
 - Exécutez les commandes suivantes depuis le répertoire *noethysweb* :
-    - `python3 manage.py makemigrations`
     - `python3 manage.py migrate`
     - `python3 manage.py collectstatic`
     - `python3 manage.py createsuperuser`
