@@ -1442,8 +1442,6 @@ class CategorieEvenement(models.Model):
     activite = models.ForeignKey(Activite, verbose_name="Activité", on_delete=models.CASCADE)
     nom = models.CharField(verbose_name="Nom", max_length=200)
     image = models.ImageField(verbose_name="Image", upload_to=get_uuid_path, blank=True, null=True)
-    choix_limitations = [(None, "Aucune"), ("1EVTJOUR", "1 événement par jour max"), ("2EVTJOUR", "2 événements par jour max"), ("3EVTJOUR", "3 événements par jour max"), ("1EVTSEMAINE", "1 événement par semaine max"), ("2EVTSEMAINE", "2 événements par semaine max"), ("3EVTSEMAINE", "3 événements par semaine max"), ("4EVTSEMAINE", "4 événements par semaine max")]
-    limitations = models.CharField(verbose_name="Limitation", max_length=100, choices=choix_limitations, default=None, blank=True, null=True)
     questions = models.CharField(verbose_name="Questions", max_length=300, blank=True, null=True)
 
     class Meta:
@@ -1456,6 +1454,31 @@ class CategorieEvenement(models.Model):
 
     def get_nom_image(self):
         return os.path.basename(self.image.url).split(".")[0] if self.image else None
+
+
+class LimitationCategorieEvenement(models.Model):
+    """ Règle de limitation des réservations d'une catégorie d'événements (ex : 3 événements max par semaine) """
+    idlimitation = models.AutoField(verbose_name="ID", db_column="IDlimitation", primary_key=True)
+    categorie = models.ForeignKey(CategorieEvenement, verbose_name="Catégorie", related_name="regles_limitation", on_delete=models.CASCADE)
+    nbre_max = models.PositiveSmallIntegerField(verbose_name="Nombre max.", validators=[MinValueValidator(1)])
+    choix_periodes = [("JOUR", "Par jour"), ("SEMAINE", "Par semaine"), ("MOIS", "Par mois"), ("ANNEE", "Par année"), ("PERIODE", "Sur une période donnée")]
+    periode = models.CharField(verbose_name="Période", max_length=20, choices=choix_periodes, default="SEMAINE")
+    date_debut = models.DateField(verbose_name="Du", blank=True, null=True)
+    date_fin = models.DateField(verbose_name="Au", blank=True, null=True)
+
+    class Meta:
+        db_table = 'evenements_categories_limitations'
+        verbose_name = "limitation de catégorie d'événements"
+        verbose_name_plural = "limitations de catégories d'événements"
+
+    def __str__(self):
+        return self.get_label()
+
+    def get_label(self):
+        texte = "%d événement%s max." % (self.nbre_max, "s" if self.nbre_max > 1 else "")
+        if self.periode == "PERIODE" and self.date_debut and self.date_fin:
+            return "%s du %s au %s" % (texte, self.date_debut.strftime("%d/%m/%Y"), self.date_fin.strftime("%d/%m/%Y"))
+        return "%s %s" % (texte, self.get_periode_display().lower())
 
 
 class Evenement(models.Model):

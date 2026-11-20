@@ -60,6 +60,11 @@ class View(CustomView, TemplateView):
         if idadresse_exp:
             self.Envoi_mail_confirmation(request=request, resultat=resultat, idadresse_exp=idadresse_exp)
 
+        # Si des réservations ont été refusées car elles dépassent une limitation de catégorie d'événements
+        if donnees.get("limitations_depassees"):
+            request.session["reservations_limitations_depassees"] = donnees["limitations_depassees"]
+            return HttpResponseRedirect(reverse_lazy("portail_planning", kwargs=self.kwargs))
+
         # Si des réservations ont été placées sur liste d'attente (séance devenue complète), on réaffiche le planning avec un avertissement
         if donnees.get("mises_en_attente"):
             request.session["reservations_mises_en_attente"] = self.Get_textes_mises_en_attente(donnees["mises_en_attente"])
@@ -111,6 +116,7 @@ class View(CustomView, TemplateView):
         context['jours_complets_semaine'] = JOURS_COMPLETS_SEMAINE
         context['data'] = self.Get_data_planning()
         context['reservations_mises_en_attente'] = self.request.session.pop("reservations_mises_en_attente", None)
+        context['reservations_limitations_depassees'] = self.request.session.pop("reservations_limitations_depassees", None)
         if context['data']["tarifs_credits_exists"]:
             context['form_forfaits'] = form_forfaits(inscriptions=context['data']["liste_inscriptions"], is_portail=True)
         return context

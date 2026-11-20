@@ -16,7 +16,7 @@ import json, datetime, decimal
 from collections import Counter, defaultdict
 from django.db.models import Count, Q
 from django.db.models.fields.files import FileField
-from core.models import Activite, ResponsableActivite, Agrement, Groupe, Unite, UniteRemplissage, CategorieEvenement, \
+from core.models import Activite, ResponsableActivite, Agrement, Groupe, Unite, UniteRemplissage, CategorieEvenement, LimitationCategorieEvenement, \
                         Evenement, CategorieTarif, NomTarif, Tarif, TarifLigne, CombiTarif, ModelePrestation, Ouverture, \
                         Remplissage, PortailPeriode, TypeCotisation, Vacance, Ferie, Inscription, Consommation
 
@@ -249,7 +249,7 @@ def Exporter_activite(activite, depuis=None, jusqua=None, tous_les_tarifs=False,
                 "Les jours fériés fixes légaux français sont contrôlés dans les ouvertures même s'ils ne sont pas saisis dans Noethysweb (voir calendrier.feries_fixes_legaux_non_saisis).",
             ],
         },
-        "dictionnaire_champs": Dictionnaire_champs([Activite, ResponsableActivite, Agrement, Groupe, Unite, UniteRemplissage, CategorieEvenement,
+        "dictionnaire_champs": Dictionnaire_champs([Activite, ResponsableActivite, Agrement, Groupe, Unite, UniteRemplissage, CategorieEvenement, LimitationCategorieEvenement,
                                                     Evenement, CategorieTarif, NomTarif, Tarif, TarifLigne, CombiTarif, ModelePrestation,
                                                     PortailPeriode, TypeCotisation]),
         "activite": Serialiser(activite),
@@ -263,7 +263,8 @@ def Exporter_activite(activite, depuis=None, jusqua=None, tous_les_tarifs=False,
         "tarifs": liste_tarifs,
         "modeles_prestations": [Serialiser(o, exclure=("activite",)) for o in ModelePrestation.objects.filter(activite=activite).order_by("pk")],
         "types_cotisations_associes": [Serialiser(o, exclure=("activite",)) for o in TypeCotisation.objects.filter(activite=activite).order_by("nom")],
-        "categories_evenements": [Serialiser(o, exclure=("activite",)) for o in CategorieEvenement.objects.filter(activite=activite).order_by("nom")],
+        "categories_evenements": [dict(Serialiser(o, exclure=("activite",)), regles_limitation=[Serialiser(r, exclure=("categorie",)) for r in o.regles_limitation.all().order_by("pk")])
+                                  for o in CategorieEvenement.objects.filter(activite=activite).order_by("nom")],
         "evenements": [Serialiser(o, exclure=("activite",)) for o in Evenement.objects.filter(activite=activite, date__range=(depuis, jusqua)).order_by("date", "pk")],
         "periodes_portail": [Serialiser(o, exclure=("activite",)) for o in PortailPeriode.objects.filter(activite=activite, date_fin__gte=depuis, date_debut__lte=jusqua).order_by("date_debut")],
         "ouvertures": liste_ouvertures,

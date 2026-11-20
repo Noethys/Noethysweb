@@ -9,7 +9,7 @@ from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.models import CategorieEvenement
 from parametrage.views.activites import Onglet
-from parametrage.forms.activites_evenements_categories import Formulaire
+from parametrage.forms.activites_evenements_categories import Formulaire, FORMSET_LIMITATIONS
 
 
 class Page(Onglet):
@@ -29,6 +29,8 @@ class Page(Onglet):
         context['onglet_actif'] = "evenements"
         context['url_liste'] = self.url_liste
         context['idactivite'] = self.Get_idactivite()
+        if hasattr(self, "object") and getattr(self, "verbe_action", None) in ("Ajouter", "Modifier"):
+            context["formset_limitations"] = FORMSET_LIMITATIONS(self.request.POST or None, instance=self.object, form_kwargs={"request": self.request})
         context['boutons_liste'] = [
             {"label": "Ajouter", "classe": "btn btn-success", "href": reverse_lazy(self.url_ajouter, kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-plus"},
             {"label": "Retour à la liste des événements", "classe": "btn btn-default", "href": reverse_lazy("activites_evenements_liste", kwargs={'idactivite': self.Get_idactivite()}), "icone": "fa fa-arrow-circle-o-left"},
@@ -40,6 +42,27 @@ class Page(Onglet):
         form_kwargs = super(Page, self).get_form_kwargs(**kwargs)
         form_kwargs["idactivite"] = self.Get_idactivite()
         return form_kwargs
+
+    def form_valid(self, form):
+        if getattr(self, "verbe_action", None) not in ("Ajouter", "Modifier"):
+            return super(Page, self).form_valid(form)
+
+        # Contrôle des règles de limitation
+        formset_limitations = FORMSET_LIMITATIONS(self.request.POST, instance=self.object, form_kwargs={"request": self.request})
+        if not formset_limitations.is_valid():
+            return self.render_to_response(self.get_context_data(form=form))
+
+        # Sauvegarde de la catégorie puis des règles
+        self.object = form.save()
+        for formline in formset_limitations.forms:
+            if formline.cleaned_data.get("DELETE") and formline.instance.pk:
+                formline.instance.delete()
+            elif formline.cleaned_data and not formline.cleaned_data.get("DELETE"):
+                instance = formline.save(commit=False)
+                instance.categorie = self.object
+                instance.save()
+
+        return super(Page, self).form_valid(form)
 
     def get_success_url(self):
         """ Renvoie vers la liste après le formulaire """

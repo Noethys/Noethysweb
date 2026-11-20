@@ -19,7 +19,7 @@
 {% block scripts %}
     <script type="text/javascript" src="{% static 'lib/clusterize/clusterize.min.js' %}"></script>
     <script type="text/javascript">var SYMBOLE_MONNAIE = "{{ SYMBOLE_MONNAIE }}";</script>
-    <script type="text/javascript" src="{% static "consommations/grille.js" %}"></script>
+    <script type="text/javascript" src="{% static "consommations/grille.js" %}?v={{ version_application }}"></script>
     <script type="text/javascript" src="{% static 'lib/moment/moment.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'lib/daterangepicker/daterangepicker.js' %}"></script>
 {% endblock scripts %}
@@ -44,6 +44,7 @@
         var liste_unites = JSON.parse('{{ data.liste_unites_json|escapejs }}');
         var liste_evenements = JSON.parse('{{ data.liste_evenements_json|escapejs }}');
         var dict_categories_evenements = JSON.parse('{{ data.dict_categories_evenements_json|escapejs }}');
+        var conso_limitations_evenements = JSON.parse('{{ data.conso_limitations_evenements_json|default:"{}"|escapejs }}');
         var liste_groupes = JSON.parse('{{ data.liste_groupes_json|escapejs }}');
         var dict_places = JSON.parse('{{ data.dict_places_json|escapejs }}');
         var dict_capacite = JSON.parse('{{ data.dict_capacite_json|escapejs }}');

@@ -38,6 +38,19 @@
 
 {% block contenu_page %}
 
+    {# Erreur : réservations refusées car elles dépassent une limitation de catégorie d'événements #}
+    {% if reservations_limitations_depassees %}
+        <div class="alert alert-danger d-print-none" role="alert" id="alerte_limitations_depassees">
+            <p class="mb-1">
+                <i class="fa fa-ban margin-r-5" aria-hidden="true"></i>
+                <strong>{% trans "Certaines réservations n'ont pas été enregistrées" %}</strong>
+            </p>
+            <ul class="mb-0">
+                {% for texte in reservations_limitations_depassees %}<li>{{ texte }}</li>{% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
     {# Avertissement : réservations placées sur liste d'attente lors du dernier enregistrement #}
     {% if reservations_mises_en_attente %}
         <div class="alert alert-warning d-print-none" role="alert" id="alerte_mises_en_attente">

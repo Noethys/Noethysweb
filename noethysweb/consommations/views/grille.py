@@ -20,7 +20,7 @@ from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite
                         Tarif, CombiTarif, TarifLigne, Quotient, Prestation, Aide, Deduction, CombiAide, Individu, Activite, Scolarite, QuestionnaireReponse, Inscription, \
                         Note, Information
 from core.utils import utils_dates, utils_decimal, utils_historique, utils_parametres, utils_formule_tarif
-from consommations.utils import utils_consommations
+from consommations.utils import utils_consommations, utils_limitations_evenements
 from consommations.forms.grille_questionnaire import Formulaire as Formulaire_questionnaire
 from cotisations.utils import utils_cotisations_manquantes
 from individus.utils import utils_pieces_manquantes
@@ -427,7 +427,10 @@ def Get_generic_data(data={}):
     data["liste_evenements"] = liste_evenements
     data["liste_images_evenements"] = [evt for evt in liste_evenements if evt.image]
     data["liste_categories_evenements"] = list({evt.categorie: True for evt in liste_evenements if evt.categorie}.keys())
-    data["dict_categories_evenements_json"] = json.dumps({categorie.pk: {"nom": categorie.nom, "image": categorie.get_nom_image(), "questions": categorie.questions, "limitations": categorie.limitations} for categorie in data["liste_categories_evenements"]})
+    limitations = utils_limitations_evenements.Get_donnees_grille(categories=data["liste_categories_evenements"], individus=[individu.pk for individu in data["liste_individus"]], date_min=data["date_min"], date_max=data["date_max"])
+    data["dict_categories_evenements_json"] = json.dumps({categorie.pk: {"nom": categorie.nom, "image": categorie.get_nom_image(), "questions": categorie.questions, "limitations": limitations["regles"].get(categorie.pk, [])} for categorie in data["liste_categories_evenements"]})
+    data["conso_limitations_evenements_json"] = json.dumps({"conso_existantes": limitations["conso_existantes"],
+        "individus": {individu.pk: individu.Get_nom() for individu in data["liste_individus"]} if limitations["regles"] else {}})
 
     # Importation des remplissages
     liste_remplissage = Remplissage.objects.filter(data["conditions_periodes"] & Q(activite=data['selection_activite']))

@@ -17,7 +17,8 @@ Le navigateur n'est jamais cru :
 import logging, json, datetime, uuid
 logger = logging.getLogger(__name__)
 from django.db.models import Q
-from core.models import Inscription, Prestation, Consommation, Deduction, Evenement, MemoJournee
+from core.models import Inscription, Prestation, Consommation, Deduction, Evenement, MemoJournee, CategorieEvenement
+from consommations.utils.utils_limitations_evenements import Controle_limitations
 from portail.templatetags.planning import is_suppression_allowed
 
 ETATS_POINTES = ("present", "absentj", "absenti")
@@ -207,13 +208,20 @@ def Securiser_donnees_save(request, donnees, data):
     cases_occupees = set()
 
     # Conso existantes en premier (pour la détection des doublons), y compris celles de la base absentes de la grille
-    liste_conso.sort(key=lambda item: 0 if _int(item[1].get("pk")) else 1)
+    # Puis nouvelles conso par date (pour le contrôle des limitations des catégories d'événements)
+    liste_conso.sort(key=lambda item: (0, "") if _int(item[1].get("pk")) else (1, str(item[1].get("date"))))
     for conso in Consommation.objects.filter(inscription__in=inscriptions.keys(), date__in={str(_date(c.get("date"))) for k, c in liste_conso if _date(c.get("date"))}).exclude(
             pk__in=suppressions_conso).values("date", "inscription_id", "unite_id", "evenement_id"):
         cases_occupees.add((str(conso["date"]), conso["inscription_id"], conso["unite_id"], conso["evenement_id"]))
 
     places = Places(activite=activite, inscriptions=inscriptions, suppressions_conso=suppressions_conso,
                     dates={_date(c.get("date")) for k, c in liste_conso if _date(c.get("date"))})
+
+    # Limitations des catégories d'événements : toutes les conso de la base sont comptées (sauf celles supprimées ici)
+    limitations = Controle_limitations(categories=list(CategorieEvenement.objects.filter(activite=activite)), individus={inscription.individu_id for inscription in inscriptions.values()},
+                                       dates={_date(c.get("date")) for k, c in liste_conso if not _int(c.get("pk")) and _int(c.get("evenement")) and _date(c.get("date"))},
+                                       exclure_pks=suppressions_conso)
+    limitations_depassees = []
 
     mises_en_attente = []
     consommations = {}
@@ -249,6 +257,13 @@ def Securiser_donnees_save(request, donnees, data):
             if idunite not in unites_multihoraires and key_occupation in cases_occupees:
                 rejets.append("doublon conso %s %s" % (conso.get("date"), conso.get("unite")))
                 continue
+            if idevenement and dict_evenements[idevenement].categorie_id:
+                message = limitations.Ajouter(idindividu=inscription.individu_id, idcategorie=dict_evenements[idevenement].categorie_id, date=date)
+                if message:
+                    rejets.append("limitation conso %s %s evenement %s" % (date, idunite, idevenement))
+                    if message not in limitations_depassees:
+                        limitations_depassees.append(message)
+                    continue
             if activite.validation_type == "MANUELLE":
                 etat = "demande"
             elif etat == "reservation" and places.Is_complet(date=date, idunite=idunite, idgroupe=inscription.groupe_id, evenement=dict_evenements.get(idevenement)):
@@ -366,5 +381,6 @@ def Securiser_donnees_save(request, donnees, data):
         "memos": memos,
         "conso_masquees": conso_masquees,
         "mises_en_attente": mises_en_attente,
+        "limitations_depassees": limitations_depassees,
         "suppressions": {"consommations": suppressions_conso, "prestations": suppressions_prestations, "memos": suppressions_memos},
     }

@@ -273,6 +273,11 @@ class Case_base {
         this.maj_affichage();
         maj_remplissage(this.date);
 
+        // Avertissement si une limitation de la catégorie d'événements est dépassée
+        if ((this.type_case === "event") && (conso.evenement)) {
+            signaler_limitations_evenements(this);
+        };
+
         // Calcul de la facturation
         if (maj_facturation === true) {
             facturer(this);
@@ -972,6 +977,8 @@ class Case_event extends Case_standard {
         if (this.dela == "False") {return false};
         // Vérifie la compatiblité avec les autres unités
         if (this.check_compatilites_unites() === false) {return false};
+        // Portail : refuse la réservation si elle dépasse une limitation de la catégorie d'événements
+        if ((mode === "portail") && !(autoriser_ajout_evenement(this))) {return false};
         // Vérifie s'il faut ouvrir la modal questions
         if (this.ouvrir_modal_questionnaire()) {return false}
         // Créer conso
@@ -1616,6 +1623,8 @@ $(document).ready(function() {
     });
 
     $('[name=bouton_enregistrer]').on('click', function(event) {
+        // Portail : contrôle des limitations des catégories d'événements avant d'afficher la boîte d'attente
+        if ((mode === "portail") && (!(valider_limitations_evenements()))) {return false};
         if (afficher_facturation === false) {
             // Si mode portail, on génére la facturation avant le submit
             var box = bootbox.dialog({
@@ -1658,7 +1667,10 @@ $(document).ready(function() {
 
         if ((mode === "portail") && (!(valider_limitations_evenements()))) {
             event.preventDefault();
+            // La boîte d'attente peut être en cours d'ouverture (une fermeture pendant l'animation est ignorée par Bootstrap)
+            $(".bootbox").one("shown.bs.modal", function () {bootbox.hideAll()});
             bootbox.hideAll();
+            setTimeout(function () {bootbox.hideAll()}, 600);
             return false;
         }
 
@@ -1685,40 +1697,143 @@ $(document).ready(function() {
 
 });
 
+// ---------------------- Limitations des catégories d'événements ----------------------
+// Toutes les consommations sont comptées, quel que soit leur état. La semaine va du lundi au dimanche (ISO).
+
+var MOIS_LIMITATIONS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+
+function get_periode_limitation(regle, date) {
+    // Renvoie {key, label} de la période de la règle contenant la date, ou null si la date n'est pas concernée
+    var d = moment(date, "YYYY-MM-DD");
+    if (regle.periode === "JOUR") {
+        return {key: d.format("YYYY-MM-DD"), label: "par jour (le " + d.format("DD/MM/YYYY") + ")"};
+    };
+    if (regle.periode === "SEMAINE") {
+        var lundi = d.clone().startOf("isoWeek");
+        return {key: lundi.format("YYYY-MM-DD"), label: "par semaine (semaine du " + lundi.format("DD/MM/YYYY") + ")"};
+    };
+    if (regle.periode === "MOIS") {
+        return {key: d.format("YYYY-MM"), label: "par mois (" + MOIS_LIMITATIONS[d.month()] + " " + d.year() + ")"};
+    };
+    if (regle.periode === "ANNEE") {
+        return {key: d.format("YYYY"), label: "par année (" + d.year() + ")"};
+    };
+    if ((regle.periode === "PERIODE") && regle.date_debut && regle.date_fin && (date >= regle.date_debut) && (date <= regle.date_fin)) {
+        return {key: "P", label: "entre le " + moment(regle.date_debut).format("DD/MM/YYYY") + " et le " + moment(regle.date_fin).format("DD/MM/YYYY")};
+    };
+    return null;
+};
+
+function get_depassements_limitations(filtre=null, ajout=false) {
+    // Renvoie la liste des dépassements : [{individu, categorie, texte_limite, nbre}]
+    // filtre (facultatif) : {individu, categorie, date} pour ne contrôler que les périodes contenant cette date
+    // ajout : si true, compte en plus une nouvelle réservation à la date du filtre (contrôle avant ajout)
+    var donnees = (typeof conso_limitations_evenements !== "undefined") ? conso_limitations_evenements : {};
+
+    // Consommations de la grille sur des événements dont la catégorie a des règles
+    var reservations = {};
+    var pk_grille = new Set();
+    $.each(dict_cases, function (key, case_tableau) {
+        if ((case_tableau.type_case !== "event") || !(case_tableau.evenement) || !(case_tableau.evenement.categorie)) {return true};
+        var idcategorie = case_tableau.evenement.categorie;
+        if (!(dict_categories_evenements[idcategorie]) || !(dict_categories_evenements[idcategorie].limitations.length)) {return true};
+        for (var conso of case_tableau.consommations) {
+            pk_grille.add(String(conso.pk));
+            var key = case_tableau.individu + "_" + idcategorie;
+            if (!(key in reservations)) {reservations[key] = {individu: case_tableau.individu, categorie: idcategorie, liste: []}};
+            reservations[key].liste.push({date: case_tableau.date, nouvelle: String(conso.pk).indexOf("-") >= 0});
+        };
+    });
+
+    // Consommations de la base absentes de la grille (hors période affichée, unités masquées...) et non supprimées
+    var suppressions = new Set(dict_suppressions.consommations.map(String));
+    for (var item of (donnees.conso_existantes || [])) {
+        var idconso = String(item[0]), idindividu = item[1], idcategorie = item[2], date = item[3];
+        if (pk_grille.has(idconso) || suppressions.has(idconso)) {continue};
+        var key = idindividu + "_" + idcategorie;
+        if (!(key in reservations)) {reservations[key] = {individu: idindividu, categorie: idcategorie, liste: []}};
+        reservations[key].liste.push({date: date, nouvelle: false});
+    };
+
+    // Réservation virtuelle (contrôle avant ajout)
+    if (filtre && ajout) {
+        var key = filtre.individu + "_" + filtre.categorie;
+        if (!(key in reservations)) {reservations[key] = {individu: filtre.individu, categorie: filtre.categorie, liste: []}};
+        reservations[key].liste.push({date: filtre.date, nouvelle: true});
+    };
+
+    // Comptage par période
+    var depassements = [];
+    $.each(reservations, function (key, groupe) {
+        if (filtre && ((groupe.individu != filtre.individu) || (groupe.categorie != filtre.categorie))) {return true};
+        var dict_categorie = dict_categories_evenements[groupe.categorie];
+        for (var regle of dict_categorie.limitations) {
+            var periodes = {};
+            for (var reservation of groupe.liste) {
+                var periode = get_periode_limitation(regle, reservation.date);
+                if (!(periode)) {continue};
+                if (filtre && (get_periode_limitation(regle, filtre.date) || {}).key !== periode.key) {continue};
+                if (!(periode.key in periodes)) {periodes[periode.key] = {label: periode.label, nbre: 0, nouvelles: 0}};
+                periodes[periode.key].nbre += 1;
+                if (reservation.nouvelle) {periodes[periode.key].nouvelles += 1};
+            };
+            $.each(periodes, function (key_periode, periode) {
+                // Seules les périodes où des réservations ont été ajoutées sont signalées
+                if ((periode.nbre > regle.nbre_max) && (periode.nouvelles > 0)) {
+                    depassements.push({
+                        individu: groupe.individu, categorie: groupe.categorie,
+                        texte_limite: regle.nbre_max + " événement" + (regle.nbre_max > 1 ? "s" : "") + " de type '" + dict_categorie.nom + "' " + periode.label,
+                        nbre: periode.nbre,
+                    });
+                };
+            });
+        };
+    });
+    return depassements;
+};
+
+function get_message_limitation(depassement) {
+    if (mode === "portail") {
+        return "Vous ne pouvez pas réserver plus de " + depassement.texte_limite + ".";
+    };
+    var donnees = (typeof conso_limitations_evenements !== "undefined") ? conso_limitations_evenements : {};
+    var nom = (donnees.individus || {})[depassement.individu] || "L'individu";
+    return "Attention : " + nom + " dépasse la limite de " + depassement.texte_limite + " (" + depassement.nbre + " événements). L'enregistrement reste possible.";
+};
+
+function get_filtre_limitation(case_tableau) {
+    return {individu: case_tableau.individu, categorie: case_tableau.evenement.categorie, date: case_tableau.date};
+};
+
+function autoriser_ajout_evenement(case_tableau) {
+    // Portail : appelée avant l'ajout d'une réservation sur un événement. Renvoie false (avec un message) si une limite serait dépassée
+    if (!(case_tableau.evenement) || !(case_tableau.evenement.categorie)) {return true};
+    var depassements = get_depassements_limitations(get_filtre_limitation(case_tableau), true);
+    if (depassements.length) {
+        // preventDuplicates désactivé : le message doit s'afficher à chaque clic refusé
+        toastr.error(get_message_limitation(depassements[0]), null, {preventDuplicates: false});
+        return false;
+    };
+    return true;
+};
+
+function signaler_limitations_evenements(case_tableau) {
+    // Grilles de gestion : appelée après l'ajout d'une consommation sur un événement. Simple avertissement (non bloquant)
+    if ((mode === "portail") || (mode === "pointeuse")) {return};
+    for (var depassement of get_depassements_limitations(get_filtre_limitation(case_tableau))) {
+        toastr.warning(get_message_limitation(depassement));
+    };
+};
+
 function valider_limitations_evenements() {
-    var resultat = true;
-    $.each(dict_categories_evenements, function (idcategorie, dict_categorie) {
-        if (dict_categorie.limitations) {
-            var type_limitation = dict_categorie.limitations.indexOf("SEMAINE") >= 0 ? "SEMAINE": "JOUR";
-            var nbre_evt_max = parseInt(dict_categorie.limitations.charAt(0));
-            var dict_evt_semaines = {};
-            var dict_evt_jours = {};
-            $.each(dict_cases, function (key, case_tableau) {
-                if ((case_tableau.type_case === "event") && (case_tableau.evenement) && (case_tableau.evenement.categorie === parseInt(idcategorie))) {
-                    for (var conso of case_tableau.consommations) {
-                        var date_moment = moment(conso.date);
-                        var key_date = date_moment.year().toString() + date_moment.week().toString()
-                        if (!(key_date in dict_evt_semaines)) {dict_evt_semaines[key_date] = 0;}
-                        if (!(key_date in dict_evt_jours)) {dict_evt_jours[key_date] = 0;}
-                        dict_evt_semaines[key_date] += 1;
-                        dict_evt_jours[key_date] += 1;
-                        if ((type_limitation === "SEMAINE") && (dict_evt_semaines[key_date] > nbre_evt_max)) {
-                            toastr.error("Vous ne pouvez pas réserver plus de " + nbre_evt_max + " événement" + (nbre_evt_max > 1 ? "s" : "") + " de type '" + dict_categorie.nom + "' par semaine");
-                            resultat = false;
-                            return false;
-                        }
-                        if ((type_limitation === "JOUR") && (dict_evt_jours[key_date] > nbre_evt_max)) {
-                            toastr.error("Vous ne pouvez pas réserver plus de " + nbre_evt_max + " événement" + (nbre_evt_max > 1 ? "s" : "") + " de type '" + dict_categorie.nom + "' par jour");
-                            resultat = false;
-                            return false;
-                        }
-                    }
-                }
-            })
-        }
-    })
-    return resultat;
-}
+    // Contrôle avant enregistrement au portail (le serveur refait le contrôle)
+    var depassements = get_depassements_limitations();
+    if (depassements.length) {
+        toastr.error(get_message_limitation(depassements[0]));
+        return false;
+    };
+    return true;
+};
 
 function Get_activite() {
     // return selection_activite;
