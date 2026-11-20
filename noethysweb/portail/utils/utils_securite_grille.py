@@ -16,9 +16,13 @@ Le navigateur n'est jamais cru :
 
 import logging, json, datetime, uuid
 logger = logging.getLogger(__name__)
+from django import forms
 from django.db.models import Q
+from django.http import QueryDict
+from django.core.serializers.json import DjangoJSONEncoder
 from core.models import Inscription, Prestation, Consommation, Deduction, Evenement, MemoJournee, CategorieEvenement
 from consommations.utils.utils_limitations_evenements import Controle_limitations
+from consommations.forms.grille_questionnaire import Formulaire as Formulaire_questionnaire
 from portail.templatetags.planning import is_suppression_allowed
 
 ETATS_POINTES = ("present", "absentj", "absenti")
@@ -170,6 +174,38 @@ class Places():
 
 # ------------------------------------- Enregistrement --------------------------------------------
 
+def Valider_reponses_questionnaire(request, evenement, extra):
+    """ Revalide les réponses au questionnaire d'un événement envoyées par le navigateur.
+    Renvoie (valide, extra) : extra est None si la catégorie n'a pas de questionnaire,
+    sinon les réponses nettoyées par le formulaire, au même format que Valid_form_questionnaire() """
+    if not evenement or not evenement.categorie_id or not evenement.categorie.questions:
+        return True, None
+    try:
+        reponses = json.loads(extra) if isinstance(extra, str) and extra else {}
+    except ValueError:
+        return False, None
+    if not isinstance(reponses, dict):
+        return False, None
+    # Reconstitue les données du formulaire selon le type de chaque champ
+    form = Formulaire_questionnaire(idevenement=evenement.pk, request=request)
+    donnees_form = QueryDict(mutable=True)
+    for nom_champ, champ in form.fields.items():
+        valeur = reponses.get(nom_champ)
+        if valeur is None or valeur is False or valeur == "":
+            continue
+        if isinstance(champ, forms.MultipleChoiceField):
+            # Liste de cases à cocher : stockée "a;b" par Formulaire.clean()
+            donnees_form.setlist(nom_champ, valeur.split(";") if isinstance(valeur, str) else [str(v) for v in valeur])
+        elif isinstance(champ, forms.BooleanField):
+            donnees_form[nom_champ] = "on"
+        else:
+            donnees_form[nom_champ] = str(valeur)
+    form = Formulaire_questionnaire(donnees_form, idevenement=evenement.pk, request=request)
+    if not form.is_valid():
+        return False, None
+    return True, json.dumps(form.cleaned_data, cls=DjangoJSONEncoder)
+
+
 def Securiser_donnees_save(request, donnees, data):
     """ Nettoie les données envoyées à Save_grille() par le planning du portail, puis recalcule la facturation côté serveur.
     data : résultat de planning.View.Get_data_planning() (inscriptions, dates, unités visibles...) """
@@ -197,7 +233,7 @@ def Securiser_donnees_save(request, donnees, data):
     liste_conso = [(key_case, conso) for key_case, liste in (donnees.get("consommations") or {}).items() for conso in (liste or []) if isinstance(conso, dict)]
     dict_db = {conso.pk: conso for conso in Consommation.objects.select_related("inscription").filter(
         pk__in=[_int(conso.get("pk")) for key_case, conso in liste_conso if _int(conso.get("pk"))], inscription__in=inscriptions.keys())}
-    dict_evenements = {evenement.pk: evenement for evenement in Evenement.objects.filter(activite=activite, visible_portail=True)}
+    dict_evenements = {evenement.pk: evenement for evenement in Evenement.objects.select_related("categorie").filter(activite=activite, visible_portail=True)}
 
     def Evenement_valide(idevenement, date, idunite, inscription):
         evenement = dict_evenements.get(idevenement)
@@ -241,6 +277,13 @@ def Securiser_donnees_save(request, donnees, data):
                 "prestation": conso_db.prestation_id, "quantite": conso_db.quantite, "evenement": conso_db.evenement_id, "badgeage_debut": conso_db.badgeage_debut,
                 "badgeage_fin": conso_db.badgeage_fin, "options": conso_db.options, "extra": conso_db.extra, "forfait": conso_db.forfait, "dirty": False,
             }
+            # Questionnaire de l'événement : les réponses peuvent être modifiées tant que la date est modifiable
+            if conso_db.evenement_id and str(conso_db.date) in dates_modifiables and conso.get("extra") != conso_db.extra:
+                valide, extra = Valider_reponses_questionnaire(request, dict_evenements.get(conso_db.evenement_id), conso.get("extra"))
+                if valide and extra and extra != conso_db.extra:
+                    dict_conso.update({"extra": extra, "dirty": True})
+                elif not valide:
+                    rejets.append("questionnaire conso %s" % conso_db.pk)
 
         else:
             # Nouvelle consommation : date modifiable, unité visible, inscription valide, état autorisé au portail
@@ -256,6 +299,10 @@ def Securiser_donnees_save(request, donnees, data):
             key_occupation = (str(date), inscription.pk, idunite, idevenement)
             if idunite not in unites_multihoraires and key_occupation in cases_occupees:
                 rejets.append("doublon conso %s %s" % (conso.get("date"), conso.get("unite")))
+                continue
+            valide_questionnaire, extra = Valider_reponses_questionnaire(request, dict_evenements.get(idevenement), conso.get("extra"))
+            if not valide_questionnaire:
+                rejets.append("questionnaire invalide conso %s %s evenement %s" % (date, idunite, idevenement))
                 continue
             if idevenement and dict_evenements[idevenement].categorie_id:
                 message = limitations.Ajouter(idindividu=inscription.individu_id, idcategorie=dict_evenements[idevenement].categorie_id, date=date)
@@ -279,7 +326,7 @@ def Securiser_donnees_save(request, donnees, data):
                 "heure_debut": _heure(conso.get("heure_debut")), "heure_fin": _heure(conso.get("heure_fin")), "etat": etat,
                 "categorie_tarif": inscription.categorie_tarif_id, "prestation": None,
                 "quantite": max(1, min(_int(conso.get("quantite")) or 1, 99)), "evenement": idevenement, "badgeage_debut": None, "badgeage_fin": None,
-                "options": conso.get("options") if isinstance(conso.get("options"), str) else None, "extra": None, "forfait": None, "dirty": True,
+                "options": conso.get("options") if isinstance(conso.get("options"), str) else None, "extra": extra, "forfait": None, "dirty": True,
             }
             for cle in ("nom_evenement", "description_evenement"):
                 if conso.get(cle):

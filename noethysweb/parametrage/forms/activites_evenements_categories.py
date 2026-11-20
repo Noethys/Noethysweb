@@ -44,26 +44,16 @@ class LimitationForm(FormulaireBase, forms.ModelForm):
         date_debut, date_fin = self.cleaned_data.get("date_debut"), self.cleaned_data.get("date_fin")
         if periode == "PERIODE":
             if not date_debut or not date_fin:
-                self.add_error("date_debut", "Vous devez saisir les dates de la période")
+                self.add_error("date_debut", "Dates obligatoires")
             elif date_debut > date_fin:
-                self.add_error("date_fin", "La date de fin doit être supérieure à la date de début")
+                self.add_error("date_fin", "Antérieure au début")
         else:
             self.cleaned_data["date_debut"] = None
             self.cleaned_data["date_fin"] = None
         return self.cleaned_data
 
 
-class BaseLimitationFormSet(BaseInlineFormSet):
-    def clean(self):
-        for form in self.forms:
-            if not self._should_delete_form(form):
-                if not form.is_valid() or len(form.cleaned_data) == 0:
-                    for field, erreur in form.errors.as_data().items():
-                        form.add_error(field, erreur[0].message)
-                        return
-
-
-FORMSET_LIMITATIONS = inlineformset_factory(CategorieEvenement, LimitationCategorieEvenement, form=LimitationForm, fk_name="categorie", formset=BaseLimitationFormSet,
+FORMSET_LIMITATIONS = inlineformset_factory(CategorieEvenement, LimitationCategorieEvenement, form=LimitationForm, fk_name="categorie", formset=BaseInlineFormSet,
                                             fields=["nbre_max", "periode", "date_debut", "date_fin"], extra=1, min_num=0,
                                             can_delete=True, validate_max=True, can_order=False)
 

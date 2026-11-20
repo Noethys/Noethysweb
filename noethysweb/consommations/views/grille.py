@@ -13,6 +13,7 @@ from django.template.context_processors import csrf
 from django.db.models import Q, Count, prefetch_related_objects
 from django.db import connection
 from django.core import serializers
+from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from django.templatetags.static import static
 from crispy_forms.utils import render_crispy_form
@@ -65,7 +66,8 @@ def Valid_form_questionnaire(request):
     form = Formulaire_questionnaire(request.POST, idevenement=int(request.POST["idevenement"]), request=request)
     if not form.is_valid():
         return JsonResponse({"erreur": "Vous devez obligatoirement renseigner les questions marquées d'une étoile (*)"}, status=401)
-    return JsonResponse({"succes": True, "reponses": json.dumps(form.cleaned_data)})
+    # DjangoJSONEncoder : les réponses décimales et dates sont stockées en texte ("12.50", "2026-12-02")
+    return JsonResponse({"succes": True, "reponses": json.dumps(form.cleaned_data, cls=DjangoJSONEncoder)})
 
 
 def Get_individus(request):
