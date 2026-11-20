@@ -20,6 +20,7 @@ from core.utils import utils_dates
 from core.models import FiltreListe, QuestionnaireQuestion, LISTE_CONTROLES_QUESTIONNAIRES
 from core.widgets import DatePickerWidget, SelectionActivitesWidget, DateTimePickerWidget
 from consommations.widgets import SelectionEcolesWidget, SelectionClassesWidget, SelectionNiveauxWidget, SelectionEvenementsWidget
+from cotisations.widgets import SelectionTypesCotisationsWidget, SelectionUnitesCotisationsWidget
 
 
 def Get_form_filtres(request):
@@ -57,14 +58,14 @@ def Get_form_filtres(request):
 
         if filtre.startswith("igenerique:"):
             nom_champ = filtre.split(":")[1]
-            filtres.extend(["%s:%s" % (txt, nom_champ) for txt in ("ipresent", "iscolarise", "datenaiss", "age")])
+            filtres.extend(["%s:%s" % (txt, nom_champ) for txt in ("ipresent", "iscolarise", "iadherent", "datenaiss", "age")])
             filtres.extend(["%s%s" % ("" if nom_champ == "pk" else nom_champ + "__", txt) for txt in ("nom", "prenom", "rue_resid", "cp_resid", "ville_resid", "tel_domicile", "tel_mobile", "mail", "date_creation")])
             for question in QuestionnaireQuestion.objects.filter(categorie="individu").exclude(controle__in=["couleur", "codebarres"]).order_by("ordre"):
                 filtres.append(("iquestion%s:%s" % (question.pk, nom_champ)))
 
         if filtre.startswith("fgenerique:"):
             nom_champ = filtre.split(":")[1]
-            filtres.extend(["%s:%s" % (txt, nom_champ) for txt in ("fpresent", "fscolarise")])
+            filtres.extend(["%s:%s" % (txt, nom_champ) for txt in ("fpresent", "fscolarise", "fadherent")])
             filtres.extend(["%s%s" % ("" if nom_champ == "pk" else nom_champ + "__", txt) for txt in ("nom", "rue_resid", "cp_resid", "ville_resid", "date_creation")])
             for question in QuestionnaireQuestion.objects.filter(categorie="famille").exclude(controle__in=["couleur", "codebarres"]).order_by("ordre"):
                 filtres.append(("fquestion%s:%s" % (question.pk, nom_champ)))
@@ -98,6 +99,9 @@ def Ajouter_filtre(request):
 
         if key.startswith("critere"):
             type_critere = key.replace("critere_", "")
+            if type_critere == "adhesions_familiales":
+                dict_resultat["criteres"].append(valeur in (True, "true", "on"))
+                continue
             if "datetime" in type_critere:
                 dict_resultat["criteres"].append(str(dateutil.parser.parse(valeur, dayfirst=True)))
             elif "date_naiss" in type_critere:
@@ -111,7 +115,7 @@ def Ajouter_filtre(request):
                 dict_resultat["criteres"].append(str(utils_dates.ConvertDateFRtoDate(valeur)))
             else:
                 dict_resultat["criteres"].append(valeur)
-            if not valeur and key not in ("critere_date_optionnelle", "critere_periode_naiss"):
+            if not valeur and key not in ("critere_date_optionnelle", "critere_date_validite", "critere_periode_naiss"):
                 return JsonResponse({"erreur": "Vous n'avez pas renseigné correctement le critère"}, status=401)
             if key not in ("critere_etats", "critere_etats_inscriptions", "critere_periode_naiss"):
                 liste_labels_criteres.append("'%s'" % valeur)
@@ -131,18 +135,33 @@ def Ajouter_filtre(request):
         "ECOLES": "est scolarisé sur une sélection d'écoles au", "CLASSES": "est scolarisé sur une sélection de classes",
         "NIVEAUX": "est scolarisé sur une sélection de niveaux scolaires au", "NON_SCOLARISE": "n'est pas scolarisé au",
         "EST_NUL": "est vide", "EST_PAS_NUL": "n'est pas vide",
+        "ADHERENT_TYPES": "est adhérent à une sélection de types d'adhésions", "ADHERENT_UNITES": "est adhérent à une sélection d'unités d'adhésion",
+        "NON_ADHERENT_TYPES": "n'est adhérent à aucun type d'adhésion d'une sélection",
     }
 
     if valeurs["champ"].startswith("ipresent") or valeurs["champ"].startswith("iscolarise"): valeurs["label_champ"] = "L'individu"
     if valeurs["champ"].startswith("fpresent") or valeurs["champ"].startswith("fscolarise"): valeurs["label_champ"] = "L'un des membres de la famille"
+    if valeurs["champ"].startswith("iadherent"): valeurs["label_champ"] = "L'individu"
+    if valeurs["champ"].startswith("fadherent"): valeurs["label_champ"] = "La famille ou l'un de ses membres"
     if valeurs["champ"].startswith("datenaiss"): valeurs["label_champ"] = "La date de naissance de l'individu"
     if valeurs["champ"].startswith("age"): valeurs["label_champ"] = "L'âge de l'individu"
     if valeurs["champ"].startswith("fprelevement_actif"): valeurs["label_champ"] = "Le prélèvement activé pour la famille"
     if dict_resultat["condition"] in ("INSCRIT", "PRESENT", "SANS_RESA"):
         if "liste_groupes_activites" not in valeurs and "liste_activites" not in valeurs and "liste_groupes" not in valeurs:
             return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
+    if dict_resultat["condition"] in ("ADHERENT_TYPES", "ADHERENT_UNITES", "NON_ADHERENT_TYPES"):
+        if "liste_types_cotisations" not in valeurs and "liste_unites_cotisations" not in valeurs:
+            return JsonResponse({"erreur": "Vous devez cocher au moins une ligne dans la liste"}, status=401)
     dict_resultat["label_filtre"] = "%s %s" % (valeurs["label_champ"], traductions_criteres[dict_resultat["condition"].replace("*", "")])
-    if liste_labels_criteres:
+    if dict_resultat["condition"] in ("ADHERENT_TYPES", "ADHERENT_UNITES", "NON_ADHERENT_TYPES"):
+        # Libellé spécifique aux filtres Adhérent
+        if valeurs["champ"].startswith("fadherent") and dict_resultat["condition"] == "NON_ADHERENT_TYPES":
+            dict_resultat["label_filtre"] = "Ni la famille ni ses membres ne sont adhérents à une sélection de types d'adhésions"
+        if valeurs.get("critere_date_validite"):
+            dict_resultat["label_filtre"] += " au '%s'" % valeurs["critere_date_validite"]
+        if valeurs.get("critere_adhesions_familiales") in (True, "true", "on"):
+            dict_resultat["label_filtre"] += " (adhésions familiales incluses)"
+    elif liste_labels_criteres:
         dict_resultat["label_filtre"] += " " + " et ".join(liste_labels_criteres)
 
     # Enregistrement du filtre
@@ -171,6 +190,7 @@ class Formulaire(FormulaireBase, forms.Form):
     condition3 = forms.ChoiceField(label="Condition", choices=[("VRAI", "Est vrai"), ("FAUX", "Est faux")], required=False)
     condition4 = forms.ChoiceField(label="Condition", choices=[("INSCRIT", "Est inscrit sur l'une des activités suivantes"), ("PRESENT", "A des consommations sur l'une des activités suivantes"), ("EVENEMENTS", "A des consommations sur l'un des événements suivants"), ("SANS_RESA", "Est sans consommations sur l'une des activités suivantes")], required=False)
     condition5 = forms.ChoiceField(label="Condition", choices=[("*EGAL", "Est égal à"), ("*DIFFERENT", "Est différent de"), ("*CONTIENT", "Contient"), ("*NE_CONTIENT_PAS", "Ne contient pas"), ("*EST_VIDE", "Est vide"), ("*EST_PAS_VIDE", "N'est pas vide")], required=False)
+    condition7 = forms.ChoiceField(label="Condition", choices=[("ADHERENT_TYPES", "Est adhérent à l'un des types d'adhésions suivants"), ("ADHERENT_UNITES", "Est adhérent à l'une des unités d'adhésion suivantes"), ("NON_ADHERENT_TYPES", "N'est adhérent à aucun des types d'adhésions suivants")], required=False)
     condition6 = forms.ChoiceField(label="Condition", choices=[("ECOLES", "Est scolarisé dans l'une des écoles suivantes"), ("CLASSES", "Est scolarisé dans l'une des classes suivantes"), ("NIVEAUX", "Est scolarisé dans l'un des niveaux suivants"), ("NON_SCOLARISE", "N'est pas scolarisé")], required=False)
     critere_texte = forms.CharField(label="Texte", required=False)
     critere_date = forms.DateField(label="Date", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False)
@@ -200,6 +220,10 @@ class Formulaire(FormulaireBase, forms.Form):
     critere_etats_inscriptions = forms.MultipleChoiceField(label="Statuts", required=False, widget=Select2MultipleWidget(),
         choices=[("ok", "Validé"), ("attente", "En attente"), ("refus", "Refusé")], initial=["ok",])
     critere_periode_naiss = forms.CharField(label="Né(e) entre", required=False, widget=forms.TextInput(attrs={"placeholder": "jj/mm/aaaa - jj/mm/aaaa"}))
+    critere_date_validite = forms.DateField(label="Valide au", widget=DatePickerWidget(attrs={'afficher_fleches': False}), required=False, help_text="Facultatif. Laissez vide pour ignorer la période de validité de l'adhésion.")
+    critere_types_adhesions = forms.CharField(label="Types d'adhésions", required=False, widget=SelectionTypesCotisationsWidget(attrs={"name": "liste_types_cotisations"}))
+    critere_unites_adhesions = forms.CharField(label="Unités d'adhésion", required=False, widget=SelectionUnitesCotisationsWidget(attrs={"name": "liste_unites_cotisations"}))
+    critere_adhesions_familiales = forms.BooleanField(label="Inclure les adhésions familiales de ses familles", required=False)
 
     dict_types = {
         'BinaryField': {'condition': 'condition5', 'criteres': {"*EGAL": ["critere_texte"], "*DIFFERENT": ["critere_texte"], "*CONTIENT": ["critere_texte"], "*NE_CONTIENT_PAS": ["critere_texte"], "*EST_VIDE": [], "*EST_PAS_VIDE": []}},
@@ -216,6 +240,8 @@ class Formulaire(FormulaireBase, forms.Form):
         'fpresent': {'condition': 'condition4', 'criteres': {"INSCRIT": ["critere_activites", "critere_date_optionnelle", "critere_etats_inscriptions", "critere_periode_naiss"], "PRESENT": ["critere_activites", "critere_date_min", "critere_date_max", "critere_etats", "critere_periode_naiss"], "EVENEMENTS": ["critere_evenements", "critere_etats", "critere_periode_naiss"], "SANS_RESA": ["critere_activites", "critere_date_min", "critere_date_max"]}},
         'iscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"], "NON_SCOLARISE": ["critere_date"]}},
         'fscolarise': {'condition': 'condition6', 'criteres': {"ECOLES": ["critere_date", "critere_ecoles"], "CLASSES": ["critere_classes"], "NIVEAUX": ["critere_date", "critere_niveaux"], "NON_SCOLARISE": ["critere_date"]}},
+        'iadherent': {'condition': 'condition7', 'criteres': {"ADHERENT_TYPES": ["critere_date_validite", "critere_types_adhesions", "critere_adhesions_familiales"], "ADHERENT_UNITES": ["critere_date_validite", "critere_unites_adhesions", "critere_adhesions_familiales"], "NON_ADHERENT_TYPES": ["critere_date_validite", "critere_types_adhesions", "critere_adhesions_familiales"]}},
+        'fadherent': {'condition': 'condition7', 'criteres': {"ADHERENT_TYPES": ["critere_date_validite", "critere_types_adhesions"], "ADHERENT_UNITES": ["critere_date_validite", "critere_unites_adhesions"], "NON_ADHERENT_TYPES": ["critere_date_validite", "critere_types_adhesions"]}},
         'fprelevement_actif': {'condition': 'condition3', 'criteres': {"VRAI": [], "FAUX": []}},
         'datenaiss': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_date"], "DIFFERENT": ["critere_date"], "SUPERIEUR": ["critere_date"], "SUPERIEUR_EGAL": ["critere_date"], "INFERIEUR": ["critere_date"], "INFERIEUR_EGAL": ["critere_date"], "COMPRIS": ["critere_date_min", "critere_date_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'age': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
@@ -241,6 +267,8 @@ class Formulaire(FormulaireBase, forms.Form):
         # Liste uniquement les activités accessibles pour l'utilisateur
         self.fields["critere_activites"].widget.request = self.request
         self.fields["critere_evenements"].widget.request = self.request
+        self.fields["critere_types_adhesions"].widget.request = self.request
+        self.fields["critere_unites_adhesions"].widget.request = self.request
 
         # Affiche uniquement les événéments récents
         self.fields["critere_evenements"].widget.attrs["date_min"] = datetime.date.today() - datetime.timedelta(days=365)
@@ -264,6 +292,8 @@ class Formulaire(FormulaireBase, forms.Form):
                 if nom_filtre == "fpresent": nom_champ = "Famille : Inscrit/présent"
                 if nom_filtre == "iscolarise": nom_champ = "Individu : Scolarisé"
                 if nom_filtre == "fscolarise": nom_champ = "Famille : Scolarisé"
+                if nom_filtre == "iadherent": nom_champ = "Individu : Adhérent"
+                if nom_filtre == "fadherent": nom_champ = "Famille : Adhérent"
                 if nom_filtre == "fprelevement_actif": nom_champ = "Famille : Prélèvement actif"
                 if nom_filtre == "datenaiss": nom_champ = "Individu : Date de naissance"
                 if nom_filtre == "age": nom_champ = "Individu : Age"
@@ -325,8 +355,11 @@ class Formulaire(FormulaireBase, forms.Form):
                 ctrl_criteres = self.dict_types[type_champ]["criteres"][dict_filtre["condition"]]
                 for index, nom_ctrl in enumerate(ctrl_criteres):
                     # Si datetime
-                    if index <= len(dict_filtre["criteres"])-1 and "-" in dict_filtre["criteres"][index] and ":" in dict_filtre["criteres"][index]:
+                    if index <= len(dict_filtre["criteres"])-1 and isinstance(dict_filtre["criteres"][index], str) and "-" in dict_filtre["criteres"][index] and ":" in dict_filtre["criteres"][index]:
                         dict_filtre["criteres"][index] = datetime.datetime.strptime(dict_filtre["criteres"][index], "%Y-%m-%d %H:%M:%S")
+                    # Ignore les valeurs vides mémorisées sous la forme "None"
+                    if index <= len(dict_filtre["criteres"])-1 and dict_filtre["criteres"][index] == "None":
+                        continue
                     # Importation de la valeur par défaut
                     try:
                         self.fields[nom_ctrl].initial = dict_filtre["criteres"][index]
@@ -345,6 +378,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("condition4"),
             Field("condition5"),
             Field("condition6"),
+            Field("condition7"),
             Field("critere_activites"),
             Field("critere_evenements"),
             Field("critere_texte"),
@@ -370,6 +404,10 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("critere_etats"),
             Field("critere_etats_inscriptions"),
             Field("critere_periode_naiss"),
+            Field("critere_date_validite"),
+            Field("critere_types_adhesions"),
+            Field("critere_unites_adhesions"),
+            Field("critere_adhesions_familiales"),
             ButtonHolder(
                 Div(
                     HTML("""<button type="button" class="btn btn-primary" onclick="valider_ajout_filtre()"><i class="fa fa-check margin-r-5"></i>Valider</button>"""),
@@ -397,7 +435,7 @@ EXTRA_HTML = """
         };
     }
     
-    $("#id_condition1, #id_condition2, #id_condition3, #id_condition4, #id_condition5, #id_condition6").on("change", function(event){
+    $("#id_condition1, #id_condition2, #id_condition3, #id_condition4, #id_condition5, #id_condition6, #id_condition7").on("change", function(event){
         $("[id*=div_id_critere]").hide();
         var nom_champ = $("#id_champ").val();
         var type_champ = dict_champs[nom_champ].type;

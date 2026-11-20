@@ -138,6 +138,8 @@
                         valeurs[this.name] = [$(this).val()];
                     };
                 };
+            } else if (this.type === "checkbox") {
+                if (this.name) {valeurs[this.name] = $(this).prop("checked")};
             } else {
                 if (this.name) {valeurs[this.name] = $(this).val()};
             };

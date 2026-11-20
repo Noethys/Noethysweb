@@ -18,7 +18,7 @@ from django.forms import Form
 from core.views.base import CustomView
 from core.views.mydatatableview import MyDatatableView, MyMultipleDatatableView
 from core.utils import utils_texte, utils_historique, utils_dates
-from core.models import FiltreListe, Consommation, Inscription, Scolarite, Individu, LISTE_ETATS_CONSO, QuestionnaireReponse
+from core.models import FiltreListe, Consommation, Inscription, Scolarite, Individu, LISTE_ETATS_CONSO, QuestionnaireReponse, Cotisation, Rattachement
 
 
 class Page(CustomView):
@@ -192,6 +192,42 @@ class Liste_commun():
 
                     # Création de la condition
                     conditions &= Q(**{champ + "__in": resultats})
+
+                # Filtres spéciaux : Adhérent
+                if filtre["condition"] in ("ADHERENT_TYPES", "ADHERENT_UNITES", "NON_ADHERENT_TYPES"):
+                    type_champ, champ = champ.split(":")
+                    condition_adhesion = Q(pk=None)
+                    try:
+                        type_criteres, liste_criteres = criteres[1].split(":")
+                        liste_criteres = [int(x) for x in liste_criteres.split(";") if x]
+                        if type_criteres == "types_cotisations": condition_adhesion = Q(type_cotisation__in=liste_criteres)
+                        if type_criteres == "unites_cotisations": condition_adhesion = Q(unite_cotisation__in=liste_criteres)
+                    except:
+                        pass
+
+                    # Date de validité facultative
+                    if criteres and criteres[0] and criteres[0] != "None":
+                        condition_adhesion &= Q(date_debut__lte=criteres[0], date_fin__gte=criteres[0])
+
+                    adhesions = Cotisation.objects.filter(condition_adhesion)
+                    adhesions_individuelles = adhesions.filter(individu__isnull=False)
+                    if type_champ == "fadherent":
+                        # Familles adhérentes + familles dont au moins un membre est adhérent
+                        resultats = set(adhesions.filter(famille__isnull=False).values_list("famille_id", flat=True))
+                        resultats |= set(Rattachement.objects.filter(individu__in=adhesions_individuelles.values("individu"), famille__isnull=False).values_list("famille_id", flat=True))
+                    else:
+                        # Individus adhérents
+                        resultats = set(adhesions_individuelles.values_list("individu_id", flat=True))
+                        # Option : inclure les adhésions familiales des familles de l'individu
+                        if len(criteres) > 2 and criteres[2] in (True, "True", "true"):
+                            adhesions_familiales = adhesions.filter(individu__isnull=True, famille__isnull=False)
+                            resultats |= set(Rattachement.objects.filter(famille__in=adhesions_familiales.values("famille"), individu__isnull=False).values_list("individu_id", flat=True))
+
+                    # Création de la condition
+                    if filtre["condition"] == "NON_ADHERENT_TYPES":
+                        conditions &= ~Q(**{champ + "__in": resultats})
+                    else:
+                        conditions &= Q(**{champ + "__in": resultats})
 
                 # Filtre pour champ crypté
                 if "*" in filtre["condition"]:
