@@ -22,6 +22,7 @@ from core.models import Ouverture, Remplissage, UniteRemplissage, Vacance, Unite
 from core.utils import utils_dates, utils_decimal, utils_historique, utils_parametres, utils_formule_tarif
 from consommations.utils import utils_consommations, utils_limitations_evenements
 from consommations.forms.grille_questionnaire import Formulaire as Formulaire_questionnaire
+from portail.forms.fiche import FormulaireBase as FormulaireBasePortail
 from cotisations.utils import utils_cotisations_manquantes
 from individus.utils import utils_pieces_manquantes
 
@@ -53,6 +54,9 @@ def Get_form_questionnaire(request):
     conso = json.loads(request.POST.get("conso", "{}"))
     idevenement = int(request.POST.get("idevenement", 0))
     form_detail = Formulaire_questionnaire(request=request, idevenement=idevenement, initial=json.loads((conso.get("extra", "{}")) or "{}") if conso else {})
+    if request.POST.get("version_bootstrap") == "5":
+        # Portail : rendu Bootstrap 5 avec attributs ARIA
+        FormulaireBasePortail.Appliquer_version_bootstrap(form_detail, 5)
     form_html = render_crispy_form(form_detail, context=context)
     return JsonResponse({"form_html": form_html})
 
