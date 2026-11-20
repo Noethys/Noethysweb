@@ -1929,6 +1929,21 @@ function search_unites_liees(case_tableau) {
                     // Recherche les états des unités solidaires
                     for (var idunite_solidaire of solidaires_unite) {
                         let key_unite_solidaire = conso.date + "_" + conso.inscription + "_" + idunite_solidaire;
+                        // Unité événementielle : on coche l'événement uniquement s'il est seul ce jour-là (sinon choix laissé à l'usager)
+                        if (dict_unites[idunite_solidaire].type === "Evenement") {
+                            var cases_events = [];
+                            $.each(dict_cases, function (key_event, case_event) {
+                                if ((case_event.type_case === "event") && (case_event.key_case_parente === key_unite_solidaire) &&
+                                    (case_event.evenement.groupe === case_event.groupe) && (case_event.evenement.visible_portail === true)) {
+                                    cases_events.push(case_event);
+                                }
+                            });
+                            if ((cases_events.length === 1) && !(cases_events[0].has_conso())) {
+                                // ajouter() applique les contrôles : délai, incompatibilités, limitations, questionnaire
+                                cases_events[0].ajouter();
+                            }
+                            continue;
+                        }
                         // On ne crée la conso que si la case solidaire est vide (sinon doublon à chaque clic sur la ligne)
                         if ((key_unite_solidaire in dict_cases) && (dict_cases[key_unite_solidaire].consommations.length === 0)) {
                             var case_solidaire = dict_cases[key_unite_solidaire]

@@ -137,6 +137,15 @@ class Grille:
                         case["consos"] = []
                 for solidaire in unite.solidaires.all():
                     key_sol = "%s_%s_%s" % (date, ins.pk, solidaire.pk)
+                    if solidaire.type == "Evenement":
+                        # Coche l'événement uniquement s'il est seul ce jour-là
+                        evenements = [e for e in Evenement.objects.filter(date=date, unite=solidaire, groupe=ins.groupe, visible_portail=True)
+                                      if "event_%s_%s" % (key_sol, e.pk) in self.cases]
+                        if len(evenements) == 1:
+                            key_event = "event_%s_%s" % (key_sol, evenements[0].pk)
+                            if not self.cases[key_event]["consos"]:
+                                self.cases[key_event]["consos"] = [self.dict_conso(ins, date, solidaire.pk, str(uuid.uuid4()), evenement=evenements[0].pk, dirty=True)]
+                        continue
                     if key_sol in self.cases and not self.cases[key_sol]["consos"]:
                         self.cases[key_sol]["consos"] = [self.dict_conso(ins, date, solidaire.pk, str(uuid.uuid4()), etat=conso["etat"], dirty=True)]
 
@@ -499,6 +508,38 @@ class Portail(Scenarios, Base):
         g.cases[key]["consos"] = [g.dict_conso(self.ins1, D1, self.sortie.pk, str(uuid.uuid4()), evenement=self.zoo_g2.pk, dirty=True)]
         g.enregistrer()
         self.assertEqual(Consommation.objects.count(), 0)
+
+    def test_solidaire_evenement_unique(self):
+        """ Journée solidaire de Sortie : un seul événement ce jour-là -> il est coché automatiquement """
+        self.preparer_evenements()
+        self.piscine.delete()
+        self.journee.solidaires.add(self.sortie)
+        g = self.grille(); g.ajouter(self.ins1, D1, self.journee); g.enregistrer()
+        self.assertEqual(sorted((c[2], c[3]) for c in self.etat()[0]), [("Journée", 0), ("Sortie", self.zoo.pk)])
+        self.assertEqual(self.montants(), [10.0, 15.0])
+        self.assertStable()
+
+    def test_solidaire_evenement_plusieurs(self):
+        """ Plusieurs événements ce jour-là -> rien n'est coché (choix laissé à l'usager) """
+        self.preparer_evenements()
+        self.journee.solidaires.add(self.sortie)
+        g = self.grille(); g.ajouter(self.ins1, D1, self.journee); g.enregistrer()
+        self.assertEqual([c[2] for c in self.etat()[0]], ["Journée"])
+
+    def test_solidaire_evenement_masque(self):
+        """ L'événement non visible sur le portail n'est pas compté : seul le visible est coché """
+        self.preparer_evenements()
+        Evenement.objects.filter(pk=self.piscine.pk).update(visible_portail=False)
+        self.journee.solidaires.add(self.sortie)
+        g = self.grille(); g.ajouter(self.ins1, D1, self.journee); g.enregistrer()
+        self.assertEqual(sorted((c[2], c[3]) for c in self.etat()[0]), [("Journée", 0), ("Sortie", self.zoo.pk)])
+
+    def test_solidaire_sans_evenement(self):
+        """ Aucun événement ce jour-là -> pas de conso orpheline sur l'unité événementielle """
+        self.preparer_evenements()
+        self.journee.solidaires.add(self.sortie)
+        g = self.grille(); g.ajouter(self.ins1, D2, self.journee); g.enregistrer()
+        self.assertEqual([c[2] for c in self.etat()[0]], ["Journée"])
 
 
 class Gestion(Scenarios, Base):
