@@ -17,8 +17,8 @@ from core.forms.base import FormulaireBase
 class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget())
     compte = forms.ModelChoiceField(label="Compte", widget=Select2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}), queryset=CompteBancaire.objects.none(), required=True)
-    mode = forms.ModelChoiceField(label="Mode de règlement", queryset=ModeReglement.objects.all().order_by("label"), widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains']), required=True)
-    emetteur = forms.ModelChoiceField(label="Emetteur", queryset=Emetteur.objects.all().order_by("nom"), widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'], dependent_fields={"mode": "mode"}), required=False)
+    mode = forms.ModelChoiceField(label="Mode de règlement", queryset=ModeReglement.objects.all().order_by("label"), widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'], queryset=ModeReglement.objects.all().order_by("label")), required=True)
+    emetteur = forms.ModelChoiceField(label="Emetteur", queryset=Emetteur.objects.all().order_by("nom"), widget=ModelSelect2Widget({"lang": "fr", "data-width": "100%", "data-minimum-input-length": 0}, search_fields=['nom__icontains'], dependent_fields={"mode": "mode"}, queryset=Emetteur.objects.all().order_by("nom")), required=False)
 
     def __init__(self, *args, **kwargs):
         super(Formulaire, self).__init__(*args, **kwargs)
