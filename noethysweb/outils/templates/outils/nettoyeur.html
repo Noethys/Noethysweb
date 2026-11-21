@@ -1,0 +1,874 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .nettoyeur-barre {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        #parametres_nettoyeur fieldset legend {
+            text-align: left;
+            margin-bottom: 8px;
+        }
+        .nettoyeur-categorie .card-header {
+            background-color: rgba(0, 0, 0, .03);
+        }
+        .nettoyeur-operation {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 12px 16px;
+            border-bottom: 1px solid #dee2e6;
+            transition: background-color .15s;
+        }
+        .nettoyeur-operation:last-child {
+            border-bottom: none;
+        }
+        .nettoyeur-operation.cochee {
+            background-color: rgba(60, 141, 188, .06);
+        }
+        .nettoyeur-operation.vide .nettoyeur-titre, .nettoyeur-operation.vide .nettoyeur-description {
+            color: #6c757d;
+        }
+        .nettoyeur-operation > input[type="checkbox"] {
+            margin-top: 5px;
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+        }
+        .nettoyeur-corps {
+            flex: 1;
+            min-width: 0;
+        }
+        .nettoyeur-titre {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        .nettoyeur-titre .badge {
+            font-weight: normal;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .nettoyeur-description {
+            font-size: 0.875rem;
+            color: #495057;
+            line-height: 1.4;
+        }
+        .nettoyeur-delai {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .nettoyeur-delai select, .nettoyeur-delai input {
+            height: 26px;
+            padding: 0 6px;
+            font-size: 0.8rem;
+            width: auto;
+        }
+        .nettoyeur-exclus, .nettoyeur-detail {
+            margin-top: 4px;
+            font-size: 0.8rem;
+        }
+        .nettoyeur-resultat {
+            min-width: 130px;
+            text-align: right;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+        .nettoyeur-resultat .nettoyeur-nbre {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .nettoyeur-gain {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+            border-radius: 6px;
+            padding: 10px 12px;
+        }
+        .nettoyeur-gain .valeur {
+            font-size: 1.5rem;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+        #modal_apercu .table td {
+            vertical-align: middle;
+        }
+        #apercu_table_wrapper {
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        #confirmation_progression .fa {
+            width: 18px;
+        }
+    </style>
+{% endblock styles %}
+
+{% block contenu_page %}
+
+    <div class="row">
+
+        {# Paramètres #}
+        <div class="col-lg-3">
+            <div class="card card-default">
+                <div class="card-header with-border">
+                    <h3 class="card-title"><i class="fa fa-gear margin-r-5" aria-hidden="true"></i> Paramètres</h3>
+                </div>
+                <div class="card-body" id="parametres_nettoyeur">
+                    <div class="form-group">
+                        <label for="delai_global">Délai de conservation</label>
+                        <select id="delai_global" class="form-control">
+                            <option value="" selected>Pour toutes les opérations...</option>
+                            {% for mois, label in choix_delais %}
+                                <option value="{{ mois }}">{{ label }}</option>
+                            {% endfor %}
+                            <option value="perso">Date personnalisée</option>
+                        </select>
+                        <input type="date" id="date_globale" class="form-control mt-2" style="display: none;" max="{{ date_jour|date:'Y-m-d' }}" aria-label="Date personnalisée">
+                        <small class="form-text text-muted">
+                            Chaque opération peut aussi avoir son propre délai. Les délais choisis sont enregistrés pour tous les utilisateurs
+                            et utilisés par l'encart de la page d'accueil.
+                        </small>
+                        <button type="button" class="btn btn-link btn-sm p-0 mt-1" onclick="retablir_delais()"><i class="fa fa-undo margin-r-5" aria-hidden="true"></i>Rétablir les délais conseillés</button>
+                        <div id="delais_enregistres" class="small text-success" role="status" aria-live="polite"></div>
+                    </div>
+
+                    <fieldset class="form-group">
+                        <legend>Catégories</legend>
+                        {% for categorie in categories %}
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input filtre-categorie" id="filtre_{{ categorie.code }}" value="{{ categorie.code }}" checked>
+                                <label class="custom-control-label font-weight-normal" for="filtre_{{ categorie.code }}">{{ categorie.label }}</label>
+                            </div>
+                        {% endfor %}
+                    </fieldset>
+
+                    <fieldset class="form-group">
+                        <legend>Affichage</legend>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_suggestions" checked>
+                            <label class="custom-control-label font-weight-normal" for="option_suggestions">Suggestions en premier</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="option_masquer_vides">
+                            <label class="custom-control-label font-weight-normal" for="option_masquer_vides">Masquer les opérations sans élément</label>
+                        </div>
+                    </fieldset>
+
+                    <div class="nettoyeur-gain mb-3" aria-live="polite">
+                        <div>Gain de la sélection</div>
+                        <div class="valeur" id="gain_octets">-</div>
+                        <div id="gain_elements">Lancez l'analyse</div>
+                    </div>
+
+                    <p class="small text-muted mb-2">
+                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        Seules les familles jamais utilisées peuvent être supprimées. Les autres peuvent seulement être anonymisées : leurs inscriptions, prestations, factures et règlements sont toujours conservés.
+                    </p>
+                    <p class="small text-muted mb-0">
+                        <i class="fa fa-history" aria-hidden="true"></i>
+                        {% if dernier_nettoyage %}
+                            Dernier nettoyage le {{ dernier_nettoyage.horodatage|date:"d/m/Y à H:i" }}.
+                        {% else %}
+                            Aucun nettoyage effectué à ce jour.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {# Opérations #}
+        <div class="col-lg-9">
+            <div class="alert alert-info">
+                <i class="icon fa fa-info-circle" aria-hidden="true"></i>
+                Cliquez sur <strong>Analyser</strong> pour rechercher les données obsolètes. Les nettoyages conseillés sont mis en avant et cochés automatiquement.
+                Vérifiez le détail avec <strong>Aperçu</strong>, puis cliquez sur <strong>Nettoyer la sélection</strong>. Pensez à <a href="{% url 'sauvegarde_creer' %}" class="alert-link" style="color: inherit; text-decoration: underline;">créer une sauvegarde</a> avant de nettoyer.
+            </div>
+
+            {# Boutons d'action #}
+            <div class="nettoyeur-barre">
+                <button type="button" id="bouton_analyser" class="btn btn-primary" onclick="analyser()">
+                    <i class="fa fa-search margin-r-5" aria-hidden="true"></i> Analyser
+                </button>
+                <button type="button" id="bouton_nettoyer" class="btn btn-danger" onclick="ouvrir_confirmation()">
+                    <i class="fa fa-trash margin-r-5" aria-hidden="true"></i> Nettoyer la sélection <span id="nbre_selection" class="badge badge-light">0</span>
+                </button>
+                <a href="{% url 'nettoyeur_registre' %}" class="btn btn-default">
+                    <i class="fa fa-book margin-r-5" aria-hidden="true"></i> Registre des nettoyages
+                </a>
+                <span id="analyse_attente" class="text-muted" role="status" aria-live="polite" style="display: none;">
+                    <i class="fa fa-refresh fa-spin margin-r-5" aria-hidden="true"></i> Analyse en cours : <span id="analyse_progression"></span>
+                </span>
+            </div>
+
+            {% for categorie in categories %}
+                <div class="card card-default nettoyeur-categorie" data-categorie="{{ categorie.code }}">
+                    <div class="card-header with-border">
+                        <h3 class="card-title"><i class="fa {{ categorie.icone }} margin-r-5" aria-hidden="true"></i> {{ categorie.label }}</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" onclick="cocher_categorie('{{ categorie.code }}', true)">Tout cocher</button>
+                            <button type="button" class="btn btn-tool" onclick="cocher_categorie('{{ categorie.code }}', false)">Tout décocher</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0 nettoyeur-liste">
+                        {% for operation in categorie.operations %}
+                            <div class="nettoyeur-operation" id="operation_{{ operation.code }}" data-code="{{ operation.code }}" data-ordre="{{ forloop.counter }}">
+                                <input type="checkbox" class="coche-operation" id="coche_{{ operation.code }}" value="{{ operation.code }}" aria-describedby="description_{{ operation.code }}">
+                                <div class="nettoyeur-corps">
+                                    <label class="nettoyeur-titre mb-0" for="coche_{{ operation.code }}">
+                                        <i class="fa {{ operation.icone }} margin-r-5 text-muted" aria-hidden="true"></i>{{ operation.titre }}
+                                        <span class="badge badge-warning badge-suggestion" style="display: none;">Conseillé</span>
+                                        {% if operation.irreversible %}
+                                            <span class="badge badge-light border">Irréversible</span>
+                                        {% else %}
+                                            <span class="badge badge-light border">Réversible</span>
+                                        {% endif %}
+                                    </label>
+                                    <div class="nettoyeur-description" id="description_{{ operation.code }}">{{ operation.description }}</div>
+                                    {% if operation.delai_defaut %}
+                                        <div class="nettoyeur-delai">
+                                            <label for="delai_{{ operation.code }}" class="mb-0 font-weight-normal text-muted">{{ operation.label_date }}</label>
+                                            <select id="delai_{{ operation.code }}" class="form-control select-delai" data-code="{{ operation.code }}" data-defaut="{{ operation.delai_defaut }}">
+                                                {% for mois, label in choix_delais %}
+                                                    <option value="{{ mois }}" {% if not operation.delai_date and mois == operation.delai_mois %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                                <option value="perso" {% if operation.delai_date %}selected{% endif %}>Date personnalisée</option>
+                                            </select>
+                                            <input type="date" class="form-control date-perso" id="date_{{ operation.code }}" data-code="{{ operation.code }}" {% if operation.delai_date %}value="{{ operation.delai_date }}"{% else %}style="display: none;"{% endif %} max="{{ date_jour|date:'Y-m-d' }}" aria-label="Date personnalisée">
+                                            <span class="texte-date text-muted" id="texte_date_{{ operation.code }}"></span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="nettoyeur-exclus text-warning" id="exclus_{{ operation.code }}" style="display: none;"></div>
+                                    <div class="nettoyeur-detail text-muted" id="detail_{{ operation.code }}" style="display: none;"></div>
+                                </div>
+                                <div class="nettoyeur-resultat" id="resultat_{{ operation.code }}" aria-live="polite">
+                                    <span class="text-muted">-</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    {# Modal de l'aperçu #}
+    <div class="modal fade" id="modal_apercu" tabindex="-1" role="dialog" aria-labelledby="modal_apercu_titre" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modal_apercu_titre">Aperçu</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p id="apercu_introduction" class="text-muted small"></p>
+                    <div class="d-flex mb-2" style="gap: 8px;">
+                        <input type="search" id="apercu_recherche" class="form-control form-control-sm" placeholder="Rechercher..." aria-label="Rechercher dans la liste">
+                        <button type="button" class="btn btn-default btn-sm apercu-selection text-nowrap flex-shrink-0" onclick="apercu_cocher(true)">Tout cocher</button>
+                        <button type="button" class="btn btn-default btn-sm apercu-selection text-nowrap flex-shrink-0" onclick="apercu_cocher(false)">Tout décocher</button>
+                    </div>
+                    <div id="apercu_table_wrapper">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="apercu-selection" style="width: 30px;"><span class="sr-only">Inclure</span></th>
+                                    <th>Elément</th>
+                                    <th>Détail</th>
+                                    <th class="text-right">Taille</th>
+                                </tr>
+                            </thead>
+                            <tbody id="apercu_lignes"></tbody>
+                        </table>
+                    </div>
+                    <p id="apercu_tronque" class="small text-muted mt-2 mb-0" style="display: none;">Seuls les 1000 premiers éléments sont affichés.</p>
+                </div>
+                <div class="modal-footer">
+                    <span class="mr-auto small text-muted" id="apercu_compteur"></span>
+                    <button type="button" class="btn btn-primary apercu-selection" onclick="apercu_valider()"><i class="fa fa-check margin-r-5" aria-hidden="true"></i> Valider la sélection</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5" aria-hidden="true"></i> Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Modal de confirmation #}
+    <div class="modal fade" id="modal_confirmation" tabindex="-1" role="dialog" aria-labelledby="modal_confirmation_titre" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modal_confirmation_titre"><i class="fa fa-exclamation-triangle text-danger margin-r-5" aria-hidden="true"></i> Confirmer le nettoyage</h4>
+                    <button type="button" class="close bouton-fermer-confirmation" data-dismiss="modal" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm mb-3">
+                        <tbody id="confirmation_lignes"></tbody>
+                    </table>
+                    <div id="confirmation_saisie">
+                        <div id="confirmation_avertissements"></div>
+                        <div class="alert alert-danger">
+                            Les opérations irréversibles ne pourront pas être annulées. <a href="{% url 'sauvegarde_creer' %}" target="_blank" class="alert-link">Créez une sauvegarde</a> avant de continuer.
+                        </div>
+                        <label for="saisie_confirmation">Tapez <code>{{ mot_confirmation }}</code> pour confirmer</label>
+                        <input type="text" id="saisie_confirmation" class="form-control" autocomplete="off" placeholder="{{ mot_confirmation }}">
+                        <div class="invalid-feedback" id="erreur_confirmation">Tapez {{ mot_confirmation }} pour confirmer.</div>
+                    </div>
+                    <div id="confirmation_resultat" style="display: none;" aria-live="polite"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="bouton_lancer_nettoyage" onclick="lancer_nettoyage()"><i class="fa fa-trash margin-r-5" aria-hidden="true"></i> Nettoyer</button>
+                    <button type="button" class="btn btn-danger bouton-fermer-confirmation" data-dismiss="modal" id="bouton_annuler_confirmation"><i class="fa fa-ban margin-r-5" aria-hidden="true"></i> <span>Annuler</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var OPERATIONS = {{ operations_json|safe }};
+        var ORDRE_OPERATIONS = Object.keys(OPERATIONS);
+        var MOT_CONFIRMATION = "{{ mot_confirmation }}";
+        var resultats = {};
+        var exclusions = {};
+        var apercu_code = null;
+        var analyse_en_cours = false;
+
+        // ------------------------------------------------------------------
+        // Outils
+        // ------------------------------------------------------------------
+
+        function formate_taille(octets) {
+            if (!octets) {return "0 octet";}
+            var unites = ["octets", "Ko", "Mo", "Go"];
+            var index = 0;
+            while (octets >= 1024 && index < unites.length - 1) {
+                octets = octets / 1024;
+                index++;
+            }
+            return (index === 0 ? octets : octets.toFixed(1).replace(".", ",")) + " " + unites[index];
+        }
+
+        function formate_nombre(nombre) {
+            return (nombre || 0).toLocaleString("fr-FR");
+        }
+
+        // Echappe un texte pour l'insérer dans du HTML, y compris dans un attribut (guillemets et apostrophes compris)
+        function echappe(texte) {
+            if (texte === null || texte === undefined) {return "";}
+            return String(texte).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+        }
+
+        function date_iso(date) {
+            var mois = ("0" + (date.getMonth() + 1)).slice(-2);
+            var jour = ("0" + date.getDate()).slice(-2);
+            return date.getFullYear() + "-" + mois + "-" + jour;
+        }
+
+        function date_fr(iso) {
+            var morceaux = iso.split("-");
+            return morceaux[2] + "/" + morceaux[1] + "/" + morceaux[0];
+        }
+
+        // Renvoie la date limite (format ISO) d'une opération ou "" si elle n'utilise pas de date
+        function get_date_limite(code) {
+            if (!OPERATIONS[code].delai_defaut) {return "";}
+            var valeur = $("#delai_" + code).val();
+            if (valeur === "perso") {
+                return $("#date_" + code).val() || "";
+            }
+            var date = new Date();
+            date.setMonth(date.getMonth() - parseInt(valeur));
+            return date_iso(date);
+        }
+
+        function maj_texte_date(code) {
+            var date_limite = get_date_limite(code);
+            $("#texte_date_" + code).text(date_limite ? "(avant le " + date_fr(date_limite) + ")" : "");
+        }
+
+        // ------------------------------------------------------------------
+        // Délais
+        // ------------------------------------------------------------------
+
+        function appliquer_delai_global() {
+            var valeur = $("#delai_global").val();
+            $("#date_globale").toggle(valeur === "perso");
+            if (valeur === "" || (valeur === "perso" && !$("#date_globale").val())) {return;}
+            $(".select-delai").each(function() {
+                var code = $(this).data("code");
+                $(this).val(valeur);
+                if (valeur === "perso") {
+                    $("#date_" + code).val($("#date_globale").val());
+                }
+                $("#date_" + code).toggle(valeur === "perso");
+                maj_texte_date(code);
+                invalider_resultat(code);
+            });
+            enregistrer_delais();
+        }
+
+        function retablir_delais() {
+            $("#delai_global").val("");
+            $("#date_globale").hide();
+            $(".select-delai").each(function() {
+                var code = $(this).data("code");
+                $(this).val(String($(this).data("defaut")));
+                $("#date_" + code).val("").hide();
+                maj_texte_date(code);
+                invalider_resultat(code);
+            });
+            enregistrer_delais();
+        }
+
+        // Enregistrement des délais pour toute l'instance (seuls ceux qui diffèrent du délai conseillé sont mémorisés)
+        var minuteur_enregistrement = null;
+        function enregistrer_delais() {
+            clearTimeout(minuteur_enregistrement);
+            minuteur_enregistrement = setTimeout(function() {
+                var delais = {};
+                $(".select-delai").each(function() {
+                    var code = $(this).data("code");
+                    var valeur = $(this).val();
+                    if (valeur === "perso") {
+                        if ($("#date_" + code).val()) {delais[code] = {date: $("#date_" + code).val()};}
+                    } else if (valeur !== String($(this).data("defaut"))) {
+                        delais[code] = {mois: parseInt(valeur)};
+                    }
+                });
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_nettoyeur_memoriser_delais' %}",
+                    data: {delais: JSON.stringify(delais), csrfmiddlewaretoken: "{{ csrf_token }}"},
+                    dataType: "json",
+                    success: function(data) {
+                        $("#delais_enregistres").text("Délais enregistrés").show().delay(2000).fadeOut();
+                        if (data.ignores.length) {
+                            toastr.warning("Délai non enregistré (date trop récente) pour : " + echappe(data.ignores.join(", ")));
+                        }
+                    },
+                    error: function(data) {
+                        toastr.error(echappe(data.responseJSON ? data.responseJSON.erreur : "Les délais n'ont pas pu être enregistrés"));
+                    }
+                });
+            }, 400);
+        }
+
+        function invalider_resultat(code) {
+            if (resultats[code]) {
+                delete resultats[code];
+                delete exclusions[code];
+                $("#resultat_" + code).html("<span class='text-muted'>A analyser de nouveau</span>");
+                $("#exclus_" + code + ", #detail_" + code).hide();
+                $("#operation_" + code).removeClass("vide").find(".badge-suggestion").hide();
+                maj_gain();
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Analyse
+        // ------------------------------------------------------------------
+
+        function analyser() {
+            if (analyse_en_cours) {return;}
+            var codes = ORDRE_OPERATIONS.slice();
+            for (var i = 0; i < codes.length; i++) {
+                var code = codes[i];
+                if (OPERATIONS[code].delai_defaut && !get_date_limite(code)) {
+                    toastr.error("Saisissez la date personnalisée de l'opération '" + echappe(OPERATIONS[code].titre) + "'");
+                    return;
+                }
+            }
+            analyse_en_cours = true;
+            resultats = {};
+            exclusions = {};
+            $("#bouton_analyser").prop("disabled", true);
+            $("#analyse_attente").show();
+            $.each(codes, function(index, code) {
+                $("#resultat_" + code).html("<i class='fa fa-refresh fa-spin text-muted' aria-hidden='true'></i><span class='sr-only'>Analyse en cours</span>");
+                $("#exclus_" + code + ", #detail_" + code).hide();
+            });
+            var file = codes.slice();
+            var nbre_termines = 0;
+            $("#analyse_progression").text("0 / " + codes.length);
+
+            // Deux analyses simultanées au maximum
+            function suivante() {
+                if (file.length === 0) {return;}
+                var code = file.shift();
+                var date_limite = get_date_limite(code);
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_nettoyeur_analyser' %}",
+                    data: {code: code, date_limite: date_limite, csrfmiddlewaretoken: "{{ csrf_token }}"},
+                    dataType: "json",
+                    success: function(data) {
+                        data.date_limite = date_limite;
+                        resultats[code] = data;
+                        afficher_resultat(code);
+                    },
+                    error: function(data) {
+                        var erreur = data.responseJSON ? data.responseJSON.erreur : "Erreur lors de l'analyse";
+                        $("#resultat_" + code).html("<span class='text-danger'><i class='fa fa-exclamation-circle' aria-hidden='true'></i> Erreur</span>");
+                        $("#detail_" + code).text(erreur).removeClass("text-muted").addClass("text-danger").show();
+                    },
+                    complete: function() {
+                        nbre_termines++;
+                        $("#analyse_progression").text(nbre_termines + " / " + codes.length);
+                        if (nbre_termines === codes.length) {
+                            fin_analyse();
+                        } else {
+                            suivante();
+                        }
+                    }
+                });
+            }
+            suivante();
+            suivante();
+        }
+
+        function fin_analyse() {
+            analyse_en_cours = false;
+            $("#bouton_analyser").prop("disabled", false);
+            $("#analyse_attente").hide();
+            // Les suggestions sont cochées automatiquement
+            $.each(resultats, function(code, data) {
+                $("#coche_" + code).prop("checked", data.suggestion && data.resultat.nbre > 0);
+            });
+            maj_affichage();
+            maj_gain();
+        }
+
+        function afficher_resultat(code) {
+            var data = resultats[code];
+            var resultat = data.resultat;
+            var operation = OPERATIONS[code];
+            var html = "";
+            if (resultat.nbre === 0) {
+                html = "<span class='text-muted'>Aucun élément</span>";
+            } else {
+                html = "<div class='nettoyeur-nbre'>" + resultat.nbre_texte + " élément" + (resultat.nbre > 1 ? "s" : "") + "</div>";
+                if (resultat.octets) {
+                    html += "<div>" + (resultat.octets_estimes ? "environ " : "") + resultat.octets_texte + "</div>";
+                }
+                if (resultat.apercu !== null) {
+                    html += "<a href='#' onclick='ouvrir_apercu(\"" + code + "\"); return false;'><i class='fa fa-eye' aria-hidden='true'></i> Aperçu</a>";
+                    html += "<div class='small text-warning' id='nbre_exclus_" + code + "'></div>";
+                }
+            }
+            $("#resultat_" + code).html(html);
+            $("#operation_" + code).toggleClass("vide", resultat.nbre === 0).find(".badge-suggestion").toggle(data.suggestion);
+            if (resultat.message_exclus) {
+                $("#exclus_" + code).html("<i class='fa fa-shield' aria-hidden='true'></i> " + echappe(resultat.message_exclus)).show();
+            }
+            if (resultat.detail) {
+                $("#detail_" + code).text(resultat.detail).removeClass("text-danger").addClass("text-muted").show();
+            }
+            maj_exclusions(code);
+        }
+
+        // ------------------------------------------------------------------
+        // Affichage et sélection
+        // ------------------------------------------------------------------
+
+        function maj_affichage() {
+            var masquer_vides = $("#option_masquer_vides").prop("checked");
+            var suggestions_en_premier = $("#option_suggestions").prop("checked");
+            $(".filtre-categorie").each(function() {
+                $(".nettoyeur-categorie[data-categorie='" + $(this).val() + "']").toggle($(this).prop("checked"));
+            });
+            $(".nettoyeur-liste").each(function() {
+                var liste = $(this);
+                var lignes = liste.children(".nettoyeur-operation").get();
+                lignes.sort(function(a, b) {
+                    var sa = 0, sb = 0;
+                    if (suggestions_en_premier) {
+                        var ra = resultats[$(a).data("code")], rb = resultats[$(b).data("code")];
+                        sa = ra && ra.suggestion ? 0 : 1;
+                        sb = rb && rb.suggestion ? 0 : 1;
+                    }
+                    return sa !== sb ? sa - sb : $(a).data("ordre") - $(b).data("ordre");
+                });
+                $.each(lignes, function(index, ligne) {
+                    liste.append(ligne);
+                    var data = resultats[$(ligne).data("code")];
+                    $(ligne).toggle(!(masquer_vides && data && data.resultat.nbre === 0));
+                });
+            });
+            $(".coche-operation").each(function() {
+                $(this).closest(".nettoyeur-operation").toggleClass("cochee", $(this).prop("checked"));
+            });
+        }
+
+        function cocher_categorie(categorie, etat) {
+            $(".nettoyeur-categorie[data-categorie='" + categorie + "'] .coche-operation").each(function() {
+                var data = resultats[$(this).val()];
+                $(this).prop("checked", etat && (!data || data.resultat.nbre > 0));
+            });
+            maj_affichage();
+            maj_gain();
+        }
+
+        function get_selection() {
+            var selection = [];
+            $.each(ORDRE_OPERATIONS, function(index, code) {
+                var data = resultats[code];
+                if ($("#coche_" + code).prop("checked") && $(".nettoyeur-categorie[data-categorie='" + OPERATIONS[code].categorie + "']").is(":visible") && data && data.resultat.nbre > 0) {
+                    selection.push(code);
+                }
+            });
+            return selection;
+        }
+
+        function get_nbre_retenu(code) {
+            var resultat = resultats[code].resultat;
+            var nbre_exclus = exclusions[code] ? exclusions[code].length : 0;
+            return Math.max(resultat.nbre - nbre_exclus, 0);
+        }
+
+        function get_octets_retenus(code) {
+            var resultat = resultats[code].resultat;
+            if (!exclusions[code] || !resultat.apercu) {return resultat.octets;}
+            var octets_exclus = 0;
+            $.each(resultat.apercu, function(index, element) {
+                if (exclusions[code].indexOf(element.id) !== -1) {octets_exclus += element.octets;}
+            });
+            if (resultat.octets_estimes) {octets_exclus = octets_exclus * 0.65;}
+            return Math.max(resultat.octets - octets_exclus, 0);
+        }
+
+        // Liste des éléments présentés lors de l'analyse et non exclus (null si la liste n'est pas détaillée)
+        function get_inclusions(code) {
+            var resultat = resultats[code].resultat;
+            if (resultat.apercu === null || resultat.apercu_tronque) {return null;}
+            var exclus = exclusions[code] || [];
+            return $.map(resultat.apercu, function(element) {
+                return exclus.indexOf(element.id) === -1 ? element.id : null;
+            });
+        }
+
+        function maj_gain() {
+            var selection = get_selection();
+            var nbre = 0, octets = 0;
+            $.each(selection, function(index, code) {
+                nbre += get_nbre_retenu(code);
+                octets += get_octets_retenus(code);
+            });
+            $("#nbre_selection").text(selection.length);
+            if ($.isEmptyObject(resultats)) {
+                $("#gain_octets").text("-");
+                $("#gain_elements").text("Lancez l'analyse");
+            } else {
+                $("#gain_octets").text(formate_taille(octets));
+                $("#gain_elements").text(formate_nombre(nbre) + " élément" + (nbre > 1 ? "s" : "") + " dans " + selection.length + " opération" + (selection.length > 1 ? "s" : ""));
+            }
+        }
+
+        function maj_exclusions(code) {
+            var nbre = exclusions[code] ? exclusions[code].length : 0;
+            $("#nbre_exclus_" + code).text(nbre ? nbre + " exclu" + (nbre > 1 ? "s" : "") : "");
+        }
+
+        // ------------------------------------------------------------------
+        // Aperçu
+        // ------------------------------------------------------------------
+
+        function ouvrir_apercu(code) {
+            apercu_code = code;
+            var operation = OPERATIONS[code];
+            var resultat = resultats[code].resultat;
+            var exclus = exclusions[code] || [];
+            $("#modal_apercu_titre").text(operation.titre);
+            $("#apercu_introduction").text(operation.selection_individuelle ? "Décochez les éléments que vous souhaitez conserver." : "Liste des éléments concernés.");
+            $(".apercu-selection").toggle(operation.selection_individuelle);
+            var lignes = [];
+            $.each(resultat.apercu, function(index, element) {
+                var label = element.url ? "<a href='" + echappe(element.url) + "' target='_blank'>" + echappe(element.label) + "</a>" : echappe(element.label);
+                var case_a_cocher = operation.selection_individuelle ? "<td><input type='checkbox' class='coche-apercu' value='" + echappe(element.id) + "' aria-label='Inclure " + echappe(element.label) + "' " + (exclus.indexOf(element.id) === -1 ? "checked" : "") + "></td>" : "";
+                lignes.push("<tr data-recherche='" + echappe((element.label + " " + element.info).toLowerCase()) + "'>" + case_a_cocher + "<td>" + label + "</td><td class='small text-muted'>" + echappe(element.info) + "</td><td class='text-right small'>" + (element.octets ? formate_taille(element.octets) : "") + "</td></tr>");
+            });
+            $("#apercu_lignes").html(lignes.join(""));
+            $("#apercu_tronque").toggle(resultat.apercu_tronque);
+            $("#apercu_recherche").val("");
+            maj_compteur_apercu();
+            $("#modal_apercu").modal("show");
+        }
+
+        function maj_compteur_apercu() {
+            var total = $(".coche-apercu").length;
+            if (total) {
+                $("#apercu_compteur").text($(".coche-apercu:checked").length + " / " + total + " élément(s) retenu(s)");
+            } else {
+                $("#apercu_compteur").text(resultats[apercu_code].resultat.apercu.length + " élément(s)");
+            }
+        }
+
+        function apercu_cocher(etat) {
+            $("#apercu_lignes tr:visible .coche-apercu").prop("checked", etat);
+            maj_compteur_apercu();
+        }
+
+        function apercu_valider() {
+            exclusions[apercu_code] = $(".coche-apercu:not(:checked)").map(function() {return $(this).val();}).get();
+            maj_exclusions(apercu_code);
+            maj_gain();
+            $("#modal_apercu").modal("hide");
+        }
+
+        // ------------------------------------------------------------------
+        // Nettoyage
+        // ------------------------------------------------------------------
+
+        function ouvrir_confirmation() {
+            if ($.isEmptyObject(resultats)) {
+                toastr.error("Cliquez d'abord sur Analyser");
+                return;
+            }
+            var selection = get_selection();
+            if (selection.length === 0) {
+                toastr.error("Cochez au moins une opération contenant des éléments à nettoyer");
+                return;
+            }
+            var lignes = [], avertissements = [];
+            $.each(selection, function(index, code) {
+                var resultat = resultats[code].resultat;
+                var octets = get_octets_retenus(code);
+                lignes.push("<tr id='ligne_confirmation_" + code + "'><td><span class='statut-confirmation'></span> " + echappe(OPERATIONS[code].titre) + "</td><td class='text-right text-nowrap'>" + formate_nombre(get_nbre_retenu(code)) + (octets ? " · " + formate_taille(octets) : "") + "</td></tr>");
+                if (resultat.message_exclus) {
+                    avertissements.push("<div class='alert alert-warning small'><i class='fa fa-shield margin-r-5' aria-hidden='true'></i>" + echappe(resultat.message_exclus) + "</div>");
+                }
+            });
+            $("#confirmation_lignes").html(lignes.join(""));
+            $("#confirmation_avertissements").html(avertissements.join(""));
+            $("#confirmation_saisie").show();
+            $("#confirmation_resultat").hide().html("");
+            $("#saisie_confirmation").val("").removeClass("is-invalid");
+            $("#bouton_lancer_nettoyage").show().prop("disabled", false);
+            $("#bouton_annuler_confirmation").removeClass("btn-default").addClass("btn-danger").find("i").attr("class", "fa fa-ban margin-r-5");
+            $("#bouton_annuler_confirmation span").text("Annuler");
+            $(".bouton-fermer-confirmation").prop("disabled", false);
+            $("#modal_confirmation").modal("show");
+        }
+
+        function lancer_nettoyage() {
+            if ($("#bouton_lancer_nettoyage").prop("disabled") || !$("#bouton_lancer_nettoyage").is(":visible")) {return;}
+            var saisie = $("#saisie_confirmation").val().trim().toUpperCase();
+            if (saisie !== MOT_CONFIRMATION) {
+                $("#saisie_confirmation").addClass("is-invalid").focus();
+                return;
+            }
+            var file = get_selection();
+            var bilan = {nbre: 0, octets: 0, echecs: 0, erreurs: [], details: []};
+            $("#confirmation_saisie").hide();
+            $("#bouton_lancer_nettoyage").prop("disabled", true);
+            $(".bouton-fermer-confirmation").prop("disabled", true);
+
+            // Les opérations sont exécutées les unes après les autres, dans l'ordre du nettoyeur
+            function suivante() {
+                if (file.length === 0) {
+                    fin_nettoyage(bilan);
+                    return;
+                }
+                var code = file.shift();
+                var statut = $("#ligne_confirmation_" + code + " .statut-confirmation");
+                statut.html("<i class='fa fa-refresh fa-spin text-primary' aria-hidden='true'></i>");
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'ajax_nettoyeur_nettoyer' %}",
+                    data: {code: code, date_limite: resultats[code].date_limite, exclusions: JSON.stringify(exclusions[code] || []),
+                           inclusions: JSON.stringify(get_inclusions(code)), confirmation: saisie, csrfmiddlewaretoken: "{{ csrf_token }}"},
+                    dataType: "json",
+                    success: function(data) {
+                        var resultat = data.resultat;
+                        bilan.nbre += resultat.nbre;
+                        bilan.octets += resultat.octets;
+                        bilan.echecs += resultat.nbre_echecs;
+                        statut.html("<i class='fa fa-check text-success' aria-hidden='true'></i><span class='sr-only'>Terminé</span>");
+                        statut.closest("tr").find("td:last").html(formate_nombre(resultat.nbre) + " traité" + (resultat.nbre > 1 ? "s" : "") + (resultat.octets ? " · " + formate_taille(resultat.octets) : "") + (resultat.nbre_echecs ? " <span class='text-warning'>(" + resultat.nbre_echecs + " non traité" + (resultat.nbre_echecs > 1 ? "s" : "") + ")</span>" : ""));
+                        if (resultat.detail && resultat.nbre_echecs) {
+                            bilan.details.push(OPERATIONS[code].titre + " :\n" + resultat.detail);
+                        }
+                    },
+                    error: function(data) {
+                        statut.html("<i class='fa fa-times text-danger' aria-hidden='true'></i><span class='sr-only'>Erreur</span>");
+                        bilan.erreurs.push(data.responseJSON ? data.responseJSON.erreur : "Erreur lors de l'opération " + OPERATIONS[code].titre);
+                    },
+                    complete: suivante
+                });
+            }
+            suivante();
+        }
+
+        function fin_nettoyage(bilan) {
+            var html = "<div class='alert " + (bilan.erreurs.length ? "alert-warning" : "alert-success") + "'><i class='fa fa-check-circle margin-r-5' aria-hidden='true'></i>";
+            html += "Nettoyage terminé : " + formate_nombre(bilan.nbre) + " élément(s) traité(s)" + (bilan.octets ? ", " + formate_taille(bilan.octets) + " libérés" : "") + ".</div>";
+            $.each(bilan.erreurs, function(index, erreur) {
+                html += "<div class='alert alert-danger small'>" + echappe(erreur) + "</div>";
+            });
+            if (bilan.details.length) {
+                html += "<details class='small'><summary>Eléments non traités</summary><pre class='mt-2' style='white-space: pre-wrap;'>" + echappe(bilan.details.join("\n\n")) + "</pre></details>";
+            }
+            html += "<p class='small text-muted mb-0'>Le détail est disponible dans le <a href='{% url 'nettoyeur_registre' %}'>registre des nettoyages</a>.</p>";
+            $("#confirmation_resultat").html(html).show();
+            $("#bouton_lancer_nettoyage").hide();
+            $("#bouton_annuler_confirmation").removeClass("btn-danger").addClass("btn-default").find("i").attr("class", "fa fa-times margin-r-5");
+            $("#bouton_annuler_confirmation span").text("Fermer");
+            $(".bouton-fermer-confirmation").prop("disabled", false);
+            $("#modal_confirmation").one("hidden.bs.modal", function() {
+                analyser();
+            });
+        }
+
+        // ------------------------------------------------------------------
+        // Initialisation
+        // ------------------------------------------------------------------
+
+        $(document).ready(function() {
+            $("#delai_global").on("change", appliquer_delai_global);
+            $("#date_globale").on("change", function() {
+                if ($("#delai_global").val() === "perso") {appliquer_delai_global();}
+            });
+            $(".select-delai").on("change", function() {
+                var code = $(this).data("code");
+                $("#date_" + code).toggle($(this).val() === "perso");
+                maj_texte_date(code);
+                invalider_resultat(code);
+                if ($(this).val() !== "perso") {enregistrer_delais();}
+            });
+            $(".date-perso").on("change", function() {
+                var code = $(this).data("code");
+                maj_texte_date(code);
+                invalider_resultat(code);
+                enregistrer_delais();
+            });
+            $(".filtre-categorie, #option_suggestions, #option_masquer_vides").on("change", function() {
+                maj_affichage();
+                maj_gain();
+            });
+            $(".coche-operation").on("change", function() {
+                maj_affichage();
+                maj_gain();
+            });
+            $("#apercu_lignes").on("change", ".coche-apercu", maj_compteur_apercu);
+            $("#apercu_recherche").on("input", function() {
+                var recherche = $(this).val().toLowerCase();
+                $("#apercu_lignes tr").each(function() {
+                    $(this).toggle(String($(this).data("recherche")).indexOf(recherche) !== -1);
+                });
+            });
+            $("#saisie_confirmation").on("input", function() {
+                $(this).removeClass("is-invalid");
+            }).on("keypress", function(event) {
+                if (event.which === 13) {lancer_nettoyage();}
+            });
+            $.each(ORDRE_OPERATIONS, function(index, code) {maj_texte_date(code);});
+            maj_gain();
+        });
+    </script>
+
+{% endblock contenu_page %}

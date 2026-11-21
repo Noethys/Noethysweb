@@ -12,14 +12,9 @@ from django.contrib import messages
 from django.db.models import Max, Sum
 from core.views.mydatatableview import MyDatatable, columns, helpers
 from core.views import crud
-from core.models import Famille, Prestation, Reglement, Rattachement, Note, Piece, QuestionnaireReponse, Information, Vaccin
-from core.models import Mandat, Payeur, Historique, Lien, Destinataire, ContactUrgence, Assurance, PortailMessage, Scolarite, Inscription
+from core.models import Famille, Prestation, Reglement, Rattachement
 from core.utils import utils_texte
-
-
-def Effacer_attributs(objet=None, attributs=[]):
-    for attribut in attributs:
-        setattr(objet, attribut, None)
+from individus.utils import utils_anonymisation
 
 
 def Effacer(request):
@@ -42,62 +37,7 @@ def Effacer(request):
 
     # Effacer les fiches familles
     for famille in Famille.objects.filter(pk__in=coches):
-
-        # Fiche famille
-        famille.nom = "Famille effacée"
-        famille.internet_actif = False
-        Effacer_attributs(famille, [
-            "caisse", "num_allocataire", "allocataire", "memo", "email_factures_adresses",
-            "email_recus_adresses", "email_depots_adresses", "rue_resid", "cp_resid", "ville_resid",
-            "secteur", "mail", "mobile", "code_compta"])
-        famille.save()
-
-        Note.objects.filter(famille=famille).delete()
-        Piece.objects.filter(famille=famille).delete()
-        QuestionnaireReponse.objects.filter(famille=famille).delete()
-        PortailMessage.objects.filter(famille=famille).delete()
-
-        # Mandats
-        for mandat in Mandat.objects.filter(famille=famille):
-            Effacer_attributs(mandat, ["individu", "individu_nom", "individu_rue", "individu_cp", "individu_ville"])
-            mandat.iban = "XXX"
-            mandat.bic = "XXX"
-            mandat.save()
-
-        # Autres tables liées à la famille
-        Payeur.objects.filter(famille=famille).update(nom="Payeur effacé")
-        Historique.objects.filter(famille=famille).delete()
-        Lien.objects.filter(famille=famille).delete()
-        Destinataire.objects.filter(famille=famille).delete()
-        ContactUrgence.objects.filter(famille=famille).delete()
-        Assurance.objects.filter(famille=famille).delete()
-
-        # Individus rattachés
-        for rattachement in Rattachement.objects.select_related("individu").filter(famille=famille):
-            rattachement.individu.nom = "Individu effacé"
-            Effacer_attributs(rattachement.individu, [
-                "nom_jfille", "prenom", "date_naiss", "cp_naiss", "ville_naiss",
-                "annee_deces", "adresse_auto", "rue_resid", "cp_resid", "ville_resid", "secteur",
-                "categorie_travail", "profession", "employeur", "travail_tel", "travail_fax", "travail_mail",
-                "tel_domicile", "tel_mobile", "tel_fax", "mail", "medecin", "memo", "type_sieste",
-                "situation_familiale", "info_garde",
-            ])
-            rattachement.individu.listes_diffusion.clear()
-            rattachement.individu.regimes_alimentaires.clear()
-            rattachement.individu.maladies.clear()
-            rattachement.individu.save()
-            rattachement.individu.photo.delete(save=True)
-
-            # Inscriptions
-            Inscription.objects.filter(individu=rattachement.individu, date_fin__isnull=True).update(date_fin=datetime.date.today())
-
-            # Autres tables liées à l'individu
-            Information.objects.filter(individu=rattachement.individu).delete()
-            Vaccin.objects.filter(individu=rattachement.individu).delete()
-            Note.objects.filter(individu=rattachement.individu).delete()
-            Piece.objects.filter(individu=rattachement.individu).delete()
-            QuestionnaireReponse.objects.filter(individu=rattachement.individu).delete()
-            Scolarite.objects.filter(individu=rattachement.individu).delete()
+        utils_anonymisation.Anonymiser_famille(famille=famille)
 
     # Réactualisation de la page
     messages.add_message(request, messages.SUCCESS, "%d fiches familles ont été effacées avec succès" % len(coches))

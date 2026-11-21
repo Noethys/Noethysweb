@@ -1,0 +1,85 @@
+<style>
+    #alerte_nettoyeur {
+        background-color: #fff;
+    }
+    .dark-mode #alerte_nettoyeur {
+        background-color: #343a40;
+    }
+    #alerte_nettoyeur .nettoyeur-alerte-entete {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    #alerte_nettoyeur h5 {
+        margin: 0;
+    }
+    #alerte_nettoyeur h5 small {
+        font-size: 0.75rem;
+        margin-left: 6px;
+    }
+    #alerte_nettoyeur .nettoyeur-alerte-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    #alerte_nettoyeur .nettoyeur-alerte-actions .btn {
+        white-space: nowrap;
+        text-decoration: none;
+    }
+    #alerte_nettoyeur .nettoyeur-alerte-actions .btn-primary {
+        color: #fff;
+    }
+    #alerte_nettoyeur .nettoyeur-pastilles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 10px 0 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    #alerte_nettoyeur .nettoyeur-pastille {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 14px;
+        background-color: #f1f0f0;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+    .dark-mode #alerte_nettoyeur .nettoyeur-pastille {
+        background-color: #4b545c;
+    }
+    #alerte_nettoyeur .nettoyeur-pastille .fa {
+        color: #6c757d;
+    }
+    .dark-mode #alerte_nettoyeur .nettoyeur-pastille .fa {
+        color: #ced4da;
+    }
+</style>
+
+<div class="callout callout-warning" id="alerte_nettoyeur" role="region" aria-labelledby="alerte_nettoyeur_titre">
+    <div class="nettoyeur-alerte-entete">
+        <h5 id="alerte_nettoyeur_titre">
+            <i class="fa fa-magic text-warning margin-r-5" aria-hidden="true"></i>Nettoyage recommandé
+            <small class="text-muted">
+                {% if alerte.dernier_nettoyage %}dernier nettoyage le {{ alerte.dernier_nettoyage|date:"d/m/Y" }}{% else %}aucun nettoyage effectué{% endif %}
+            </small>
+        </h5>
+        <div class="nettoyeur-alerte-actions">
+            <button type="button" class="btn btn-link btn-sm text-muted p-0" onclick="masquer_alerte_nettoyeur()">Masquer 1 mois</button>
+            <a href="{% url 'nettoyeur' %}" class="btn btn-primary btn-sm"><i class="fa fa-magic margin-r-5" aria-hidden="true"></i>Ouvrir le nettoyeur</a>
+        </div>
+    </div>
+    <ul class="nettoyeur-pastilles">
+        {% for item in alerte.items %}
+            <li class="nettoyeur-pastille" title="{{ item.titre }} : {{ item.valeur }}">
+                <i class="fa {{ item.icone }}" aria-hidden="true"></i>
+                <span>{{ item.label }}</span>
+                <strong>{{ item.nbre_texte }}</strong>{% if item.octets_texte %}<span class="sr-only"> ({{ item.octets_texte }})</span>{% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>

@@ -62,6 +62,36 @@
                         </div>
                     {% endif %}
 
+                    {# Nettoyage recommandé (chargé en différé pour ne pas ralentir la page d'accueil) #}
+                    {% if request.user.is_superuser and not mode_demo %}
+                        <div id="conteneur_alerte_nettoyeur" aria-live="polite"></div>
+                        <script>
+                            $(document).ready(function() {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'ajax_nettoyeur_alerte_accueil' %}",
+                                    data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
+                                    dataType: "json",
+                                    success: function(data) {
+                                        $("#conteneur_alerte_nettoyeur").html(data.html);
+                                    }
+                                });
+                            });
+                            function masquer_alerte_nettoyeur() {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'ajax_nettoyeur_masquer_alerte' %}",
+                                    data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
+                                    dataType: "json",
+                                    success: function() {
+                                        $("#alerte_nettoyeur").slideUp();
+                                        toastr.info("L'encart est masqué pendant 1 mois. Le nettoyeur reste disponible dans le menu Outils.");
+                                    }
+                                });
+                            }
+                        </script>
+                    {% endif %}
+
                     {# Si aucune structure associée à cet utilisateur #}
                     {% if not request.user.structures.all %}
                         <div class="alert alert-warning">

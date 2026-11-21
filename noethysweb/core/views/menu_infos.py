@@ -300,6 +300,7 @@ COMMANDES = {
 
     # Dépannage
     "correcteur": ("medkit", "a", "Détecter et corriger les anomalies des données."),
+    "nettoyeur": ("magic", "a", "Nettoyer les données obsolètes (RGPD) et alléger la base de données et les fichiers."),
     "liste_conso_sans_presta": ("chain-broken", "l", "Repérer les consommations sans prestation associée."),
 
     # Utilitaires

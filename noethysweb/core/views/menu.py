@@ -202,6 +202,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     menu_administration.Add(code="update", titre="Mise à jour de l'application", icone="file-text-o")
     menu_administration.Add(code="notes_versions", titre="Notes de versions", icone="file-text-o")
     menu_administration.Add(code="procedures", titre="Procédures", icone="file-text-o", compatible_demo=False)
+    menu_administration.Add(code="nettoyeur", titre="Nettoyeur", icone="file-text-o", compatible_demo=False, superutilisateur_only=True)
 
     # Dépannage
     menu_depannage = menu_outils.Add(titre="Dépannage")

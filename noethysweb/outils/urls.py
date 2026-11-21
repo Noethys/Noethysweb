@@ -11,7 +11,7 @@ from outils.views import editeur_emails, editeur_emails_express, historique, upd
                         editeur_emails_saisie_libre, emails, notes_versions, messages_portail, messagerie_portail, notes, calendrier_annuel, \
                         demandes_portail, liste_conso_sans_presta, statistiques_portail, correcteur, editeur_sms, editeur_sms_familles, \
                         editeur_sms_individus, editeur_sms_collaborateurs, editeur_sms_saisie_libre, sms, utilisateurs_bloques, procedures, editeur_sms_express, taches, \
-                        suivi_reservations, commandes, desk_creer, rapport_activite
+                        suivi_reservations, commandes, desk_creer, rapport_activite, nettoyeur
 
 urlpatterns = [
 
@@ -107,6 +107,10 @@ urlpatterns = [
 
     # Dépannage
     path('outils/correcteur', correcteur.View.as_view(), name='correcteur'),
+
+    # Nettoyeur
+    path('outils/nettoyeur', nettoyeur.View.as_view(), name='nettoyeur'),
+    path('outils/nettoyeur/registre', nettoyeur.Registre.as_view(), name='nettoyeur_registre'),
     path('outils/liste_conso_sans_presta', liste_conso_sans_presta.Liste.as_view(), name='liste_conso_sans_presta'),
     path('outils/liste_conso_sans_presta_supprimer_plusieurs/<str:listepk>', liste_conso_sans_presta.Supprimer_plusieurs.as_view(), name='liste_conso_sans_presta_supprimer_plusieurs'),
 
@@ -127,6 +131,11 @@ urlpatterns = [
     path('outils/portail/demandes/', secure_ajax(demandes_portail.Appliquer_modification), name='ajax_appliquer_modification_portail'),
     path('outils/portail/tout_valider/', secure_ajax(demandes_portail.Tout_valider), name='ajax_tout_valider_portail'),
     path('outils/sauvegarder_db/', secure_ajax(sauvegarde_creer.Sauvegarder_db), name='ajax_sauvegarder_db'),
+    path('outils/nettoyeur/analyser', secure_ajax(nettoyeur.Analyser), name='ajax_nettoyeur_analyser'),
+    path('outils/nettoyeur/nettoyer', secure_ajax(nettoyeur.Nettoyer), name='ajax_nettoyeur_nettoyer'),
+    path('outils/nettoyeur/alerte_accueil', secure_ajax(nettoyeur.Get_alerte_accueil), name='ajax_nettoyeur_alerte_accueil'),
+    path('outils/nettoyeur/masquer_alerte', secure_ajax(nettoyeur.Masquer_alerte_accueil), name='ajax_nettoyeur_masquer_alerte'),
+    path('outils/nettoyeur/memoriser_delais', secure_ajax(nettoyeur.Memoriser_delais), name='ajax_nettoyeur_memoriser_delais'),
     path('outils/sauvegarder_media/', secure_ajax(sauvegarde_creer.Sauvegarder_media), name='ajax_sauvegarder_media'),
     path('outils/sauvegarder_liste/', secure_ajax(sauvegarde_creer.Get_liste_sauvegardes), name='ajax_get_liste_sauvegardes'),
     path('outils/messages/marquer_lu/', secure_ajax(messagerie_portail.Marquer_lu), name='ajax_message_marquer_lu'),

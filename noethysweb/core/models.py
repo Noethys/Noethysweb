@@ -5141,3 +5141,28 @@ class CommandeVersion(models.Model):
 
     def __str__(self):
         return "IDversion %d" % self.idversion if self.idversion else "Nouvelle version"
+
+
+class Nettoyage(models.Model):
+    """ Registre des nettoyages effectués avec le Nettoyeur (menu Outils) """
+    idnettoyage = models.AutoField(verbose_name="ID", db_column="IDnettoyage", primary_key=True)
+    horodatage = models.DateTimeField(verbose_name="Date", auto_now_add=True, db_index=True)
+    utilisateur = models.ForeignKey(Utilisateur, verbose_name="Utilisateur", blank=True, null=True, on_delete=models.SET_NULL)
+    code = models.CharField(verbose_name="Code de l'opération", max_length=100)
+    titre = models.CharField(verbose_name="Opération", max_length=300)
+    categorie = models.CharField(verbose_name="Catégorie", max_length=100, blank=True, null=True)
+    date_limite = models.DateField(verbose_name="Date limite", blank=True, null=True)
+    nbre_elements = models.IntegerField(verbose_name="Eléments traités", default=0)
+    nbre_echecs = models.IntegerField(verbose_name="Eléments non traités", default=0)
+    nbre_exclus = models.IntegerField(verbose_name="Eléments exclus", default=0)
+    octets_liberes = models.BigIntegerField(verbose_name="Espace libéré (octets)", default=0)
+    duree = models.FloatField(verbose_name="Durée (secondes)", default=0)
+    detail = models.TextField(verbose_name="Détail", blank=True, null=True)
+
+    class Meta:
+        db_table = "nettoyages"
+        verbose_name = "nettoyage"
+        verbose_name_plural = "nettoyages"
+
+    def __str__(self):
+        return "Nettoyage ID%d" % self.idnettoyage if self.idnettoyage else "Nouveau nettoyage"
