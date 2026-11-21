@@ -1,3 +1,18 @@
+Version 1.3.7.0 (21/11/2026) :
+
+Nouveautés
+- Outils > Nettoyeur : fonction réservée aux superutilisateurs pour nettoyer les données et fichiers obsolètes.
+- Page d'accueil : encart signalant qu'un nettoyage est recommandé
+- Catégories d'événements : limitation paramétrable du nombre de réservations par jour, semaine, mois, année ou période
+- Listes : nouveau filtre Adhérent
+Améliorations
+- Effacer des fiches familles : anonymisation plus complète
+- Portail : fenêtre du questionnaire d'un événement adaptée à Bootstrap 5
+Corrections
+- Portail : enregistrement des réponses au questionnaire d'un événement
+- Grille des consommations : sélection de l'événement pour les unités solidaires événementielles
+- Listes : filtre sur le numéro de facture
+
 Version 1.3.6.9 (19/11/2026) :
 
 Nouveautés
