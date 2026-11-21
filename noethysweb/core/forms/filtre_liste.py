@@ -246,6 +246,10 @@ class Formulaire(FormulaireBase, forms.Form):
         'datenaiss': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_date"], "DIFFERENT": ["critere_date"], "SUPERIEUR": ["critere_date"], "SUPERIEUR_EGAL": ["critere_date"], "INFERIEUR": ["critere_date"], "INFERIEUR_EGAL": ["critere_date"], "COMPRIS": ["critere_date_min", "critere_date_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
         'age': {'condition': 'condition2', 'criteres': {"EGAL": ["critere_entier"], "DIFFERENT": ["critere_entier"], "SUPERIEUR": ["critere_entier"], "SUPERIEUR_EGAL": ["critere_entier"], "INFERIEUR": ["critere_entier"], "INFERIEUR_EGAL": ["critere_entier"], "COMPRIS": ["critere_entier_min", "critere_entier_max"], "EST_NUL": [], "EST_PAS_NUL": []}},
     }
+    # Les autres types d'entiers utilisent les mêmes conditions que IntegerField
+    for type_entier in ("BigIntegerField", "PositiveIntegerField", "PositiveSmallIntegerField", "SmallIntegerField"):
+        dict_types[type_entier] = dict_types["IntegerField"]
+    del type_entier
 
     critere = forms.CharField(label="Critère", required=False)
 
