@@ -233,6 +233,7 @@ class Supprimer_individu(Page, crud.Supprimer):
                 return HttpResponseRedirect(self.get_success_url(), status=303)
 
             # Si c'est le dernier membre, on essaye de supprimer la fiche famille
+            idfamille = famille.pk
             try:
                 message_erreur = famille.delete()
                 if isinstance(message_erreur, str):
@@ -247,11 +248,12 @@ class Supprimer_individu(Page, crud.Supprimer):
             messages.add_message(self.request, messages.SUCCESS, "La fiche famille a été supprimée car il s'agissait du dernier membre de la famille")
 
             # On supprime la famille de l'historique des recherches
-            if "historique_recherche" in request.session:
-                for index, dict_historique in enumerate(request.session["historique_recherche"]):
-                    if dict_historique["idfamille"] == famille.pk:
-                        request.session["historique_recherche"].pop(index)
-                        request.session.modified = True
+            # (famille.pk vaut None après famille.delete(), d'où l'utilisation de idfamille)
+            historique = request.session.get("historique_recherche", [])
+            nouvel_historique = [item for item in historique if str(item.get("idfamille")) != str(idfamille)]
+            if len(nouvel_historique) != len(historique):
+                request.session["historique_recherche"] = nouvel_historique
+                request.session.modified = True
 
         return None
 
@@ -320,17 +322,19 @@ class Detacher_individu(Supprimer_individu):
         """ Supprime le rattachement de l'individu """
         famille = self.get_famille()
         individu = self.get_object()
+        idfamille = famille.pk
 
         # Supprime la famille si besoin
         reponse = self.Supprime_famille(request=request, individu=individu, famille=famille)
         if reponse:
             return reponse
 
-        # Supprime le rattachement
-        rattachement = Rattachement.objects.filter(famille=famille, individu=individu).first()
-        if rattachement:
-            rattachement.delete()
+        # Supprime le rattachement (déjà supprimé en cascade si la famille a été supprimée).
+        # On filtre sur famille_id : après famille.delete(), famille.pk vaut None et Django 5
+        # lève une ValueError si on passe une instance non enregistrée dans un filtre.
+        Rattachement.objects.filter(famille_id=idfamille, individu=individu).delete()
         messages.add_message(self.request, messages.SUCCESS, "Détachement effectué avec succès")
-        utils_historique.Ajouter(titre="Détachement d'un individu", detail="Détachement de %s" % individu.Get_nom(), utilisateur=self.request.user, famille=famille.pk)
+        famille_existe = Famille.objects.filter(pk=idfamille).exists()
+        utils_historique.Ajouter(titre="Détachement d'un individu", detail="Détachement de %s" % individu.Get_nom(), utilisateur=self.request.user, famille=idfamille if famille_existe else None)
 
         return HttpResponseRedirect(self.get_success_url())
