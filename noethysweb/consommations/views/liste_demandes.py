@@ -54,13 +54,8 @@ def Get_detail_demande(request):
                     dict_places_unite_remplissage = data_remplissage["dict_cases"].get(key_unite_remplissage, None)
 
                     if dict_places_unite_remplissage and dict_places_unite_remplissage["initiales"] > 0:
-                        nbre_places_restantes = None
-                        if conso.evenement:
-                            for evenement_tmp in dict_places_unite_remplissage["evenements"]:
-                                if evenement_tmp.pk == conso.evenement.pk:
-                                    nbre_places_restantes = evenement_tmp.restantes
-                        else:
-                            nbre_places_restantes = dict_places_unite_remplissage["restantes"]
+                        # Unité standard ou événement sans capacité max (ses places restantes valent None) : places de l'unité de remplissage
+                        nbre_places_restantes = dict_places_unite_remplissage["restantes"]
                         if nbre_places_restantes <= 0:
                             place_dispo = False
 
