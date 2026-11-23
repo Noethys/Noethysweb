@@ -123,7 +123,7 @@ class Formulaire(FormulaireBase, ModelForm):
         )
 
         # Ajout d'autres champs du modèle
-        for champ in ("activite_id", "categorie_tarif_id", "tarif_id", "code_compta"):
+        for champ in ("activite_id", "categorie_tarif_id", "tarif_id", "code_compta", "code_analytique"):
             valeur = getattr(modele, champ)
             if valeur:
                 self.helper.layout.append(Hidden(champ.replace("_id", ""), value=valeur))

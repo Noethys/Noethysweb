@@ -28,7 +28,9 @@
                     <li>Menu Paramétrage > Activités : Le compte comptable et le code analytique (Optionnel) de chaque activité.</li>
                     <li>Menu Paramétrage > Type d'adhésion : Le compte comptable et le code analytique (Optionnel) de chaque type.</li>
                     <li>Fiche famille > Paramètres : Le compte comptable de la famille (Optionnel). A défaut, un code de type "FAM000001" sera généré automatiquement.</li>
+                    <li>Les prestations saisies manuellement (ou depuis un modèle de prestation) : leur code comptable et leur code analytique. Ils peuvent être modifiés par lot depuis le menu Facturation > Liste des prestations.</li>
                 </ul>
+                Au moment de l'export, la liste des prestations sans code comptable ou sans code analytique est affichée : vous pouvez alors saisir les codes manquants ou exporter quand même.
             </p>
 
             <p>
@@ -74,8 +76,8 @@
             On_change_comptes_clients();
         });
 
-        // Générer l'export
-        function exporter() {
+        // Générer le fichier d'export (après le contrôle des codes, voir export_ecritures_controle.html)
+        function exporter_fichier() {
             var box = bootbox.dialog({
                     message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération de l'export en cours</b><br><br>Veuillez patienter...</p>",
                     closeButton: false
@@ -110,5 +112,7 @@
         };
 
     </script>
+
+    {% include 'facturation/export_ecritures_controle.html' with nom_export='cloe' %}
 
 {% endblock contenu_page %}

@@ -1,0 +1,100 @@
+{# Contrôle des codes comptables et analytiques des prestations avant l'export des écritures comptables #}
+{# A inclure dans la page d'un export avec la variable nom_export. La page doit définir la fonction exporter_fichier() #}
+<script>
+
+    var nom_export_controle = "{{ nom_export }}";
+
+    function Get_donnees_controle(extra) {
+        return $("#form_parametres").serialize() + "&" + $.param($.extend({nom_export: nom_export_controle}, extra || {}));
+    };
+
+    // Bouton Exporter : contrôle des codes puis génération du fichier
+    function exporter() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_export_ecritures_verifier_codes' %}",
+            data: Get_donnees_controle(),
+            datatype: "json",
+            success: function(data) {
+                if (data.nbre) {
+                    Afficher_anomalies_codes(data.html);
+                } else {
+                    exporter_fichier();
+                };
+            },
+            error: function(data) {
+                toastr.error((data.responseJSON && data.responseJSON.erreur) || "Erreur lors du contrôle des codes");
+            }
+        });
+    };
+
+    function Get_corrections_codes(dialog) {
+        var corrections = [];
+        dialog.find("#table_anomalies_codes tbody tr").each(function() {
+            // attr() et non data() : un label numérique doit rester une chaîne
+            var correction = {label: $(this).attr("data-label"), idactivite: $(this).attr("data-idactivite") || ""};
+            var renseigne = false;
+            $(this).find("input[data-champ]").each(function() {
+                var valeur = $.trim($(this).val());
+                if (valeur) {
+                    correction[$(this).attr("data-champ")] = valeur;
+                    renseigne = true;
+                };
+            });
+            if (renseigne) {corrections.push(correction)};
+        });
+        return corrections;
+    };
+
+    function Afficher_anomalies_codes(html) {
+        var dialog = bootbox.dialog({
+            title: "<i class='fa fa-exclamation-triangle text-warning margin-r-5'></i>Prestations sans code",
+            message: html,
+            size: "large",
+            onEscape: true,
+            buttons: {
+                // Ordre d'affichage de gauche à droite
+                exporter: {
+                    label: "<i class='fa fa-bolt margin-r-5'></i>Exporter quand même",
+                    className: "btn-default",
+                    callback: function() {
+                        // Le fichier n'est généré qu'une fois l'alerte fermée (sinon deux fenêtres se chevauchent)
+                        dialog.one("hidden.bs.modal", exporter_fichier);
+                    }
+                },
+                enregistrer: {
+                    label: "<i class='fa fa-save margin-r-5'></i>Enregistrer les codes",
+                    className: "btn-primary",
+                    callback: function() {
+                        var corrections = Get_corrections_codes(dialog);
+                        if (!corrections.length) {
+                            toastr.warning("Saisissez au moins un code");
+                            return false;
+                        };
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'ajax_export_ecritures_corriger_codes' %}",
+                            data: Get_donnees_controle({corrections: JSON.stringify(corrections)}),
+                            datatype: "json",
+                            success: function(data) {
+                                toastr.success(data.nbre + " prestation" + (data.nbre > 1 ? "s modifiées" : " modifiée"));
+                                // Nouveau contrôle : export si tout est renseigné, sinon nouvelle alerte avec les codes restants
+                                dialog.one("hidden.bs.modal", exporter);
+                                dialog.modal("hide");
+                            },
+                            error: function(data) {
+                                toastr.error((data.responseJSON && data.responseJSON.erreur) || "Erreur lors de l'enregistrement des codes");
+                            }
+                        });
+                        return false;
+                    }
+                },
+                annuler: {
+                    label: "<i class='fa fa-ban margin-r-5'></i>Annuler",
+                    className: "btn-danger",
+                },
+            }
+        });
+    };
+
+</script>

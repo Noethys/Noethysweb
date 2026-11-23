@@ -13,7 +13,7 @@ from facturation.views import factures_generation, liste_prestations, liste_fact
                                 lots_prelevements, lots_prelevements_factures, attestations_fiscales_generation, attestations_fiscales_impression, \
                                 attestations_fiscales_email, liste_attestations_fiscales, liste_aides, solder_impayes, edition_recap_factures, \
                                 factures_modifier, export_ecritures_cloe, saisie_lot_forfaits_credits, synthese_deductions, export_ecritures_cwe, \
-                                liste_factures_detaillees, export_ecritures_ebp, export_ecritures_quadra, export_ecritures_sage
+                                liste_factures_detaillees, export_ecritures_ebp, export_ecritures_quadra, export_ecritures_sage, export_ecritures_controle
 
 urlpatterns = [
 
@@ -144,6 +144,9 @@ urlpatterns = [
     path('facturation/export_ecritures_cwe/exporter', secure_ajax(export_ecritures_cwe.Exporter), name='ajax_export_ecritures_cwe_exporter'),
     path('facturation/export_ecritures_quadra/exporter', secure_ajax(export_ecritures_quadra.Exporter), name='ajax_export_ecritures_quadra_exporter'),
     path('facturation/export_ecritures_sage/exporter', secure_ajax(export_ecritures_sage.Exporter), name='ajax_export_ecritures_sage_exporter'),
+    path('facturation/liste_prestations/modifier_codes', secure_ajax(liste_prestations.Modifier_codes), name='ajax_liste_prestations_modifier_codes'),
+    path('facturation/export_ecritures/verifier_codes', secure_ajax(export_ecritures_controle.Verifier), name='ajax_export_ecritures_verifier_codes'),
+    path('facturation/export_ecritures/corriger_codes', secure_ajax(export_ecritures_controle.Corriger), name='ajax_export_ecritures_corriger_codes'),
     path('facturation/ajax_saisie_lot_forfaits_credits_get_tarifs', secure_ajax(saisie_lot_forfaits_credits.Get_tarifs), name='ajax_saisie_lot_forfaits_credits_get_tarifs'),
     path('facturation/ajax_saisie_lot_forfaits_credits_appliquer', secure_ajax(saisie_lot_forfaits_credits.Appliquer), name='ajax_saisie_lot_forfaits_credits_appliquer'),
 

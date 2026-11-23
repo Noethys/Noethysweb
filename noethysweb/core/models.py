@@ -1603,6 +1603,7 @@ class ModelePrestation(models.Model):
     categorie_tarif = models.ForeignKey(CategorieTarif, verbose_name="Catégorie de tarif", on_delete=models.SET_NULL, blank=True, null=True)
     tva = models.DecimalField(verbose_name="Taux de TVA", max_digits=10, decimal_places=2, default=0.0, blank=True, null=True)
     code_compta = models.CharField(verbose_name="Code comptable", max_length=200, blank=True, null=True)
+    code_analytique = models.CharField(verbose_name="Code analytique", max_length=200, blank=True, null=True)
     public_choix = [("individu", "Individu"), ("famille", "Famille")]
     public = models.CharField(verbose_name="Public", max_length=50, choices=public_choix)
     montant = models.DecimalField(verbose_name="Montant", max_digits=10, decimal_places=2, default=0.0)

@@ -78,8 +78,8 @@
             $("#id_format_date").val(preset.format_date);
         });
 
-        // Générer l'export
-        function exporter() {
+        // Générer le fichier d'export (après le contrôle des codes, voir export_ecritures_controle.html)
+        function exporter_fichier() {
             var box = bootbox.dialog({
                     message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération de l'export en cours</b><br><br>Veuillez patienter...</p>",
                     closeButton: false
@@ -102,5 +102,7 @@
         };
 
     </script>
+
+    {% include 'facturation/export_ecritures_controle.html' with nom_export='sage' %}
 
 {% endblock contenu_page %}

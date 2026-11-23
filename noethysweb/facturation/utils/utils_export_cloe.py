@@ -3,7 +3,7 @@
 #  Noethysweb, application de gestion multi-activités.
 #  Distribué sous licence GNU GPL.
 
-import os, datetime, shutil, uuid
+import os, re, datetime, shutil, uuid, unicodedata
 from django.conf import settings
 from django.db.models import Q
 from core.models import Famille, Facture, Depot, Reglement, Ventilation
@@ -32,6 +32,21 @@ format_export_rgl = [("num_ecriture", "Numéro d'écriture", 6), ("num_ligne_ecr
                      ("emetteur", "Emetteur", 40), ("etablissement_bancaire", "Etablissement bancaire", 40)]
 
 
+def Nettoyer_texte(texte=""):
+    """ Retire les accents et les caractères spéciaux (non gérés par Cloé). Ex : 'Crèche "Les Câlins" & Cie' -> 'Creche Les Calins ET Cie' """
+    remplacements = {"&": "ET", "œ": "oe", "Œ": "OE", "æ": "ae", "Æ": "AE", "ß": "ss", "€": "EUR", "°": "o",
+                     "Ø": "O", "ø": "o", "Ł": "L", "ł": "l", "Đ": "D", "đ": "d",
+                     "\u2018": "'", "\u2019": "'", "\u02bc": "'", "`": "'", "\u00b4": "'",
+                     "\u2010": "-", "\u2011": "-", "\u2012": "-", "\u2013": "-", "\u2014": "-"}
+    for avant, apres in remplacements.items():
+        texte = texte.replace(avant, apres)
+    # Lettres accentuées : seul l'accent est retiré. Les autres caractères non gérés sont remplacés par un espace
+    texte = "".join(caractere for caractere in unicodedata.normalize("NFKD", texte) if not unicodedata.combining(caractere))
+    texte = texte.replace("\u2044", "/")  # Barre de fraction issue de la décomposition (ex : ½ -> 1/2)
+    texte = re.sub(r"[^A-Za-z0-9 .,'/()+:-]", " ", texte)
+    return re.sub(r" {2,}", " ", texte).strip()
+
+
 class Exporter(BaseExporter):
     def Generer(self):
         # Création du répertoire de sortie et des fichiers
@@ -53,6 +68,9 @@ class Exporter(BaseExporter):
         return code
 
     def Ecrire_fichier(self, nom_fichier="", format_export=None, lignes=[]):
+        # Nettoyage avant le découpage en colonnes : chaque caractère occupe alors un seul octet et les largeurs fixes sont respectées
+        if self.options.get("retirer_accents"):
+            lignes = [{cle: Nettoyer_texte(valeur) if isinstance(valeur, str) else valeur for cle, valeur in ligne.items()} for ligne in lignes]
         texte = self.Generer_fichier_texte(format_export=format_export, lignes=lignes)
         with open(os.path.join(self.rep_destination, "%s-%s.TXT" % (nom_fichier, datetime.date.today().strftime("%d%m%Y"))), "w") as fichier:
             fichier.write(texte)

@@ -16,6 +16,8 @@ class Formulaire(FormulaireBase, forms.Form):
     periode = forms.CharField(label="Période", required=True, widget=DateRangePickerWidget(attrs={"afficher_check": False}))
     compte_collectif = forms.CharField(label="Compte collectif", max_length=100, initial="411000", help_text="Compte collectif pour les comptes clients.")
     prefixe_c = forms.BooleanField(label="Insérer le préfixe 'C' devant les alias des tiers", initial=True, required=False)
+    retirer_accents = forms.BooleanField(label="Retirer les accents et caractères spéciaux", initial=True, required=False,
+                                         help_text="Les lettres accentuées sont remplacées par leur lettre simple (é -> e), & par ET et les autres caractères spéciaux par un espace.")
     choix_comptes = [
         ("toutes", "Toutes les familles"),
         ("utilisees", "Uniquement les familles présentes dans les factures et règlements exportés"),
@@ -51,6 +53,7 @@ class Formulaire(FormulaireBase, forms.Form):
                 Field("periode"),
                 Field("compte_collectif"),
                 Field("prefixe_c"),
+                Field("retirer_accents"),
             ),
             Fieldset("Comptes clients",
                 Field("comptes_clients"),

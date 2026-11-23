@@ -40,6 +40,7 @@ class Formulaire(FormulaireBase, ModelForm):
             "categorie_tarif": "Sélectionnez si besoin la catégorie de tarif à laquelle seront rattachées les prestations.",
             "tva": "Saisissez si besoin le taux de TVA applicable. Exemple : 20.",
             "code_compta": "Saisissez si besoin le code comptable des prestations, pour les exports comptables.",
+            "code_analytique": "Saisissez si besoin le code analytique des prestations, pour les exports comptables.",
             "public": "Indiquez si les prestations concernent un individu ou l'ensemble de la famille.",
             "structure": "Sélectionnez la structure associée à ce modèle. Laissez 'Toutes les structures' pour que ce modèle soit disponible dans toutes les structures.",
         }
@@ -94,6 +95,7 @@ class Formulaire(FormulaireBase, ModelForm):
             Fieldset("Options",
                 PrependedText("tva", "%"),
                 Field("code_compta"),
+                Field("code_analytique"),
             ),
             Fieldset("Structure",
                 Field("structure"),

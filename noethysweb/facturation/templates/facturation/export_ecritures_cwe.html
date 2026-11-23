@@ -54,7 +54,7 @@
     <script>
 
         // Générer le PDF
-        function exporter() {
+        function exporter_fichier() {
             var box = bootbox.dialog({
                     message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Génération de l'export en cours</b><br><br>Veuillez patienter...</p>",
                     closeButton: false
@@ -77,5 +77,7 @@
         };
 
     </script>
+
+    {% include 'facturation/export_ecritures_controle.html' with nom_export='cwe' %}
 
 {% endblock contenu_page %}

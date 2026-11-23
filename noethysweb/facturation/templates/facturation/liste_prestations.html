@@ -1,0 +1,92 @@
+{% extends "core/crud/liste_in_box.html" %}
+{% load static %}
+{% load embed %}
+
+{% block contenu_page %}
+    {{ block.super }}
+
+    {# Modal de modification par lot des codes des prestations cochées #}
+    {% embed 'core/modal.html' %}
+        {% block modal_id %}modal_modifier_codes{% endblock %}
+        {% block modal_titre %}Modifier les codes des prestations cochées{% endblock %}
+        {% block modal_body %}
+            <p id="modal_codes_intro" class="text-muted small"></p>
+            <div class="form-group">
+                <label for="id_lot_code_analytique">Code analytique</label>
+                <input type="text" class="form-control" id="id_lot_code_analytique" maxlength="200">
+                <div class="form-check mt-1">
+                    <input type="checkbox" class="form-check-input" id="id_lot_effacer_code_analytique">
+                    <label class="form-check-label small" for="id_lot_effacer_code_analytique">Effacer le code analytique des prestations</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_lot_code_compta">Code comptable</label>
+                <input type="text" class="form-control" id="id_lot_code_compta" maxlength="200">
+                <div class="form-check mt-1">
+                    <input type="checkbox" class="form-check-input" id="id_lot_effacer_code_compta">
+                    <label class="form-check-label small" for="id_lot_effacer_code_compta">Effacer le code comptable des prestations</label>
+                </div>
+            </div>
+            <p class="text-muted small mb-0">Laissez un champ vide pour ne pas le modifier. Une prestation sans code reprend dans les exports celui de son activité ou de son type d'adhésion.</p>
+            <div class="buttonHolder">
+                <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
+                    <button type="button" class="btn btn-primary" onclick="valider_modal_codes()"><i class="fa fa-check margin-r-5"></i>Appliquer</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+                </div>
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    <script>
+        var coches_modal_codes = [];
+
+        function ouvrir_modal_codes() {
+            coches_modal_codes = get_coches();
+            if (!coches_modal_codes.length) {
+                toastr.warning("Cochez au moins une prestation");
+                return;
+            };
+            $("#modal_codes_intro").text(coches_modal_codes.length + " prestation" + (coches_modal_codes.length > 1 ? "s cochées" : " cochée") + ". Les montants et les factures ne sont pas modifiés.");
+            $("#id_lot_code_analytique, #id_lot_code_compta").val("").prop("disabled", false);
+            $("#id_lot_effacer_code_analytique, #id_lot_effacer_code_compta").prop("checked", false);
+            $("#modal_modifier_codes").modal("show");
+        };
+
+        // La case Effacer désactive la saisie du code correspondant
+        $(document).on("change", "#id_lot_effacer_code_analytique, #id_lot_effacer_code_compta", function() {
+            var champ = $(this).attr("id").replace("id_lot_effacer_", "");
+            $("#id_lot_" + champ).prop("disabled", this.checked).val("");
+        });
+
+        $("#modal_modifier_codes").on("shown.bs.modal", function() {$("#id_lot_code_analytique").trigger("focus")});
+
+        function valider_modal_codes() {
+            var donnees = {
+                liste_lignes: JSON.stringify(coches_modal_codes),
+                code_analytique: $.trim($("#id_lot_code_analytique").val()),
+                effacer_code_analytique: $("#id_lot_effacer_code_analytique").is(":checked"),
+                code_compta: $.trim($("#id_lot_code_compta").val()),
+                effacer_code_compta: $("#id_lot_effacer_code_compta").is(":checked"),
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+            };
+            if (!(donnees.code_analytique || donnees.effacer_code_analytique || donnees.code_compta || donnees.effacer_code_compta)) {
+                toastr.warning("Saisissez au moins un code");
+                return;
+            };
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_liste_prestations_modifier_codes' %}",
+                data: donnees,
+                datatype: "json",
+                success: function(data) {
+                    $("#modal_modifier_codes").modal("hide");
+                    toastr.success(data.nbre + " prestation" + (data.nbre > 1 ? "s modifiées" : " modifiée"));
+                    Actualiser_page_liste();
+                },
+                error: function(data) {
+                    toastr.error((data.responseJSON && data.responseJSON.erreur) || "Erreur lors de la modification");
+                }
+            });
+        };
+    </script>
+{% endblock contenu_page %}
