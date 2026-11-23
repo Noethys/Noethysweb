@@ -76,6 +76,10 @@ class FormulaireBase():
             for code in dict_rubrique["champs"]:
                 statut_champ = self.dict_champs.get(code, "MASQUER")
 
+                # Champ masqué : désactivé pour qu'il ne soit ni lu dans le POST ni détecté comme modifié
+                if code in self.dict_champs and statut_champ == "MASQUER" and code in self.fields:
+                    self.fields[code].disabled = True
+
                 if statut_champ in ("AFFICHER", "MODIFIABLE", "OBLIGATOIRE"):
 
                     # Affiche les help_text si mode édition
