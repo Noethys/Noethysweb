@@ -64,7 +64,10 @@ def Creer_paiement(request=None, demande=None, parametres_portail={}):
 
     objet = normalize_objet("Paiement %s" % facture.regie.nom)
     exer = str(facture.date_debut.year)
-    if payfip_contrat == "role":
+    if payfip_contrat == "role" and saisie in ("T", "X"):
+        # Test et activation en Rôle : référence et exercice fictifs imposés par la DGFiP (aucune dette en base)
+        refdet, exer = "999999990000000000000", "9999"
+    elif payfip_contrat == "role":
         # REFDET Rôle ORMC (21 car.) : Exer (4) + ROLREC (2 premiers car. du CodProdLoc) + ROLDEB ("00") + ROLDET (n° de facture sur 13 chiffres)
         piece_pes = PesPiece.objects.select_related("lot", "lot__modele").filter(facture=facture).order_by("-lot__pk").first()
         if not piece_pes:
