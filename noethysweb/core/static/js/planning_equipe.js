@@ -77,6 +77,7 @@
         charges: new Set(),         // jours chargés
         chargement_en_cours: false,
         reglages_defaut: {}, reglages_user: {}, peut_regler_tous: false,
+        sms: {autorise: false, configuration: false},  // droit d'envoyer des SMS et existence d'une configuration SMS par défaut
         prochain_tmp: -1
     };
     var V = {
@@ -127,6 +128,7 @@
         S.groupes = data.groupes; S.qualifs = data.qualifications; S.modeles = data.modeles;
         S.reglages_defaut = data.reglages.defaut; S.reglages_user = data.reglages.utilisateur;
         S.peut_regler_tous = data.peut_regler_tous;
+        S.sms = data.sms || {autorise: false, configuration: false};
         CFG.aujourdhui = data.aujourdhui;
         Reglages_effectifs();
     }
@@ -3306,6 +3308,95 @@
         });
     }
 
+    // ------------------------------------------------------------------ SMS libre aux collaborateurs
+    var Sms = {source: "affiches", decoches: new Set(), recherche: ""};
+    var SMS_BOUTON = "<i class='fa fa-pencil margin-r-5' aria-hidden='true'></i>Rédiger le SMS (<span id='pl_sms_nb'>0</span>)";
+    function Numero_sms(c, priorite) {
+        // Même règle que Mobile_collaborateur() côté serveur (mobile_pro n'est fourni que s'il s'agit d'un portable)
+        if (priorite === "perso_seul") { return c.mobile_perso ? {numero: c.mobile_perso, type: "perso"} : null; }
+        var ordre = priorite === "pro" ? [["pro", c.mobile_pro], ["perso", c.mobile_perso]] : [["perso", c.mobile_perso], ["pro", c.mobile_pro]];
+        for (var i = 0; i < ordre.length; i++) { if (ordre[i][1]) { return {numero: ordre[i][1], type: ordre[i][0]}; } }
+        return null;
+    }
+    function Sms_ids_source() {
+        return Sms.source === "selection" ? Collabs_selection() : Collabs_visibles();
+    }
+    function Sms_destinataires() {
+        var priorite = $("#pl_sms_priorite").val();
+        return Sms_ids_source().filter(function(id) {
+            var c = S.collabs.get(id);
+            return c && Numero_sms(c, priorite) && !Sms.decoches.has(id);
+        });
+    }
+    function Sms_correspond(c) {
+        var q = Sms.recherche.toLowerCase();
+        return !q || (c.libelle + " " + (c.poste || "")).toLowerCase().indexOf(q) >= 0;
+    }
+    function Ouvrir_sms() {
+        var visibles = Collabs_visibles(), selection = Collabs_selection();
+        if (!visibles.length) { toastr.warning("Aucun collaborateur affiché"); return; }
+        Sms.source = "affiches"; Sms.decoches = new Set(); Sms.recherche = "";
+        $("#pl_sms_recherche").val("");
+        $("[data-sms-source='affiches']").text("Collaborateurs affichés (" + visibles.length + ")");
+        $("[data-sms-source='selection']").text("Évènements sélectionnés (" + selection.length + ")").prop("disabled", !selection.length);
+        $("#pl_sms_periode").text(V.dates.length ? "Période affichée : " + (V.dates.length > 1 ? "du " + Texte_jour_fr(V.dates[0]) + " au " + Texte_jour_fr(V.dates[V.dates.length - 1]) : Texte_jour_long(V.dates[0])) + "." : "");
+        $("#pl_sms_alerte_config").prop("hidden", S.sms.configuration);
+        $("#pl_sms_valider").html(SMS_BOUTON);
+        Rendu_sms();
+        $("#pl_modal_sms").modal("show");
+    }
+    function Rendu_sms() {
+        var priorite = $("#pl_sms_priorite").val();
+        $("[data-sms-source]").each(function() { $(this).attr("aria-pressed", String(this.getAttribute("data-sms-source") === Sms.source)); });
+        var html = [];
+        Sms_ids_source().forEach(function(id) {
+            var c = S.collabs.get(id);
+            if (!c || !Sms_correspond(c)) { return; }
+            var mobile = Numero_sms(c, priorite);
+            var coche = mobile && !Sms.decoches.has(id);
+            html.push("<label class='pl-email-ligne" + (mobile ? "" : " sans") + "'>" +
+                "<input type='checkbox' data-id='" + id + "'" + (coche ? " checked" : "") + (mobile ? "" : " disabled") + ">" +
+                "<span class='pl-email-identite'><strong>" + Echapper(c.libelle) + "</strong><small>" + Echapper(c.poste || "") + "</small></span>" +
+                (mobile ? "<span class='pl-email-adresse' title='" + Echapper(mobile.numero) + "'>" + Echapper(mobile.numero) + "</span>" +
+                          "<span class='pl-email-badge " + mobile.type + "'>" + (mobile.type === "pro" ? "Pro" : "Perso") + "</span>"
+                        : "<span class='pl-email-aucune'>Aucun numéro de portable</span>") +
+                "</label>");
+        });
+        $("#pl_sms_liste").html(html.length ? html.join("") : "<p class='pl-email-vide'>Aucun collaborateur ne correspond à la recherche.</p>");
+        Maj_compteur_sms();
+    }
+    function Maj_compteur_sms() {
+        var priorite = $("#pl_sms_priorite").val();
+        var ids = Sms_ids_source(), nbre = Sms_destinataires().length;
+        var sans = ids.filter(function(id) { var c = S.collabs.get(id); return c && !Numero_sms(c, priorite); }).length;
+        $("#pl_sms_compteur").html("<strong>" + nbre + "</strong> destinataire" + (nbre > 1 ? "s" : "") + " sur " + ids.length);
+        $("#pl_sms_sans").text(sans ? (sans > 1 ? sans + " collaborateurs sans portable ne recevront pas" : "1 collaborateur sans portable ne recevra pas") + " le SMS." : "");
+        $("#pl_sms_nb").text(nbre);
+        $("#pl_sms_valider").prop("disabled", !nbre);
+    }
+    function Cocher_tous_sms(cocher) {
+        Sms_ids_source().forEach(function(id) {
+            var c = S.collabs.get(id);
+            if (!c || !Sms_correspond(c)) { return; }
+            if (cocher) { Sms.decoches.delete(id); } else { Sms.decoches.add(id); }
+        });
+        Rendu_sms();
+    }
+    function Valider_sms() {
+        var ids = Sms_destinataires();
+        if (!ids.length) { toastr.warning("Aucun destinataire"); return; }
+        var $bouton = $("#pl_sms_valider").prop("disabled", true).html("<i class='fa fa-spinner fa-spin margin-r-5'></i>Préparation…");
+        Ajax(CFG.urls.sms_libre, {collaborateurs: JSON.stringify(ids), priorite: $("#pl_sms_priorite").val()}).done(function(data) {
+            $("#pl_modal_sms").modal("hide");
+            if (data.sans_numero && data.sans_numero.length) { toastr.warning("Sans numéro de portable : " + data.sans_numero.join(", ")); }
+            window.location = data.url;
+        }).fail(function(xhr) {
+            toastr.error(Message_erreur(xhr));
+            $bouton.html(SMS_BOUTON);
+            Maj_compteur_sms();
+        });
+    }
+
     // ------------------------------------------------------------------ Réglages
     var Reglages_portee = "utilisateur";
     function Ouvrir_reglages() {
@@ -3527,6 +3618,20 @@
             var id = +this.getAttribute("data-id");
             if (this.checked) { Email.decoches.delete(id); } else { Email.decoches.add(id); }
             Maj_compteur_email();
+        });
+
+        // SMS (bouton et fenêtre présents uniquement si l'utilisateur a le droit d'envoyer des SMS)
+        $("#pl_sms_btn").on("click", Ouvrir_sms);
+        $("#pl_sms_valider").on("click", Valider_sms);
+        $("#pl_sms_priorite").on("change", Rendu_sms);
+        $("#pl_sms_recherche").on("input", function() { Sms.recherche = $.trim(this.value); Rendu_sms(); });
+        $("#pl_sms_tout_cocher").on("click", function() { Cocher_tous_sms(true); });
+        $("#pl_sms_tout_decocher").on("click", function() { Cocher_tous_sms(false); });
+        $("#pl_modal_sms").on("click", "[data-sms-source]", function() { Sms.source = this.getAttribute("data-sms-source"); Rendu_sms(); });
+        $("#pl_sms_liste").on("change", "input[type=checkbox]", function() {
+            var id = +this.getAttribute("data-id");
+            if (this.checked) { Sms.decoches.delete(id); } else { Sms.decoches.add(id); }
+            Maj_compteur_sms();
         });
 
         $("[data-portee]").on("click", function() {

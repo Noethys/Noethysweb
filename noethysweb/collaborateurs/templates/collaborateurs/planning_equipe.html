@@ -216,6 +216,7 @@
                             </div>
                         </div>
                         <button type="button" class="pl-btn pl-btn-icone" id="pl_email_btn" aria-haspopup="dialog" aria-label="Envoyer un email aux collaborateurs" title="Envoyer un email aux collaborateurs"><i class="fa fa-envelope-o" aria-hidden="true"></i></button>
+                        {% if perms.core.editeur_sms %}<button type="button" class="pl-btn pl-btn-icone" id="pl_sms_btn" aria-haspopup="dialog" aria-label="Envoyer un SMS aux collaborateurs" title="Envoyer un SMS aux collaborateurs"><i class="fa fa-mobile" aria-hidden="true" style="font-size: 1.25em;"></i></button>{% endif %}
                         <button type="button" class="pl-btn pl-btn-icone" id="pl_actualiser" aria-label="Actualiser" title="Actualiser"><i class="fa fa-refresh" aria-hidden="true"></i></button>
                         <button type="button" class="pl-btn pl-btn-icone" id="pl_plein_ecran" aria-label="Plein écran" title="Plein écran"><i class="fa fa-expand" aria-hidden="true"></i></button>
                         <button type="button" class="pl-btn pl-btn-icone" id="pl_reglages_btn" aria-label="Réglages d'affichage" title="Réglages d'affichage"><i class="fa fa-cog" aria-hidden="true"></i></button>
@@ -495,6 +496,55 @@
     </div>
 </div>
 
+{% if perms.core.editeur_sms %}
+<div class="modal fade" id="pl_modal_sms" tabindex="-1" role="dialog" aria-labelledby="pl_modal_sms_titre">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-olive">
+                <h5 class="modal-title" id="pl_modal_sms_titre"><strong>Envoyer un SMS aux collaborateurs</strong></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la fenêtre"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Choisissez les destinataires, puis rédigez votre message dans l'éditeur de SMS : il pourra être relu avant l'envoi. <span id="pl_sms_periode"></span></p>
+                <div class="alert alert-warning py-2 px-3 small" id="pl_sms_alerte_config" role="note" hidden><i class="fa fa-exclamation-triangle margin-r-5" aria-hidden="true"></i>Aucune configuration SMS par défaut : vous pourrez la choisir dans l'éditeur de SMS.</div>
+                <div class="pl-label">Destinataires</div>
+                <div class="pl-email-entete">
+                    <div class="pl-seg" role="group" aria-label="Source des destinataires">
+                        <button type="button" class="pl-seg-btn" data-sms-source="affiches" aria-pressed="true"></button>
+                        <button type="button" class="pl-seg-btn" data-sms-source="selection" aria-pressed="false"></button>
+                    </div>
+                    <span class="pl-espace"></span>
+                    <span class="pl-email-compteur" id="pl_sms_compteur" aria-live="polite"></span>
+                </div>
+                <div class="pl-email-outils">
+                    <div class="pl-email-recherche">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                        <input type="search" class="form-control" id="pl_sms_recherche" placeholder="Rechercher un collaborateur, un poste…" aria-label="Rechercher un collaborateur">
+                    </div>
+                    <button type="button" class="pl-lien" id="pl_sms_tout_cocher">Tout cocher</button>
+                    <button type="button" class="pl-lien" id="pl_sms_tout_decocher">Tout décocher</button>
+                </div>
+                <div class="pl-email-liste" id="pl_sms_liste" role="group" aria-label="Collaborateurs destinataires"></div>
+                <div class="pl-label">Options</div>
+                <div class="form-inline mb-2">
+                    <label for="pl_sms_priorite" class="mr-2 font-weight-normal">Numéro utilisé :</label>
+                    <select id="pl_sms_priorite" class="form-control form-control-sm">
+                        <option value="perso">Portable personnel en priorité, sinon portable pro</option>
+                        <option value="pro">Portable pro en priorité, sinon portable personnel</option>
+                        <option value="perso_seul">Portable personnel uniquement</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span class="pl-muted pl-petit mr-auto" id="pl_sms_sans"></span>
+                <button type="button" class="btn btn-primary" id="pl_sms_valider"></button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times margin-r-5"></i>Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="modal fade" id="pl_modal_diffusion" tabindex="-1" role="dialog" aria-labelledby="pl_modal_diffusion_titre">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -622,6 +672,7 @@
                 imprimer: "{% url 'ajax_planning_equipe_imprimer' %}",
                 emails: "{% url 'ajax_planning_equipe_envoyer_emails' %}",
                 email_libre: "{% url 'ajax_planning_equipe_envoyer_email_libre' %}",
+                sms_libre: "{% url 'ajax_planning_equipe_envoyer_sms_libre' %}",
                 excel: "{% url 'ajax_planning_equipe_exporter_recapitulatif' %}"
             }
         };

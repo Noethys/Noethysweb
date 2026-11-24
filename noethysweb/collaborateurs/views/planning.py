@@ -11,7 +11,8 @@ from django.db import transaction
 from django.urls import reverse
 from core.views.base import CustomView
 from core.models import Collaborateur, TypeEvenementCollaborateur, ModelePlanningCollaborateur, GroupeCollaborateurs, TypeQualificationCollaborateur, \
-                        ContratCollaborateur, NotePlanningCollaborateur, EvenementCollaborateur, AffectationCollaborateur, Mail, Destinataire, DocumentJoint, ModeleEmail
+                        ContratCollaborateur, NotePlanningCollaborateur, EvenementCollaborateur, AffectationCollaborateur, Mail, Destinataire, DocumentJoint, ModeleEmail, \
+                        SMS, DestinataireSMS, ModeleSMS
 from core.utils import utils_parametres
 from collaborateurs.utils import utils_planning, utils_controle_reglementaire
 from collaborateurs.utils.utils_planning import Parse_date, PERMISSION, CATEGORIE_PARAMETRES
@@ -47,6 +48,8 @@ def Get_donnees(request):
     """ Données de référence du planning """
     ids_modifiables = utils_planning.Get_ids_modifiables(request.user)
     ids_visibles = utils_planning.Get_ids_visibles(request.user)
+    # Les numéros de portable ne sont transmis qu'aux utilisateurs autorisés à envoyer des SMS
+    peut_sms = request.user.has_perm(PERMISSION_SMS)
 
     contrats = {}
     for contrat in ContratCollaborateur.objects.filter(collaborateur_id__in=ids_visibles).order_by("date_debut"):
@@ -63,6 +66,8 @@ def Get_donnees(request):
             "contrats": contrats.get(collaborateur.pk, []), "modifiable": collaborateur.pk in ids_modifiables,
             "mail": bool(collaborateur.travail_mail or collaborateur.mail),
             "mail_pro": collaborateur.travail_mail or "", "mail_perso": collaborateur.mail or "",
+            "mobile_perso": (Normaliser_portable(collaborateur.tel_mobile) or collaborateur.tel_mobile or "") if peut_sms else "",
+            "mobile_pro": (Normaliser_portable(collaborateur.travail_tel) or "") if peut_sms else "",
         })
 
     affichage = utils_parametres.Get(nom="affichage", categorie=CATEGORIE_PARAMETRES, utilisateur=request.user, valeur={}) or {}
@@ -77,6 +82,7 @@ def Get_donnees(request):
         "modeles": [{"id": modele.pk, "nom": modele.nom, "nb_semaines": modele.nb_semaines, "cycle": modele.Get_libelle_cycle()} for modele in ModelePlanningCollaborateur.objects.all().order_by("nom")],
         "reglages": utils_planning.Get_reglages(request.user),
         "peut_regler_tous": utils_planning.Peut_regler_pour_tous(request.user),
+        "sms": {"autorise": peut_sms, "configuration": bool(peut_sms and request.user.Get_configuration_sms_defaut())},
         "affichage": affichage,
         "aujourdhui": str(datetime.date.today()),
         "dates_session": request.session.get(CLE_SESSION_DATES, []),
@@ -383,6 +389,72 @@ def Envoyer_email_libre(request):
         mail.delete()
         return JsonResponse({"erreur": "Aucun des collaborateurs sélectionnés n'a d'adresse email"}, status=400)
     return JsonResponse({"url": reverse("editeur_emails", kwargs={"pk": mail.pk}), "sans_adresse": sans_adresse, "sans_document": sans_document})
+
+
+PERMISSION_SMS = "core.editeur_sms"
+PRIORITES_MOBILE = ("perso", "pro", "perso_seul")
+
+
+def Normaliser_portable(numero=None):
+    """ Renvoie le numéro au format national (06.12.34.56.78) s'il s'agit d'un portable français (06, 07, +336, +337), sinon None """
+    chiffres = "".join(caractere for caractere in (numero or "") if caractere.isdigit())
+    if chiffres.startswith("00"):
+        chiffres = chiffres[2:]
+    if chiffres.startswith("330") and len(chiffres) == 12:
+        chiffres = chiffres[2:]                 # +33 (0)6 12 34 56 78
+    elif chiffres.startswith("33") and len(chiffres) == 11:
+        chiffres = "0" + chiffres[2:]           # +33 6 12 34 56 78
+    if len(chiffres) != 10 or chiffres[:2] not in ("06", "07"):
+        return None
+    return ".".join(chiffres[i:i + 2] for i in range(0, 10, 2))
+
+
+def Mobile_collaborateur(collaborateur=None, priorite="perso"):
+    """ Portable du collaborateur : personnel en priorité (perso), pro en priorité (pro) ou personnel uniquement (perso_seul).
+        Le téléphone pro n'est retenu que s'il s'agit d'un portable. """
+    # Le portable personnel est retenu tel qu'il est saisi (comme dans la fiche collaborateur), mis au format national si possible
+    perso = Normaliser_portable(collaborateur.tel_mobile) or collaborateur.tel_mobile or None
+    pro = Normaliser_portable(collaborateur.travail_tel)
+    if priorite == "perso_seul":
+        return perso
+    if priorite == "pro":
+        return pro or perso
+    return perso or pro
+
+
+@Verifie_permission
+def Envoyer_sms_libre(request):
+    """ Prépare un SMS au texte libre pour les collaborateurs cochés, puis renvoie vers l'éditeur de SMS """
+    if not request.user.has_perm(PERMISSION_SMS):
+        return HttpResponseForbidden()
+    collaborateurs = utils_planning.Filtrer_ids_visibles(request.user, Get_liste_ids(request))
+    if not collaborateurs:
+        return JsonResponse({"erreur": "Aucun collaborateur sélectionné"}, status=400)
+    priorite = request.POST.get("priorite") if request.POST.get("priorite") in PRIORITES_MOBILE else "perso"
+
+    modele_sms = ModeleSMS.objects.filter(categorie="saisie_libre", defaut=True).first()
+    sms = SMS.objects.create(
+        objet=modele_sms.objet if modele_sms else "",
+        texte=modele_sms.texte if modele_sms else "",
+        configuration_sms=request.user.Get_configuration_sms_defaut(),
+        selection="NON_ENVOYE",
+        verrouillage_destinataires=True,
+        utilisateur=request.user,
+    )
+
+    sans_numero = []
+    for collaborateur in Collaborateur.objects.filter(pk__in=collaborateurs).order_by("nom", "prenom"):
+        mobile = Mobile_collaborateur(collaborateur, priorite)
+        if not mobile:
+            sans_numero.append(collaborateur.Get_nom())
+            continue
+        destinataire = DestinataireSMS.objects.create(categorie="collaborateur", collaborateur=collaborateur, mobile=mobile, valeurs=json.dumps({}))
+        sms.destinataires.add(destinataire)
+
+    if not sms.destinataires.exists():
+        sms.delete()
+        return JsonResponse({"erreur": "Aucun des collaborateurs sélectionnés n'a de numéro de portable"}, status=400)
+    return JsonResponse({"url": reverse("editeur_sms", kwargs={"pk": sms.pk}), "sans_numero": sans_numero})
 
 
 @Verifie_permission
