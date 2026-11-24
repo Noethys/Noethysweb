@@ -200,6 +200,7 @@
 .pl-collabs-liste li.masque {opacity: 0.5;}
 .pl-collabs-liste li.masque .pl-collab-nom {text-decoration: line-through;}
 .pl-collabs-aide {margin: 0 0 8px; font-size: 12px; line-height: 1.4; color: var(--pl-muted);}
+.pl-collabs-critere {display: block; width: 100%; max-width: 100%; min-width: 0; margin-bottom: 8px; text-overflow: ellipsis;}
 .pl-badge-nouveau {height: 18px; padding: 0 6px; border-radius: 5px; background: #dcfce7; color: #166534; font-size: 10px; font-weight: 800; display: inline-flex; align-items: center; flex-shrink: 0;}
 .dark-mode .pl-badge-nouveau {background: #14532d; color: #bbf7d0;}
 .pl-collab-nom {flex: 1 1 0; font-size: 13px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}

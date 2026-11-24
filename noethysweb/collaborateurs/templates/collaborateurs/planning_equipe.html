@@ -59,7 +59,12 @@
                             <button type="button" class="pl-seg-btn" data-selection="manuel" aria-pressed="false"><i class="fa fa-hand-pointer-o" aria-hidden="true"></i> Manuel</button>
                         </div>
                         <div id="pl_collabs_auto">
-                            <p class="pl-collabs-aide">Collaborateurs <strong>sous contrat</strong> ou <strong>ayant des évènements</strong> sur la période affichée. La liste se met à jour quand vous changez de dates.</p>
+                            <label for="pl_collabs_critere" class="pl-label">Afficher les collaborateurs</label>
+                            <select id="pl_collabs_critere" class="pl-select pl-collabs-critere" style="width: 100%;" title="Collaborateurs affichés. La liste se met à jour quand vous changez de dates.">
+                                <option value="tous">Avec contrat ou évènements</option>
+                                <option value="contrat">Avec contrat uniquement</option>
+                                <option value="evenements">Avec évènements uniquement</option>
+                            </select>
                             <label for="pl_collabs_groupes" class="pl-label">Limiter aux groupes</label>
                             <select id="pl_collabs_groupes" multiple style="width: 100%;"></select>
                         </div>

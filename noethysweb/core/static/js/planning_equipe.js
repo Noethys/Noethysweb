@@ -82,7 +82,8 @@
     var V = {
         mode: "date", sous: "aucun", titres: true, affs: true, realise: false, densite: "auto", vue: "frise",
         affiches: [], masques: new Set(), dates: [], pas: 15, cat_defaut: null,
-        mode_collabs: "auto",       // collaborateurs affichés : "auto" (sous contrat ou avec évènements sur la période) ou "manuel" (liste fixe)
+        mode_collabs: "auto",       // collaborateurs affichés : "auto" (calculés selon critere_auto) ou "manuel" (liste fixe)
+        critere_auto: "tous",       // critère du mode auto : "tous" (sous contrat ou avec évènements), "contrat" ou "evenements"
         groupes_auto: [], connus_avant: new Set(),
         info_actualisation: null,   // bandeau affiché après « Actualiser » (changements détectés)
         filtres: {cats: new Set(), aff: null, qualif: null, vides: false, jours_vides: false},
@@ -570,7 +571,7 @@
         var affichage = {
             mode: V.mode, sous: V.sous, titres: V.titres, affs: V.affs, realise: V.realise, densite: V.densite, vue: V.vue,
             affiches: V.affiches, masques: Array.from(V.masques), pas: V.pas, cat_defaut: V.cat_defaut,
-            mode_collabs: V.mode_collabs, groupes_auto: V.groupes_auto, connus: Array.from(S.collabs.keys()),
+            mode_collabs: V.mode_collabs, critere_auto: V.critere_auto, groupes_auto: V.groupes_auto, connus: Array.from(S.collabs.keys()),
             filtres: {cats: Array.from(V.filtres.cats), aff: V.filtres.aff, qualif: V.filtres.qualif, vides: V.filtres.vides, jours_vides: V.filtres.jours_vides},
             plage: V.plage.auto ? {auto: true} : {auto: false, debut: V.plage.debut, fin: V.plage.fin},
             legende: V.legende, panneau: V.panneau
@@ -589,6 +590,8 @@
         if (Array.isArray(a.masques)) { V.masques = new Set(a.masques.filter(function(id) { return S.collabs.has(id); })); }
         // Sélection automatique par défaut, y compris pour les préférences enregistrées avant l'apparition de ce mode
         V.mode_collabs = a.mode_collabs === "manuel" ? "manuel" : "auto";
+        // Critère du mode automatique : "tous" par défaut (comportement historique)
+        V.critere_auto = ["tous", "contrat", "evenements"].indexOf(a.critere_auto) >= 0 ? a.critere_auto : "tous";
         var ids_groupes = new Set(S.groupes.map(function(g) { return g.id; }));
         V.groupes_auto = Array.isArray(a.groupes_auto) ? a.groupes_auto.filter(function(id) { return ids_groupes.has(id); }) : [];
         // Collaborateurs connus lors de la dernière visite (badge « Nouveau » pour les autres)
@@ -625,18 +628,23 @@
     var $canvas, $scroll, $axe, $sticky, $minimap, $synthese;
 
     function Calculer_affiches_auto() {
-        // Collaborateurs sous contrat sur la période affichée ou ayant des évènements sur l'une des dates affichées
+        // Selon V.critere_auto : collaborateurs sous contrat sur la période affichée ("contrat"),
+        // ayant des évènements sur l'une des dates affichées ("evenements") ou l'un ou l'autre ("tous")
         if (!V.dates.length) { return []; }
         var debut = V.dates[0], fin = V.dates[V.dates.length - 1], dates = new Set(V.dates), ids = new Set();
-        S.collabs.forEach(function(c) {
-            if (c.contrats.some(function(contrat) { return contrat.d <= fin && (contrat.f === null || contrat.f >= debut); })) { ids.add(c.id); }
-        });
-        S.evts.forEach(function(evt) {
-            if (ids.has(evt.c) || !S.collabs.has(evt.c)) { return; }
-            for (var j = Math.max(Jour_de(evt.s), debut), j2 = Math.min(Jour_de(evt.e - 1), fin); j <= j2; j++) {
-                if (dates.has(j)) { ids.add(evt.c); return; }
-            }
-        });
+        if (V.critere_auto !== "evenements") {
+            S.collabs.forEach(function(c) {
+                if (c.contrats.some(function(contrat) { return contrat.d <= fin && (contrat.f === null || contrat.f >= debut); })) { ids.add(c.id); }
+            });
+        }
+        if (V.critere_auto !== "contrat") {
+            S.evts.forEach(function(evt) {
+                if (ids.has(evt.c) || !S.collabs.has(evt.c)) { return; }
+                for (var j = Math.max(Jour_de(evt.s), debut), j2 = Math.min(Jour_de(evt.e - 1), fin); j <= j2; j++) {
+                    if (dates.has(j)) { ids.add(evt.c); return; }
+                }
+            });
+        }
         if (V.groupes_auto.length) {
             ids.forEach(function(id) {
                 var c = S.collabs.get(id);
@@ -1299,11 +1307,14 @@
                 "<button type='button' class='pl-mini-btn' data-collab-masquer='" + id + "' aria-label='" + (masque ? "Afficher " : "Masquer ") + Echapper(c.libelle) + "' title='" + (masque ? "Afficher" : "Masquer") + "'><i class='fa " + (masque ? "fa-eye-slash" : "fa-eye") + "'></i></button>" +
                 (auto ? "" : "<button type='button' class='pl-mini-btn' data-collab-retirer='" + id + "' aria-label='Retirer " + Echapper(c.libelle) + "' title='Retirer'><i class='fa fa-times'></i></button>") + "</li>";
         });
-        var vide = auto ? "Aucun collaborateur sous contrat ou avec des évènements sur la période." : "Aucun collaborateur affiché.";
+        var vides_auto = {tous: "Aucun collaborateur sous contrat ou avec des évènements sur la période.", contrat: "Aucun collaborateur sous contrat sur la période.", evenements: "Aucun collaborateur avec des évènements sur la période."};
+        var libelles_critere = {tous: "Contrat ou évènements", contrat: "Contrat", evenements: "Évènements"};
+        var vide = auto ? vides_auto[V.critere_auto] : "Aucun collaborateur affiché.";
         $("#pl_collabs_liste").html(html || "<li class='pl-muted pl-petit'>" + vide + "</li>");
         var masques = V.affiches.filter(function(id) { return V.masques.has(id); }).length, visibles = V.affiches.length - masques;
-        $("#pl_collabs_compte").text((auto ? "Automatique · " : "Manuel · ") + visibles + " affiché" + (visibles > 1 ? "s" : "") + (masques ? " · " + masques + " masqué" + (masques > 1 ? "s" : "") : ""));
+        $("#pl_collabs_compte").text((auto ? "Automatique (" + libelles_critere[V.critere_auto] + ") · " : "Manuel · ") + visibles + " affiché" + (visibles > 1 ? "s" : "") + (masques ? " · " + masques + " masqué" + (masques > 1 ? "s" : "") : ""));
         $("[data-selection]").each(function() { this.setAttribute("aria-pressed", String(this.getAttribute("data-selection") === V.mode_collabs)); });
+        $("#pl_collabs_critere").val(V.critere_auto);
         $("#pl_collabs_auto").prop("hidden", !auto);
         $("#pl_collabs_manuel").prop("hidden", auto);
         $("#pl_collabs_vider").prop("hidden", auto);
@@ -2470,6 +2481,12 @@
             V.mode_collabs = mode;
             // En passant en manuel, la liste calculée actuelle devient le point de départ de la liste fixe
             if (mode === "auto") { V.affiches = Calculer_affiches_auto(); }
+            Apres_changement_collabs();
+        });
+        $("#pl_collabs_critere").on("change", function() {
+            if (this.value === V.critere_auto) { return; }
+            V.critere_auto = this.value;
+            V.affiches = Calculer_affiches_auto();
             Apres_changement_collabs();
         });
         $("#pl_collabs_groupes").on("change", function() {
