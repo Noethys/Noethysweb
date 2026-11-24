@@ -225,6 +225,21 @@ HTML_CREATION_MODELE_PLANNING = """
             </div>
             <div class="modal-body">
                 <div id="cmp_erreurs" class="alert alert-danger" role="alert" hidden></div>
+                <div class="border rounded px-3 py-2 mb-3 bg-light" id="cmp_depart" role="radiogroup" aria-labelledby="cmp_depart_titre">
+                    <div class="text-muted small mb-1" id="cmp_depart_titre">Partir de</div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio" class="custom-control-input" id="cmp_depart_vierge" name="cmp_depart" value="vierge" checked>
+                        <label class="custom-control-label font-weight-normal" for="cmp_depart_vierge">Un modèle vierge</label>
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap">
+                        <div class="custom-control custom-radio mr-2">
+                            <input type="radio" class="custom-control-input" id="cmp_depart_copie" name="cmp_depart" value="copie">
+                            <label class="custom-control-label font-weight-normal" for="cmp_depart_copie">Un modèle existant :</label>
+                        </div>
+                        <div style="flex: 1; min-width: 240px; max-width: 520px;"><select class="form-control" id="cmp_source" aria-label="Modèle existant à copier" style="width: 100%;"></select></div>
+                    </div>
+                </div>
+                <div id="cmp_info_copie" class="alert alert-info py-2" role="status" hidden></div>
                 <div id="cmp_contenu"></div>
             </div>
             <div class="modal-footer">
@@ -252,22 +267,55 @@ HTML_CREATION_MODELE_PLANNING = """
             if (erreurs.length) { $modale.scrollTop(0); }
         }
 
-        // Ouverture : chargement du formulaire existant des modèles de planning
-        $("#cmp_ouvrir").on("click", function() {
+        // Chargement du formulaire des modèles de planning, vierge ou copié d'un modèle existant
+        var num_chargement = 0;
+        function Charger_formulaire() {
+            var copie = $("#cmp_depart_copie").prop("checked"), source = copie ? $("#cmp_source").val() : "";
+            var num = ++num_chargement;
+            $("#cmp_source").prop("disabled", !copie);
             Afficher_erreurs([]);
-            $("#cmp_contenu").html(html_chargement);
-            $modale.modal("show");
-            $.ajax({url: url_creer, type: "GET", data: {idcollaborateur: idcollaborateur}, dataType: "json"}).done(function(data) {
+            $("#cmp_info_copie").prop("hidden", true);
+            // Hauteur conservée pendant le chargement pour éviter que la fenêtre ne saute
+            $("#cmp_contenu").css("min-height", $("#cmp_contenu").outerHeight() + "px").html(html_chargement);
+            $("#cmp_valider").prop("disabled", true);
+            $.ajax({url: url_creer, type: "GET", data: {idcollaborateur: idcollaborateur, source: source || ""}, dataType: "json"}).done(function(data) {
+                if (num !== num_chargement) { return; }
                 $("body > #modal_ligne").remove();
-                $("#cmp_contenu").html(data.form_html);
+                $("#cmp_contenu").html(data.form_html).css("min-height", "");
                 // La sous-modale de saisie d'un évènement doit être hors de la modale pour s'afficher correctement
                 $("#cmp_contenu #modal_ligne").appendTo("body");
                 $("#cmp_contenu .django-select2").djangoSelect2();
+                if (data.source) {
+                    var nom = $("<div>").text(data.source.nom).html(), nb = data.source.nb_lignes;
+                    $("#cmp_info_copie").html("<i class='fa fa-copy margin-r-5' aria-hidden='true'></i>Copie de « " + nom + " » : réglages du cycle et " + nb + " évènement" + (nb > 1 ? "s" : "") +
+                        " repris. Modifiez ce qui doit l'être : le modèle d'origine ne sera pas modifié.").prop("hidden", false);
+                }
+                $("#cmp_valider").prop("disabled", false);
             }).fail(function(xhr) {
-                $("#cmp_contenu").empty();
+                if (num !== num_chargement) { return; }
+                $("#cmp_contenu").empty().css("min-height", "");
                 Afficher_erreurs((xhr.responseJSON && xhr.responseJSON.erreur) || ["Impossible de charger le formulaire"]);
             });
+        }
+
+        // Ouverture : liste des modèles existants reprise du champ du contrat, modèle sélectionné dans le contrat proposé comme point de départ
+        var $source = $("#cmp_source").select2({theme: "bootstrap4", language: "fr", width: "100%", dropdownParent: $modale});
+        $("#cmp_ouvrir").on("click", function() {
+            $source.empty();
+            $champ.find("option").each(function() {
+                if (this.value) { $source.append(new Option(this.text, this.value)); }
+            });
+            var existe = $source.find("option").length > 0, selection = $champ.val();
+            $source.val(selection || $source.find("option").first().val()).trigger("change.select2");
+            $("#cmp_depart_copie").prop("disabled", !existe);
+            $("#cmp_depart_" + (existe && selection ? "copie" : "vierge")).prop("checked", true);
+            $modale.modal("show");
+            Charger_formulaire();
         });
+        $("input[name='cmp_depart']").on("change", Charger_formulaire);
+        // Rechargement après la fermeture de Select2 : il retire alors le blocage du défilement posé sur la fenêtre pendant son ouverture
+        $("#cmp_source").on("change", function() { setTimeout(Charger_formulaire, 0); });
+        $("#cmp_source").on("select2:close", function() { setTimeout(function() { $modale.off("scroll.select2"); }, 0); });
 
         // Les listes Select2 et la sous-modale doivent pouvoir prendre le focus
         $modale.on("shown.bs.modal", function(e) { if (e.target === this) { $(document).off("focusin.bs.modal"); } });

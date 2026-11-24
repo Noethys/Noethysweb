@@ -86,8 +86,26 @@ def Creer_modele_modale(request):
         collaborateur = Collaborateur.objects.filter(pk=int(idcollaborateur)).first() if idcollaborateur.isdigit() else None
         if collaborateur:
             initial = {"nom": "Semaine type - %s" % collaborateur.Get_nom(), "disponibilite": "RESTREINT", "collaborateurs": [collaborateur.pk]}
+
+        # Copie d'un modèle existant : réglages du cycle et évènements repris (le modèle d'origine n'est pas modifié)
+        idsource = request.GET.get("source", "")
+        source = ModelePlanningCollaborateur.objects.filter(pk=int(idsource)).first() if idsource.isdigit() else None
+        infos_source = None
+        if source:
+            lignes = LigneModelePlanningCollaborateur.objects.filter(modele=source).order_by("semaine", "jour", "heure_debut")
+            initial.update({
+                "nom": "%s - %s" % (source.nom, collaborateur.Get_nom()) if collaborateur else "Copie de %s" % source.nom,
+                "inclure_feries": source.inclure_feries, "nb_semaines": source.nb_semaines, "reperage": source.reperage,
+                "date_reference": source.date_reference, "vacances_cycle": source.vacances_cycle,
+                # idligne vide : les lignes sont recréées dans le nouveau modèle et non déplacées depuis le modèle d'origine
+                "lignes": json.dumps([{
+                    "idligne": None, "semaine": ligne.semaine, "jour": ligne.jour, "periode": ligne.periode, "heure_debut": str(ligne.heure_debut),
+                    "heure_fin": str(ligne.heure_fin), "type_evenement": ligne.type_evenement_id, "titre": ligne.titre, "affectation": ligne.affectation_id}
+                    for ligne in lignes]),
+            })
+            infos_source = {"id": source.pk, "nom": source.nom, "nb_lignes": len(lignes)}
         form = Formulaire(request=request, mode="modale", initial=initial)
-        return JsonResponse({"form_html": render_crispy_form(form, context=csrf(request))})
+        return JsonResponse({"form_html": render_crispy_form(form, context=csrf(request)), "source": infos_source})
 
     # Validation du formulaire
     form = Formulaire(request.POST, request=request, mode="modale")
@@ -108,6 +126,10 @@ def Creer_modele_modale(request):
                 erreurs.append("<b>%s</b> : %s" % (escape(label), escape(erreur)) if label else escape(erreur))
     if erreurs:
         return JsonResponse({"erreur": erreurs}, status=400)
+
+    # Création uniquement : aucune ligne existante ne doit être rattachée au nouveau modèle (ex : copie d'un modèle existant)
+    for ligne in lignes:
+        ligne["idligne"] = None
 
     # Enregistrement
     with transaction.atomic():
