@@ -174,7 +174,8 @@ def Form_valid_modifier(form=None, request=None, object=None):
     if not form.is_valid():
         return form
 
-    # Sauvegarde de l'évènement
+    # Sauvegarde de l'évènement (nouvelle version pour que le planning détecte la modification)
+    form.instance.version = (form.instance.version or 0) + 1
     object = form.save()
 
     return object

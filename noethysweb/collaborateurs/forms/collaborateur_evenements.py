@@ -41,7 +41,9 @@ class Formulaire(FormulaireBase, ModelForm):
 
     class Meta:
         model = EvenementCollaborateur
-        fields = "__all__"
+        # Uniquement les champs saisis dans ce formulaire : les champs techniques (version) et ceux gérés par le planning
+        # (affectation, réalisé, déclarations) ne doivent être ni exigés ni effacés lors d'une modification
+        fields = ["collaborateur", "type_evenement", "titre", "date_debut", "date_fin"]
         widgets = {
             "date_debut": DateTimePickerWidget(),
             "date_fin": DateTimePickerWidget(),
