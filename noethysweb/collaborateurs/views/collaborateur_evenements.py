@@ -12,6 +12,7 @@ from core.views import crud
 from core.models import EvenementCollaborateur, Vacance, Ferie
 from core.utils import utils_dates
 from collaborateurs.forms.collaborateur_evenements import Formulaire
+from collaborateurs.utils import utils_planning
 from collaborateurs.views.collaborateur import Onglet
 from django.utils.html import format_html
 
@@ -154,6 +155,15 @@ def Form_valid_ajouter(form=None, request=None, object=None):
 
     if form.cleaned_data["selection_periode"] == "RECURRENCE":
         occurences = Calcule_occurences(form.cleaned_data)
+        if not occurences:
+            form.add_error(None, "Aucun évènement ne correspond aux critères de récurrence saisis.")
+            return form
+        # Chevauchement avec les évènements existants du collaborateur : rien n'est créé en cas de conflit
+        conflits = utils_planning.Get_conflits(collaborateur=form.cleaned_data["collaborateur"], type_evenement=form.cleaned_data["type_evenement"],
+                                               periodes=[(occurence["date_debut"], occurence["date_fin"]) for occurence in occurences])
+        if conflits:
+            form.add_error(None, utils_planning.Texte_conflits(conflits))
+            return form
         serie = str(uuid.uuid4())
         for occurence in occurences:
             evenement = EvenementCollaborateur.objects.create(
@@ -230,8 +240,8 @@ def Calcule_occurences(cleaned_data={}):
             if numSemaineAnnee % 2 != 0 and cleaned_data["recurrence_frequence_type"] == 5:
                 valide = False
 
-        # Vérifie si férié
-        if cleaned_data["recurrence_feries"] and utils_dates.EstFerie(date, liste_feries):
+        # Vérifie si férié : les fériés sont exclus sauf si "Inclure les fériés" est coché
+        if not cleaned_data["recurrence_feries"] and utils_dates.EstFerie(date, liste_feries):
             valide = False
 
         # Application

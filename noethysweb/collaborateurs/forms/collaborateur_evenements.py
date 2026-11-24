@@ -14,6 +14,7 @@ from core.forms.base import FormulaireBase
 from core.utils.utils_commandes import Commandes
 from core.utils.utils_texte import Creation_tout_cocher
 from core.models import EvenementCollaborateur, Collaborateur, JOURS_SEMAINE
+from collaborateurs.utils import utils_planning
 from core.widgets import DatePickerWidget, DateTimePickerWidget
 
 
@@ -37,7 +38,7 @@ class Formulaire(FormulaireBase, ModelForm):
     choix_frequence = [(1, "Toutes les semaines"), (2, "Une semaine sur deux"),
                         (3, "Une semaine sur trois"), (4, "Une semaine sur quatre"),
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]
-    recurrence_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False, help_text="Sélectionnez le rythme de répétition des semaines.")
+    recurrence_frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, coerce=int, empty_value=1, required=False, help_text="Sélectionnez le rythme de répétition des semaines.")
 
     class Meta:
         model = EvenementCollaborateur
@@ -130,12 +131,27 @@ class Formulaire(FormulaireBase, ModelForm):
             if not self.cleaned_data["date_fin"]:
                 self.add_error("date_fin", "Vous devez sélectionner une date de fin")
                 return
+            if self.cleaned_data["date_fin"] <= self.cleaned_data["date_debut"]:
+                self.add_error("date_fin", "La date de fin doit être postérieure à la date de début")
+                return
+            # Chevauchement avec les autres évènements du collaborateur (l'évènement modifié est exclu)
+            conflits = utils_planning.Get_conflits(collaborateur=self.cleaned_data.get("collaborateur"), type_evenement=self.cleaned_data.get("type_evenement"),
+                                                   periodes=[(self.cleaned_data["date_debut"], self.cleaned_data["date_fin"])], exclure_pk=self.instance.pk)
+            if conflits:
+                self.add_error(None, utils_planning.Texte_conflits(conflits))
+                return
 
         if self.cleaned_data["selection_periode"] == "RECURRENCE":
             for code, label in [("date_debut", "date de début"), ("date_fin", "date de fin"), ("heure_debut", "heure de début"), ("heure_fin", "heure de fin")]:
                 if not self.cleaned_data["recurrence_%s" % code]:
                     self.add_error("recurrence_%s" % code, "Vous devez sélectionner une %s" % label)
                     return
+            if self.cleaned_data["recurrence_date_fin"] < self.cleaned_data["recurrence_date_debut"]:
+                self.add_error("recurrence_date_fin", "La date de fin doit être postérieure ou égale à la date de début")
+                return
+            if self.cleaned_data["recurrence_heure_fin"] <= self.cleaned_data["recurrence_heure_debut"]:
+                self.add_error("recurrence_heure_fin", "L'heure de fin doit être postérieure à l'heure de début")
+                return
 
         return self.cleaned_data
 

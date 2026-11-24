@@ -171,6 +171,26 @@ def Verifier_chevauchements(evenements=[], categories={}):
     return erreurs
 
 
+def Get_conflits(collaborateur=None, type_evenement=None, periodes=[], exclure_pk=None):
+    """ Renvoie les périodes (début, fin) qui chevauchent un évènement existant du collaborateur.
+        Même règle que le planning : aucun conflit si l'une des deux catégories autorise le chevauchement. """
+    if not collaborateur or not type_evenement or not periodes or type_evenement.chevauchement_possible:
+        return []
+    existants = list(EvenementCollaborateur.objects.filter(
+        collaborateur=collaborateur, type_evenement__chevauchement_possible=False,
+        date_debut__lt=max(fin for debut, fin in periodes), date_fin__gt=min(debut for debut, fin in periodes)).exclude(pk=exclure_pk))
+    return [(debut, fin) for debut, fin in periodes if any(debut < autre.date_fin and fin > autre.date_debut for autre in existants)]
+
+
+def Texte_conflits(conflits=[]):
+    """ Message d'erreur listant les dates en conflit """
+    dates = sorted({debut.strftime("%d/%m/%Y") for debut, fin in conflits}, key=lambda texte: texte[6:] + texte[3:5] + texte[:2])
+    if len(dates) == 1:
+        return "Cet évènement chevauche un autre évènement du collaborateur le %s." % dates[0]
+    return "Ces évènements chevauchent d'autres évènements du collaborateur sur %d dates : %s%s." % (
+        len(dates), ", ".join(dates[:8]), "…" if len(dates) > 8 else "")
+
+
 def Appliquer_donnees(evenement=None, donnees={}, categories={}, arbre=None):
     """ Applique un dictionnaire de données client à un évènement, avec validation """
     try:
