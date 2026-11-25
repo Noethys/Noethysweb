@@ -1,3 +1,24 @@
+Version 1.3.7.1 (25/11/2026) :
+
+Nouveautés
+- Collaborateurs > Planning général : envoi de SMS aux collaborateurs
+- Collaborateurs > Planning général : filtre pour n'afficher que les collaborateurs sous contrat ou ayant des événements sur la période
+- Collaborateurs > Taux d'encadrement : contrôle heure par heure du nombre d'individus par collaborateur sur chaque affectation
+- Fiche collaborateur > Contrats : création d'un modèle de planning à partir d'un modèle existant
+- Facturation > Liste des prestations : modification par lot des codes comptables et analytiques des prestations cochées
+- Paramétrage > Modèles de prestations : nouveau champ Code analytique
+Améliorations
+- Facturation > Exporter les écritures comptables : contrôle des prestations sans code avant l'export, avec saisie directe des codes manquants
+Corrections
+- Consommations > Demandes de réservations : calcul des places restantes pour les événements sans capacité maximale
+- Fiche famille : erreur au détachement du dernier individu d'une famille
+- Fiches individu et collaborateur : erreur quand le fichier de la photo est absent du serveur
+- Portail : les champs masqués ne bloquent plus la validation de la fiche
+- Portail > Paiement en ligne : correction du test et de l'activation de PayFiP Rôle
+- Fiche collaborateur > Événements : correction de la saisie depuis la rubrique Événements et de la détection des chevauchements
+- Fichiers importés depuis Noethys Windows : correction des chemins contenant des antislashs
+- Outils > Nettoyeur : suppression des fichiers orphelins désactivée provisoirement
+
 Version 1.3.7.0 (21/11/2026) :
 
 Nouveautés
