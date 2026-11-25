@@ -540,6 +540,7 @@ def GetMenuPrincipal(organisateur=None, user=None, force_permissions=False):
     # Analyse
     menu_analyse_collaborateurs = menu_collaborateurs.Add(titre="Analyse")
     menu_analyse_collaborateurs.Add(code="statistiques_evenements_collaborateurs", titre="Statistiques des évènements", icone="file-text-o")
+    menu_analyse_collaborateurs.Add(code="encadrement_collaborateurs", titre="Taux d'encadrement", icone="file-text-o")
     menu_analyse_collaborateurs.Add(code="variables_paie_collaborateurs", titre="Éléments variables de paie", icone="file-text-o")
 
 

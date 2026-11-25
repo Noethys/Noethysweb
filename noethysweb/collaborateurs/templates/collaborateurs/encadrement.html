@@ -1,0 +1,285 @@
+{% extends "core/page.html" %}
+{% load static %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .enc-barre {display: flex; flex-wrap: wrap; align-items: center; gap: 8px}
+        .enc-barre .enc-periode {font-weight: 600; min-width: 260px; text-align: center}
+        .enc-barre select {width: auto; max-width: 320px}
+        .enc-barre [data-mode].active {background: var(--couleur-principale, #3c8dbc); border-color: var(--couleur-principale, #3c8dbc); color: #ffffff}
+        .enc-kpi {height: 100%; padding: 12px 14px; border-radius: .25rem; background: #ffffff; box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2)}
+        .enc-kpi .libelle {font-size: 12.5px; color: #6c757d}
+        .enc-kpi .valeur {font-size: 26px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums}
+        .enc-tableau-conteneur {overflow-x: auto}
+        .enc-tableau {border-collapse: separate; border-spacing: 3px; font-size: 12.5px}
+        .enc-tableau th {font-weight: 600; color: #6c757d; text-align: center; white-space: nowrap; padding: 2px 4px}
+        .enc-tableau th.enc-nom, .enc-tableau td.enc-nom {text-align: left; min-width: 200px; position: sticky; left: 0; background: #ffffff; z-index: 1}
+        .enc-tableau .enc-nom small {display: block; color: #8a96a3; font-size: 11px}
+        .enc-tableau td.enc-titre {color: #6c757d; font-weight: 600}
+        .enc-cellule {min-width: 84px; max-width: 110px; height: 40px; border-radius: 4px; text-align: center; line-height: 1.2; padding: 3px 4px; border: 2px solid transparent; cursor: pointer; font-weight: 600}
+        .enc-cellule small {display: block; font-weight: 400; font-size: 11px}
+        .enc-cellule:focus {outline: 2px solid #3c8dbc; outline-offset: 1px}
+        .enc-cellule.selection {border-color: #343a40}
+        .enc-ko {background: #f8d7da; color: #721c24}
+        .enc-al {background: #fff3cd; color: #856404}
+        .enc-ok {background: #d4edda; color: #155724}
+        .enc-vide {background: #f4f6f9; color: #adb5bd; cursor: default; font-weight: 400}
+        .enc-legende {display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: 12px; color: #6c757d}
+        .enc-legende span {display: inline-flex; align-items: center; gap: 5px}
+        .enc-legende i.carre {width: 12px; height: 12px; border-radius: 2px; display: inline-block}
+        .enc-graphe {position: relative; height: 240px}
+        .enc-collab {display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px solid #eef0f2; font-size: 13px}
+        .enc-collab:first-child {border-top: 0}
+        .enc-remarque {font-size: 11.5px; color: #8a96a3}
+        .dark-mode .enc-kpi, .dark-mode .enc-tableau td.enc-nom {background: #343a40}
+        .dark-mode .enc-vide {background: #3f474e; color: #8a96a3}
+    </style>
+{% endblock styles %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'lib/chartjs/chart.umd.min.js' %}"></script>
+{% endblock scripts %}
+
+{% block contenu_page %}
+    {% csrf_token %}
+
+    <!-- Barre de sélection -->
+    <div class="card card-default">
+        <div class="card-body py-2">
+            <div class="enc-barre">
+                <div class="btn-group" role="group" aria-label="Durée de la période">
+                    <button type="button" class="btn btn-default btn-sm active" data-mode="semaine" aria-pressed="true">Semaine</button>
+                    <button type="button" class="btn btn-default btn-sm" data-mode="mois" aria-pressed="false">Mois</button>
+                </div>
+                <button type="button" class="btn btn-default btn-sm" id="enc_precedent" aria-label="Période précédente" title="Période précédente"><i class="fa fa-chevron-left"></i></button>
+                <span class="enc-periode" id="enc_libelle" aria-live="polite"></span>
+                <button type="button" class="btn btn-default btn-sm" id="enc_suivant" aria-label="Période suivante" title="Période suivante"><i class="fa fa-chevron-right"></i></button>
+                <button type="button" class="btn btn-default btn-sm" id="enc_aujourdhui">Aujourd'hui</button>
+                <select class="form-control form-control-sm ml-2" id="enc_affectation" aria-label="Affectation">
+                    <option value="">Toutes les affectations</option>
+                    {% for affectation in affectations %}
+                        <option value="{{ affectation.id }}">{{ affectation.prefixe }}{{ affectation.nom }}</option>
+                    {% endfor %}
+                </select>
+                <span class="ml-auto"></span>
+                <button type="button" class="btn btn-default btn-sm" id="enc_excel" title="Exporter la période au format Excel"><i class="fa fa-file-excel-o margin-r-5"></i>Excel</button>
+            </div>
+        </div>
+    </div>
+
+    {% if not affectations %}
+        <div class="callout callout-info">
+            <p>Aucune affectation n'a de taux d'encadrement maximal. Renseignez-le dans Paramétrage &gt; Affectations des collaborateurs, sur des affectations liées à une activité.</p>
+        </div>
+    {% else %}
+
+    <!-- Indicateurs -->
+    <div class="row mb-3">
+        <div class="col-6 col-md-3 mb-2"><div class="enc-kpi"><div class="libelle"><i class="fa fa-exclamation-circle text-danger margin-r-5"></i>Créneaux en dépassement</div><div class="valeur text-danger" id="enc_kpi_ko">-</div></div></div>
+        <div class="col-6 col-md-3 mb-2"><div class="enc-kpi"><div class="libelle"><i class="fa fa-exclamation-triangle text-warning margin-r-5"></i>Créneaux en alerte</div><div class="valeur text-warning" id="enc_kpi_al">-</div></div></div>
+        <div class="col-6 col-md-3 mb-2"><div class="enc-kpi"><div class="libelle"><i class="fa fa-check-circle text-success margin-r-5"></i>Créneaux conformes</div><div class="valeur text-success" id="enc_kpi_ok">-</div></div></div>
+        <div class="col-6 col-md-3 mb-2"><div class="enc-kpi"><div class="libelle"><i class="fa fa-user-plus margin-r-5"></i>Renforts manquants</div><div class="valeur" id="enc_kpi_manque">-</div></div></div>
+    </div>
+
+    <!-- Tableau affectations x jours -->
+    <div class="card card-default">
+        <div class="card-header with-border"><h3 class="card-title"><i class="fa fa-table margin-r-5"></i>Pire taux de chaque journée</h3></div>
+        <div class="card-body">
+            <div id="enc_tableau" class="enc-tableau-conteneur"></div>
+            <div class="enc-legende">
+                <span><i class="carre enc-ok"></i>Conforme</span>
+                <span><i class="carre enc-al"></i>Alerte (au moins 85 % du maximum)</span>
+                <span><i class="carre enc-ko"></i>Dépassement ou aucun collaborateur</span>
+            </div>
+            <div class="enc-remarque mt-2">Individus présents (réservations et présences) rapportés aux collaborateurs ayant du temps comptabilisé sur l'affectation ou ses sous-affectations, pauses déduites. Calcul par quart d'heure : chaque heure affiche son pire quart d'heure. Les jours sans consommation ne sont pas affichés.</div>
+        </div>
+    </div>
+
+    <!-- Détail d'une journée -->
+    <div class="card card-default" id="enc_detail" hidden>
+        <div class="card-header with-border d-flex align-items-center flex-wrap">
+            <h3 class="card-title" id="enc_detail_titre"></h3>
+            <a class="btn btn-default btn-sm ml-auto" id="enc_lien_planning" href="#" title="Ouvrir le planning général sur cette date"><i class="fa fa-calendar margin-r-5"></i>Ouvrir dans le planning général</a>
+        </div>
+        <div class="card-body">
+            <p class="mb-2" id="enc_detail_resume"></p>
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="enc-legende mt-0 mb-2">
+                        <span><i class="carre" style="background: #3c8dbc;"></i>Individus présents</span>
+                        <span><i class="carre" style="background: #dc3545;"></i>Heure en dépassement</span>
+                        <span><i class="carre" style="background: transparent; border-top: 2px dashed #6c757d; height: 0; width: 16px;"></i>Capacité d'encadrement (collaborateurs × maximum)</span>
+                    </div>
+                    <div class="enc-graphe"><canvas id="enc_graphe" role="img" aria-label="Individus présents et capacité d'encadrement heure par heure"></canvas></div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="font-weight-bold mb-1" style="font-size: 13px;">Collaborateurs planifiés</div>
+                    <div id="enc_collaborateurs"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
+    <script>
+        $(function () {
+            var URL_DONNEES = "{% url 'ajax_encadrement_collaborateurs_get_donnees' %}",
+                URL_DETAIL = "{% url 'ajax_encadrement_collaborateurs_get_detail' %}",
+                URL_EXCEL = "{% url 'ajax_encadrement_collaborateurs_exporter_excel' %}";
+            var etat = {mode: "semaine", date: "{{ aujourdhui }}", idaffectation: ""}, donnees = null, selection = null, graphe = null;
+            var LIBELLES = {ko: "Dépassement", al: "Alerte", ok: "Conforme"};
+
+            function Echapper(texte) { return $("<div>").text(texte == null ? "" : texte).html(); }
+            function Parametres(extra) {
+                return $.extend({csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(), mode: etat.mode, date: etat.date, idaffectation: etat.idaffectation}, extra || {});
+            }
+            function Decaler(sens) {
+                var d = new Date(etat.date + "T12:00:00");
+                if (etat.mode === "mois") { d.setDate(1); d.setMonth(d.getMonth() + sens); } else { d.setDate(d.getDate() + 7 * sens); }
+                etat.date = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+                Charger();
+            }
+            function Format_taux(taux) { return String(Math.round(taux * 10) / 10).replace(".", ","); }
+            function Texte_taux(cellule) { return cellule.taux ? "1 / " + Format_taux(cellule.taux) : "Aucun"; }
+
+            // ------------------- Chargement de la période -------------------
+            function Charger() {
+                $("#enc_libelle").html("<i class='fa fa-spinner fa-spin'></i>");
+                $.post(URL_DONNEES, Parametres(), function (data) {
+                    donnees = data;
+                    $("#enc_libelle").text(data.libelle);
+                    $.each(data.kpi, function (cle, valeur) { $("#enc_kpi_" + cle).text(valeur); });
+                    Rendu_tableau();
+                    // Sélection : la case précédente si elle existe encore, sinon le premier dépassement, sinon rien
+                    var cellule = selection && Get_cellule(selection.id, selection.date);
+                    if (!cellule) { selection = Premier_depassement(); }
+                    if (selection) { Afficher_detail(); } else { $("#enc_detail").prop("hidden", true); }
+                }).fail(function (xhr) {
+                    $("#enc_libelle").text("");
+                    toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Impossible de calculer les taux d'encadrement");
+                });
+            }
+            function Get_ligne(id) { return donnees.lignes.find(function (ligne) { return ligne.id === id; }); }
+            function Get_cellule(id, date) { var ligne = Get_ligne(id); return ligne && ligne.cellules[date]; }
+            function Premier_depassement() {
+                for (var i = 0; i < donnees.lignes.length; i++) {
+                    var ligne = donnees.lignes[i];
+                    for (var j = 0; j < donnees.colonnes.length; j++) {
+                        var cellule = ligne.cellules[donnees.colonnes[j].date];
+                        if (cellule && cellule.etat === "ko") { return {id: ligne.id, date: donnees.colonnes[j].date}; }
+                    }
+                }
+                return null;
+            }
+
+            function Rendu_tableau() {
+                if (!donnees.colonnes.length) {
+                    $("#enc_tableau").html("<p class='text-muted text-center my-4'>Aucune consommation réservée sur cette période pour les affectations ayant un taux d'encadrement maximal.</p>");
+                    return;
+                }
+                var html = ["<table class='enc-tableau'><thead><tr><th class='enc-nom' scope='col'>Affectation</th>"];
+                donnees.colonnes.forEach(function (colonne) { html.push("<th scope='col'>" + Echapper(colonne.libelle) + "</th>"); });
+                html.push("</tr></thead><tbody>");
+                donnees.lignes.forEach(function (ligne) {
+                    var marge = "padding-left: " + (4 + ligne.niveau * 16) + "px;";
+                    if (!ligne.seuil) {
+                        html.push("<tr><td class='enc-nom enc-titre' style='" + marge + "' colspan='" + (donnees.colonnes.length + 1) + "'>" + Echapper(ligne.nom) + "</td></tr>");
+                        return;
+                    }
+                    html.push("<tr><th class='enc-nom font-weight-normal' scope='row' style='" + marge + "'>" + Echapper(ligne.nom) + "<small>max 1 pour " + ligne.seuil + "</small></th>");
+                    donnees.colonnes.forEach(function (colonne) {
+                        var cellule = ligne.cellules[colonne.date];
+                        if (!cellule) { html.push("<td class='enc-cellule enc-vide'>–</td>"); return; }
+                        var choisie = selection && selection.id === ligne.id && selection.date === colonne.date;
+                        var sous_titre = cellule.manque ? "manque " + cellule.manque : "à " + cellule.heure + "h";
+                        html.push("<td class='enc-cellule enc-" + cellule.etat + (choisie ? " selection" : "") + "' tabindex='0' role='button' data-id='" + ligne.id + "' data-date='" + colonne.date + "'" +
+                            " aria-label='" + Echapper(ligne.nom + ", " + colonne.libelle + " : " + LIBELLES[cellule.etat] + ", " + Texte_taux(cellule) + ", " + sous_titre) + "'>" +
+                            Texte_taux(cellule) + "<small>" + sous_titre + "</small></td>");
+                    });
+                    html.push("</tr>");
+                });
+                html.push("</tbody></table>");
+                $("#enc_tableau").html(html.join(""));
+            }
+
+            // ------------------- Détail d'une journée -------------------
+            function Afficher_detail() {
+                var ligne = Get_ligne(selection.id), cellule = ligne.cellules[selection.date];
+                var colonne = donnees.colonnes.find(function (c) { return c.date === selection.date; });
+                $(".enc-cellule.selection").removeClass("selection");
+                $(".enc-cellule[data-id='" + selection.id + "'][data-date='" + selection.date + "']").addClass("selection");
+                $("#enc_detail").prop("hidden", false);
+                $("#enc_detail_titre").html("<i class='fa fa-clock-o margin-r-5'></i>" + Echapper(ligne.nom) + " · " + Echapper(colonne.libelle));
+                $("#enc_detail_resume").html("Pic de <b>" + cellule.pic + "</b> individu" + (cellule.pic > 1 ? "s" : "") + " · pire moment à <b>" + cellule.heure + "h</b> : " +
+                    (cellule.taux ? "1 pour " + Format_taux(cellule.taux) : "aucun collaborateur") + " (maximum 1 pour " + ligne.seuil + ")" +
+                    (cellule.manque ? " · <span class='text-danger font-weight-bold'>manque " + cellule.manque + " collaborateur" + (cellule.manque > 1 ? "s" : "") + "</span>" : ""));
+                Rendu_graphe(cellule);
+                $("#enc_collaborateurs").html("<span class='text-muted'><i class='fa fa-spinner fa-spin'></i></span>");
+                $.post(URL_DETAIL, Parametres({idaffectation: selection.id, date_detail: selection.date}), function (data) {
+                    $("#enc_lien_planning").attr("href", data.url_planning);
+                    var html = data.collaborateurs.map(function (c) {
+                        return "<div class='enc-collab'><span>" + Echapper(c.nom) + (c.affectations.length ? "<small class='d-block text-muted'>" + Echapper(c.affectations.join(", ")) + "</small>" : "") +
+                            "</span><span class='text-muted text-nowrap'>" + Echapper(c.horaires) + "</span></div>";
+                    });
+                    if (data.autres) { html.push("<div class='enc-collab text-muted'>+ " + data.autres + " autre" + (data.autres > 1 ? "s" : "") + " collaborateur" + (data.autres > 1 ? "s" : "") + "</div>"); }
+                    $("#enc_collaborateurs").html(html.length ? html.join("") : "<span class='text-muted'>Aucun collaborateur planifié.</span>");
+                });
+            }
+
+            function Rendu_graphe(cellule) {
+                var heures = cellule.heures;
+                var config = {
+                    data: {
+                        labels: heures.map(function (h) { return h.h + "h"; }),
+                        datasets: [
+                            {type: "bar", label: "Individus présents", data: heures.map(function (h) { return h.e; }), order: 2, borderRadius: 3, maxBarThickness: 28,
+                             backgroundColor: heures.map(function (h) { return h.etat === "ko" ? "#dc3545" : "#3c8dbc"; })},
+                            {type: "line", label: "Capacité d'encadrement", data: heures.map(function (h) { return h.cap; }), order: 1, stepped: "middle",
+                             borderColor: "#6c757d", borderDash: [6, 4], borderWidth: 2, pointRadius: 0, fill: false}
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, animation: false,
+                        plugins: {legend: {display: false}, tooltip: {callbacks: {afterBody: function (items) {
+                            var h = heures[items[0].dataIndex];
+                            return [h.c + " collaborateur" + (h.c > 1 ? "s" : ""), h.manque ? "Manque " + h.manque + " collaborateur" + (h.manque > 1 ? "s" : "") : ""];
+                        }}}},
+                        scales: {x: {grid: {display: false}}, y: {beginAtZero: true, ticks: {precision: 0}}}
+                    }
+                };
+                if (graphe) { graphe.destroy(); }
+                graphe = new Chart(document.getElementById("enc_graphe"), config);
+            }
+
+            // ------------------- Evènements -------------------
+            $("[data-mode]").on("click", function () {
+                etat.mode = $(this).data("mode");
+                $("[data-mode]").each(function () { var actif = $(this).data("mode") === etat.mode; $(this).toggleClass("active", actif).attr("aria-pressed", String(actif)); });
+                Charger();
+            });
+            $("#enc_precedent").on("click", function () { Decaler(-1); });
+            $("#enc_suivant").on("click", function () { Decaler(1); });
+            $("#enc_aujourdhui").on("click", function () { etat.date = "{{ aujourdhui }}"; Charger(); });
+            $("#enc_affectation").on("change", function () { etat.idaffectation = this.value; selection = null; Charger(); });
+            $("#enc_tableau").on("click keydown", ".enc-cellule[data-id]", function (e) {
+                if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") { return; }
+                e.preventDefault();
+                selection = {id: +this.getAttribute("data-id"), date: this.getAttribute("data-date")};
+                Afficher_detail();
+            });
+            $("#enc_excel").on("click", function () {
+                var $bouton = $(this).prop("disabled", true), $icone = $bouton.find("i").attr("class", "fa fa-spinner fa-spin margin-r-5");
+                $.post(URL_EXCEL, Parametres(), function (data) {
+                    window.location = "{{ MEDIA_URL }}" + data.nom_fichier;
+                }).fail(function (xhr) {
+                    toastr.error((xhr.responseJSON && xhr.responseJSON.erreur) || "Une erreur est survenue lors de l'export");
+                }).always(function () { $bouton.prop("disabled", false); $icone.attr("class", "fa fa-file-excel-o margin-r-5"); });
+            });
+
+            {% if affectations %}Charger();{% endif %}
+        });
+    </script>
+{% endblock contenu_page %}

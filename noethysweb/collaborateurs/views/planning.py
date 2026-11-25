@@ -492,4 +492,10 @@ class View(CustomView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(View, self).get_context_data(**kwargs)
         context["page_titre"] = "Planning général"
+        # Ouverture sur une date précise (ex : lien depuis la page Taux d'encadrement)
+        try:
+            date = datetime.datetime.strptime(self.request.GET.get("date", ""), "%Y-%m-%d").date()
+            self.request.session[CLE_SESSION_DATES] = [str(date)]
+        except ValueError:
+            pass
         return context

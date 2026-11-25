@@ -531,6 +531,7 @@ COMMANDES = {
     "planning_individuel": ("calendar-check-o", "a", "Planifier l'année d'un collaborateur et suivre son objectif d'heures."),
     "soldes_objectifs_collaborateurs": ("exchange", "a", "Comparer le planifié à l'objectif annuel et reporter les soldes sur la période suivante."),
     "statistiques_evenements_collaborateurs": ("bar-chart", "s", "Tableau de bord du temps de travail, des absences et des objectifs des collaborateurs."),
+    "encadrement_collaborateurs": ("users", "s", "Vérifier heure par heure le nombre d'individus par collaborateur sur chaque affectation."),
     "demandes_absences_collaborateurs": ("plane", "a", "Saisir et valider les demandes de congé et d'absence."),
     "compteurs_conges_collaborateurs": ("balance-scale", "l", "Consulter les soldes de congés et attribuer les droits."),
     "heures_declarees_collaborateurs": ("clock-o", "a", "Valider les heures réalisées déclarées par les collaborateurs depuis leur espace."),
@@ -586,6 +587,7 @@ NOUVEAUTES = {
     "releves_heures_collaborateurs": "2026-11-15",
     "attestations_conges_collaborateurs": "2026-11-15",
     "impression_demandes_absences_collaborateurs": "2026-11-15",
+    "encadrement_collaborateurs": "2026-11-24",
 }
 
 

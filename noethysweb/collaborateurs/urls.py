@@ -12,7 +12,7 @@ from collaborateurs.views import accueil_widgets, collaborateur, collaborateur_i
                                 collaborateur_emails, collaborateur_sms, appliquer_modele_planning, collaborateur_groupes, collaborateur_voir_contrat, \
                                 fusionner_contrats_word, importer_collaborateurs, planning, planning_individuel, statistiques_evenements, conges, \
                                 collaborateur_espace, heures_declarees, pieces_manquantes, planning_absences, variables_paie, editions, \
-                                collaborateur_agenda
+                                collaborateur_agenda, encadrement
 
 
 urlpatterns = [
@@ -95,6 +95,7 @@ urlpatterns = [
 
     # Analyse
     path('collaborateurs/statistiques_evenements', statistiques_evenements.View.as_view(), name='statistiques_evenements_collaborateurs'),
+    path('collaborateurs/encadrement', encadrement.View.as_view(), name='encadrement_collaborateurs'),
     path('collaborateurs/pieces_manquantes', pieces_manquantes.View.as_view(), name='pieces_manquantes_collaborateurs'),
     path('collaborateurs/planning_absences', planning_absences.View.as_view(), name='planning_absences_collaborateurs'),
     path('collaborateurs/variables_paie', variables_paie.View.as_view(), name='variables_paie_collaborateurs'),
@@ -157,6 +158,9 @@ urlpatterns = [
     path('collaborateurs/conges/reporter_soldes', secure_ajax(conges.Reporter_soldes), name='ajax_conges_reporter_soldes'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrat', secure_ajax(collaborateur_voir_contrat.Fusionner), name='ajax_collaborateur_fusionner_contrat'),
     path('collaborateurs/contrats/collaborateur_fusionner_contrats', secure_ajax(fusionner_contrats_word.Fusionner), name='ajax_collaborateur_fusionner_contrats'),
+    path('collaborateurs/encadrement/get_donnees', secure_ajax(encadrement.Get_donnees), name='ajax_encadrement_collaborateurs_get_donnees'),
+    path('collaborateurs/encadrement/get_detail', secure_ajax(encadrement.Get_detail), name='ajax_encadrement_collaborateurs_get_detail'),
+    path('collaborateurs/encadrement/exporter_excel', secure_ajax(encadrement.Exporter_excel), name='ajax_encadrement_collaborateurs_exporter_excel'),
     path('collaborateurs/statistiques_evenements/exporter_excel', secure_ajax(statistiques_evenements.Exporter_excel), name='ajax_statistiques_evenements_collaborateurs_exporter_excel'),
     path('collaborateurs/statistiques_evenements/generer_pdf', secure_ajax(statistiques_evenements.Generer_pdf), name='ajax_statistiques_evenements_collaborateurs_generer_pdf'),
     path('collaborateurs/importer_collaborateurs/importer', secure_ajax(importer_collaborateurs.Importer), name='ajax_importer_collaborateurs_importer'),
