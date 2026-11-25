@@ -36,7 +36,7 @@ OPERATIONS = [
     Supprimer_pieces_remplacees,
     Supprimer_pieces_expirees,
     Supprimer_photos_inactifs,
-    Supprimer_fichiers_orphelins,
+    # Supprimer_fichiers_orphelins,
     Reduire_images,
     # Base de données
     Purger_historique,
