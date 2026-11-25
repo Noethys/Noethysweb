@@ -155,7 +155,9 @@ def Get_repertoires_fichiers():
             repertoire = os.path.join(location, modele._meta.db_table)
             repertoires.setdefault(repertoire, (location, set()))
             references = modele.objects.exclude(**{champ.name: ""}).exclude(**{"%s__isnull" % champ.name: True}).values_list(champ.name, flat=True)
-            repertoires[repertoire][1].update([os.path.normpath(nom) for nom in references])
+            # Les chemins importés depuis Windows peuvent contenir des antislashs (individus\xxx.jpg) :
+            # sur le disque, le fichier est bien dans individus/xxx.jpg, il ne doit donc pas être considéré comme orphelin
+            repertoires[repertoire][1].update([os.path.normpath(nom.replace("\\", "/")) for nom in references])
     # Plusieurs modèles peuvent partager une même table : fusion des références par location
     references_location = {}
     for repertoire, (location, references) in repertoires.items():
