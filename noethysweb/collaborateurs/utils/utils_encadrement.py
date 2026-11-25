@@ -11,7 +11,9 @@
     - Individus : individus distincts ayant une consommation réservée ou présente sur les unités de remplissage
       de l'affectation (ou de ses sous-affectations liées à une activité). Un individu n'est compté qu'une fois
       même s'il a plusieurs consommations au même moment. Horaires : ceux de la consommation, sinon ceux de l'unité
-      de consommation, sinon ceux de l'unité de remplissage, sinon la plage par défaut (7h-19h).
+      de consommation, sinon la plage la plus large des unités de remplissage concernées (heure min / heure max).
+    - Unités sans horaire : une consommation sans aucun de ces horaires n'est pas placée dans les heures. Elle est
+      comptée sur son unité de remplissage, comparée au maximum de collaborateurs présents en même temps dans la journée.
     - Collaborateurs : collaborateurs ayant un évènement de temps comptabilisé sur l'affectation ou l'une de ses
       sous-affectations, hors évènements de temps soustrait (pauses...).
 """
@@ -22,7 +24,6 @@ from collaborateurs.utils.utils_affectations import Arbre
 
 DUREE_QUART = 15
 NBRE_QUARTS = 24 * 60 // DUREE_QUART
-PLAGE_DEFAUT = (7 * 60, 19 * 60)          # Plage retenue pour une consommation sans aucun horaire (en minutes)
 SEUIL_ALERTE = 0.85                         # Même seuil que le widget de la page d'accueil
 
 
@@ -56,10 +57,17 @@ def Ratio(individus=0, collaborateurs=0):
     return individus / collaborateurs if collaborateurs else float("inf")
 
 
-def Synthese_jour(individus_quarts={}, collaborateurs_quarts={}, seuil=None):
-    """ individus_quarts et collaborateurs_quarts : {quart: nombre}. Renvoie la synthèse par heure et pour la journée, ou None sans individu """
-    if not any(individus_quarts.values()):
+def Synthese_jour(individus_quarts={}, collaborateurs_quarts={}, seuil=None, unites_sans_horaire=[]):
+    """ individus_quarts et collaborateurs_quarts : {quart: nombre}. unites_sans_horaire : [(nom, nombre d'individus)].
+        Renvoie la synthèse par heure, par unité sans horaire et pour la journée, ou None sans individu """
+    unites_sans_horaire = [(nom, nombre) for nom, nombre in unites_sans_horaire if nombre]
+    if not any(individus_quarts.values()) and not unites_sans_horaire:
         return None
+
+    def Manque(individus, collaborateurs):
+        return max(0, math.ceil(individus / seuil) - collaborateurs) if individus else 0
+
+    # Heure par heure
     heures = []
     for heure in range(24):
         quarts = range(heure * 4, heure * 4 + 4)
@@ -72,17 +80,27 @@ def Synthese_jour(individus_quarts={}, collaborateurs_quarts={}, seuil=None):
         else:
             pire = max(quarts, key=lambda q: collaborateurs_quarts.get(q, 0))
         individus, collaborateurs = individus_quarts.get(pire, 0), collaborateurs_quarts.get(pire, 0)
-        heures.append({
-            "h": heure, "e": individus, "c": collaborateurs, "cap": collaborateurs * seuil, "etat": Etat(individus, collaborateurs, seuil),
-            "manque": max(0, math.ceil(individus / seuil) - collaborateurs) if individus else 0,
-        })
+        heures.append({"h": heure, "e": individus, "c": collaborateurs, "cap": collaborateurs * seuil,
+                       "etat": Etat(individus, collaborateurs, seuil), "manque": Manque(individus, collaborateurs)})
+    if not any(heure["e"] for heure in heures):
+        heures = []
 
-    avec_individus = [heure for heure in heures if heure["e"]]
-    pire = max(avec_individus, key=lambda heure: (Ratio(heure["e"], heure["c"]), heure["e"]))
-    ratio = Ratio(pire["e"], pire["c"])
+    # Unités sans horaire : comparées au maximum de collaborateurs présents en même temps dans la journée
+    max_collaborateurs = max(collaborateurs_quarts.values(), default=0)
+    unites = [{"nom": nom, "e": nombre, "c": max_collaborateurs, "etat": Etat(nombre, max_collaborateurs, seuil),
+               "manque": Manque(nombre, max_collaborateurs), "taux": None if not max_collaborateurs else round(nombre / max_collaborateurs, 1)}
+              for nom, nombre in unites_sans_horaire]
+
+    # Pire moment de la journée : une heure ou une unité sans horaire
+    candidats = [(Ratio(heure["e"], heure["c"]), heure["e"], "heure", heure) for heure in heures if heure["e"]]
+    candidats += [(Ratio(unite["e"], unite["c"]), unite["e"], "unite", unite) for unite in unites]
+    ratio, _, nature, pire = max(candidats, key=lambda candidat: (candidat[0], candidat[1]))
     return {
-        "etat": pire["etat"], "taux": None if ratio == float("inf") else round(ratio, 1), "heure": pire["h"],
-        "pic": max(individus_quarts.values()), "manque": max(heure["manque"] for heure in heures), "heures": heures,
+        "etat": pire["etat"], "taux": None if ratio == float("inf") else round(ratio, 1),
+        "heure": pire["h"] if nature == "heure" else None, "unite": pire["nom"] if nature == "unite" else None,
+        "pic": max([valeur for valeur in individus_quarts.values()] + [unite["e"] for unite in unites]),
+        "manque": max([heure["manque"] for heure in heures] + [unite["manque"] for unite in unites]),
+        "heures": heures, "unites": unites,
     }
 
 
@@ -114,28 +132,37 @@ def Descendants(arbre=None, idaffectation=None):
     return ids
 
 
+def Plage(debut=None, fin=None):
+    """ (début, fin) en minutes si la plage est exploitable, sinon None """
+    return (debut, fin) if debut is not None and fin is not None and fin > debut else None
+
+
 def Charger_individus(date_debut=None, date_fin=None, arbre=None):
-    """ {(idaffectation liée, date): {quart: set(idindividu)}} """
+    """ Renvoie (horaires, sans_horaire, noms_unites) :
+        - horaires : {(idaffectation liée, date): {quart: set(idindividu)}}
+        - sans_horaire : {(idaffectation liée, date): {idunite_remplissage: set(idindividu)}}
+        - noms_unites : {idunite_remplissage: (ordre, nom)} """
     from core.models import UniteRemplissage, Consommation
 
     liees = [affectation for affectation in arbre.affectations.values() if affectation.activite_id]
     if not liees:
-        return {}
+        return {}, {}, {}
     activites = {affectation.activite_id for affectation in liees}
 
-    # Unités de remplissage, unités de consommation associées et horaires de repli
+    # Unités de remplissage, unités de consommation associées et leurs horaires
     unites_remplissage, par_conso, horaires_unites = {}, {}, {}
     for unite in UniteRemplissage.objects.prefetch_related("unites").filter(activite__in=activites):
         unites_remplissage[unite.pk] = unite
         for unite_conso in unite.unites.all():
             par_conso.setdefault(unite_conso.pk, []).append(unite.pk)
-            horaires_unites[unite_conso.pk] = (Minutes(unite_conso.heure_debut), Minutes(unite_conso.heure_fin))
+            horaires_unites[unite_conso.pk] = Plage(Minutes(unite_conso.heure_debut), Minutes(unite_conso.heure_fin))
+    noms_unites = {pk: (unite.ordre or 0, unite.nom) for pk, unite in unites_remplissage.items()}
     selection = {}
     for affectation in liees:
         ids = list(affectation.unites_remplissage.values_list("pk", flat=True))
         selection[affectation.pk] = set(ids or [pk for pk, unite in unites_remplissage.items() if unite.activite_id == affectation.activite_id])
 
-    resultats = {}
+    horaires, sans_horaire = {}, {}
     conditions = Q(activite__in=activites, date__gte=date_debut, date__lte=date_fin, etat__in=("reservation", "present"), individu__isnull=False)
     for conso in Consommation.objects.filter(conditions).values("date", "individu_id", "unite_id", "groupe_id", "activite_id", "heure_debut", "heure_fin"):
         ids_remplissage = par_conso.get(conso["unite_id"], [])
@@ -149,18 +176,23 @@ def Charger_individus(date_debut=None, date_fin=None, arbre=None):
                       and not (unites_remplissage[pk].date_fin and conso["date"] > unites_remplissage[pk].date_fin)]
             if not unites:
                 continue
-            # Horaires : consommation, sinon unité de consommation, sinon unité de remplissage, sinon plage par défaut
-            debut, fin = Minutes(conso["heure_debut"]), Minutes(conso["heure_fin"])
-            if debut is None or fin is None:
-                debut, fin = horaires_unites.get(conso["unite_id"], (None, None))
-            if debut is None or fin is None:
-                debut, fin = Minutes(unites[0].heure_min), Minutes(unites[0].heure_max)
-            if debut is None or fin is None or fin <= debut:
-                debut, fin = PLAGE_DEFAUT
-            quarts = resultats.setdefault((affectation.pk, conso["date"]), {})
-            for quart in Quarts(debut, fin):
-                quarts.setdefault(quart, set()).add(conso["individu_id"])
-    return resultats
+            # Horaires : consommation, sinon unité de consommation, sinon plage la plus large des unités de remplissage
+            plage = Plage(Minutes(conso["heure_debut"]), Minutes(conso["heure_fin"])) or horaires_unites.get(conso["unite_id"])
+            if not plage:
+                plages_remplissage = [Plage(Minutes(unite.heure_min), Minutes(unite.heure_max)) for unite in unites]
+                plages_remplissage = [p for p in plages_remplissage if p]
+                if plages_remplissage:
+                    plage = (min(p[0] for p in plages_remplissage), max(p[1] for p in plages_remplissage))
+            if plage:
+                quarts = horaires.setdefault((affectation.pk, conso["date"]), {})
+                for quart in Quarts(*plage):
+                    quarts.setdefault(quart, set()).add(conso["individu_id"])
+            else:
+                # Aucun horaire : l'individu est compté sur ses unités de remplissage, sans être placé dans les heures
+                par_unite = sans_horaire.setdefault((affectation.pk, conso["date"]), {})
+                for unite in unites:
+                    par_unite.setdefault(unite.pk, set()).add(conso["individu_id"])
+    return horaires, sans_horaire, noms_unites
 
 
 def Charger_collaborateurs(date_debut=None, date_fin=None):
@@ -204,7 +236,7 @@ def Calculer(date_debut=None, date_fin=None, idaffectation=None):
     arbre = Arbre()
     lignes = Get_lignes(arbre, idaffectation)
     dates = [date_debut + datetime.timedelta(days=index) for index in range((date_fin - date_debut).days + 1)]
-    presences_individus = Charger_individus(date_debut, date_fin, arbre) if lignes else {}
+    presences_individus, sans_horaire, noms_unites = Charger_individus(date_debut, date_fin, arbre) if lignes else ({}, {}, {})
     presences, plages = Charger_collaborateurs(date_debut, date_fin) if lignes else ({}, {})
 
     kpi = {"ko": 0, "al": 0, "ok": 0, "manque": 0}
@@ -218,16 +250,19 @@ def Calculer(date_debut=None, date_fin=None, idaffectation=None):
         sous_arbre = Descendants(arbre, affectation.pk)
         for date in dates:
             # Individus distincts sur l'ensemble des sources, collaborateurs présents sur le sous-arbre
-            individus = {}
+            individus, par_unite = {}, {}
             for idsource in sources:
                 for quart, ids in presences_individus.get((idsource, date), {}).items():
                     individus.setdefault(quart, set()).update(ids)
+                for idunite, ids in sans_horaire.get((idsource, date), {}).items():
+                    par_unite.setdefault(idunite, set()).update(ids)
             collaborateurs = {}
             for idaff in sous_arbre:
                 for quart, ids in presences.get((idaff, date), {}).items():
                     collaborateurs.setdefault(quart, set()).update(ids)
             synthese = Synthese_jour({quart: len(ids) for quart, ids in individus.items()},
-                                     {quart: len(ids) for quart, ids in collaborateurs.items()}, ligne["seuil"])
+                                     {quart: len(ids) for quart, ids in collaborateurs.items()}, ligne["seuil"],
+                                     [(noms_unites[idunite][1], len(ids)) for idunite, ids in sorted(par_unite.items(), key=lambda item: noms_unites[item[0]])])
             if synthese:
                 ligne["cellules"][date] = synthese
                 dates_avec_donnees.add(date)

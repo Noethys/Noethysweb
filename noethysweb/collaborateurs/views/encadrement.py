@@ -129,7 +129,8 @@ def Exporter_excel(request):
 
     def Texte_cellule(cellule):
         taux = utils_encadrement.Format_taux(cellule["taux"])
-        return "%s (%s)" % (taux, "manque %d" % cellule["manque"] if cellule["manque"] else "pire à %dh" % cellule["heure"])
+        moment = cellule["unite"] if cellule["unite"] else "à %dh" % cellule["heure"]
+        return "%s (%s%s)" % (taux, moment, " - manque %d" % cellule["manque"] if cellule["manque"] else "")
 
     # Synthèse
     feuille = classeur.add_worksheet("Synthèse")
@@ -154,7 +155,7 @@ def Exporter_excel(request):
 
     # Détail heure par heure
     feuille = classeur.add_worksheet("Détail horaire")
-    entetes = ("Affectation", "Date", "Heure", "Individus", "Collaborateurs", "Taux maximal", "Capacité", "Taux", "Manque", "Etat")
+    entetes = ("Affectation", "Date", "Heure ou unité", "Individus", "Collaborateurs", "Taux maximal", "Capacité", "Taux", "Manque", "Etat")
     for num_colonne, entete in enumerate(entetes):
         feuille.write(0, num_colonne, entete, format_entete)
     feuille.set_column(0, 0, 40)
@@ -171,6 +172,13 @@ def Exporter_excel(request):
                            heure["cap"], taux, heure["manque"], LIBELLES_ETATS.get(heure["etat"], ""))
                 for num_colonne, valeur in enumerate(valeurs):
                     feuille.write(num_ligne, num_colonne, valeur, formats_etats[heure["etat"]] if num_colonne == len(valeurs) - 1 else None)
+                num_ligne += 1
+            # Unités sans horaire, comparées au maximum de collaborateurs présents en même temps dans la journée
+            for unite in cellule["unites"]:
+                valeurs = (ligne["affectation"].nom, date.strftime("%d/%m/%Y"), "%s (sans horaire)" % unite["nom"], unite["e"], unite["c"], ligne["seuil"],
+                           unite["c"] * ligne["seuil"], utils_encadrement.Format_taux(unite["taux"]), unite["manque"], LIBELLES_ETATS.get(unite["etat"], ""))
+                for num_colonne, valeur in enumerate(valeurs):
+                    feuille.write(num_ligne, num_colonne, valeur, formats_etats[unite["etat"]] if num_colonne == len(valeurs) - 1 else None)
                 num_ligne += 1
     classeur.close()
     return JsonResponse({"nom_fichier": os.path.join(rep_temp, nom_fichier)})

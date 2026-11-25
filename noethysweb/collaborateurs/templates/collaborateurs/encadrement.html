@@ -32,6 +32,9 @@
         .enc-collab {display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px solid #eef0f2; font-size: 13px}
         .enc-collab:first-child {border-top: 0}
         .enc-remarque {font-size: 11.5px; color: #8a96a3}
+        .enc-unite {display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 4px; margin-bottom: 6px; font-size: 13px}
+        .enc-unite small {display: block; font-size: 11.5px}
+        .enc-sous-titre {font-size: 13px; font-weight: 600; margin-bottom: 4px}
         .dark-mode .enc-kpi, .dark-mode .enc-tableau td.enc-nom {background: #343a40}
         .dark-mode .enc-vide {background: #3f474e; color: #8a96a3}
     </style>
@@ -93,7 +96,7 @@
                 <span><i class="carre enc-al"></i>Alerte (au moins 85 % du maximum)</span>
                 <span><i class="carre enc-ko"></i>Dépassement ou aucun collaborateur</span>
             </div>
-            <div class="enc-remarque mt-2">Individus présents (réservations et présences) rapportés aux collaborateurs ayant du temps comptabilisé sur l'affectation ou ses sous-affectations, pauses déduites. Calcul par quart d'heure : chaque heure affiche son pire quart d'heure. Les jours sans consommation ne sont pas affichés.</div>
+            <div class="enc-remarque mt-2">Individus présents (réservations et présences) rapportés aux collaborateurs ayant du temps comptabilisé sur l'affectation ou ses sous-affectations, pauses déduites. Calcul par quart d'heure : chaque heure affiche son pire quart d'heure. Les unités de remplissage sans horaire sont comparées au maximum de collaborateurs présents en même temps dans la journée. Les jours sans consommation ne sont pas affichés.</div>
         </div>
     </div>
 
@@ -107,15 +110,22 @@
             <p class="mb-2" id="enc_detail_resume"></p>
             <div class="row">
                 <div class="col-lg-8">
-                    <div class="enc-legende mt-0 mb-2">
+                    <div class="enc-sous-titre">Unités avec horaires · heure par heure</div>
+                    <div class="enc-legende mt-0 mb-2" id="enc_graphe_legende">
                         <span><i class="carre" style="background: #3c8dbc;"></i>Individus présents</span>
                         <span><i class="carre" style="background: #dc3545;"></i>Heure en dépassement</span>
                         <span><i class="carre" style="background: transparent; border-top: 2px dashed #6c757d; height: 0; width: 16px;"></i>Capacité d'encadrement (collaborateurs × maximum)</span>
                     </div>
                     <div class="enc-graphe"><canvas id="enc_graphe" role="img" aria-label="Individus présents et capacité d'encadrement heure par heure"></canvas></div>
+                    <p class="text-muted text-center my-5" id="enc_graphe_vide" hidden>Aucune unité avec horaires ce jour-là.</p>
                 </div>
                 <div class="col-lg-4">
-                    <div class="font-weight-bold mb-1" style="font-size: 13px;">Collaborateurs planifiés</div>
+                    <div id="enc_unites_bloc" hidden>
+                        <div class="enc-sous-titre">Unités sans horaire</div>
+                        <div id="enc_unites"></div>
+                        <div class="enc-remarque mb-3">Comparées au maximum de collaborateurs présents en même temps dans la journée (<span id="enc_unites_max"></span>) : on ne sait pas à quelle heure ces unités ont lieu. Renseignez l'heure min et l'heure max de l'unité de remplissage pour l'intégrer au détail horaire.</div>
+                    </div>
+                    <div class="enc-sous-titre">Collaborateurs planifiés</div>
                     <div id="enc_collaborateurs"></div>
                 </div>
             </div>
@@ -194,7 +204,7 @@
                         var cellule = ligne.cellules[colonne.date];
                         if (!cellule) { html.push("<td class='enc-cellule enc-vide'>–</td>"); return; }
                         var choisie = selection && selection.id === ligne.id && selection.date === colonne.date;
-                        var sous_titre = cellule.manque ? "manque " + cellule.manque : "à " + cellule.heure + "h";
+                        var sous_titre = (cellule.unite ? cellule.unite : "à " + cellule.heure + "h") + (cellule.manque ? " · manque " + cellule.manque : "");
                         html.push("<td class='enc-cellule enc-" + cellule.etat + (choisie ? " selection" : "") + "' tabindex='0' role='button' data-id='" + ligne.id + "' data-date='" + colonne.date + "'" +
                             " aria-label='" + Echapper(ligne.nom + ", " + colonne.libelle + " : " + LIBELLES[cellule.etat] + ", " + Texte_taux(cellule) + ", " + sous_titre) + "'>" +
                             Texte_taux(cellule) + "<small>" + sous_titre + "</small></td>");
@@ -213,10 +223,12 @@
                 $(".enc-cellule[data-id='" + selection.id + "'][data-date='" + selection.date + "']").addClass("selection");
                 $("#enc_detail").prop("hidden", false);
                 $("#enc_detail_titre").html("<i class='fa fa-clock-o margin-r-5'></i>" + Echapper(ligne.nom) + " · " + Echapper(colonne.libelle));
-                $("#enc_detail_resume").html("Pic de <b>" + cellule.pic + "</b> individu" + (cellule.pic > 1 ? "s" : "") + " · pire moment à <b>" + cellule.heure + "h</b> : " +
+                var moment = cellule.unite ? "pire moment : <b>" + Echapper(cellule.unite) + "</b> (unité sans horaire)" : "pire moment à <b>" + cellule.heure + "h</b>";
+                $("#enc_detail_resume").html("Pic de <b>" + cellule.pic + "</b> individu" + (cellule.pic > 1 ? "s" : "") + " · " + moment + " : " +
                     (cellule.taux ? "1 pour " + Format_taux(cellule.taux) : "aucun collaborateur") + " (maximum 1 pour " + ligne.seuil + ")" +
                     (cellule.manque ? " · <span class='text-danger font-weight-bold'>manque " + cellule.manque + " collaborateur" + (cellule.manque > 1 ? "s" : "") + "</span>" : ""));
                 Rendu_graphe(cellule);
+                Rendu_unites(cellule, ligne.seuil);
                 $("#enc_collaborateurs").html("<span class='text-muted'><i class='fa fa-spinner fa-spin'></i></span>");
                 $.post(URL_DETAIL, Parametres({idaffectation: selection.id, date_detail: selection.date}), function (data) {
                     $("#enc_lien_planning").attr("href", data.url_planning);
@@ -229,8 +241,23 @@
                 });
             }
 
+            function Rendu_unites(cellule) {
+                $("#enc_unites_bloc").prop("hidden", !cellule.unites.length);
+                if (!cellule.unites.length) { return; }
+                $("#enc_unites_max").text(cellule.unites[0].c);
+                $("#enc_unites").html(cellule.unites.map(function (u) {
+                    var icone = u.etat === "ok" ? "check-circle" : (u.etat === "al" ? "exclamation-triangle" : "exclamation-circle");
+                    return "<div class='enc-unite enc-" + u.etat + "'><i class='fa fa-" + icone + "' aria-hidden='true'></i>" +
+                        "<span class='flex-grow-1'><b>" + Echapper(u.nom) + "</b><small>" + u.e + " individu" + (u.e > 1 ? "s" : "") + " pour " + u.c + " collaborateur" + (u.c > 1 ? "s" : "") + "</small></span>" +
+                        "<span class='text-right text-nowrap'><b>" + (u.taux ? "1 / " + Format_taux(u.taux) : "Aucun") + "</b><small>" + LIBELLES[u.etat] + (u.manque ? " · manque " + u.manque : "") + "</small></span></div>";
+                }).join(""));
+            }
+
             function Rendu_graphe(cellule) {
                 var heures = cellule.heures;
+                $("#enc_graphe").parent().prop("hidden", !heures.length);
+                $("#enc_graphe_legende").toggleClass("d-none", !heures.length);
+                $("#enc_graphe_vide").prop("hidden", !!heures.length);
                 var config = {
                     data: {
                         labels: heures.map(function (h) { return h.h + "h"; }),
