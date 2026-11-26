@@ -23,7 +23,7 @@ PERMISSION = "core.planning_individuel"
 CATEGORIE_PREFERENCES = "planning_individuel"
 PREFERENCES_DEFAUT = {"vue": "calendrier", "journee_debut": "09:00", "journee_fin": "17:00", "matin_debut": "08:30", "matin_fin": "12:00",
                       "am_debut": "13:30", "am_fin": "17:00", "ignorer_non_ouvres": True,
-                      "synthese_repliee": False}
+                      "synthese_repliee": False, "diff_pieces": False, "diff_pieces_expir": True, "diff_pieces_delai": 30}
 VUES = ("calendrier", "colonnes", "mois")
 
 
@@ -79,6 +79,10 @@ def Get_preferences(user=None):
             continue
         if nom == "vue" and valeur not in VUES:
             continue
+        if nom == "diff_pieces_delai":
+            if valeur in (30, 60, 90):
+                preferences[nom] = valeur
+            continue
         if isinstance(defaut, bool):
             valeur = bool(valeur)
         elif nom != "vue":
@@ -113,7 +117,8 @@ def Get_donnees(request):
     resultat = {
         "collaborateur": {"id": collaborateur.pk, "nom": collaborateur.nom, "prenom": collaborateur.prenom or "", "contrats": contrats,
                           "modifiable": collaborateur.pk in utils_planning.Get_ids_modifiables(request.user),
-                          "mail": collaborateur.travail_mail or collaborateur.mail or "", "mail_pro": bool(collaborateur.travail_mail)},
+                          "mail": collaborateur.travail_mail or collaborateur.mail or "", "mail_pro": bool(collaborateur.travail_mail),
+                          "pieces": Get_pieces_dossier(collaborateur)},
         "categories": [{"id": categorie.pk, "nom": categorie.nom, "couleur": categorie.couleur, "type": categorie.type, "chevauchement": categorie.chevauchement_possible,
                         "objectif": categorie.temps_travail_objectif} for categorie in TypeEvenementCollaborateur.objects.all().order_by("nom")],
         "affectations": Arbre().Get_liste_dict(),
@@ -129,6 +134,13 @@ def Get_donnees(request):
     }
     resultat.update(utils_planning.Get_dates_speciales(periode["debut"], periode["fin"]))
     return JsonResponse(resultat)
+
+
+def Get_pieces_dossier(collaborateur=None):
+    """ Pièces manquantes du dossier et celles qui expirent dans les 90 jours, pour le décompte affiché dans la fenêtre d'impression """
+    from collaborateurs.utils import utils_pieces_manquantes
+    pieces = utils_pieces_manquantes.Get_liste_pieces_manquantes([collaborateur], delai_expiration=90).get(collaborateur.pk, [])
+    return [{"e": piece["etat"], "f": str(piece["date_fin"]) if piece["date_fin"] else None} for piece in pieces]
 
 
 def Get_conges(user=None, collaborateur=None):
@@ -521,6 +533,7 @@ TYPES_IMPRESSION = ("annuel", "bilan", "calendrier", "individuel", "recapitulati
 
 def Get_parametres_edition(request, collaborateur=None):
     """ Paramètres d'édition : type de document, dates (toute la période, plage de mois ou jours sélectionnés) et options """
+    from collaborateurs.utils.utils_impression_planning import Lire_delai_pieces
     parametres = utils_objectif.Get_parametres()
     periode = Get_periode_demandee(request, collaborateur.pk, parametres)
     type_document = request.POST.get("type") if request.POST.get("type") in TYPES_IMPRESSION else "annuel"
@@ -549,7 +562,9 @@ def Get_parametres_edition(request, collaborateur=None):
     return {"dates": dates, "collaborateurs": [collaborateur.pk], "type": type_document, "periode": periode,
             "afficher_realise": request.POST.get("afficher_realise") == "true",
             "afficher_affectations": request.POST.get("afficher_affectations", "true") == "true",
-            "afficher_notes": request.POST.get("afficher_notes", "true") == "true"}, None
+            "afficher_notes": request.POST.get("afficher_notes", "true") == "true",
+            "inserer_pieces": request.POST.get("inserer_pieces") == "true",
+            "delai_pieces": Lire_delai_pieces(request.POST.get("delai_pieces"))}, None
 
 
 @Verifie_permission

@@ -474,6 +474,14 @@
 .pl-type-doc[hidden] {display: none;}
 .pl-diff-colonnes {display: grid; grid-template-columns: 1fr 1fr; gap: 16px;}
 .pl-diff-colonnes .custom-control {margin-bottom: 4px;}
+.pl-diff-pieces {margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--pl-bordure-legere);}
+.pl-diff-pieces .custom-control {margin-bottom: 2px;}
+.pl-diff-pieces-detail {display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-left: 1.5rem;}
+.pl-diff-pieces-detail .custom-control {margin-bottom: 0;}
+.pl-diff-pieces-detail .pl-select {height: 26px;}
+.pl-diff-pieces .pl-diff-pieces-detail.inactif {opacity: .5;}
+.pl-diff-pieces p {margin-left: 1.5rem; margin-top: 3px;}
+.pl-email-pieces {margin-left: 1.5rem; margin-top: 4px; padding-top: 0; border-top: 0;}
 .pl-diff-avert {margin: 8px 0 0; padding: 6px 9px; border-radius: 7px; background: #fff3cd; color: #5c4300; font-size: 12px;}
 .dark-mode .pl-type-doc {border-color: #4b545c;}
 .dark-mode .pl-type-doc > i {background: #3f474e; color: #ced4da;}

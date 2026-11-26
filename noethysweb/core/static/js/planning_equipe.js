@@ -82,6 +82,7 @@
     };
     var V = {
         mode: "date", sous: "aucun", titres: true, affs: true, realise: false, densite: "auto", vue: "frise",
+        pieces: false, pieces_expir: true, pieces_delai: 30,
         affiches: [], masques: new Set(), dates: [], pas: 15, cat_defaut: null,
         mode_collabs: "auto",       // collaborateurs affichés : "auto" (calculés selon critere_auto) ou "manuel" (liste fixe)
         critere_auto: "tous",       // critère du mode auto : "tous" (sous contrat ou avec évènements), "contrat" ou "evenements"
@@ -576,7 +577,8 @@
             mode_collabs: V.mode_collabs, critere_auto: V.critere_auto, groupes_auto: V.groupes_auto, connus: Array.from(S.collabs.keys()),
             filtres: {cats: Array.from(V.filtres.cats), aff: V.filtres.aff, qualif: V.filtres.qualif, vides: V.filtres.vides, jours_vides: V.filtres.jours_vides},
             plage: V.plage.auto ? {auto: true} : {auto: false, debut: V.plage.debut, fin: V.plage.fin},
-            legende: V.legende, panneau: V.panneau
+            legende: V.legende, panneau: V.panneau,
+            pieces: V.pieces, pieces_expir: V.pieces_expir, pieces_delai: V.pieces_delai
         };
         Ajax(CFG.urls.affichage, {affichage: JSON.stringify(affichage)});
     }, 1200);
@@ -610,6 +612,10 @@
         V.plage = {auto: R.plage_auto !== false, debut: R.plage_debut, fin: R.plage_fin};
         if (a.plage && a.plage.auto === false && a.plage.fin > a.plage.debut) { V.plage = {auto: false, debut: a.plage.debut, fin: a.plage.fin}; }
         if (a.legende === "cat" || a.legende === "aff") { V.legende = a.legende; }
+        // Options de diffusion mémorisées : pièces manquantes du dossier
+        if (typeof a.pieces === "boolean") { V.pieces = a.pieces; }
+        if (typeof a.pieces_expir === "boolean") { V.pieces_expir = a.pieces_expir; }
+        if ([30, 60, 90].indexOf(a.pieces_delai) >= 0) { V.pieces_delai = a.pieces_delai; }
         if (["dates", "collabs", "filtres", "legende", null].indexOf(a.panneau) >= 0 && a.hasOwnProperty("panneau")) { V.panneau = a.panneau; }
 
         if (V.mode_collabs === "manuel" && !V.affiches.length) {
@@ -3141,9 +3147,11 @@
     var Diff_action = "imprimer";
     // Options proposées pour chaque type de document
     var DIFF_OPTIONS = {
-        individuel: ["affs", "realise"], calendrier: [], equipe: ["affs", "notes"], frise: ["grouper", "notes"],
-        affectation: ["realise", "notes"], emargement: ["affs", "notes"], recapitulatif: []
+        individuel: ["affs", "realise", "pieces"], calendrier: ["pieces"], equipe: ["affs", "notes", "pieces"], frise: ["grouper", "notes", "pieces"],
+        affectation: ["realise", "notes", "pieces"], emargement: ["affs", "notes", "pieces"], recapitulatif: ["pieces"]
     };
+    // Documents par collaborateur : encadré sous le titre. Autres documents : page récapitulative en fin de PDF.
+    var DIFF_PIECES_ENCADRE = ["individuel", "calendrier"];
     var DIFF_TYPES_EMAIL = ["individuel", "calendrier"];
     var DIFF_INTROS = {
         imprimer: "Choisissez le document à générer pour les dates sélectionnées.",
@@ -3170,6 +3178,9 @@
         $("input[name='pl_diff_collabs'][value='affiches']").prop("checked", true);
         $("#pl_diff_realise").prop("checked", V.realise);
         $("#pl_diff_grouper").prop("checked", V.sous === "aff");
+        $("#pl_diff_pieces").prop("checked", V.pieces);
+        $("#pl_diff_pieces_expir").prop("checked", V.pieces_expir);
+        $("#pl_diff_pieces_delai").val(String(V.pieces_delai));
         Maj_options_diffusion();
         $("#pl_modal_diffusion").modal("show");
     }
@@ -3182,12 +3193,28 @@
         $("#pl_diff_options [data-option]").each(function() { this.hidden = options.indexOf(this.getAttribute("data-option")) < 0; });
         $("#pl_diff_options").prop("hidden", Diff_action === "excel");
         $("#pl_diff_sans_option").prop("hidden", options.length > 0);
+        Maj_pieces_diffusion();
         // Avertissement sur le volume de pages
         var avert = "";
         if ((type === "frise" || type === "emargement") && V.dates.length > 7) {
             avert = "Ce document comporte une page par jour : " + V.dates.length + " pages seront générées.";
         }
         $("#pl_diff_avert").text(avert).prop("hidden", !avert);
+    }
+    function Maj_pieces_diffusion() {
+        var type = Type_diffusion(), actif = $("#pl_diff_pieces").is(":checked");
+        $("#pl_diff_pieces_expir").prop("disabled", !actif);
+        $("#pl_diff_pieces_delai").prop("disabled", !actif || !$("#pl_diff_pieces_expir").is(":checked"));
+        $("#pl_modal_diffusion .pl-diff-pieces-detail").toggleClass("inactif", !actif);
+        var aide = Diff_action === "email" || DIFF_PIECES_ENCADRE.indexOf(type) >= 0 ? "Un encadré « Pièces à fournir » sous le titre de chaque collaborateur." : "Une page récapitulative en fin de document.";
+        $("#pl_diff_pieces_aide").text(aide).prop("hidden", !actif);
+    }
+    function Memoriser_pieces_diffusion() {
+        V.pieces = $("#pl_diff_pieces").is(":checked");
+        V.pieces_expir = $("#pl_diff_pieces_expir").is(":checked");
+        V.pieces_delai = +$("#pl_diff_pieces_delai").val() || 30;
+        Maj_pieces_diffusion();
+        Memoriser_affichage();
     }
     function Collabs_selection() {
         var ids = [];
@@ -3200,7 +3227,8 @@
         var coche = function(id) { return $(id).is(":checked") ? "true" : "false"; };
         var donnees = {dates: JSON.stringify(V.dates.map(Iso_jour)), collaborateurs: JSON.stringify(collabs), type: Type_diffusion() || "individuel",
                        afficher_realise: coche("#pl_diff_realise"), afficher_affectations: coche("#pl_diff_affs"),
-                       afficher_notes: coche("#pl_diff_notes"), grouper_affectations: coche("#pl_diff_grouper")};
+                       afficher_notes: coche("#pl_diff_notes"), grouper_affectations: coche("#pl_diff_grouper"),
+                       inserer_pieces: coche("#pl_diff_pieces"), delai_pieces: $("#pl_diff_pieces_expir").is(":checked") ? $("#pl_diff_pieces_delai").val() : "0"};
         var url = {imprimer: CFG.urls.imprimer, email: CFG.urls.emails, excel: CFG.urls.excel}[Diff_action];
         var $bouton = $("#pl_diff_valider").prop("disabled", true).html("<i class='fa fa-spinner fa-spin margin-r-5'></i>Génération…");
         Ajax(url, donnees).done(function(data) {
@@ -3248,6 +3276,10 @@
         $("[data-email-source='selection']").text("Évènements sélectionnés (" + selection.length + ")").prop("disabled", !selection.length);
         $("#pl_email_periode").text(V.dates.length ? "Période affichée : " + (V.dates.length > 1 ? "du " + Texte_jour_fr(V.dates[0]) + " au " + Texte_jour_fr(V.dates[V.dates.length - 1]) : Texte_jour_long(V.dates[0])) + "." : "");
         $("#pl_email_joindre").prop("checked", false).prop("disabled", !V.dates.length);
+        $("#pl_email_pieces").prop("checked", V.pieces);
+        $("#pl_email_pieces_expir").prop("checked", V.pieces_expir);
+        $("#pl_email_pieces_delai").val(String(V.pieces_delai));
+        Maj_pieces_email();
         $("#pl_email_valider").html(EMAIL_BOUTON);
         Rendu_email();
         $("#pl_modal_email").modal("show");
@@ -3289,12 +3321,31 @@
         });
         Rendu_email();
     }
+    function Maj_pieces_email() {
+        // Les pièces manquantes ne concernent que le planning joint
+        var joindre = $("#pl_email_joindre").is(":checked"), actif = $("#pl_email_pieces").is(":checked");
+        $("#pl_email_pieces_bloc").prop("hidden", !joindre);
+        $("#pl_email_pieces_expir").prop("disabled", !actif);
+        $("#pl_email_pieces_delai").prop("disabled", !actif || !$("#pl_email_pieces_expir").is(":checked"));
+        $("#pl_email_pieces_bloc .pl-diff-pieces-detail").toggleClass("inactif", !actif);
+        $("#pl_email_pieces_aide").prop("hidden", !actif);
+    }
+    function Memoriser_pieces_email() {
+        // Mêmes préférences que la fenêtre d'impression et d'envoi du planning
+        V.pieces = $("#pl_email_pieces").is(":checked");
+        V.pieces_expir = $("#pl_email_pieces_expir").is(":checked");
+        V.pieces_delai = +$("#pl_email_pieces_delai").val() || 30;
+        Maj_pieces_email();
+        Memoriser_affichage();
+    }
     function Valider_email() {
         var ids = Email_destinataires();
         if (!ids.length) { toastr.warning("Aucun destinataire"); return; }
         var donnees = {collaborateurs: JSON.stringify(ids), priorite: $("#pl_email_priorite").val(),
                        joindre_planning: $("#pl_email_joindre").is(":checked") ? "true" : "false",
-                       dates: JSON.stringify(V.dates.map(Iso_jour)), afficher_realise: V.realise ? "true" : "false"};
+                       dates: JSON.stringify(V.dates.map(Iso_jour)), afficher_realise: V.realise ? "true" : "false",
+                       inserer_pieces: $("#pl_email_joindre").is(":checked") && $("#pl_email_pieces").is(":checked") ? "true" : "false",
+                       delai_pieces: $("#pl_email_pieces_expir").is(":checked") ? $("#pl_email_pieces_delai").val() : "0"};
         var $bouton = $("#pl_email_valider").prop("disabled", true).html("<i class='fa fa-spinner fa-spin margin-r-5'></i>Préparation…");
         Ajax(CFG.urls.email_libre, donnees).done(function(data) {
             $("#pl_modal_email").modal("hide");
@@ -3605,6 +3656,7 @@
 
         $("#pl_diff_valider").on("click", Valider_diffusion);
         $("#pl_modal_diffusion").on("change", "input[name='pl_diff_type']", Maj_options_diffusion);
+        $("#pl_modal_diffusion").on("change", "#pl_diff_pieces, #pl_diff_pieces_expir, #pl_diff_pieces_delai", Memoriser_pieces_diffusion);
         $("#pl_modal_diffusion").on("dblclick", ".pl-type-doc", Valider_diffusion);
 
         $("#pl_email_btn").on("click", Ouvrir_email);
@@ -3614,6 +3666,8 @@
         $("#pl_email_tout_cocher").on("click", function() { Cocher_tous_email(true); });
         $("#pl_email_tout_decocher").on("click", function() { Cocher_tous_email(false); });
         $("#pl_modal_email").on("click", "[data-email-source]", function() { Email.source = this.getAttribute("data-email-source"); Rendu_email(); });
+        $("#pl_email_joindre").on("change", Maj_pieces_email);
+        $("#pl_modal_email").on("change", "#pl_email_pieces, #pl_email_pieces_expir, #pl_email_pieces_delai", Memoriser_pieces_email);
         $("#pl_email_liste").on("change", "input[type=checkbox]", function() {
             var id = +this.getAttribute("data-id");
             if (this.checked) { Email.decoches.delete(id); } else { Email.decoches.add(id); }

@@ -13,7 +13,7 @@ from reportlab.lib import colors
 from django.utils.html import escape
 from core.utils import utils_impression, utils_polices, utils_dates
 from core.models import Collaborateur, TypeEvenementCollaborateur, ContratCollaborateur, Ferie, NotePlanningCollaborateur
-from collaborateurs.utils import utils_planning
+from collaborateurs.utils import utils_planning, utils_pieces_manquantes
 from collaborateurs.utils.utils_affectations import Arbre
 
 JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
@@ -38,6 +38,23 @@ GRIS_FOND = colors.HexColor("#eef1f5")
 GRIS_CLAIR = colors.HexColor("#f6f8fb")
 ROUGE_FERIE = colors.HexColor("#e0485a")
 JAUNE_VACANCES = colors.HexColor("#fff3cd")
+
+# Pièces manquantes du dossier : encadré sous le titre des documents par collaborateur, page récapitulative pour les documents d'équipe
+TYPES_PIECES_ANNEXE = ("equipe", "frise", "affectation", "emargement", "recapitulatif")
+DELAIS_PIECES = (30, 60, 90)
+ORANGE_PIECES = colors.HexColor("#d97706")
+FOND_PIECES = colors.HexColor("#fff7e6")
+SITUATIONS_PIECES = {"ABSENTE": ("non fournie", "#6b7280"), "EXPIREE": ("expirée le %s", "#b91c1c"), "BIENTOT": ("expire le %s", "#92400e"),
+                     "ATTENTE": ("transmise, à vérifier", "#6b7280"), "REFUSEE": ("refusée", "#b91c1c")}
+
+
+def Lire_delai_pieces(valeur=None):
+    """ Délai d'expiration (jours) transmis par la fenêtre d'impression : 0 si absent ou incorrect """
+    try:
+        delai = int(valeur or 0)
+    except (TypeError, ValueError):
+        return 0
+    return delai if delai in DELAIS_PIECES else 0
 
 
 def Couleur(valeur, defaut="#94a3b8"):
@@ -136,6 +153,10 @@ class Impression(utils_impression.Impression):
         self.afficher_affectations = d.get("afficher_affectations", True)
         self.afficher_notes = d.get("afficher_notes", True)
         self.collaborateurs = list(Collaborateur.objects.filter(pk__in=d["collaborateurs"]).order_by("nom", "prenom"))
+        # Pièces manquantes du dossier (et, si demandé, celles qui expirent bientôt)
+        self.inserer_pieces = d.get("inserer_pieces", False)
+        self.delai_pieces = d.get("delai_pieces", 0) if d.get("delai_pieces", 0) in DELAIS_PIECES else 0
+        self.pieces = utils_pieces_manquantes.Get_liste_pieces_manquantes(self.collaborateurs, delai_expiration=self.delai_pieces) if self.inserer_pieces else {}
         self.categories = {categorie.pk: categorie for categorie in TypeEvenementCollaborateur.objects.all()}
         self.arbre = Arbre()
         self.liste_feries = list(Ferie.objects.all())
@@ -220,6 +241,21 @@ class Impression(utils_impression.Impression):
     def Insert_titre(self, titre, detail=""):
         self.Insert_header(titre=titre, detail=detail, espace_apres=10)
 
+    def Insert_header(self, titre=None, espace_apres=20, detail=None):
+        """ Cadre de titre standard, mais aligné sur la largeur du contenu (marges réduites des plannings) """
+        organisateur = utils_impression.cache.get("organisateur", None)
+        if not organisateur:
+            organisateur = utils_impression.cache.get_or_set("organisateur", utils_impression.Organisateur.objects.filter(pk=1).first())
+        details = "%s\n%s" % (organisateur.nom, datetime.datetime.now().strftime("%d/%m/%Y-%H:%M"))
+        if detail:
+            details += "\n%s" % detail
+        tableau = Table([(titre or self.titre, details)], [self.largeur - 100, 100])
+        tableau.setStyle(TableStyle([
+            ("BOX", (0, 0), (-1, -1), 0.25, colors.black), ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("ALIGN", (0, 0), (0, 0), "LEFT"), ("FONT", (0, 0), (0, 0), utils_polices.FONT_BOLD, 16),
+            ("ALIGN", (1, 0), (1, 0), "RIGHT"), ("FONT", (1, 0), (1, 0), utils_polices.FONT_NORMAL, 6)]))
+        self.story += [tableau, Spacer(0, espace_apres)]
+
     def Semaines(self, dates):
         semaines = []
         for date in dates:
@@ -236,6 +272,76 @@ class Impression(utils_impression.Impression):
             mois[-1].append(date)
         return mois
 
+    # ---------------------------------------------------------------- Pièces manquantes du dossier
+    def Texte_situation_piece(self, piece):
+        texte, couleur = SITUATIONS_PIECES.get(piece["etat"], ("", "#6b7280"))
+        if "%s" in texte:
+            texte = texte % (piece["date_fin"].strftime("%d/%m/%Y") if piece["date_fin"] else "")
+        return texte, couleur
+
+    def Encadre_pieces(self, collaborateur):
+        """ Encadré « Pièces à fournir au dossier » d'un collaborateur, ou None si son dossier est complet """
+        pieces = self.pieces.get(collaborateur.pk) if self.inserer_pieces else None
+        if not pieces:
+            return None
+        s_titre = ParagraphStyle(name="pieces_titre", fontName=utils_polices.FONT_BOLD, fontSize=9, leading=11, textColor=colors.HexColor("#92400e"))
+        elements = []
+        for piece in pieces:
+            texte, couleur = self.Texte_situation_piece(piece)
+            elements.append(Paragraph("&#9632; %s <font color='%s'>— %s</font>" % (escape(piece["type_piece"].nom), couleur, escape(texte)), self.s_texte))
+        if len(elements) % 2:
+            elements.append("")
+        largeur = self.largeur - 16
+        grille = Table([elements[index:index + 2] for index in range(0, len(elements), 2)], [largeur / 2] * 2)
+        grille.setStyle(TableStyle([("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 8), ("TOPPADDING", (0, 0), (-1, -1), 1), ("BOTTOMPADDING", (0, 0), (-1, -1), 1)]))
+        espace = " ou de les déposer depuis votre espace collaborateur" if collaborateur.utilisateur_id and collaborateur.internet_actif else ""
+        invitation = Paragraph("<font color='#6b7280'>Merci de transmettre ces documents au service%s.</font>" % espace, self.s_petit)
+        encadre = Table([[Paragraph("Pièces à fournir au dossier", s_titre)], [grille], [invitation]], [self.largeur])
+        encadre.setStyle(TableStyle([("BOX", (0, 0), (-1, -1), 0.6, ORANGE_PIECES), ("BACKGROUND", (0, 0), (-1, -1), FOND_PIECES),
+                                     ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                                     ("TOPPADDING", (0, 0), (-1, 0), 6), ("BOTTOMPADDING", (0, -1), (-1, -1), 6)]))
+        return encadre
+
+    def Insert_pieces(self, collaborateur, espace_apres=10):
+        """ Insère l'encadré des pièces et renvoie la hauteur occupée (0 si aucun encadré) """
+        encadre = self.Encadre_pieces(collaborateur)
+        if not encadre:
+            return 0
+        hauteur = encadre.wrap(self.largeur, self.taille_page[1])[1] + espace_apres
+        self.story += [encadre, Spacer(0, espace_apres)]
+        return hauteur
+
+    def Draw_annexe_pieces(self):
+        """ Page récapitulative des pièces manquantes pour les documents d'équipe """
+        if self.story:
+            self.story.append(PageBreak())
+        detail = "Situation au %s" % datetime.date.today().strftime("%d/%m/%Y")
+        if self.delai_pieces:
+            detail += " · expirations sous %d jours incluses" % self.delai_pieces
+        self.Insert_titre("Pièces manquantes des collaborateurs", detail)
+        concernes = [collaborateur for collaborateur in self.collaborateurs if self.pieces.get(collaborateur.pk)]
+        if not concernes:
+            self.story.append(Paragraph("Tous les dossiers sont complets.", self.s_texte))
+            return
+        lignes = [[Paragraph(entete, self.s_gras) for entete in ("Collaborateur", "Pièce", "Situation")]]
+        styles = [("GRID", (0, 0), (-1, -1), 0.25, GRIS_LIGNE), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("BACKGROUND", (0, 0), (-1, 0), GRIS_FOND)]
+        for collaborateur in concernes:
+            premiere = len(lignes)
+            for piece in self.pieces[collaborateur.pk]:
+                texte, couleur = self.Texte_situation_piece(piece)
+                gras = piece["etat"] in ("EXPIREE", "REFUSEE")
+                lignes.append([Paragraph("<b>%s</b>" % escape(collaborateur.Get_nom()), self.s_texte) if len(lignes) == premiere else "",
+                               Paragraph(escape(piece["type_piece"].nom), self.s_texte),
+                               Paragraph("<font color='%s'>%s%s%s</font>" % (couleur, "<b>" if gras else "", escape(texte[:1].upper() + texte[1:]), "</b>" if gras else ""), self.s_texte)])
+            if len(lignes) - premiere > 1:
+                styles += [("SPAN", (0, premiere), (0, len(lignes) - 1)), ("VALIGN", (0, premiere), (0, len(lignes) - 1), "TOP")]
+        tableau = Table(lignes, [150, self.largeur - 150 - 170, 170], repeatRows=1)
+        tableau.setStyle(TableStyle(styles))
+        nbre_pieces = sum(len(self.pieces[collaborateur.pk]) for collaborateur in concernes)
+        resume = "%d collaborateur%s concerné%s sur %d · %d pièce%s à régulariser." % (len(concernes), "s" if len(concernes) > 1 else "", "s" if len(concernes) > 1 else "",
+                                                                                    len(self.collaborateurs), nbre_pieces, "s" if nbre_pieces > 1 else "")
+        self.story += [tableau, Spacer(0, 8), Paragraph(resume, self.s_texte)]
+
     # ---------------------------------------------------------------- Dessin
     def Draw(self):
         self.Charger()
@@ -246,6 +352,8 @@ class Impression(utils_impression.Impression):
             setattr(self.doc, nom, 28)
         fonction = getattr(self, "Draw_%s" % self.type, None) or self.Draw_individuel
         fonction()
+        if self.inserer_pieces and self.type in TYPES_PIECES_ANNEXE:
+            self.Draw_annexe_pieces()
         if not self.story:
             self.story.append(Paragraph("Aucune donnée à imprimer.", self.s_texte))
 
@@ -266,6 +374,7 @@ class Impression(utils_impression.Impression):
             if index_collaborateur:
                 self.story.append(PageBreak())
             self.Insert_titre("Planning de %s" % collaborateur.Get_nom(), self.Periode())
+            self.Insert_pieces(collaborateur)
             lignes = [[Paragraph(entete, self.s_gras) for entete in entetes]]
             styles = [("GRID", (0, 0), (-1, -1), 0.25, GRIS_LIGNE), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("BACKGROUND", (0, 0), (-1, 0), GRIS_FOND)]
             total_realise = 0
@@ -548,16 +657,17 @@ class Impression(utils_impression.Impression):
                 mois_liste.append((date.year, date.month))
         premier = True
         for collaborateur in self.collaborateurs:
-            for annee, mois in mois_liste:
+            for index_mois, (annee, mois) in enumerate(mois_liste):
                 if not premier:
                     self.story.append(PageBreak())
                 premier = False
                 dates_mois = [datetime.date(annee, mois, jour) for jour in range(1, calendar.monthrange(annee, mois)[1] + 1)]
                 total = self.Total(collaborateur.pk, [date for date in dates_mois if date in self.dates_set])
                 self.Insert_titre("%s - %s %d" % (collaborateur.Get_nom(), MOIS[mois - 1].capitalize(), annee), "Temps planifié : %s" % utils_planning.Format_minutes(total))
+                hauteur_pieces = self.Insert_pieces(collaborateur, espace_apres=6) if index_mois == 0 else 0
                 semaines = calendar.Calendar(firstweekday=0).monthdatescalendar(annee, mois)
                 largeur_jour = self.largeur / 7
-                hauteur_disponible = self.taille_page[1] - 56 - 70
+                hauteur_disponible = self.taille_page[1] - 56 - 70 - hauteur_pieces
                 hauteur_semaine = (hauteur_disponible - 16) / len(semaines)
                 lignes = [[Paragraph("<b>%s</b>" % jour, ParagraphStyle(name="j", fontName=utils_polices.FONT_BOLD, fontSize=8, alignment=1)) for jour in JOURS]]
                 styles = [("GRID", (0, 0), (-1, -1), 0.4, GRIS_LIGNE), ("VALIGN", (0, 1), (-1, -1), "TOP"), ("BACKGROUND", (0, 0), (-1, 0), GRIS_FOND)]
@@ -716,6 +826,9 @@ class Impression(utils_impression.Impression):
             self.story.append(Paragraph(" &nbsp;&nbsp; ".join(elements), self.s_texte))
             self.story.append(Spacer(0, 3))
             self.story.append(Paragraph("Couleur : catégorie principale de la journée. Totaux mensuels : temps compté dans l'objectif (règles des catégories).", self.s_petit))
+            encadre = self.Encadre_pieces(collaborateur)
+            if encadre:
+                self.story += [Spacer(0, 8), KeepTogether([encadre])]
 
     # I. Bilan de l'objectif (une page par collaborateur)
     def Draw_bilan(self):
@@ -739,6 +852,7 @@ class Impression(utils_impression.Impression):
             calcul = self.Get_calcul_objectif(collaborateur)
             self.Insert_header(titre="Bilan de l'objectif %s - %s" % (periode["libelle"] if periode else "", collaborateur.Get_nom()),
                                detail="Période %s" % self.Periode([periode["debut"], periode["fin"]]) if periode else "", espace_apres=10)
+            self.Insert_pieces(collaborateur)
             if not calcul or not calcul.a_objectif:
                 self.story.append(Paragraph("Aucun objectif n'est défini sur cette période (pas de contrat ou contrat en mode « Aucun »).", self.s_texte))
                 continue

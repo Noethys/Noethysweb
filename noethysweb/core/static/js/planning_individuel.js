@@ -1474,7 +1474,9 @@
 
     // ------------------------------------------------------------------ Impression, email, Excel et agenda
     var Diff_action = null;
-    var DIFF_OPTIONS = {annuel: [], bilan: [], calendrier: ["notes"], individuel: ["affs", "realise"], recapitulatif: []};
+    var DIFF_OPTIONS = {annuel: ["pieces"], bilan: ["pieces"], calendrier: ["notes", "pieces"], individuel: ["affs", "realise", "pieces"], recapitulatif: ["pieces"]};
+    // Emplacement des pièces manquantes dans chaque document
+    var DIFF_PIECES_AIDE = {annuel: "Un encadré « Pièces à fournir » en bas de page.", recapitulatif: "Une page récapitulative en fin de document."};
     var DIFF_TITRES = {imprimer: "Imprimer le planning", email: "Envoyer le planning par email", excel: "Exporter vers Excel"};
     function Fermer_aide() { $("#pi_aide_pop").prop("hidden", true); $("#pi_aide_btn").attr("aria-expanded", "false"); }
     function Fermer_menu_diffusion() { $("#pi_diffusion_menu").prop("hidden", true); $("#pi_diffusion_btn").attr("aria-expanded", "false"); }
@@ -1503,6 +1505,9 @@
         else { $dest.addClass("erreur").text("Aucune adresse email : renseignez-la dans la fiche collaborateur (Coordonnées)."); }
         $("#pi_diff_email_bloc").prop("hidden", action !== "email");
         $("#pi_diff_realise").prop("checked", false);
+        $("#pi_diff_pieces").prop("checked", !!S.prefs.diff_pieces);
+        $("#pi_diff_pieces_expir").prop("checked", S.prefs.diff_pieces_expir !== false);
+        $("#pi_diff_pieces_delai").val(String(S.prefs.diff_pieces_delai || 30));
         Maj_diffusion();
         $("#pi_modal_diffusion").modal("show");
     }
@@ -1516,6 +1521,7 @@
         $("#pi_diff_options [data-option]").each(function() { this.hidden = options.indexOf(this.getAttribute("data-option")) < 0; });
         $("#pi_diff_options").prop("hidden", excel);
         $("#pi_diff_sans_option").prop("hidden", options.length > 0);
+        Maj_pieces_diffusion();
         // Avertissement sur le volume de pages
         var avert = "", portee = $("input[name='pi_diff_portee']:checked").val();
         if (!portee_fixe && (type === "calendrier" || type === "recapitulatif") && !excel) {
@@ -1526,12 +1532,34 @@
         $("#pi_diff_avert").text(avert).prop("hidden", !avert);
         $("#pi_diff_valider").prop("disabled", Diff_action === "email" && !S.collab.mail);
     }
+    function Nb_pieces_dossier() {
+        // Pièces manquantes, plus celles qui expirent dans le délai choisi si l'option est cochée
+        var avec_expir = $("#pi_diff_pieces_expir").is(":checked"), limite = Iso_jour(Aujourdhui() + (+$("#pi_diff_pieces_delai").val() || 0));
+        return (S.collab.pieces || []).filter(function(piece) { return piece.e !== "BIENTOT" || (avec_expir && piece.f && piece.f <= limite); }).length;
+    }
+    function Maj_pieces_diffusion() {
+        var actif = $("#pi_diff_pieces").is(":checked"), type = Type_diffusion();
+        $("#pi_diff_pieces_expir").prop("disabled", !actif);
+        $("#pi_diff_pieces_delai").prop("disabled", !actif || !$("#pi_diff_pieces_expir").is(":checked"));
+        $("#pi_modal_diffusion .pl-diff-pieces-detail").toggleClass("inactif", !actif);
+        var nb = Nb_pieces_dossier(), nom = S.collab.prenom + " " + S.collab.nom;
+        var aide = nb ? (DIFF_PIECES_AIDE[type] || "Un encadré « Pièces à fournir » sous le titre.") + " " + Pluriel(nb, "pièce") + " à fournir pour " + nom + "."
+                      : "Dossier complet : aucune pièce à signaler pour " + nom + ".";
+        $("#pi_diff_pieces_aide").text(aide).prop("hidden", !actif);
+    }
+    function Memoriser_pieces_diffusion() {
+        var prefs = {diff_pieces: $("#pi_diff_pieces").is(":checked"), diff_pieces_expir: $("#pi_diff_pieces_expir").is(":checked"), diff_pieces_delai: +$("#pi_diff_pieces_delai").val() || 30};
+        $.extend(S.prefs, prefs);
+        Maj_pieces_diffusion();
+        Memoriser_preferences(prefs);
+    }
     function Nb_mois(a, b) { if (!a || !b) { return 0; } return (+b.substr(0, 4) - +a.substr(0, 4)) * 12 + (+b.substr(5, 2) - +a.substr(5, 2)); }
     function Valider_diffusion() {
         var coche = function(id) { return $(id).is(":checked") ? "true" : "false"; };
         var donnees = Donnees_periode({type: Type_diffusion(), portee: $("input[name='pi_diff_portee']:checked").val(), mois_debut: $("#pi_diff_mois_debut").val(), mois_fin: $("#pi_diff_mois_fin").val(),
                                        dates: JSON.stringify(Jours_selectionnes().map(Iso_jour)), afficher_realise: coche("#pi_diff_realise"),
-                                       afficher_affectations: coche("#pi_diff_affs"), afficher_notes: coche("#pi_diff_notes"), export: $("input[name='pi_diff_export']:checked").val()});
+                                       afficher_affectations: coche("#pi_diff_affs"), afficher_notes: coche("#pi_diff_notes"), export: $("input[name='pi_diff_export']:checked").val(),
+                                       inserer_pieces: coche("#pi_diff_pieces"), delai_pieces: $("#pi_diff_pieces_expir").is(":checked") ? $("#pi_diff_pieces_delai").val() : "0"});
         var url = {imprimer: CFG.urls.imprimer, email: CFG.urls.email, excel: CFG.urls.excel}[Diff_action];
         var $bouton = $("#pi_diff_valider").prop("disabled", true).html("<i class='fa fa-spinner fa-spin margin-r-5'></i>Génération…");
         Ajax(url, donnees).done(function(data) {
@@ -1718,6 +1746,7 @@
             if (e.key === "Escape" || e.key === "Tab") { Fermer_menu_diffusion(); $("#pi_diffusion_btn").trigger("focus"); e.preventDefault(); e.stopPropagation(); }
         });
         $(document).on("mousedown.pi", function(e) { if (!$(e.target).closest("#pi_diffusion_menu, #pi_diffusion_btn").length) { Fermer_menu_diffusion(); } });
+        $("#pi_modal_diffusion").on("change", "#pi_diff_pieces, #pi_diff_pieces_expir, #pi_diff_pieces_delai", Memoriser_pieces_diffusion);
         $("#pi_modal_diffusion").on("change", "input[name='pi_diff_type'], input[name='pi_diff_export'], input[name='pi_diff_portee'], select", Maj_diffusion);
         $("#pi_modal_diffusion").on("focus", ".pl-inline-champs select", function() { $("input[name='pi_diff_portee'][value='mois']").prop("checked", true); Maj_diffusion(); });
         $("#pi_modal_diffusion").on("dblclick", ".pl-type-doc", Valider_diffusion);

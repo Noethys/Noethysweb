@@ -472,6 +472,14 @@
                             <div class="custom-control custom-checkbox" data-option="affs"><input type="checkbox" class="custom-control-input" id="pi_diff_affs" checked><label class="custom-control-label" for="pi_diff_affs">Afficher les affectations</label></div>
                             <div class="custom-control custom-checkbox" data-option="realise"><input type="checkbox" class="custom-control-input" id="pi_diff_realise"><label class="custom-control-label" for="pi_diff_realise">Afficher les heures réalisées</label></div>
                             <div class="custom-control custom-checkbox" data-option="notes"><input type="checkbox" class="custom-control-input" id="pi_diff_notes" checked><label class="custom-control-label" for="pi_diff_notes">Afficher les notes du jour</label></div>
+                            <div class="pl-diff-pieces" data-option="pieces">
+                                <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="pi_diff_pieces"><label class="custom-control-label" for="pi_diff_pieces">Insérer les pièces manquantes du dossier</label></div>
+                                <div class="pl-diff-pieces-detail">
+                                    <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" id="pi_diff_pieces_expir"><label class="custom-control-label" for="pi_diff_pieces_expir">Inclure celles qui expirent dans les</label></div>
+                                    <select id="pi_diff_pieces_delai" class="pl-select" aria-label="Délai d'expiration des pièces"><option value="30">30 jours</option><option value="60">60 jours</option><option value="90">90 jours</option></select>
+                                </div>
+                                <p class="pl-muted pl-petit mb-0" id="pi_diff_pieces_aide"></p>
+                            </div>
                             <p class="pl-muted pl-petit mb-0" id="pi_diff_sans_option" hidden>Aucune option pour ce document.</p>
                         </div>
                         <div id="pi_diff_email_bloc">

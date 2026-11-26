@@ -261,6 +261,7 @@ def Get_parametres_edition(request):
     collaborateurs = utils_planning.Filtrer_ids_visibles(request.user, Get_liste_ids(request))
     if not dates or not collaborateurs:
         return None
+    from collaborateurs.utils import utils_impression_planning
     from collaborateurs.utils.utils_impression_planning import TYPES_DOCUMENTS
     type_document = request.POST.get("type", "individuel")
     if type_document not in TYPES_DOCUMENTS:
@@ -269,7 +270,10 @@ def Get_parametres_edition(request):
             "afficher_realise": request.POST.get("afficher_realise") == "true",
             "afficher_affectations": request.POST.get("afficher_affectations", "true") == "true",
             "afficher_notes": request.POST.get("afficher_notes", "true") == "true",
-            "grouper_affectations": request.POST.get("grouper_affectations") == "true"}
+            "grouper_affectations": request.POST.get("grouper_affectations") == "true",
+            "inserer_pieces": request.POST.get("inserer_pieces") == "true",
+            "delai_pieces": utils_impression_planning.Lire_delai_pieces(request.POST.get("delai_pieces"))}
+
 
 
 @Verifie_permission
@@ -368,7 +372,9 @@ def Envoyer_email_libre(request):
         from collaborateurs.utils import utils_impression_planning
         nom_document = utils_impression_planning.TYPES_DOCUMENTS["individuel"][0]
         parametres = {"dates": dates, "type": "individuel", "afficher_realise": request.POST.get("afficher_realise") == "true",
-                      "afficher_affectations": True, "afficher_notes": False, "grouper_affectations": False}
+                      "afficher_affectations": True, "afficher_notes": False, "grouper_affectations": False,
+                      "inserer_pieces": request.POST.get("inserer_pieces") == "true",
+                      "delai_pieces": utils_impression_planning.Lire_delai_pieces(request.POST.get("delai_pieces"))}
 
     sans_adresse, sans_document = [], []
     for collaborateur in Collaborateur.objects.filter(pk__in=collaborateurs).order_by("nom", "prenom"):
