@@ -1,0 +1,316 @@
+/*  Noethysweb - Listes bootstrap-table
+    Présentation alignée sur les listes DataTables (mydatatableview.css).
+    Les règles sont limitées aux listes préparées par nw_bootstrap_table.js (classe .nw-bt sur le conteneur).
+*/
+
+/* ---------- Variables (identiques aux listes DataTables) ---------- */
+.nw-bt {
+    --nw-accent: var(--couleur-principale, #3c8dbc);
+    --nw-accent-rgb: var(--couleur-principale-rgb, 60, 141, 188);
+    --nw-texte: #1f2933;
+    --nw-texte-doux: #5b6672;
+    --nw-texte-discret: #8a949e;
+    --nw-ligne: #e3e7ec;
+    --nw-bordure: #ced4da;
+    --nw-fond: #ffffff;
+    --nw-fond-entete: #f6f8fa;
+    --nw-fond-survol: #f1f4f7;
+}
+.dark-mode .nw-bt {
+    --nw-texte: #e9ecef;
+    --nw-texte-doux: #b8c0c8;
+    --nw-texte-discret: #9aa3ad;
+    --nw-ligne: #4b545c;
+    --nw-bordure: #6c757d;
+    --nw-fond: #343a40;
+    --nw-fond-entete: #3f474e;
+    --nw-fond-survol: #454d55;
+}
+
+/* ---------- Barre d'outils ---------- */
+.nw-bt .fixed-table-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 8px;
+    margin: 8px 0 10px 0;
+}
+.nw-bt .fixed-table-toolbar::after {
+    display: none;
+}
+.nw-bt .fixed-table-toolbar > * {
+    float: none !important;
+    margin: 0 !important;
+}
+.nw-bt .fixed-table-toolbar .search {
+    order: 1;
+}
+.nw-bt .fixed-table-toolbar .nw-bt-outils {
+    order: 2;
+}
+.nw-bt .fixed-table-toolbar .bs-bars {
+    order: 3;
+}
+/* Boutons d'origine (impression, export) : déclenchés depuis le menu « Outils » */
+.nw-bt .fixed-table-toolbar .columns {
+    display: none !important;
+}
+
+/* Recherche */
+.nw-bt .fixed-table-toolbar .search input.nw-recherche {
+    width: 240px;
+    max-width: 100%;
+    height: 30px;
+    padding: 0 12px 0 32px;
+    border: 1px solid var(--nw-bordure);
+    border-radius: 999px !important;
+    font-size: 0.85rem;
+    color: var(--nw-texte);
+    background: var(--nw-fond) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E") no-repeat 12px center;
+}
+.nw-bt .fixed-table-toolbar .search input.nw-recherche:focus {
+    border-color: var(--nw-accent);
+    box-shadow: 0 0 0 3px rgba(var(--nw-accent-rgb), 0.2);
+    outline: none;
+}
+
+/* Bouton « Outils » (pastille) */
+.nw-bt .nw-pastille {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px;
+    border: 1px dashed var(--nw-bordure);
+    border-radius: 999px;
+    background: var(--nw-fond);
+    color: var(--nw-texte);
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: none;
+}
+.nw-bt .nw-pastille:hover,
+.nw-bt .nw-pastille.nw-actif {
+    background: var(--nw-fond-survol);
+    color: var(--nw-texte);
+}
+.nw-bt .nw-pastille:focus-visible {
+    outline: 2px solid var(--nw-accent);
+    outline-offset: 2px;
+}
+.nw-bt .nw-pastille .nw-fleche {
+    margin-left: 2px;
+    opacity: 0.8;
+}
+
+/* ---------- Tableau ---------- */
+.nw-bt .fixed-table-container,
+.nw-bt .fixed-table-container.fixed-height:not(.has-footer) {
+    border: 0 !important;
+    border-radius: 0;
+}
+.nw-bt .fixed-table-container .table,
+.nw-bt .sticky-header-container .table {
+    border: 0 !important;
+    border-collapse: collapse !important;
+    color: var(--nw-texte);
+    margin-bottom: 0;
+}
+.nw-bt .table thead th,
+.nw-bt .fixed-table-footer .table tfoot th {
+    background: var(--nw-fond-entete);
+    color: var(--nw-texte-doux);
+    font-weight: 600;
+    font-size: inherit;
+    border: 0 !important;
+    border-bottom: 1px solid var(--nw-ligne) !important;
+    vertical-align: middle !important;
+}
+.nw-bt .table thead th .th-inner {
+    padding: 6px 10px !important;
+    line-height: 1.3;
+}
+.nw-bt .table thead th .th-inner.sortable {
+    padding-right: 26px !important;
+}
+.nw-bt .table tbody td {
+    border: 0 !important;
+    border-bottom: 1px solid var(--nw-ligne) !important;
+    padding: 5px 10px !important;
+    vertical-align: middle;
+}
+.nw-bt .table tbody tr:hover > td {
+    box-shadow: inset 0 0 0 9999px rgba(var(--nw-accent-rgb), 0.09);
+}
+.nw-bt .table.table-striped tbody tr:nth-of-type(odd) {
+    background-color: transparent;
+}
+/* Lignes de regroupement */
+.nw-bt .table tbody td.case_regroupement {
+    background-color: var(--nw-fond-entete);
+    color: var(--nw-texte);
+    font-weight: 700;
+}
+/* Ligne des totaux */
+.nw-bt .table tfoot th,
+.nw-bt .table tfoot td,
+.nw-bt .fixed-table-footer .table th,
+.nw-bt .fixed-table-footer .table td {
+    background: var(--nw-fond-entete);
+    color: var(--nw-texte);
+    font-weight: 700;
+    border: 0 !important;
+    border-top: 1px solid var(--nw-ligne) !important;
+}
+.nw-bt .fixed-table-footer {
+    border-top: 0 !important;
+    background: var(--nw-fond-entete);
+}
+.nw-bt .fixed-table-footer .th-inner {
+    padding: 6px 10px !important;
+}
+/* En-tête flottant (extension sticky-header) */
+.nw-bt .sticky-header-container {
+    box-shadow: 0 2px 6px rgba(16, 24, 40, 0.08);
+}
+/* Aucune donnée */
+.nw-bt .table tbody tr.no-records-found td {
+    padding: 24px 10px !important;
+    color: var(--nw-texte-discret);
+    text-align: center;
+}
+
+/* ---------- Pied de liste ---------- */
+.nw-bt .fixed-table-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px 16px;
+    /* Toujours visible en bas de l'écran quand la liste est plus haute que la fenêtre */
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    padding: 8px 0;
+    background: var(--nw-fond);
+}
+.nw-bt .fixed-table-pagination::after {
+    display: none;
+}
+.nw-bt .fixed-table-pagination > .pagination-detail {
+    display: contents;
+}
+.nw-bt .fixed-table-pagination > * {
+    float: none !important;
+    margin: 0 !important;
+}
+.nw-bt .fixed-table-pagination .pagination-info {
+    order: 1;
+    margin: 0 auto 0 0 !important;
+    color: var(--nw-texte-discret);
+    font-size: 0.8rem;
+    line-height: 1;
+}
+.nw-bt .fixed-table-pagination .pagination-info b {
+    font-weight: 400;
+}
+.nw-bt .fixed-table-pagination .page-list {
+    order: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--nw-texte-doux);
+    font-size: 0.9rem;
+}
+.nw-bt .fixed-table-pagination .page-list .btn-group {
+    margin: 0;
+}
+/* Nombre de lignes par page : présenté comme une liste déroulante */
+.nw-bt .fixed-table-pagination .page-list .dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-width: 82px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--nw-bordure);
+    border-radius: 8px !important;
+    background: var(--nw-fond);
+    color: var(--nw-texte);
+    font-size: 0.9rem;
+    box-shadow: none;
+}
+.nw-bt .fixed-table-pagination .page-list .dropdown-toggle:hover,
+.nw-bt .fixed-table-pagination .page-list .dropdown-toggle:focus {
+    background: var(--nw-fond-survol);
+    color: var(--nw-texte);
+}
+.nw-bt .fixed-table-pagination .page-list .dropdown-menu {
+    min-width: 82px;
+    border-color: var(--nw-ligne);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.16);
+}
+.nw-bt .fixed-table-pagination .page-list .dropdown-item.active {
+    background: var(--nw-accent);
+}
+.nw-bt .fixed-table-pagination > div.pagination {
+    order: 3;
+}
+.nw-bt .fixed-table-pagination .pagination {
+    margin: 0 !important;
+    gap: 4px;
+}
+.nw-bt .fixed-table-pagination .page-link {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 8px !important;
+    background: transparent;
+    color: var(--nw-texte);
+    font-weight: 600;
+    margin: 0 !important;
+}
+.nw-bt .fixed-table-pagination .page-item.page-pre .page-link,
+.nw-bt .fixed-table-pagination .page-item.page-next .page-link {
+    border-color: var(--nw-ligne);
+}
+.nw-bt .fixed-table-pagination .page-link:hover {
+    background: var(--nw-fond-survol);
+}
+.nw-bt .fixed-table-pagination .page-item.active .page-link {
+    background: var(--nw-accent);
+    border-color: var(--nw-accent);
+    color: #ffffff;
+}
+.nw-bt .fixed-table-pagination .page-item.disabled .page-link {
+    opacity: 0.45;
+    background: transparent;
+}
+.nw-bt .fixed-table-pagination .page-item.page-first-separator .page-link,
+.nw-bt .fixed-table-pagination .page-item.page-last-separator .page-link {
+    min-width: 20px;
+    padding: 0;
+    border: 0;
+    opacity: 1;
+    color: var(--nw-texte-discret);
+    font-weight: 400;
+}
+
+/* ---------- Petits écrans ---------- */
+@media screen and (max-width: 767px) {
+    .nw-bt .fixed-table-toolbar .search,
+    .nw-bt .fixed-table-toolbar .search input.nw-recherche {
+        width: 100%;
+    }
+    .nw-bt .fixed-table-pagination {
+        justify-content: center;
+    }
+}

@@ -66,16 +66,14 @@
                                 {# Calcule le total de chaque colonne #}
                                 var colonne = this.field;
                                 if (colonne === "0") {return "Total"}
+                                {# Toutes les colonnes sont des montants : total arrondi à 2 décimales #}
                                 var total = 0;
                                 items.forEach(function(item) {
                                     if ($.isNumeric(item[colonne])) {
                                         total = total + item[colonne];
-                                    } else {
-                                        total = "";
                                     };
                                 });
-                                if (colonne === "1") {total = total.toFixed(2);};
-                                return total;
+                                return total.toFixed(2);
                             };
                             function formate_montant(value, row, index) {
                                 try {
