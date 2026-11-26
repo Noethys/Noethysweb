@@ -7,8 +7,6 @@ from django.utils.html import format_html, conditional_escape
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from datatableview import Datatable, columns, helpers
 from datatableview.views import DatatableView, MultipleDatatableView, XEditableDatatableView
 from core.utils import utils_texte, utils_parametres
@@ -24,12 +22,9 @@ class MyMultipleDatatableView(MultipleDatatableView):
 
 
 class Deplacer_lignes(View):
-    """ A surcharger avec un model pour activer le déplacement des lignes dans la liste """
+    """ A surcharger avec un model pour activer le déplacement des lignes dans la liste.
+        La requête POST est protégée par le jeton CSRF envoyé par mydatatableview.js. """
     model = None
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(Deplacer_lignes, self).dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = request.POST.get("deplacements")
@@ -53,26 +48,47 @@ class MyDatatable(Datatable):
         # Importation des paramètres de la liste
         parametres = {parametre.categorie: utils_parametres.To_python(parametre.parametre, None) for parametre in Parametre.objects.filter(nom=nom_view, utilisateur=request.user)}
 
-        # Tri mémorisé de la liste
+        # Tri mémorisé de la liste (valeur ignorée si elle ne correspond pas à une colonne de la liste)
         if parametres.get("tri_liste", None):
-            nom_colonne, sens = parametres["tri_liste"].split(";")
-            self._meta.ordering = ["%s%s" % ("-" if sens == "desc" else "", nom_colonne)]
+            nom_colonne, _, sens = parametres["tri_liste"].partition(";")
+            if nom_colonne in self.Get_noms_colonnes_declarees():
+                self._meta.ordering = ["%s%s" % ("-" if sens == "desc" else "", nom_colonne)]
 
         # Colonnes cachées mémorisées
         if parametres.get("hidden_columns", None):
-            self._meta.hidden_columns = [nom_colonne for nom_colonne in json.loads(parametres["hidden_columns"]) if nom_colonne]
+            try:
+                self._meta.hidden_columns = [nom_colonne for nom_colonne in json.loads(parametres["hidden_columns"]) if nom_colonne and isinstance(nom_colonne, str)]
+            except (ValueError, TypeError):
+                pass
 
-        # Page length mémorisées
+        # Page length mémorisées (nombre entier uniquement)
         if parametres.get("page_length", None):
-            self._meta.page_length = parametres["page_length"]
+            try:
+                self._meta.page_length = int(parametres["page_length"])
+            except (ValueError, TypeError):
+                pass
 
         super(MyDatatable, self).__init__(*args, **kwargs)
+
+        # Ordre des colonnes mémorisé (liste de codes, appliqué par mydatatableview.js)
+        self.nw_ordre_colonnes = ""
+        if parametres.get("ordre_colonnes", None):
+            try:
+                ordre = json.loads(parametres["ordre_colonnes"])
+                if isinstance(ordre, list) and all(isinstance(code, str) for code in ordre):
+                    self.nw_ordre_colonnes = json.dumps(ordre)
+            except (ValueError, TypeError):
+                pass
 
         # vérifie que les hidden columns sont bien cachées
         if parametres.get("hidden_columns", None):
             for code, colonne in self.columns.items():
                 if colonne and code not in getattr(self._meta, "hidden_columns", []):
                     colonne.visible = True
+
+    def Get_noms_colonnes_declarees(self):
+        """ Noms des colonnes de la liste """
+        return set(getattr(type(self), "base_columns", {}).keys())
 
     def get_record_data(self, obj):
         """ Echappe les valeurs brutes des colonnes (champs du modèle) pour éviter l'injection de code HTML.

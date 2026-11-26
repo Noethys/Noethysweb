@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 from decimal import Decimal
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
+from django.utils.html import escape
 from django.contrib import messages
 from django.db.models import Max, Sum
 from core.views.mydatatableview import MyDatatable, columns, helpers
@@ -91,7 +92,7 @@ class Liste(Page, crud.Liste):
                 for rattachement in Rattachement.objects.select_related("individu").all().order_by("categorie"):
                     self.dict_rattachements.setdefault(rattachement.famille_id, [])
                     self.dict_rattachements[rattachement.famille_id].append(rattachement.individu)
-            return ", ".join([individu.Get_nom() for individu in self.dict_rattachements.get(instance.pk, [])])
+            return escape(", ".join([individu.Get_nom() for individu in self.dict_rattachements.get(instance.pk, [])]))
 
         def Get_solde(self, instance, *args, **kwargs):
             if not hasattr(self, "dict_prestations"):

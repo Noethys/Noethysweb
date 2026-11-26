@@ -3,7 +3,7 @@
         <tr>
             {% for colonne in datatable.colonnes %}
                 {% if colonne.code == "check" %}
-                    <th data-name="{{ colonne.label|slugify }}" data-config-sortable="false" data-config-visible="true" class="select-checkbox sorting_disabled" style="padding: 12px;width: 25px;text-align: center;vertical-align: middle;"><input id='checkbox_all' type='checkbox'></th>
+                    <th data-name="{{ colonne.label|slugify }}" data-config-sortable="false" data-config-visible="true" class="select-checkbox sorting_disabled" style="padding: 12px;width: 25px;text-align: center;vertical-align: middle;"><input id='checkbox_all' type='checkbox' aria-label='Tout sélectionner' title='Tout sélectionner'></th>
                 {% else %}
                     <th class="text-center">{{ colonne.label }}</th>
                 {% endif %}

@@ -33,24 +33,21 @@
         </div>
     {% endif %}
 
-    {# Filtres de liste #}
-    {% if filtres_liste %}
-        <ul class="todo-list" style="margin-top: 8px;">
-
-                {% for filtre in filtres_liste %}
-                    <li style="padding: 5px;">
-                        <div class="tools pull-right">
-                            <a type="button" class="btn-xs" title="Modifier ce filtre de liste" onclick="modifier_filtrer({{ filtre.idfiltre }})"><i class="fa fa-pencil"></i></a>
-                            <a type="button" class="btn-xs text-danger" title="Supprimer ce filtre de liste" href="{% url 'ajax_supprimer_filtre_liste' idfiltre=filtre.idfiltre %}"><i class="fa fa-trash-o"></i></a>
-                        </div>
-                        <span class="text text-red">
-                            <i class="fa fa-filter text-red margin-r-5"></i> {{ filtre.label_filtre }}
-                        </span>
-                    </li>
-                {% endfor %}
-
-        </ul>
-    {% endif %}
+    {# Filtres de liste : pastilles placées dans la barre d'outils de la liste par mydatatableview.js #}
+    <div id="nw_filtres_liste" class="nw-filtres-liste">
+        {% for filtre in filtres_liste %}
+            <span class="nw-chip" title="{{ filtre.label_filtre }}">
+                <button type="button" class="nw-chip-label" onclick="modifier_filtrer({{ filtre.idfiltre }})" aria-label="Modifier le filtre : {{ filtre.label_filtre }}">
+                    <i class="fa fa-filter" aria-hidden="true"></i><span>{{ filtre.label_filtre }}</span>
+                </button>
+                <form method="post" action="{% url 'ajax_supprimer_filtre_liste' idfiltre=filtre.idfiltre %}">
+                    {% csrf_token %}
+                    <button type="submit" class="nw-chip-suppr" aria-label="Supprimer le filtre : {{ filtre.label_filtre }}" title="Supprimer ce filtre"><i class="fa fa-times" aria-hidden="true"></i></button>
+                </form>
+            </span>
+        {% endfor %}
+        <button type="button" class="nw-chip-ajout" onclick="ajouter_filtre()" title="Ajouter un filtre de liste"><i class="fa fa-plus" aria-hidden="true"></i> Filtre</button>
+    </div>
 
     {% if datatable.colonnes %}
         {% include "core/widgets/datatableview/customdatatable.html" %}

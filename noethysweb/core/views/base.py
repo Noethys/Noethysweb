@@ -62,6 +62,32 @@ def Memorise_page_length(request):
     return JsonResponse({"success": True})
 
 
+def Memorise_ordre_colonnes(request):
+    """ Mémorise l'ordre des colonnes d'une liste (liste des codes de colonnes) """
+    nom_view = request.POST.get("view", "")
+    nom_view = nom_view[4:nom_view.find(" object at ")]
+    nom_view = nom_view.replace(".Liste", "")
+    try:
+        colonnes = json.loads(request.POST.get("colonnes", "[]"))
+    except ValueError:
+        colonnes = None
+    if not nom_view or not isinstance(colonnes, list) or len(colonnes) > 200 or not all(isinstance(code, str) and len(code) <= 200 for code in colonnes):
+        return JsonResponse({"success": False}, status=400)
+    utils_parametres.Set(nom=nom_view, categorie="ordre_colonnes", utilisateur=request.user, valeur=json.dumps(colonnes))
+    return JsonResponse({"success": True})
+
+def Reinitialiser_affichage_liste(request):
+    """ Efface les préférences d'affichage mémorisées d'une liste pour l'utilisateur (tri, colonnes, ordre, lignes par page) """
+    from core.models import Parametre
+    nom_view = request.POST.get("view", "")
+    nom_view = nom_view[4:nom_view.find(" object at ")]
+    nom_view = nom_view.replace(".Liste", "")
+    if not nom_view:
+        return JsonResponse({"success": False}, status=400)
+    Parametre.objects.filter(nom=nom_view, utilisateur=request.user, categorie__in=["tri_liste", "hidden_columns", "page_length", "ordre_colonnes"]).delete()
+    return JsonResponse({"success": True})
+
+
 # def Memorise_structure(request):
 #     """ Mémorise dans la DB la structure actuelle de l'utilisateur """
 #     idstructure = request.POST.get("idstructure")

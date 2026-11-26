@@ -75,6 +75,9 @@ var datatableview = (function(){
             "pageLength": datatable.attr('data-page-length'),
             "infoCallback": function(oSettings, iStart, iEnd, iMax, iTotal, sPre){
                 $("#" + datatable.attr('data-result-counter-id')).html(parseInt(iTotal).toLocaleString());
+                if (!iTotal && oSettings.oLanguage.sInfoEmpty) {
+                    return oSettings.oLanguage.sInfoEmpty;
+                }
                 var infoString = oSettings.oLanguage.sInfo.replace('_START_',iStart).replace('_END_',iEnd).replace('_TOTAL_',iTotal);
                 if (iMax != iTotal) {
                     infoString += oSettings.oLanguage.sInfoFiltered.replace('_MAX_',iMax);

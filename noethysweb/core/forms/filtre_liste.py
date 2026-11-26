@@ -7,9 +7,11 @@ import json, datetime
 import dateutil.parser
 from operator import itemgetter
 from django import forms
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.template import Template, RequestContext
 from django.shortcuts import redirect
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 from django.utils.html import escapejs
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Hidden, HTML, Div, ButtonHolder
@@ -166,8 +168,11 @@ def Ajouter_filtre(request):
 
     # Enregistrement du filtre
     idfiltre = valeurs.get("idfiltre")
-    if idfiltre != "None":
-        filtre = FiltreListe.objects.get(pk=idfiltre)
+    if idfiltre not in (None, "", "None"):
+        # Un utilisateur ne peut modifier que ses propres filtres
+        filtre = FiltreListe.objects.filter(pk=idfiltre, utilisateur=request.user).first()
+        if not filtre:
+            return JsonResponse({"erreur": "Ce filtre n'existe pas ou ne vous appartient pas"}, status=403)
         filtre.parametres = json.dumps(dict_resultat)
         filtre.save()
     else:
@@ -177,11 +182,18 @@ def Ajouter_filtre(request):
     return JsonResponse({"success": True})
 
 
+@require_POST
 def Supprimer_filtre(request, idfiltre=None):
-    """ Suppression du filtre de liste """
-    FiltreListe.objects.get(pk=idfiltre).delete()
-    # Recharge la page
-    return redirect(request.META["HTTP_REFERER"])
+    """ Suppression du filtre de liste (requête POST protégée par le jeton CSRF) """
+    if not request.user.is_authenticated or request.user.categorie != "utilisateur":
+        return HttpResponseForbidden()
+    # Un utilisateur ne peut supprimer que ses propres filtres
+    FiltreListe.objects.filter(pk=idfiltre, utilisateur=request.user).delete()
+    # Recharge la page d'origine (uniquement si elle appartient au site)
+    url_retour = request.META.get("HTTP_REFERER")
+    if url_retour and url_has_allowed_host_and_scheme(url_retour, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        return redirect(url_retour)
+    return redirect("accueil")
 
 
 class Formulaire(FormulaireBase, forms.Form):
@@ -345,8 +357,13 @@ class Formulaire(FormulaireBase, forms.Form):
         self.fields["champ"] = forms.ChoiceField(label="Filtre", choices=choix_champs, required=False)
 
         # Si modification d'un filtre existant
+        filtre = None
         if idfiltre:
-            filtre = FiltreListe.objects.get(pk=idfiltre)
+            # Un utilisateur ne peut consulter que ses propres filtres
+            filtre = FiltreListe.objects.filter(pk=idfiltre, utilisateur=self.request.user if self.request else None).first()
+            if not filtre:
+                idfiltre = None
+        if filtre:
             dict_filtre = json.loads(filtre.parametres)
             # Saisit le champ
             self.fields["champ"].initial = dict_filtre["champ"]

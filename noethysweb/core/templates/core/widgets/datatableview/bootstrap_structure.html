@@ -1,12 +1,13 @@
 <table class="display datatable table table-striped table-bordered" data-source-url="{{ url }}" id="{{ config.id }}" style="width:100%;"
     data-ajax-method="{{ config.request_method }}"
     data-result-counter-id="{{ config.result_counter_id }}"
-    data-page-length="{{ config.page_length }}">
+    data-page-length="{{ config.page_length }}"
+    data-nw-ordre-colonnes="{{ datatable.nw_ordre_colonnes|default:'' }}">
     <thead>
         <tr>
             {% for column in columns %}
                 {% if "checkbox" in column.label %}
-                    <th data-name="{{ column.label|slugify }}"{{ column.attributes|safe }} style="padding: 12px;width: 25px;text-align: center;vertical-align: middle;"><input id='checkbox_all' type='checkbox'></th>
+                    <th data-name="{{ column.label|slugify }}"{{ column.attributes|safe }} style="padding: 12px;width: 25px;text-align: center;vertical-align: middle;"><input id='checkbox_all' type='checkbox' aria-label='Tout sélectionner' title='Tout sélectionner'></th>
                 {% else %}
                     <th data-code="{{ column.name }}" data-name="{{ column.label|slugify }}"{{ column.attributes|safe }}>{{ column.label }}</th>
                 {% endif %}
