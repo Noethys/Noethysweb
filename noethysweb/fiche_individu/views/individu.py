@@ -10,7 +10,7 @@ from django.views.generic.detail import DetailView
 from core.views.mydatatableview import MyDatatable, columns
 from core.views import crud
 from core.views.base import CustomView
-from core.models import Individu, Famille, Note, Rattachement, Inscription, ContactUrgence, Information
+from core.models import Individu, Famille, Note, Rattachement, Inscription, ContactUrgence, Information, Scolarite, Consommation
 from core.utils import utils_texte, utils_dates
 from fiche_individu.utils.utils_individu import LISTE_ONGLETS
 from individus.utils import utils_pieces_manquantes, utils_vaccinations, utils_assurances
@@ -183,7 +183,33 @@ class Resume(Onglet, DetailView):
         conditions &= (Q(date_debut__isnull=True) | Q(date_debut__lte=datetime.date.today())) & (Q(date_fin__isnull=True) | Q(date_fin__gte=datetime.date.today()))
         context['informations_sante'] = Information.objects.select_related("categorie").filter(conditions).order_by("categorie__nom", "intitule")
 
+        # En-tête : rattachement, scolarité, adresse rattachée et prochaine réservation
+        aujourdhui = datetime.date.today()
+        if self.Get_idfamille():
+            context['rattachement'] = Rattachement.objects.filter(individu_id=self.Get_idindividu(), famille_id=self.Get_idfamille()).first()
+        context['scolarite'] = Scolarite.objects.select_related("ecole", "classe", "niveau").filter(individu_id=self.Get_idindividu(), date_debut__lte=aujourdhui, date_fin__gte=aujourdhui).order_by("-date_debut").first()
+        if self.object.adresse_auto:
+            individu_adresse = Individu.objects.filter(pk=self.object.adresse_auto).first()
+            if individu_adresse:
+                context['adresse_auto_nom'] = individu_adresse.Get_nom()
+        context['prochaine_reservation'] = self.Get_prochaine_reservation(aujourdhui)
+
         return context
+
+    def Get_prochaine_reservation(self, aujourdhui=None):
+        """ Prochaine date réservée de l'individu (activités des structures de l'utilisateur) avec les unités réservées ce jour-là """
+        consos = Consommation.objects.select_related("activite", "unite").filter(individu_id=self.Get_idindividu(), date__gte=aujourdhui, etat__in=("reservation", "present"),
+                                                                                  activite__structure__in=self.request.user.structures.all())
+        date = consos.order_by("date").values_list("date", flat=True).first()
+        if not date:
+            return None
+        unites_activites = {}
+        for conso in consos.filter(date=date).order_by("activite__nom", "unite__ordre"):
+            unites = unites_activites.setdefault(conso.activite.nom, [])
+            if conso.unite and conso.unite.nom not in unites:
+                unites.append(conso.unite.nom)
+        texte = " ; ".join(["%s · %s" % (activite, ", ".join(unites)) if unites else activite for activite, unites in unites_activites.items()])
+        return {"date": date, "aujourdhui": date == aujourdhui, "texte": texte}
 
     def Get_alertes_individu(self):
         """ Pièces, cotisations, vaccinations et assurances manquantes de l'individu """

@@ -49,8 +49,8 @@
                 </div>
             </div>
 
-            <!-- Box PHOTO -->
-            {% if individu.photo %}
+            {# Photo (sauf sur le résumé, qui l'affiche déjà dans son en-tête) #}
+            {% if individu.photo and onglet_actif != "resume" %}
                 <div class="card card-informations d-none d-sm-block">
                     <div class="card-body">
                         {% if individu.photo %}<center><img class="img-fluid img-thumbnail rounded-circle" src="{{ MEDIA_URL }}{{ individu.photo }}"></center>{% endif %}
