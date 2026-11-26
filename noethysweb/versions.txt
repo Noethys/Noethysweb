@@ -1,3 +1,18 @@
+Version 1.3.7.2 (26/11/2026) :
+
+Nouveautés
+- Listes : nouvelle présentation
+- Listes : déplacement des colonnes par glisser-déposer et mémorisation de leur ordre
+- Collaborateurs > Plannings : insertion des pièces manquantes du dossier dans les impressions et envois par email
+Améliorations
+- Listes : bouton Ouvrir avec menu déroulant pour les actions de ligne
+- Fiche individuelle > Résumé : nouvel encadré d'informations générales
+- Fiche collaborateur > Résumé : nouvel encadré d'informations générales
+- Page d'accueil : hauteur du widget Notes limitée avec barre de défilement
+Corrections
+- Facturation > Liste des soldes : arrondi des totaux des colonnes Prestations et Règlements
+- Individus > Effacer des fiches familles : sécurisation de l'affichage des noms des membres
+
 Version 1.3.7.1 (25/11/2026) :
 
 Nouveautés
