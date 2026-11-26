@@ -4301,7 +4301,7 @@ class Collaborateur(models.Model):
     def Get_photo(self, forTemplate=True):
         if self.photo and (forTemplate or os.path.isfile(self.photo.path)):
             return self.photo.url
-        nom_image = "homme.png" if self.civilite == "homme" else "femme.png"
+        nom_image = "homme.png" if self.civilite == "M" else "femme.png"
         return static("images/" + nom_image) if forTemplate else settings.STATIC_ROOT + "/images/" + nom_image
 
 

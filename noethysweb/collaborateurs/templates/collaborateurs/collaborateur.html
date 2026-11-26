@@ -49,11 +49,11 @@
                 </div>
             </div>
 
-            <!-- Box PHOTO -->
-            {% if individu.photo %}
+            {# Photo (sauf sur le résumé, qui l'affiche déjà dans son en-tête) #}
+            {% if collaborateur.photo and onglet_actif != "resume" %}
                 <div class="card card-informations d-none d-sm-block">
-                    <div class="card-body">
-                        {% if collaborateur.photo %}<center><img class="img-fluid img-thumbnail rounded-circle" src="{{ MEDIA_URL }}{{ collaborateur.photo }}"></center>{% endif %}
+                    <div class="card-body text-center">
+                        <img class="img-fluid img-thumbnail rounded-circle" src="{{ collaborateur.photo.url }}" alt="Photo de {{ collaborateur.prenom|default:'' }} {{ collaborateur.nom }}">
                     </div>
                 </div>
             {% endif %}

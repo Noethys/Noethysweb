@@ -28,6 +28,17 @@ def Peut_acceder_planning_individuel(user=None):
     return Peut_acceder(user)
 
 
+def Texte_duree_mois(mois=0):
+    """ Durée en mois convertie en texte : '2 ans et 3 mois', '5 mois', 'Moins d'un mois' """
+    annees, mois = divmod(max(mois, 0), 12)
+    morceaux = []
+    if annees:
+        morceaux.append("%d an%s" % (annees, "s" if annees > 1 else ""))
+    if mois:
+        morceaux.append("%d mois" % mois)
+    return " et ".join(morceaux) or "Moins d'un mois"
+
+
 class Page(crud.Page):
     model = Collaborateur
     menu_code = "collaborateur_liste"
@@ -240,8 +251,14 @@ class Resume(Onglet, DetailView):
                                                                   user=self.request.user, collaborateur=context["collaborateur"])
         context['nbre_alertes'] = len(context['pieces_fournir'])
 
-        # Synthèse : contrat, congés, solde d'heures, absences à venir, contrôle réglementaire
+        # Synthèse : contrat, ancienneté, congés, solde d'heures, absences à venir, contrôle réglementaire
         context.update(self.Get_synthese(context["collaborateur"]))
+
+        # Âge
+        date_naiss = context["collaborateur"].date_naiss
+        if date_naiss:
+            aujourdhui = datetime.date.today()
+            context['age'] = aujourdhui.year - date_naiss.year - ((aujourdhui.month, aujourdhui.day) < (date_naiss.month, date_naiss.day))
 
         # Notes du collaborateur
         conditions = (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
@@ -262,6 +279,13 @@ class Resume(Onglet, DetailView):
         try:
             contrats = ContratCollaborateur.objects.select_related("type_contrat", "type_poste").filter(collaborateur=collaborateur)
             synthese["situation_contrat"] = Situation_contrat(contrats, aujourdhui)
+
+            # Ancienneté depuis le premier contrat commencé
+            debuts = [contrat.date_debut for contrat in contrats if contrat.date_debut <= aujourdhui]
+            if debuts:
+                debut = min(debuts)
+                mois = (aujourdhui.year - debut.year) * 12 + aujourdhui.month - debut.month - (1 if aujourdhui.day < debut.day else 0)
+                synthese["anciennete"] = {"date": debut, "texte": Texte_duree_mois(mois)}
         except Exception:
             logger.exception("Résumé collaborateur : contrat")
 

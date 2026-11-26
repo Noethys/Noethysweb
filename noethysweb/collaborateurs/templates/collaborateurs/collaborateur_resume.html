@@ -6,7 +6,6 @@
 {% block detail_collaborateur %}
     <div class="col-md-9">
 
-        {# Caractéristiques #}
         <style>
             @font-face {
                 font-family: "Caveat";
@@ -134,12 +133,135 @@
             @media (max-width: 575px) {
                 .etiquette-carac.large { grid-column: auto; }
             }
+            /* En-tête : informations principales */
+            .entete-collab { display: flex; flex-wrap: wrap; gap: 20px 24px; align-items: center; padding: 20px; }
+            .entete-collab .photo { position: relative; flex: 0 0 128px; }
+            .entete-collab .photo img, .entete-collab .photo .silhouette { display: block; width: 128px; height: 128px; border-radius: 8px; object-fit: cover; background: #dfe6ee; }
+            .entete-collab .photo .btn-photo { position: absolute; right: -10px; bottom: -10px; width: 38px; height: 38px; padding: 0; border-radius: 50%; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; }
+            .entete-collab .identite { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+            .entete-collab .nom-collab { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+            .entete-collab h2 { margin: 0; font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
+            .entete-collab .sous-titre { font-size: 15px; color: #495057; }
+            .entete-collab .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+            .entete-collab .chip { padding: 2px 9px; border-radius: 4px; font-size: 13px; font-weight: 600; background: #e8f0fb; color: #1f4f8a; }
+            .entete-collab .chip.gris { background: #eef0f2; color: #3e4a56; }
+            .entete-collab .coords { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 24px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
+            .entete-collab .coords li { display: flex; align-items: baseline; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+            .entete-collab .coords i { width: 16px; flex-shrink: 0; text-align: center; color: #6c757d; }
+            .entete-collab .coords .pro { font-size: 12px; color: #6c757d; }
+            .entete-collab .indicateurs { flex: 1 1 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px 24px; margin: 0 -20px -20px; padding: 14px 20px; border-top: 1px solid #e9ecef; background: rgba(0,0,0,.02); }
+            .entete-collab .ind-libelle { display: block; font-size: 12px; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: .04em; }
+            .entete-collab .ind-valeur { display: block; font-size: 16px; font-weight: 600; }
+            .entete-collab .ind-sous { display: block; font-size: 13px; color: #6c757d; }
+            .entete-collab .ind-valeur.positif { color: #1e7e34; }
+            .entete-collab .ind-valeur.attention { color: #a15c07; }
+            .dark-mode .entete-collab .sous-titre { color: #ced4da; }
+            .dark-mode .entete-collab .photo img, .dark-mode .entete-collab .photo .silhouette { background: #3a3f44; }
+            .dark-mode .entete-collab .photo .btn-photo { border-color: #343a40; }
+            .dark-mode .entete-collab .chip { background: #2d4561; color: #cfe2f7; }
+            .dark-mode .entete-collab .chip.gris { background: #454d55; color: #e9ecef; }
+            .dark-mode .entete-collab .coords i, .dark-mode .entete-collab .coords .pro, .dark-mode .entete-collab .ind-libelle, .dark-mode .entete-collab .ind-sous { color: #adb5bd; }
+            .dark-mode .entete-collab .indicateurs { border-color: #4b545c; background: rgba(255,255,255,.03); }
+            .dark-mode .entete-collab .ind-valeur.positif { color: #6fd08c; }
+            .dark-mode .entete-collab .ind-valeur.attention { color: #ffc46b; }
+            @media (max-width: 575px) {
+                .entete-collab .identite { flex-basis: 100%; }
+                .entete-collab .coords { grid-template-columns: 1fr; }
+            }
         </style>
+        {# En-tête : informations principales #}
+        {% with contrat=situation_contrat.contrat %}
+        <div class="card card-outline card-lightblue">
+            <div class="card-body p-0" style="min-height: 0">
+                <div class="entete-collab">
+
+                    {# Photo #}
+                    <div class="photo">
+                        {% if collaborateur.photo %}
+                            <img src="{{ collaborateur.photo.url }}" alt="Photo de {{ collaborateur.prenom|default:'' }} {{ collaborateur.nom }}">
+                        {% else %}
+                            <svg class="silhouette" viewBox="0 0 120 120" role="img" aria-label="Aucune photo"><circle cx="60" cy="46" r="24" fill="#b3c1d1"></circle><path d="M12 120c4-28 22-44 48-44s44 16 48 44z" fill="#b3c1d1"></path></svg>
+                        {% endif %}
+                        {% if perms.core.collaborateur_identite_modifier %}
+                            <a class="btn btn-primary btn-photo" href="{% url 'collaborateur_identite_modifier' idcollaborateur=collaborateur.pk %}" title="{% if collaborateur.photo %}Changer la photo{% else %}Ajouter une photo{% endif %}" aria-label="{% if collaborateur.photo %}Changer la photo{% else %}Ajouter une photo{% endif %}"><i class="fa fa-camera" aria-hidden="true"></i></a>
+                        {% endif %}
+                    </div>
+
+                    {# Identité et coordonnées #}
+                    <div class="identite">
+                        <div>
+                            <div class="nom-collab">
+                                <h2>{{ collaborateur.nom }} {{ collaborateur.prenom|default:"" }}</h2>
+                                {% if situation_contrat.etat == "EN_COURS" %}<span class="badge badge-success">En poste</span>
+                                {% elif situation_contrat.etat == "A_VENIR" %}<span class="badge badge-info">Contrat à venir</span>
+                                {% elif situation_contrat.etat == "TERMINE" %}<span class="badge badge-secondary">Aucun contrat en cours</span>{% endif %}
+                            </div>
+                            <div class="sous-titre">
+                                {% if contrat %}{{ contrat.type_poste.nom }}{% if contrat.type_contrat %} · {{ contrat.type_contrat.nom }}{% endif %}{% else %}Aucun contrat saisi{% endif %}
+                                {% if collaborateur.nom_jfille %} · Nom de naissance : {{ collaborateur.nom_jfille }}{% endif %}
+                            </div>
+                        </div>
+
+                        {% with qualifications=collaborateur.qualifications.all groupes=collaborateur.groupes.all %}
+                            {% if qualifications or groupes %}
+                                <div class="chips">
+                                    {% for qualification in qualifications %}<span class="chip" title="Qualification">{{ qualification.nom }}</span>{% endfor %}
+                                    {% for groupe in groupes %}<span class="chip gris" title="Groupe">{{ groupe.nom }}</span>{% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+
+                        <ul class="coords">
+                            {% if collaborateur.tel_mobile %}<li><i class="fa fa-mobile" aria-hidden="true"></i><a href="tel:{{ collaborateur.tel_mobile }}" title="Portable">{{ collaborateur.tel_mobile }}</a></li>{% endif %}
+                            {% if collaborateur.tel_domicile %}<li><i class="fa fa-phone" aria-hidden="true"></i><a href="tel:{{ collaborateur.tel_domicile }}" title="Domicile">{{ collaborateur.tel_domicile }}</a></li>{% endif %}
+                            {% if collaborateur.travail_tel %}<li><i class="fa fa-briefcase" aria-hidden="true"></i><span><a href="tel:{{ collaborateur.travail_tel }}">{{ collaborateur.travail_tel }}</a> <span class="pro">(pro.)</span></span></li>{% endif %}
+                            {% if collaborateur.mail %}<li><i class="fa fa-envelope-o" aria-hidden="true"></i><a href="mailto:{{ collaborateur.mail }}">{{ collaborateur.mail }}</a></li>{% endif %}
+                            {% if collaborateur.travail_mail %}<li><i class="fa fa-envelope" aria-hidden="true"></i><span><a href="mailto:{{ collaborateur.travail_mail }}">{{ collaborateur.travail_mail }}</a> <span class="pro">(pro.)</span></span></li>{% endif %}
+                            {% if collaborateur.rue_resid or collaborateur.ville_resid %}<li><i class="fa fa-map-marker" aria-hidden="true"></i><span>{{ collaborateur.rue_resid|default:"" }} {{ collaborateur.cp_resid|default:"" }} {{ collaborateur.ville_resid|default:"" }}</span></li>{% endif %}
+                            {% if collaborateur.date_naiss %}<li><i class="fa fa-birthday-cake" aria-hidden="true"></i><span>{% if collaborateur.civilite == "MME" %}Née{% else %}Né{% endif %} le {{ collaborateur.date_naiss|date:"d/m/Y" }}{% if age is not None %} ({{ age }} an{{ age|pluralize }}){% endif %}</span></li>{% endif %}
+                        </ul>
+                    </div>
+
+                    {# Indicateurs #}
+                    <div class="indicateurs">
+                        <div>
+                            <span class="ind-libelle">{% if situation_contrat.etat == "EN_COURS" %}Contrat en cours{% elif situation_contrat.etat == "A_VENIR" %}Contrat à venir{% elif situation_contrat.etat == "TERMINE" %}Dernier contrat{% else %}Contrat{% endif %}</span>
+                            {% if contrat %}
+                                <span class="ind-valeur">{% if contrat.date_fin %}Jusqu'au {{ contrat.date_fin|date:"d/m/Y" }}{% else %}Sans date de fin{% endif %}</span>
+                                <span class="ind-sous">Depuis le {{ contrat.date_debut|date:"d/m/Y" }}{% if contrat.heures_hebdo %} · {{ contrat.heures_hebdo|floatformat:"-2" }} h/sem.{% endif %}</span>
+                            {% else %}
+                                <span class="ind-valeur">Aucun</span>
+                            {% endif %}
+                            {% if perms.core.collaborateur_contrats %}<a class="ind-sous" href="{% url 'collaborateur_contrats_liste' idcollaborateur=collaborateur.pk %}">Voir les contrats</a>{% endif %}
+                        </div>
+                        {% if anciennete %}
+                            <div>
+                                <span class="ind-libelle">Ancienneté</span>
+                                <span class="ind-valeur">{{ anciennete.texte }}</span>
+                                <span class="ind-sous">Premier contrat le {{ anciennete.date|date:"d/m/Y" }}</span>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <span class="ind-libelle">Dossier</span>
+                            {% if pieces_fournir %}
+                                <span class="ind-valeur attention"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{ nbre_alertes }} élément{{ nbre_alertes|pluralize }} à régulariser</span>
+                                <a class="ind-sous" href="#a-regulariser">Voir le détail</a>
+                            {% else %}
+                                <span class="ind-valeur positif"><i class="fa fa-check" aria-hidden="true"></i> Complet</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+
         <div class="card card-outline card-lightblue">
             <div class="card-body p-0" style="min-height: 0">
                 <div class="caracteristiques caracteristiques_papier">
                     {% if pieces_fournir %}
-                        <div class="etiquette-carac postit large"><span class="scotch" aria-hidden="true"></span>
+                        <div class="etiquette-carac postit large" id="a-regulariser"><span class="scotch" aria-hidden="true"></span>
                             <span class="libelle">À régulariser</span>
                             <ul>
                                 {% for item in pieces_fournir %}
@@ -148,22 +270,6 @@
                             </ul>
                         </div>
                     {% endif %}
-                    {# Contrat en cours #}
-                    {% if situation_contrat %}
-                        <div class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span>
-                            <span class="libelle">{% if situation_contrat.etat == "EN_COURS" %}Contrat en cours{% elif situation_contrat.etat == "A_VENIR" %}Contrat à venir{% elif situation_contrat.etat == "TERMINE" %}Dernier contrat{% else %}Contrat{% endif %}</span>
-                            {% with contrat=situation_contrat.contrat %}
-                                {% if contrat %}
-                                    <span class="valeur">{% if contrat.type_contrat %}<strong>{{ contrat.type_contrat.nom }}</strong> · {% endif %}{{ contrat.type_poste.nom }}</span>
-                                    <span class="sous-texte">{% if contrat.date_fin %}Du {{ contrat.date_debut|date:"d/m/Y" }} au {{ contrat.date_fin|date:"d/m/Y" }}{% else %}Depuis le {{ contrat.date_debut|date:"d/m/Y" }}{% endif %}{% if contrat.heures_hebdo %} · {{ contrat.heures_hebdo|floatformat:"-2" }} h par semaine{% endif %}{% if situation_contrat.etat == "TERMINE" %} · terminé{% endif %}</span>
-                                {% else %}
-                                    <span class="valeur sous-texte">Aucun contrat saisi</span>
-                                {% endif %}
-                            {% endwith %}
-                            {% if perms.core.collaborateur_contrats %}<a class="lien-etiquette" href="{% url 'collaborateur_contrats_liste' idcollaborateur=collaborateur.pk %}">Voir les contrats</a>{% endif %}
-                        </div>
-                    {% endif %}
-
                     {# Solde d'heures #}
                     {% if solde_heures %}
                         <div class="etiquette-carac"><span class="scotch" aria-hidden="true"></span>
@@ -216,35 +322,6 @@
                         </div>
                     {% endif %}
 
-                    <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Nom</dt><dd class="valeur mb-0">{{ collaborateur.nom }}</dd></dl>
-                    {% if collaborateur.prenom %}<dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Prénom</dt><dd class="valeur mb-0">{{ collaborateur.prenom }}</dd></dl>{% endif %}
-                    {% if collaborateur.tel_mobile or collaborateur.tel_domicile or collaborateur.travail_tel %}
-                        <dl class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Téléphones</dt><dd class="valeur mb-0">{% if collaborateur.tel_mobile %}{{ collaborateur.tel_mobile }}{% endif %}{% if collaborateur.tel_domicile %}{% if collaborateur.tel_mobile %} · {% endif %}{{ collaborateur.tel_domicile }}{% endif %}{% if collaborateur.travail_tel %}{% if collaborateur.tel_mobile or collaborateur.tel_domicile %} · {% endif %}{{ collaborateur.travail_tel }} (pro.){% endif %}</dd></dl>
-                    {% endif %}
-                    {% if collaborateur.rue_resid or collaborateur.ville_resid %}
-                        <dl class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Adresse</dt><dd class="valeur mb-0">{{ collaborateur.rue_resid|default:"" }} {{ collaborateur.cp_resid|default:"" }} {{ collaborateur.ville_resid|default:"" }}</dd></dl>
-                    {% endif %}
-                    {% if collaborateur.mail or collaborateur.travail_mail %}
-                        <dl class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Email</dt><dd class="valeur mb-0">{% if collaborateur.mail %}{{ collaborateur.mail }}{% endif %}{% if collaborateur.travail_mail %}{% if collaborateur.mail %} · {% endif %}{{ collaborateur.travail_mail }} (pro.){% endif %}</dd></dl>
-                    {% endif %}
-                    <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">Date de création</dt><dd class="valeur mb-0">{{ collaborateur.date_creation|date:"j F Y" }}</dd></dl>
-                    <dl class="etiquette-carac"><span class="scotch" aria-hidden="true"></span><dt class="libelle">ID collaborateur</dt><dd class="valeur mb-0">{{ collaborateur.pk }}</dd></dl>
-                    {% with qualifications=collaborateur.qualifications.all %}
-                        {% if qualifications %}
-                            <div class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span>
-                                <span class="libelle">Qualifications</span>
-                                <div class="pictos">{% for qualification in qualifications %}<span class="picto">{{ qualification.nom }}</span>{% endfor %}</div>
-                            </div>
-                        {% endif %}
-                    {% endwith %}
-                    {% with groupes=collaborateur.groupes.all %}
-                        {% if groupes %}
-                            <div class="etiquette-carac large"><span class="scotch" aria-hidden="true"></span>
-                                <span class="libelle">Groupes</span>
-                                <div class="pictos">{% for groupe in groupes %}<span class="picto gris">{{ groupe.nom }}</span>{% endfor %}</div>
-                            </div>
-                        {% endif %}
-                    {% endwith %}
                     {# Notes #}
                     {% include 'outils/notes_postit.html' with mode_notes='collaborateur' %}
                 </div>
