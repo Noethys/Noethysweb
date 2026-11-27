@@ -20,7 +20,8 @@ def Calculer(request=None, parametres={}):
     if date_debut and date_fin and date_fin < date_debut: erreurs.append("date de début supérieure à la date de début")
     if not parametres["jours_scolaires"] and not parametres["jours_vacances"]: erreurs.append("jours")
 
-    # Récupération des unités
+    # Récupération des unités (en suppression, les horaires et quantités ne sont pas utilisés : pas de contrôle)
+    suppression = parametres.get("action_type") == "EFFACER"
     dict_unites = {}
     for key, valeur in request.POST.items():
         if key.startswith("unite_"):
@@ -32,17 +33,18 @@ def Calculer(request=None, parametres={}):
                 option = chaine[2]
                 if option == "debut":
                     option = "heure_debut"
-                    if utils_dates.HeureStrEnTime(valeur) == datetime.time(0, 0):
+                    if not suppression and utils_dates.HeureStrEnTime(valeur) == datetime.time(0, 0):
                         erreurs.append("l'heure de début n'est pas valide")
                 if option == "fin":
                     option = "heure_fin"
-                    if utils_dates.HeureStrEnTime(valeur) == datetime.time(0, 0):
+                    if not suppression and utils_dates.HeureStrEnTime(valeur) == datetime.time(0, 0):
                         erreurs.append("l'heure de fin n'est pas valide")
                 if option == "quantite":
                     try:
                         valeur = int(valeur)
                     except:
-                        erreurs.append("La quantité n'est pas valide")
+                        if not suppression:
+                            erreurs.append("La quantité n'est pas valide")
                 dict_unites[IDunite][option] = valeur
 
     if not dict_unites:

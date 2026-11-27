@@ -630,9 +630,11 @@ class Case_standard extends Case_base {
     // Supprimer une conso
     supprimer(maj_facturation=true) {
         if (this.is_locked()) {return false}
-        // Mémorisation de la suppression
-        if ((this.consommations.length > 0) && (!(this.consommations[0].pk.toString().includes("-")))) {
-            dict_suppressions.consommations.push(this.consommations[0].pk)
+        // Mémorisation de la suppression de toutes les conso de la case (y compris d'éventuels doublons non affichés)
+        for (var conso of this.consommations) {
+            if ((conso.pk !== null) && (!(conso.pk.toString().includes("-"))) && (!(dict_suppressions.consommations.includes(conso.pk)))) {
+                dict_suppressions.consommations.push(conso.pk);
+            };
         };
         this.consommations = [];
         this.maj_affichage();
@@ -710,25 +712,30 @@ class Case_standard extends Case_base {
 
     // Vérifie si la conso est verrouillée
     is_locked() {
-        if ((this.consommations.length > 0) && (jQuery.inArray(this.consommations[0].etat, ["present", "absentj", "absenti"]) !== -1)) {
-            toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation déjà pointée");
-            return true;
-        }
-        if ((this.consommations.length > 0) && (this.consommations[0].forfait)) {
-            toastr.error("Vous ne pouvez pas supprimer cette consommation car elle est associée à un forfait daté");
-            return true;
-        }
-        if ((this.consommations[0].facture) && (!(dict_prestations[this.consommations[0].prestation].forfait_date_debut))) {
-            toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation dont la prestation associée apparaît sur une facture");
-            return true;
-        }
-        if ((mode === "portail") && (this.consommations.length > 0) && (this.consommations[0].etat === "refus")) {
-            toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation refusée");
-            return true;
-        }
-        if ((mode === "portail") && (this.consommations[0].dels === "False") && (!(this.consommations[0].etat === "demande"))) {
-            toastr.error("Vous êtes hors délai pour supprimer cette réservation");
-            return true;
+        // Case vide : rien à verrouiller
+        if (this.consommations.length === 0) {return false}
+        // Contrôle de toutes les conso de la case (y compris d'éventuels doublons)
+        for (var conso of this.consommations) {
+            if (jQuery.inArray(conso.etat, ["present", "absentj", "absenti"]) !== -1) {
+                toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation déjà pointée");
+                return true;
+            }
+            if (conso.forfait) {
+                toastr.error("Vous ne pouvez pas supprimer cette consommation car elle est associée à un forfait daté");
+                return true;
+            }
+            if ((conso.facture) && (!(dict_prestations[conso.prestation] && dict_prestations[conso.prestation].forfait_date_debut))) {
+                toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation dont la prestation associée apparaît sur une facture");
+                return true;
+            }
+            if ((mode === "portail") && (conso.etat === "refus")) {
+                toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation refusée");
+                return true;
+            }
+            if ((mode === "portail") && (conso.dels === "False") && (!(conso.etat === "demande"))) {
+                toastr.error("Vous êtes hors délai pour supprimer cette réservation");
+                return true;
+            }
         }
         return false;
     };

@@ -36,7 +36,7 @@ $(document).ready(function() {
             success: function(data){
                 $.each(dict_cases, function (key, case_tableau) {
                     var parties_key = key.split("_");
-                    if ((data.dates.includes(parties_key[0])) && (Object.keys(data.unites).includes(parties_key[2]))) {
+                    if ((data.dates.includes(parties_key[0])) && (Object.keys(data.unites).includes(parties_key[2])) && (typeof case_tableau.supprimer === "function")) {
                         if (data.action === "SAISIE") {
                             case_tableau.ajouter(data.unites[parties_key[2]], maj_facturation = false);
                         };
@@ -50,7 +50,8 @@ $(document).ready(function() {
                 ajax_facturer(cases_touchees);
             },
             error: function(data) {
-                toastr.error(data.responseJSON.erreur);
+                var erreur = (data.responseJSON && data.responseJSON.erreur) ? data.responseJSON.erreur : "Le traitement par lot n'a pas pu être appliqué (erreur " + data.status + ").";
+                toastr.error(erreur);
             }
         });
     });
