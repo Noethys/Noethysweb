@@ -1,86 +1,180 @@
 {% extends "core/box_in_page.html" %}
-{% load crispy_forms_tags %}
 {% load static %}
 {% load embed %}
 
-{% block scripts %}
-    {{ block.super }}
-    <script type="text/javascript" src="{% static 'lib/jquery-serialize-object/jquery.serialize-object.min.js' %}"></script>
-{% endblock scripts %}
-
 {% block contenu_page %}
+
+    <style>
+        /* Panneau des paramètres fixe à gauche de la liste */
+        .panneau-traitement-lot {position: sticky; top: 70px;}
+        .panneau-traitement-lot .card-body {max-height: calc(100vh - 140px); overflow-y: auto; padding: 0;}
+        .panneau-traitement-lot .boutons-action {display: flex; gap: 6px; padding: 12px 14px; border-bottom: 1px solid #dee2e6; position: sticky; top: 0; background: #fff; z-index: 2;}
+        .panneau-traitement-lot .boutons-action .btn {white-space: nowrap;}
+        .panneau-traitement-lot .boutons-action .btn-primary {flex: 1;}
+        .panneau-traitement-lot .resume-selection {padding: 10px 14px; background: #f4f6f9; border-bottom: 1px solid #dee2e6;}
+        .panneau-traitement-lot .resume-selection strong {font-size: 1.05rem;}
+        .panneau-traitement-lot .corps-parametres {padding: 12px 14px 14px;}
+        .dark-mode .panneau-traitement-lot .boutons-action {background: #343a40; border-color: #4b545c;}
+        .dark-mode .panneau-traitement-lot .resume-selection {background: #3f474e; border-color: #4b545c;}
+        @media (max-width: 991px) {.panneau-traitement-lot {position: static;} .panneau-traitement-lot .card-body {max-height: none;}}
+    </style>
+
     <div class="row">
 
-        <div class="col-md-12 col-sm-12 col-xs-12">
+        {# Paramètres (à gauche) #}
+        <div class="col-xl-4 col-lg-5 col-md-12">
+            <div class="card card-outline card-lightblue panneau-traitement-lot">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fa fa-magic margin-r-5" aria-hidden="true"></i>Paramètres du traitement</h3>
+                </div>
+                <div class="card-body">
+
+                    {# Boutons d'action #}
+                    <div class="boutons-action">
+                        <button type="submit" form="form_traitement_lot" class="btn btn-primary" id="tl_bouton_appliquer" disabled>
+                            <i class="fa fa-check mr-1" aria-hidden="true"></i><span>Ajouter les consommations</span>
+                        </button>
+                        <a class="btn btn-danger" href="{% url 'consommations_toc' %}"><i class="fa fa-ban mr-1" aria-hidden="true"></i>Annuler</a>
+                    </div>
+
+                    {# Résumé de la sélection #}
+                    <div class="resume-selection" aria-live="polite">
+                        <strong id="tl_nbre_individus">Aucun individu coché</strong>
+                        <div class="text-muted small">Cochez les individus concernés dans la liste.</div>
+                    </div>
+
+                    {# Paramètres #}
+                    <div class="corps-parametres">
+                        <form id="form_traitement_lot" method="post" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="inscriptions_cochees" value="">
+                            <input type="hidden" name="idactivite" value="{{ idactivite }}">
+                            {% include 'consommations/traitement_lot_parametres.html' with form=form_options unites=data.liste_unites tl_bouton="#tl_bouton_appliquer" tl_compact=True %}
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {# Liste des individus (à droite) #}
+        <div class="col-xl-8 col-lg-7 col-md-12">
             {% embed 'core/box.html' %}
                 {% block box_titre %}{{ box_titre }}{% endblock %}
                 {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
                 {% block box_contenu %}
-
-                    {# Boutons de commandes #}
-                    <div class="buttonHolder mb-3">
-                        <button class="btn btn-primary" onclick="appliquer()" title="Appliquer le traitement par lot"><i class='fa fa-bolt margin-r-5'></i>Appliquer</button>
-                        <a class="btn btn-danger" href="{% url 'consommations_toc' %}"><i class='fa fa-ban margin-r-5'></i>Annuler</a>
-                    </div>
-
-                    {# Options #}
-                    {% crispy form_options %}
-
-                    {# Liste des individus #}
                     {% embed 'core/crud/liste.html' %}
                     {% endembed %}
-
                 {% endblock box_contenu %}
-                {% block box_conclusion %}{{ box_conclusion }}{% endblock %}
             {% endembed %}
         </div>
 
-        <script>
+    </div>
 
-            // Application
-            function appliquer() {
-                bootbox.dialog({
-                    title: "Confirmation",
-                    message: "Confirmez-vous l'application du traitement par lot ?",
-                    buttons: {
-                        ok: {
-                            label: "<i class='fa fa-check'></i> Valider",
-                            className: 'btn-primary',
-                            callback: function(){
-                                $("[name=individus_coches]").val(JSON.stringify(get_coches()));
-                                $("[name=idactivite]").val("{{ idactivite }}");
-                                var box = bootbox.dialog({
-                                    message: "<p class='text-center mb-0'><i class='fa fa-spin fa-cog'></i> <b>Traitement par lot en cours</b><br><br>Veuillez patienter...</p>",
-                                    closeButton: false
-                                });
-                                $.ajax({
-                                    type: "POST",
-                                    url: "{% url 'ajax_consommations_traitement_lot' %}",
-                                    data: $("#grille_traitement_lot").serialize(),
-                                    datatype: "json",
-                                    success: function(data){
-                                        bootbox.hideAll();
-                                        toastr.success("Le traitement par lot a été appliqué avec succès");
-                                        var table = $('.datatable').DataTable()
-                                        table.ajax.reload();
-                                    },
-                                    error: function(data) {
-                                        bootbox.hideAll();
-                                        toastr.error(data.responseJSON.erreur);
-                                    }
-                                })
-                            }
-                        },
-                        cancel: {
-                            label: "<i class='fa fa-ban'></i> Annuler",
-                            className: 'btn-danger',
+    <script>
+
+        // Nombre d'individus cochés : une ligne de la liste est une inscription, un individu inscrit
+        // dans deux groupes n'est compté qu'une fois (colonne Individu)
+        function tl_get_nbre_individus() {
+            var table = new $.fn.dataTable.Api(".datatable");
+            var index_colonne = table.column("individu:name").index();
+            var individus = {};
+            $.each(table.rows({selected: true}).data().toArray(), function (index, valeurs) {
+                individus[index_colonne === undefined ? index : $("<div>").html(valeurs[index_colonne]).text()] = true;
+            });
+            return Object.keys(individus).length;
+        }
+
+        function maj_selection() {
+            var nbre = tl_get_nbre_individus();
+            $("#tl_nbre_individus").text(nbre === 0 ? "Aucun individu coché" : nbre + (nbre > 1 ? " individus cochés" : " individu coché"));
+            tl_maj_affichage();
+        }
+
+        // Fenêtre d'attente pendant le traitement
+        function afficher_attente() {
+            $("#tl_bouton_appliquer").attr("aria-busy", "true").prop("disabled", true);
+            return bootbox.dialog({
+                message: "<p class='text-center mb-0' role='status'><i class='fa fa-spin fa-cog margin-r-5'></i><b>Traitement par lot en cours</b><br><br>Veuillez patienter...</p>",
+                closeButton: false
+            });
+        }
+
+        function fin_attente() {
+            bootbox.hideAll();
+            $("#tl_bouton_appliquer").removeAttr("aria-busy");
+            tl_maj_affichage();
+        }
+
+        // Application du traitement
+        function appliquer() {
+            $("[name=inscriptions_cochees]").val(JSON.stringify(get_coches()));
+            afficher_attente();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ajax_consommations_traitement_lot' %}",
+                data: $("#form_traitement_lot").serialize(),
+                datatype: "json",
+                success: function (data) {
+                    fin_attente();
+                    var texte_individus = " pour " + data.nbre_individus + " individu" + (data.nbre_individus > 1 ? "s" : "");
+                    if (data.action === "SAISIE") {
+                        if (data.nbre_ajoutees > 0) {
+                            toastr.success(data.nbre_ajoutees + (data.nbre_ajoutees > 1 ? " consommations ajoutées" : " consommation ajoutée") + texte_individus + ".");
+                        } else {
+                            toastr.info("Aucune consommation ajoutée : les cases concernées sont déjà occupées ou fermées.");
                         }
                     }
+                    if (data.action === "EFFACER") {
+                        if (data.nbre_supprimees === 0 && data.nbre_conservees === 0) {
+                            toastr.info("Aucune consommation à supprimer sur cette sélection.");
+                        }
+                        if (data.nbre_supprimees > 0) {
+                            toastr.success(data.nbre_supprimees + (data.nbre_supprimees > 1 ? " consommations supprimées" : " consommation supprimée") + texte_individus + ".");
+                        }
+                        if (data.nbre_conservees > 0) {
+                            toastr.warning(data.nbre_conservees + (data.nbre_conservees > 1 ? " consommations conservées car pointées, facturées ou associées à un forfait." : " consommation conservée car pointée, facturée ou associée à un forfait."));
+                        }
+                    }
+                },
+                error: function (data) {
+                    fin_attente();
+                    toastr.error((data.responseJSON && data.responseJSON.erreur) ? data.responseJSON.erreur : "Le traitement par lot n'a pas pu être appliqué (erreur " + data.status + ").");
+                }
+            });
+        }
+
+        $(function () {
+
+            // Initialisation de la période sur le mois en cours
+            // (valeur posée directement : le datepicker n'est initialisé qu'après le chargement du calendrier)
+            $("#traitement_lot_debut").val(moment().startOf("month").format("DD/MM/YYYY"));
+            $("#traitement_lot_fin").val(moment().endOf("month").format("DD/MM/YYYY"));
+
+            // Suivi de la sélection dans la liste
+            $(".datatable").on("select.dt deselect.dt draw.dt", maj_selection);
+            maj_selection();
+
+            // Validation : confirmation demandée uniquement pour une suppression
+            $("#form_traitement_lot").on("submit", function (event) {
+                event.preventDefault();
+                if ($("#tl_bouton_appliquer").prop("disabled")) {return}
+                if ($("#form_traitement_lot input[name=action_type]:checked").val() !== "EFFACER") {
+                    appliquer();
+                    return;
+                }
+                bootbox.dialog({
+                    title: "Confirmation",
+                    message: $("<div>").append($("#tl_resume > div").clone()).html() + "<p class='mt-2 mb-0'>Confirmez-vous la suppression ?</p>",
+                    buttons: {
+                        ok: {label: "<i class='fa fa-trash-o'></i> Supprimer", className: "btn-primary", callback: appliquer},
+                        cancel: {label: "<i class='fa fa-ban'></i> Annuler", className: "btn-danger"}
+                    }
                 });
-            };
+            });
 
-        </script>
+        });
 
-    </div>
+    </script>
 
 {% endblock contenu_page %}

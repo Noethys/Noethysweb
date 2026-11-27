@@ -31,8 +31,8 @@ class Formulaire(FormulaireBase, forms.Form):
                         (5, "Les semaines paires"), (6, "Les semaines impaires")]
     frequence_type = forms.TypedChoiceField(label="Fréquence", choices=choix_frequence, initial=1, required=False)
 
-    # Pour le traitement par lot global
-    individus_coches = forms.CharField(label="Individus_coches", required=False)
+    # Pour le traitement par lot global (page Consommations > Traitement par lot)
+    inscriptions_cochees = forms.CharField(label="Inscriptions cochées", required=False)
     idactivite = forms.CharField(label="idactivite", required=False)
 
     def __init__(self, *args, **kwargs):
@@ -44,6 +44,13 @@ class Formulaire(FormulaireBase, forms.Form):
 
         self.fields["jours_scolaires"].initial = [0, 1, 2, 3, 4]
         self.fields["jours_vacances"].initial = [0, 1, 2, 3, 4]
+
+        # La modale de la grille et la page Traitement par lot sont rendues par un template dédié
+        # (consommations/traitement_lot_parametres.html) : les datepickers reçoivent donc ici leurs id
+        # (sinon conflit avec les autres formulaires de la page)
+        if mode in ("grille", "consommations_traitement_lot"):
+            self.fields["date_debut"].widget.attrs.update({"id": "traitement_lot_debut", "class": "form-control", "taille_groupe": "sm"})
+            self.fields["date_fin"].widget.attrs.update({"id": "traitement_lot_fin", "class": "form-control", "taille_groupe": "sm"})
 
         self.helper.layout = Layout(
             Div(
@@ -60,7 +67,7 @@ class Formulaire(FormulaireBase, forms.Form):
             Field("frequence_type", id="traitement_lot_frequence"),
             Field("inclure_feries", id="traitement_lot_feries"),
             HTML(EXTRA_HTML),
-            Hidden("individus_coches", ""),
+            Hidden("inscriptions_cochees", ""),
             Hidden("idactivite", ""),
         )
 

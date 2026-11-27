@@ -627,9 +627,9 @@ class Case_standard extends Case_base {
         $("#id_date_debut").datepicker("setDate", moment(this.date).format("DD/MM/YYYY"));
     };
 
-    // Supprimer une conso
-    supprimer(maj_facturation=true) {
-        if (this.is_locked()) {return false}
+    // Supprimer une conso (silencieux : pas de message d'erreur, utilisé par le traitement par lot qui affiche un bilan global)
+    supprimer(maj_facturation=true, silencieux=false) {
+        if (this.is_locked(silencieux)) {return false}
         // Mémorisation de la suppression de toutes les conso de la case (y compris d'éventuels doublons non affichés)
         for (var conso of this.consommations) {
             if ((conso.pk !== null) && (!(conso.pk.toString().includes("-"))) && (!(dict_suppressions.consommations.includes(conso.pk)))) {
@@ -688,9 +688,12 @@ class Case_standard extends Case_base {
         };
     };
 
-    // Attribue un groupe à la conso
+    // Attribue une prestation à la conso
     set_prestation(idprestation) {
         if (this.has_conso()) {
+            // Prestation inchangée (cas des autres conso de la ligne recalculée) : rien à faire,
+            // ce qui évite aussi l'avertissement de modifier_conso() sur les conso déjà facturées
+            if (this.consommations[0].prestation === idprestation) {return true};
             this.modifier_conso({prestation: idprestation});
             return true;
         };
@@ -711,29 +714,30 @@ class Case_standard extends Case_base {
     }
 
     // Vérifie si la conso est verrouillée
-    is_locked() {
+    is_locked(silencieux=false) {
+        var afficher_erreur = function(message) {if (!silencieux) {toastr.error(message)}};
         // Case vide : rien à verrouiller
         if (this.consommations.length === 0) {return false}
         // Contrôle de toutes les conso de la case (y compris d'éventuels doublons)
         for (var conso of this.consommations) {
             if (jQuery.inArray(conso.etat, ["present", "absentj", "absenti"]) !== -1) {
-                toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation déjà pointée");
+                afficher_erreur("Vous ne pouvez pas modifier ou supprimer une consommation déjà pointée");
                 return true;
             }
             if (conso.forfait) {
-                toastr.error("Vous ne pouvez pas supprimer cette consommation car elle est associée à un forfait daté");
+                afficher_erreur("Vous ne pouvez pas supprimer cette consommation car elle est associée à un forfait daté");
                 return true;
             }
             if ((conso.facture) && (!(dict_prestations[conso.prestation] && dict_prestations[conso.prestation].forfait_date_debut))) {
-                toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation dont la prestation associée apparaît sur une facture");
+                afficher_erreur("Vous ne pouvez pas modifier ou supprimer une consommation dont la prestation associée apparaît sur une facture");
                 return true;
             }
             if ((mode === "portail") && (conso.etat === "refus")) {
-                toastr.error("Vous ne pouvez pas modifier ou supprimer une consommation refusée");
+                afficher_erreur("Vous ne pouvez pas modifier ou supprimer une consommation refusée");
                 return true;
             }
             if ((mode === "portail") && (conso.dels === "False") && (!(conso.etat === "demande"))) {
-                toastr.error("Vous êtes hors délai pour supprimer cette réservation");
+                afficher_erreur("Vous êtes hors délai pour supprimer cette réservation");
                 return true;
             }
         }
@@ -1559,6 +1563,15 @@ function maj_remplissage(date) {
 
 };
 
+
+// Enchaînement de fenêtres modales (ex : Outils > Traitement par lot) : Bootstrap 4 retire la classe "modal-open"
+// du body à la fin de la fermeture de la première fenêtre, alors que la seconde est déjà ouverte, ce qui bloque
+// son défilement vertical. On rétablit la classe si une fenêtre modale est encore affichée.
+$(document).on("hidden.bs.modal", ".modal", function () {
+    if ($(".modal.show").length > 0) {
+        $("body").addClass("modal-open");
+    };
+});
 
 // Actions au chargement de la page
 $(document).ready(function() {

@@ -1,0 +1,419 @@
+{% load get_item %}
+{% comment %}
+    Paramètres du traitement par lot, communs à la modale de la grille des consommations
+    (consommations/grille_traitement_lot.html) et à la page Consommations > Traitement par lot.
+
+    A inclure à l'intérieur d'un <form>, avec :
+    - form : formulaire consommations.forms.grille_traitement_lot.Formulaire
+    - unites : liste des unités de l'activité
+    - tl_bouton : sélecteur CSS du bouton de validation (libellé et état gérés ici)
+    - tl_compact : disposition étroite (panneau latéral)
+    - tl_date_min, tl_date_max : période affichée dans la grille (modale uniquement). Ajoute le raccourci
+      "Période affichée" et limite les autres raccourcis à cette période.
+
+    La page peut définir une fonction tl_get_nbre_individus() : le nombre d'individus est alors exigé et
+    repris dans le résumé. Appeler tl_maj_affichage() quand la sélection change.
+{% endcomment %}
+
+<style>
+    .tl-parametres .tl-section {margin-bottom: 1.1rem;}
+    .tl-parametres fieldset {min-width: 0;}
+    .tl-parametres .tl-titre {font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #6c757d; margin-bottom: .45rem; display: flex; align-items: center; width: 100%;}
+    /* Neutralise le style global des légendes de formulaires (bandeau gris) */
+    .tl-parametres legend.tl-titre {background: none !important; border: 0 !important; padding: 0 !important; border-radius: 0 !important; box-shadow: none !important;}
+    .tl-parametres .tl-titre .tl-num {display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--couleur-principale, #3c8dbc); color: #fff; font-size: .72rem; margin-right: .5rem;}
+    .tl-parametres .tl-liens {margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: .82rem; white-space: nowrap;}
+    .tl-parametres .tl-lien {background: none; border: 0; padding: 0; margin-left: .6rem; color: var(--couleur-principale, #3c8dbc); cursor: pointer;}
+    .tl-parametres .tl-lien:hover {text-decoration: underline;}
+    .tl-parametres .tl-carte {border: 1px solid #e3e6ea; border-radius: .5rem; padding: .75rem .9rem; background: #fff;}
+
+    /* Action */
+    .tl-parametres .tl-actions {display: flex; gap: .75rem;}
+    .tl-parametres .tl-action {position: relative; flex: 1; border: 2px solid #dee2e6; border-radius: .5rem; padding: .65rem .9rem; cursor: pointer; display: flex; align-items: center; background: #fff; transition: all .15s; margin: 0; font-weight: normal;}
+    .tl-parametres .tl-action input {position: absolute; opacity: 0; pointer-events: none;}
+    .tl-parametres .tl-action .tl-ico {flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; margin-right: .75rem; background: #f1f3f5; color: #6c757d; transition: all .15s;}
+    .tl-parametres .tl-action .tl-lib {font-weight: 600; line-height: 1.15;}
+    .tl-parametres .tl-action .tl-lib small {display: block; font-weight: 400; color: #6c757d; margin-top: 2px;}
+    .tl-parametres .tl-action.ajout.active {border-color: #28a745; background: #f3fbf5;}
+    .tl-parametres .tl-action.ajout.active .tl-ico {background: #28a745; color: #fff;}
+    .tl-parametres .tl-action.suppr.active {border-color: #dc3545; background: #fdf4f5;}
+    .tl-parametres .tl-action.suppr.active .tl-ico {background: #dc3545; color: #fff;}
+    .tl-parametres .tl-action:focus-within {box-shadow: 0 0 0 .2rem rgba(60, 141, 188, .35);}
+
+    /* Période */
+    .tl-parametres .tl-periode {display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1rem;}
+    .tl-parametres .tl-periode label {margin: 0 .4rem 0 0; font-weight: 600;}
+    .tl-parametres .tl-periode .input-group {width: 175px;}
+
+    /* Jours */
+    .tl-parametres .tl-ligne-jours {display: flex; flex-wrap: wrap; align-items: center; padding: .35rem 0; gap: .3rem 0;}
+    .tl-parametres .tl-ligne-jours + .tl-ligne-jours {border-top: 1px dashed #e9ecef;}
+    .tl-parametres .tl-lib-periode {width: 150px; font-weight: 600; font-size: .92rem; margin: 0;}
+    .tl-parametres .tl-lib-periode i {width: 18px; color: #6c757d;}
+    .tl-parametres .tl-jours {display: flex; gap: .3rem;}
+    .tl-parametres .tl-jour {position: relative; margin: 0; cursor: pointer;}
+    .tl-parametres .tl-jour input {position: absolute; opacity: 0; pointer-events: none;}
+    .tl-parametres .tl-jour span.tl-pastille {display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 32px; border-radius: .4rem; border: 1px solid #ced4da; font-size: .85rem; font-weight: 600; color: #495057; background: #fff; user-select: none; transition: all .12s;}
+    .tl-parametres .tl-jour input:checked + span.tl-pastille {background: var(--couleur-principale, #3c8dbc); border-color: var(--couleur-principale, #3c8dbc); color: #fff;}
+    .tl-parametres .tl-jours.vacances .tl-jour input:checked + span.tl-pastille {background: #ffe08a; border-color: #f0c23b; color: #5c4400;}
+    .tl-parametres .tl-jour input:focus-visible + span.tl-pastille {box-shadow: 0 0 0 .2rem rgba(60, 141, 188, .4);}
+    .tl-parametres .tl-raccourcis {margin-left: auto; font-size: .8rem;}
+    .tl-parametres .tl-raccourcis .tl-lien {margin-left: .5rem;}
+    .tl-parametres select.tl-frequence {width: auto;}
+
+    /* Unités */
+    .tl-parametres .tl-unite {display: flex; flex-wrap: wrap; align-items: center; padding: .45rem .25rem; border-radius: .35rem; gap: .3rem 0;}
+    .tl-parametres .tl-unite + .tl-unite {border-top: 1px solid #f1f3f5;}
+    .tl-parametres .tl-unite.selection {background: #f2f8fc;}
+    .tl-parametres .tl-unite .custom-control {min-width: 200px;}
+    .tl-parametres .tl-unite .custom-control-label {font-weight: 600;}
+    .tl-parametres .tl-unite .tl-type {font-size: .7rem; margin-left: .4rem; vertical-align: middle; font-weight: 500;}
+    .tl-parametres .tl-unite .tl-options {margin-left: auto; display: flex; gap: .4rem; align-items: center;}
+    .tl-parametres .tl-unite .tl-options .input-group {width: auto;}
+    .tl-parametres .tl-unite .tl-options input[type=time] {width: 105px;}
+    .tl-parametres .tl-unite .tl-options input[type=number] {width: 75px;}
+    .tl-parametres .tl-unite:not(.selection) .tl-options-saisie,
+    .tl-parametres.tl-mode-suppr .tl-options-saisie {display: none !important;}
+    .tl-parametres .tl-unite.desactivee {opacity: .55;}
+    .tl-parametres .tl-unite.desactivee .custom-control-label {font-weight: 400;}
+
+    /* Résumé */
+    .tl-parametres .tl-resume {border-radius: .5rem; padding: .65rem .9rem; display: flex; align-items: flex-start; font-size: .92rem; border: 1px solid #dee2e6; background: #f8f9fa; color: #495057;}
+    .tl-parametres .tl-resume > i.fa {margin-right: .6rem; margin-top: .2rem;}
+    .tl-parametres .tl-resume.ajout {background: #eef8f1; border-color: #c7e9d0; color: #1e5e2e;}
+    .tl-parametres .tl-resume.suppr {background: #fdf0f1; border-color: #f3c6cb; color: #7a1f29;}
+
+    /* Disposition étroite (panneau latéral) */
+    .tl-parametres.tl-compact .tl-actions {gap: .5rem;}
+    .tl-parametres.tl-compact .tl-action {padding: .5rem .6rem;}
+    .tl-parametres.tl-compact .tl-action .tl-ico {width: 30px; height: 30px; font-size: .95rem; margin-right: .55rem;}
+    .tl-parametres.tl-compact .tl-action .tl-lib small {display: none;}
+    .tl-parametres.tl-compact .tl-carte {padding: .65rem .8rem;}
+    .tl-parametres.tl-compact .tl-periode .input-group {width: 150px;}
+    .tl-parametres.tl-compact .tl-lib-periode {width: auto; flex: 1;}
+    .tl-parametres.tl-compact .tl-ligne-jours .tl-jours {order: 3; width: 100%; gap: .25rem;}
+    .tl-parametres.tl-compact .tl-jour span.tl-pastille {width: 42px; height: 30px; font-size: .83rem;}
+    .tl-parametres.tl-compact .tl-raccourcis {order: 2;}
+    .tl-parametres.tl-compact .tl-unite {display: block;}
+    .tl-parametres.tl-compact .tl-unite .tl-options {margin: .35rem 0 .1rem 1.5rem;}
+    .tl-parametres.tl-compact .tl-unite.desactivee .tl-options {margin-top: .1rem;}
+    .tl-parametres.tl-compact .tl-resume {font-size: .88rem;}
+
+    /* Mode sombre */
+    .dark-mode .tl-parametres .tl-carte,
+    .dark-mode .tl-parametres .tl-action,
+    .dark-mode .tl-parametres .tl-jour span.tl-pastille {background: #343a40; border-color: #4b545c; color: #dee2e6;}
+    .dark-mode .tl-parametres .tl-action .tl-ico {background: #454d55; color: #ced4da;}
+    .dark-mode .tl-parametres .tl-action.ajout.active {background: rgba(40, 167, 69, .15); border-color: #28a745;}
+    .dark-mode .tl-parametres .tl-action.suppr.active {background: rgba(220, 53, 69, .15); border-color: #dc3545;}
+    .dark-mode .tl-parametres .tl-ligne-jours + .tl-ligne-jours,
+    .dark-mode .tl-parametres .tl-unite + .tl-unite {border-color: #4b545c;}
+    .dark-mode .tl-parametres .tl-unite.selection {background: rgba(60, 141, 188, .18);}
+    .dark-mode .tl-parametres .tl-titre,
+    .dark-mode .tl-parametres .tl-action .tl-lib small {color: #adb5bd;}
+    .dark-mode .tl-parametres .tl-resume {background: #343a40; border-color: #4b545c; color: #dee2e6;}
+    .dark-mode .tl-parametres .tl-resume.ajout {background: rgba(40, 167, 69, .15); border-color: rgba(40, 167, 69, .5); color: #c3e6cb;}
+    .dark-mode .tl-parametres .tl-resume.suppr {background: rgba(220, 53, 69, .15); border-color: rgba(220, 53, 69, .5); color: #f5c6cb;}
+</style>
+
+
+{# Scripts des widgets (datepicker, moment...), comme le faisait crispy auparavant #}
+{{ form.media }}
+
+<div class="tl-parametres{% if tl_compact %} tl-compact{% endif %}" id="tl_parametres">
+
+    {# 1 - Action #}
+    <fieldset class="tl-section">
+        <legend class="tl-titre"><span class="tl-num" aria-hidden="true">1</span>Action</legend>
+        <div class="tl-actions">
+            <label class="tl-action ajout active">
+                <input type="radio" name="action_type" value="SAISIE" checked>
+                <span class="tl-ico" aria-hidden="true"><i class="fa fa-plus"></i></span>
+                <span class="tl-lib">{% if tl_compact %}Ajouter{% else %}Ajouter des consommations{% endif %}<small>Réservations sur les jours choisis</small></span>
+            </label>
+            <label class="tl-action suppr">
+                <input type="radio" name="action_type" value="EFFACER">
+                <span class="tl-ico" aria-hidden="true"><i class="fa fa-trash-o"></i></span>
+                <span class="tl-lib">{% if tl_compact %}Supprimer{% else %}Supprimer des consommations{% endif %}<small>Hors consommations pointées ou facturées</small></span>
+            </label>
+        </div>
+    </fieldset>
+
+    {# 2 - Période #}
+    <fieldset class="tl-section">
+        <legend class="tl-titre">
+            <span class="tl-num" aria-hidden="true">2</span>Période
+            <span class="tl-liens">
+                {% if tl_date_min %}<button type="button" class="tl-lien" data-periode="affichee">Période affichée</button>{% endif %}
+                <button type="button" class="tl-lien" data-periode="mois">Mois en cours</button>
+                <button type="button" class="tl-lien" data-periode="mois_suivant">Mois suivant</button>
+            </span>
+        </legend>
+        <div class="tl-carte tl-periode">
+            <div class="d-flex align-items-center"><label for="traitement_lot_debut">Du</label>{{ form.date_debut }}</div>
+            <div class="d-flex align-items-center"><label for="traitement_lot_fin">Au</label>{{ form.date_fin }}</div>
+        </div>
+    </fieldset>
+
+    {# 3 - Jours #}
+    <fieldset class="tl-section">
+        <legend class="tl-titre"><span class="tl-num" aria-hidden="true">3</span>Jours</legend>
+        <div class="tl-carte">
+            <div class="tl-ligne-jours" role="group" aria-labelledby="tl_lib_scolaires">
+                <div class="tl-lib-periode" id="tl_lib_scolaires"><i class="fa fa-graduation-cap" aria-hidden="true"></i> Période scolaire</div>
+                <div class="tl-jours scolaires">
+                    {% for num, nom in jours_complets_semaine %}
+                        <label class="tl-jour" title="{{ nom }}">
+                            <input type="checkbox" name="jours_scolaires" value="{{ num }}" {% if num < 5 %}checked{% endif %}>
+                            <span class="tl-pastille" aria-hidden="true">{{ nom|slice:":3" }}</span><span class="sr-only">{{ nom }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+                <div class="tl-raccourcis">
+                    <button type="button" class="tl-lien" data-jours="scolaires" data-valeur="semaine">Lun-Ven</button>
+                    <button type="button" class="tl-lien" data-jours="scolaires" data-valeur="tous">Tous</button>
+                    <button type="button" class="tl-lien" data-jours="scolaires" data-valeur="aucun">Aucun</button>
+                </div>
+            </div>
+            <div class="tl-ligne-jours" role="group" aria-labelledby="tl_lib_vacances">
+                <div class="tl-lib-periode" id="tl_lib_vacances"><i class="fa fa-sun-o" aria-hidden="true"></i> Vacances</div>
+                <div class="tl-jours vacances">
+                    {% for num, nom in jours_complets_semaine %}
+                        <label class="tl-jour" title="{{ nom }}">
+                            <input type="checkbox" name="jours_vacances" value="{{ num }}" {% if num < 5 %}checked{% endif %}>
+                            <span class="tl-pastille" aria-hidden="true">{{ nom|slice:":3" }}</span><span class="sr-only">{{ nom }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+                <div class="tl-raccourcis">
+                    <button type="button" class="tl-lien" data-jours="vacances" data-valeur="scolaires">Comme scolaire</button>
+                    <button type="button" class="tl-lien" data-jours="vacances" data-valeur="tous">Tous</button>
+                    <button type="button" class="tl-lien" data-jours="vacances" data-valeur="aucun">Aucun</button>
+                </div>
+            </div>
+            <div class="tl-ligne-jours">
+                {% if not tl_compact %}<label class="tl-lib-periode" for="traitement_lot_frequence"><i class="fa fa-repeat" aria-hidden="true"></i> Fréquence</label>{% endif %}
+                <select name="frequence_type" id="traitement_lot_frequence" class="form-control form-control-sm tl-frequence" {% if tl_compact %}aria-label="Fréquence"{% endif %}>
+                    {% for valeur, libelle in form.fields.frequence_type.choices %}
+                        <option value="{{ valeur }}">{{ libelle }}</option>
+                    {% endfor %}
+                </select>
+                <div class="custom-control custom-switch ml-auto">
+                    <input type="checkbox" class="custom-control-input" name="inclure_feries" id="traitement_lot_feries">
+                    <label class="custom-control-label font-weight-normal" for="traitement_lot_feries">{% if tl_compact %}Inclure les fériés{% else %}Inclure les jours fériés{% endif %}</label>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    {# 4 - Unités #}
+    <fieldset class="tl-section">
+        <legend class="tl-titre">
+            <span class="tl-num" aria-hidden="true">4</span>Unités
+            <span class="tl-liens">
+                <button type="button" class="tl-lien" data-unites="tous">Tout cocher</button>
+                <button type="button" class="tl-lien" data-unites="aucun">Tout décocher</button>
+            </span>
+        </legend>
+        <div class="tl-carte py-1">
+            {% for unite in unites %}
+                {% if unite.type|is_in_list:"Multihoraires;Evenement" %}
+                    <div class="tl-unite desactivee">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="tl_unite_{{ unite.pk }}" disabled>
+                            <label class="custom-control-label" for="tl_unite_{{ unite.pk }}">{{ unite.nom }} <span class="badge badge-light tl-type">{{ unite.get_type_display }}</span></label>
+                        </div>
+                        <div class="tl-options text-muted small"><i class="fa fa-info-circle mr-1" aria-hidden="true"></i>Non compatible avec le traitement par lot</div>
+                    </div>
+                {% else %}
+                    <div class="tl-unite">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input tl-check-unite" name="unite_{{ unite.pk }}" id="tl_unite_{{ unite.pk }}" value="0" data-nom="{{ unite.nom }}">
+                            <label class="custom-control-label" for="tl_unite_{{ unite.pk }}">{{ unite.nom }} <span class="badge badge-light tl-type">{{ unite.get_type_display }}</span></label>
+                        </div>
+                        {% if unite.type == "Horaire" %}
+                            <div class="tl-options tl-options-saisie">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend"><label class="input-group-text mb-0" for="tl_unite_{{ unite.pk }}_debut">De</label></div>
+                                    <input name="unite_{{ unite.pk }}_debut" id="tl_unite_{{ unite.pk }}_debut" type="time" value="{{ unite.heure_debut|time:'H:i' }}" class="form-control"/>
+                                </div>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend"><label class="input-group-text mb-0" for="tl_unite_{{ unite.pk }}_fin">à</label></div>
+                                    <input name="unite_{{ unite.pk }}_fin" id="tl_unite_{{ unite.pk }}_fin" type="time" value="{{ unite.heure_fin|time:'H:i' }}" class="form-control"/>
+                                </div>
+                            </div>
+                        {% elif unite.type == "Quantite" %}
+                            <div class="tl-options tl-options-saisie">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend"><label class="input-group-text mb-0" for="tl_unite_{{ unite.pk }}_quantite">Quantité</label></div>
+                                    <input name="unite_{{ unite.pk }}_quantite" id="tl_unite_{{ unite.pk }}_quantite" type="number" class="form-control" min="1" value="1">
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% empty %}
+                <div class="text-muted small py-2">Aucune unité disponible.</div>
+            {% endfor %}
+        </div>
+    </fieldset>
+
+    {# Résumé #}
+    <div class="tl-resume" id="tl_resume" aria-live="polite"></div>
+
+</div>
+
+
+<script>
+    var tl_maj_affichage;
+
+    $(function () {
+        var $tl = $("#tl_parametres");
+        var $bouton = $("{{ tl_bouton|escapejs }}");
+        var JOURS_COURTS = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
+
+        // Période affichée dans la grille (modale uniquement) : seules ces dates peuvent être traitées
+        {% if tl_date_min %}
+            var DATE_MIN = moment("{{ tl_date_min|date:'Y-m-d' }}", "YYYY-MM-DD");
+            var DATE_MAX = moment("{{ tl_date_max|date:'Y-m-d' }}", "YYYY-MM-DD");
+        {% else %}
+            var DATE_MIN = null, DATE_MAX = null;
+        {% endif %}
+
+        function Get_action() {
+            return $tl.find("input[name=action_type]:checked").val();
+        }
+
+        function Get_jours(nom) {
+            return $tl.find("input[name=" + nom + "]:checked").map(function () {return parseInt(this.value)}).get();
+        }
+
+        // Texte d'une liste de jours : "tous les jours", "du lun au ven" ou "les lun, mar, jeu"
+        function Texte_jours(jours) {
+            if (jours.length === 7) {return "tous les jours"}
+            var consecutifs = jours.length >= 3 && jours[jours.length - 1] - jours[0] === jours.length - 1;
+            if (consecutifs) {return "du " + JOURS_COURTS[jours[0]] + " au " + JOURS_COURTS[jours[jours.length - 1]]}
+            return (jours.length > 1 ? "les " : "le ") + jours.map(function (j) {return JOURS_COURTS[j]}).join(", ");
+        }
+
+        function Echapper(texte) {
+            return $("<div>").text(texte).html();
+        }
+
+        // MAJ de l'affichage selon l'action, les unités cochées et le résumé
+        tl_maj_affichage = function () {
+            var suppression = Get_action() === "EFFACER";
+
+            // Action
+            $tl.toggleClass("tl-mode-suppr", suppression);
+            $tl.find(".tl-action.ajout").toggleClass("active", !suppression);
+            $tl.find(".tl-action.suppr").toggleClass("active", suppression);
+            $bouton.find("i").first().attr("class", "fa mr-1 " + (suppression ? "fa-trash-o" : "fa-check"));
+            $bouton.find("span").first().text(suppression ? "Supprimer les consommations" : "Ajouter les consommations");
+
+            // Unités
+            $tl.find(".tl-check-unite").each(function () {
+                $(this).closest(".tl-unite").toggleClass("selection", this.checked);
+            });
+            var unites = $tl.find(".tl-check-unite:checked").map(function () {return $(this).data("nom")}).get();
+
+            // Individus (page Traitement par lot uniquement)
+            var nbre_individus = (typeof tl_get_nbre_individus === "function") ? tl_get_nbre_individus() : null;
+
+            // Contrôles
+            var jours_scolaires = Get_jours("jours_scolaires"), jours_vacances = Get_jours("jours_vacances");
+            var date_debut = $("#traitement_lot_debut").val(), date_fin = $("#traitement_lot_fin").val();
+            var manques = [];
+            if (nbre_individus === 0) {manques.push("cochez au moins un individu dans la liste")}
+            if (!date_debut || !date_fin) {manques.push("renseignez la période")}
+            if (jours_scolaires.length === 0 && jours_vacances.length === 0) {manques.push("sélectionnez au moins un jour")}
+            if (unites.length === 0) {manques.push("cochez au moins une unité")}
+
+            var $resume = $("#tl_resume").removeClass("ajout suppr");
+            $bouton.prop("disabled", manques.length > 0 || $bouton.attr("aria-busy") === "true");
+            if (manques.length > 0) {
+                $resume.html("<i class='fa fa-info-circle' aria-hidden='true'></i><div>Pour continuer, " + Echapper(manques.join(", ")) + ".</div>");
+                return;
+            }
+
+            // Résumé
+            var texte_jours;
+            if (jours_scolaires.length && jours_vacances.length) {
+                texte_jours = "<strong>" + Texte_jours(jours_scolaires) + "</strong> en période scolaire et <strong>" + Texte_jours(jours_vacances) + "</strong> pendant les vacances";
+            } else if (jours_scolaires.length) {
+                texte_jours = "<strong>" + Texte_jours(jours_scolaires) + "</strong> en période scolaire uniquement";
+            } else {
+                texte_jours = "<strong>" + Texte_jours(jours_vacances) + "</strong> pendant les vacances uniquement";
+            }
+            var texte_unites = (unites.length > 1 ? "des unités " : "de l'unité ") + "<strong>" + unites.map(Echapper).join(", ") + "</strong>";
+            var frequence = $("#traitement_lot_frequence option:selected").text().toLowerCase();
+            var feries = $("#traitement_lot_feries").prop("checked") ? ", jours fériés inclus" : "";
+            var html = "<strong>" + (suppression ? "Suppression" : "Ajout") + "</strong> " + texte_unites + " " + texte_jours;
+            html += ", du " + Echapper(date_debut) + " au " + Echapper(date_fin) + ", " + Echapper(frequence) + feries;
+            if (nbre_individus !== null) {html += ", pour <strong>" + nbre_individus + " individu" + (nbre_individus > 1 ? "s" : "") + "</strong>"}
+            html += ".";
+            if (suppression) {html += "<br><small>Les consommations pointées, facturées ou associées à un forfait seront conservées.</small>"}
+            if (DATE_MIN) {
+                var debut = moment(date_debut, "DD/MM/YYYY"), fin = moment(date_fin, "DD/MM/YYYY");
+                if (debut.isBefore(DATE_MIN, "day") || fin.isAfter(DATE_MAX, "day")) {
+                    html += "<br><small><i class='fa fa-exclamation-triangle mr-1' aria-hidden='true'></i>Seules les dates affichées dans la grille (du " + DATE_MIN.format("DD/MM/YYYY") + " au " + DATE_MAX.format("DD/MM/YYYY") + ") seront traitées.</small>";
+                }
+            }
+            $resume.addClass(suppression ? "suppr" : "ajout");
+            $resume.html("<i class='fa " + (suppression ? "fa-trash-o" : "fa-check-circle") + "' aria-hidden='true'></i><div>" + html + "</div>");
+        };
+
+        // Evènements
+        $tl.on("change", "input, select", tl_maj_affichage);
+        $("#traitement_lot_debut, #traitement_lot_fin").on("changeDate", tl_maj_affichage);
+
+        // Raccourcis de période
+        $tl.find("[data-periode]").on("click", function () {
+            var debut, fin;
+            if ($(this).data("periode") === "affichee") {
+                debut = DATE_MIN.format("DD/MM/YYYY");
+                fin = DATE_MAX.format("DD/MM/YYYY");
+            } else {
+                var mois = moment().startOf("month");
+                if ($(this).data("periode") === "mois_suivant") {mois.add(1, "months")}
+                var m_debut = mois.clone(), m_fin = mois.clone().endOf("month");
+                // Dans la grille, limitation à la période affichée
+                if (DATE_MIN) {
+                    m_debut = moment.max(m_debut, DATE_MIN);
+                    m_fin = moment.min(m_fin, DATE_MAX);
+                    if (m_debut.isAfter(m_fin, "day")) {
+                        toastr.warning("Ce mois n'est pas affiché dans la grille. Modifiez d'abord la période de la grille.");
+                        return;
+                    }
+                }
+                debut = m_debut.format("DD/MM/YYYY");
+                fin = m_fin.format("DD/MM/YYYY");
+            }
+            $("#traitement_lot_debut").datepicker("setDate", debut);
+            $("#traitement_lot_fin").datepicker("setDate", fin);
+            tl_maj_affichage();
+        });
+
+        // Raccourcis de jours
+        $tl.find("[data-jours]").on("click", function () {
+            var nom = "jours_" + $(this).data("jours"), valeur = $(this).data("valeur");
+            var jours_scolaires = Get_jours("jours_scolaires");
+            $tl.find("input[name=" + nom + "]").each(function () {
+                var jour = parseInt(this.value);
+                if (valeur === "tous") {this.checked = true}
+                if (valeur === "aucun") {this.checked = false}
+                if (valeur === "semaine") {this.checked = jour < 5}
+                if (valeur === "scolaires") {this.checked = jours_scolaires.includes(jour)}
+            });
+            tl_maj_affichage();
+        });
+
+        // Raccourcis d'unités
+        $tl.find("[data-unites]").on("click", function () {
+            $tl.find(".tl-check-unite").prop("checked", $(this).data("unites") === "tous");
+            tl_maj_affichage();
+        });
+
+        tl_maj_affichage();
+    });
+</script>

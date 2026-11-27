@@ -108,7 +108,9 @@ class Grille_virtuelle():
 
     def Ajouter(self, criteres={}, parametres={}, plusieurs=False):
         """ plusieurs=True : autorise plusieurs consommations dans une même case (unités multihoraires),
-        à condition que leurs horaires ne se chevauchent pas. Par défaut, une case déjà occupée est ignorée. """
+        à condition que leurs horaires ne se chevauchent pas. Par défaut, une case déjà occupée est ignorée.
+        Renvoie le nombre de consommations ajoutées. """
+        nbre_ajoutees = 0
         for key_case, dict_case in self.dict_cases.items():
             valide = True
             for champ, valeur in criteres.items():
@@ -147,6 +149,8 @@ class Grille_virtuelle():
                 self.data_initial["consommations"][key_conso].append(dict_conso)
                 if key_case not in self.data_initial["cases_touchees"]:
                     self.data_initial["cases_touchees"][key_case] = self.dict_cases[key_case]
+                nbre_ajoutees += 1
+        return nbre_ajoutees
 
     def Chevauchement(self, key_case=None, heure_debut=None, heure_fin=None):
         """ Indique si la plage horaire chevauche une conso existante ou déjà ajoutée dans la case """
@@ -195,6 +199,10 @@ class Grille_virtuelle():
                         self.data_initial["cases_touchees"][key_case] = self.dict_cases[key_case]
 
     def Supprimer(self, criteres={}):
+        """ Supprime les consommations qui répondent aux critères, sauf celles qui sont pointées, facturées
+        ou associées à un forfait (mêmes protections que la grille des consommations).
+        Renvoie un tuple (nombre de consommations supprimées, nombre de consommations conservées). """
+        nbre_supprimees, nbre_conservees = 0, 0
         for key_conso, liste_conso in self.data_initial["consommations"].items():
             liste_conso_finale = []
             for dict_conso in liste_conso:
@@ -204,28 +212,35 @@ class Grille_virtuelle():
                 for champ, valeur in criteres.items():
                     if dict_conso.get(champ, None) != valeur:
                         valide = False
-
-                # Vérifie que la conso n'est pas déjà pointée
-                if dict_conso["etat"] in ("present", "absentj", "absenti"):
-                    logger.debug("Impossible de supprimer une conso déjà pointée : %s" % dict_conso["date"])
-                    valide = False
-
-                # Vérifie que la conso n'est pas facturée
-                if str(dict_conso["prestation"]) in self.data_initial["prestations"]:
-                    if self.data_initial["prestations"][str(dict_conso["prestation"])]["facture"]:
-                        logger.debug("La prestation du %s ne peut pas être supprimée car elle est déjà facturée." % dict_conso["date"])
-                        valide = False
-
-                if valide:
-                    self.conso_supprimees.append(dict_conso["pk"])
-
-                    # Mémorise la case touchée
-                    key_case = dict_conso["key_case"]
-                    if key_case not in self.data_initial["cases_touchees"]:
-                        self.data_initial["cases_touchees"][key_case] = self.dict_cases[key_case]
-                else:
+                if not valide:
                     liste_conso_finale.append(dict_conso)
+                    continue
+
+                # Vérifie que la conso n'est pas verrouillée
+                motif = None
+                if dict_conso["etat"] in ("present", "absentj", "absenti"):
+                    motif = "déjà pointée"
+                elif str(dict_conso["prestation"]) in self.data_initial["prestations"] and self.data_initial["prestations"][str(dict_conso["prestation"])]["facture"]:
+                    motif = "déjà facturée"
+                elif dict_conso.get("forfait", None):
+                    motif = "associée à un forfait"
+                if motif:
+                    logger.debug("La conso du %s ne peut pas être supprimée car elle est %s." % (dict_conso["date"], motif))
+                    nbre_conservees += 1
+                    liste_conso_finale.append(dict_conso)
+                    continue
+
+                # Suppression de la conso
+                self.conso_supprimees.append(dict_conso["pk"])
+                nbre_supprimees += 1
+
+                # Mémorise la case touchée
+                key_case = dict_conso["key_case"]
+                if key_case not in self.data_initial["cases_touchees"]:
+                    self.data_initial["cases_touchees"][key_case] = self.dict_cases[key_case]
+
             self.data_initial["consommations"][key_conso] = liste_conso_finale
+        return nbre_supprimees, nbre_conservees
 
     def Enregistrer(self):
         # Les consommations supprimées sont signalées à la facturation (sinon elles seraient vues comme absentes de la grille)
