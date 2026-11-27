@@ -135,6 +135,7 @@ urlpatterns = [
     path('outils/nettoyeur/nettoyer', secure_ajax(nettoyeur.Nettoyer), name='ajax_nettoyeur_nettoyer'),
     path('outils/nettoyeur/alerte_accueil', secure_ajax(nettoyeur.Get_alerte_accueil), name='ajax_nettoyeur_alerte_accueil'),
     path('outils/nettoyeur/masquer_alerte', secure_ajax(nettoyeur.Masquer_alerte_accueil), name='ajax_nettoyeur_masquer_alerte'),
+    path('outils/update/masquer_alerte', secure_ajax(update.Masquer_alerte_accueil), name='ajax_update_masquer_alerte'),
     path('outils/nettoyeur/memoriser_delais', secure_ajax(nettoyeur.Memoriser_delais), name='ajax_nettoyeur_memoriser_delais'),
     path('outils/sauvegarder_media/', secure_ajax(sauvegarde_creer.Sauvegarder_media), name='ajax_sauvegarder_media'),
     path('outils/sauvegarder_liste/', secure_ajax(sauvegarde_creer.Get_liste_sauvegardes), name='ajax_get_liste_sauvegardes'),

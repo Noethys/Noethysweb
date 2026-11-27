@@ -1,0 +1,83 @@
+<style>
+    #alerte_update {
+        background-color: #d6eaff;
+        border-left-color: #007bff;
+    }
+    .dark-mode #alerte_update {
+        background-color: #375271;
+        border-left-color: #3f8ff0;
+    }
+    #alerte_update .update-alerte-entete {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    #alerte_update h5 {
+        margin: 0;
+    }
+    #alerte_update h5 small {
+        font-size: 0.75rem;
+        margin-left: 6px;
+    }
+    #alerte_update .update-alerte-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    #alerte_update .update-alerte-actions .btn {
+        white-space: nowrap;
+        text-decoration: none;
+    }
+    #alerte_update .update-alerte-actions .btn-primary {
+        color: #fff;
+    }
+    #alerte_update .update-pastilles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 10px 0 0 0;
+        padding: 0;
+        list-style: none;
+    }
+    #alerte_update .update-pastilles .badge {
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 5px 12px;
+    }
+</style>
+
+<div class="callout callout-info" id="alerte_update" role="region" aria-labelledby="alerte_update_titre">
+    <div class="update-alerte-entete">
+        <h5 id="alerte_update_titre">
+            <i class="fa fa-download text-primary margin-r-5" aria-hidden="true"></i>Nouvelle version disponible
+            <small class="text-muted">{{ alerte.version_installee }} <span aria-hidden="true">→</span><span class="sr-only">vers</span> {{ alerte.version_disponible }}</small>
+        </h5>
+        <div class="update-alerte-actions">
+            <button type="button" class="btn btn-link btn-sm text-muted p-0" onclick="masquer_alerte_update()">Masquer jusqu'à demain</button>
+            <a href="{% url 'update' %}" class="btn btn-primary btn-sm"><i class="fa fa-download margin-r-5" aria-hidden="true"></i>Voir et installer</a>
+        </div>
+    </div>
+    <ul class="update-pastilles" aria-label="Changements depuis votre version">
+        {% if alerte.totaux.nouveaute %}<li><span class="badge badge-pill badge-primary">{{ alerte.totaux.nouveaute }} nouveauté{{ alerte.totaux.nouveaute|pluralize }}</span></li>{% endif %}
+        {% if alerte.totaux.amelioration %}<li><span class="badge badge-pill badge-success">{{ alerte.totaux.amelioration }} amélioration{{ alerte.totaux.amelioration|pluralize }}</span></li>{% endif %}
+        {% if alerte.totaux.correction %}<li><span class="badge badge-pill badge-warning">{{ alerte.totaux.correction }} correction{{ alerte.totaux.correction|pluralize }}</span></li>{% endif %}
+        {% if alerte.totaux.autre %}<li><span class="badge badge-pill badge-secondary">{{ alerte.totaux.autre }} autre{{ alerte.totaux.autre|pluralize }}</span></li>{% endif %}
+    </ul>
+</div>
+
+<script>
+    function masquer_alerte_update() {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_update_masquer_alerte' %}",
+            data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
+            dataType: "json",
+            success: function() {
+                $("#alerte_update").slideUp();
+                toastr.info("L'encart est masqué jusqu'à demain. La mise à jour reste disponible dans le menu Outils.");
+            }
+        });
+    }
+</script>

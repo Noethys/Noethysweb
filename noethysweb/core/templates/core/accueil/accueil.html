@@ -54,12 +54,8 @@
                 {% block contenu_page %}
 
                     {# Nouvelle version disponible #}
-                    {% if nouvelle_version %}
-                        <div class="alert alert-warning">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true"></button>
-                            <h5><i class="icon fa fa-download"></i> Mise à jour</h5>
-                            Une nouvelle version de Noethysweb est disponible. <a href='{% url 'update' %}'>Cliquez ici pour l'installer maintenant.</a>
-                        </div>
+                    {% if alerte_update %}
+                        {% include 'outils/update_alerte_accueil.html' with alerte=alerte_update %}
                     {% endif %}
 
                     {# Nettoyage recommandé (chargé en différé pour ne pas ralentir la page d'accueil) #}

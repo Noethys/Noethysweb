@@ -15,21 +15,61 @@ from django.core.cache import cache
 # dans la nouvelle version (anciennes librairies JS, etc.) sont ainsi supprimés.
 REPERTOIRES_REMPLACES = ("core/static/lib/",)
 
+# Catégorie des paramètres utilisateur liés à la mise à jour
+CATEGORIE_PARAMETRES = "update"
+
 
 def Get_update_for_accueil(request=None):
     """ Recherche si une nouvelle version est disponible """
+    alerte = Get_alerte_accueil(request=request, tenir_compte_masquage=False)
+    return alerte["version_disponible"] if alerte else False
+
+
+def Get_alerte_accueil(request=None, tenir_compte_masquage=True):
+    """ Renvoie les informations de l'encart de mise à jour de la page d'accueil (ou None) """
+    # Masquage demandé par l'utilisateur pour la journée
+    if tenir_compte_masquage:
+        from core.utils import utils_parametres
+        if utils_parametres.Get(nom="masquer_alerte_jusqu", categorie=CATEGORIE_PARAMETRES, utilisateur=request.user, valeur="") == str(datetime.date.today()):
+            return None
+
+    # Recherche d'une nouvelle version (une fois par jour et par utilisateur)
     key_cache = "last_check_update_user%d" % request.user.pk
     last_check_update = cache.get(key_cache)
-    if last_check_update:
-        nouvelle_version = last_check_update["nouvelle_version"]
-        # Si la dernière recherche date de plus d'un jour, on cherche une nouvelle version
-        if datetime.date.today() > last_check_update["date"].date():
-            last_check_update = None
+    if last_check_update and ("versions" not in last_check_update or datetime.date.today() > last_check_update["date"].date()):
+        last_check_update = None
     if not last_check_update:
         logger.debug("Recherche d'une nouvelle version...")
         nouvelle_version, changelog = Recherche_update()
-        cache.set(key_cache, {"date": datetime.datetime.now(), "nouvelle_version": nouvelle_version})
-    return nouvelle_version
+        versions = []
+        if nouvelle_version:
+            liste_versions = Analyser_changelog(changelog, version_mini=version.GetVersion())[0]
+            versions = [(dict_version["version"], [changement["categorie"] for changement in dict_version["changements"]]) for dict_version in liste_versions]
+        last_check_update = {"date": datetime.datetime.now(), "nouvelle_version": nouvelle_version, "versions": versions}
+        cache.set(key_cache, last_check_update)
+
+    # Si la version trouvée a été installée depuis la dernière recherche, on n'affiche plus l'alerte
+    version_installee = version.GetVersion()
+    try:
+        tuple_installee = version.GetVersionTuple(version_installee)
+        versions = [(num_version, categories) for num_version, categories in last_check_update["versions"] if version.GetVersionTuple(num_version) > tuple_installee]
+    except Exception:
+        return None
+    if not last_check_update["nouvelle_version"] or not versions:
+        return None
+
+    # Totaux des changements depuis la version installée
+    totaux = {"nouveaute": 0, "amelioration": 0, "correction": 0, "autre": 0}
+    for num_version, categories in versions:
+        for categorie in categories:
+            totaux[categorie] += 1
+    return {"version_disponible": last_check_update["nouvelle_version"], "version_installee": version_installee, "nbre_versions": len(versions), "totaux": totaux}
+
+
+def Masquer_alerte_accueil(request=None):
+    """ Masque l'encart de mise à jour de la page d'accueil jusqu'au lendemain """
+    from core.utils import utils_parametres
+    utils_parametres.Set(nom="masquer_alerte_jusqu", categorie=CATEGORIE_PARAMETRES, utilisateur=request.user, valeur=str(datetime.date.today()))
 
 
 def Recherche_update():
@@ -43,7 +83,8 @@ def Recherche_update():
 
     # Nouvelle version avec requests
     try:
-        data = requests.get(url)
+        data = requests.get(url, timeout=10)
+        data.raise_for_status()
     except:
         logger.debug("Le fichier des versions n'a pas pu être téléchargé sur Github.")
         return False, False
@@ -71,6 +112,53 @@ def Recherche_update():
         return False, changelog
 
     return version_online_txt, changelog
+
+
+CATEGORIES_CHANGELOG = {"Nouveautés": "nouveaute", "Améliorations": "amelioration", "Corrections": "correction"}
+
+
+def Analyser_changelog(changelog="", version_mini=None, nbre_versions=None):
+    """ Découpe le fichier des versions en liste de versions, chacune avec ses changements classés par catégorie.
+        version_mini : si renseignée, seules les versions strictement supérieures sont renvoyées.
+        nbre_versions : si renseigné, nombre maximal de versions renvoyées (les plus récentes). """
+    tuple_mini = version.GetVersionTuple(version_mini) if version_mini else None
+    liste_versions = []
+    version_courante, categorie = None, "autre"
+    for ligne in (changelog or "").splitlines():
+        ligne = ligne.strip()
+        if not ligne:
+            continue
+        if ligne.startswith("Version "):
+            # Nouvelle version : "Version 1.3.7.2 (26/11/2026) :"
+            num_version = ligne[len("Version "):ligne.find("(")].strip() if "(" in ligne else ligne[len("Version "):].strip(" :")
+            date = ligne[ligne.find("(") + 1:ligne.find(")")] if "(" in ligne and ")" in ligne else ""
+            try:
+                tuple_version = version.GetVersionTuple(num_version)
+            except Exception:
+                version_courante = None
+                continue
+            if (tuple_mini and tuple_version <= tuple_mini) or (nbre_versions and len(liste_versions) >= nbre_versions):
+                break
+            version_courante = {"version": num_version, "date": date, "changements": []}
+            liste_versions.append(version_courante)
+            categorie = "autre"
+        elif version_courante is None:
+            continue
+        elif ligne in CATEGORIES_CHANGELOG:
+            categorie = CATEGORIES_CHANGELOG[ligne]
+        elif ligne.startswith("-"):
+            texte = ligne[1:].strip()
+            module = ""
+            if " : " in texte:
+                module, texte = texte.split(" : ", 1)
+            version_courante["changements"].append({"categorie": categorie, "module": module, "texte": texte})
+
+    # Totaux par catégorie
+    totaux = {"nouveaute": 0, "amelioration": 0, "correction": 0, "autre": 0}
+    for dict_version in liste_versions:
+        for changement in dict_version["changements"]:
+            totaux[changement["categorie"]] += 1
+    return liste_versions, totaux
 
 
 def Update():

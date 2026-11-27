@@ -21,10 +21,10 @@ class Accueil(CustomView, TemplateView):
 
         # Technique
         context['mode_demo'] = settings.MODE_DEMO
-        # Nouvelle version : affichée uniquement aux utilisateurs autorisés à lancer la mise à jour
-        context['nouvelle_version'] = False
+        # Nouvelle version : encart affiché uniquement aux utilisateurs autorisés à lancer la mise à jour
+        context['alerte_update'] = None
         if self.request.user.has_perm("core.update"):
-            context['nouvelle_version'] = utils_update.Get_update_for_accueil(request=self.request)
+            context['alerte_update'] = utils_update.Get_alerte_accueil(request=self.request)
 
         # Configuration accueil
         context['configuration_accueil'] = json.loads(context["options_interface"]["configuration_accueil"])

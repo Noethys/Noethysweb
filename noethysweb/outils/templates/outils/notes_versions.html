@@ -1,23 +1,256 @@
 {% extends "core/page.html" %}
-{% load crispy_forms_tags %}
 {% load static %}
-{% load embed %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        @media (min-width: 992px) {
+            .notes-panneau {
+                position: sticky;
+                top: 10px;
+            }
+        }
+        .notes-types legend {
+            font-size: inherit;
+            font-weight: 700;
+            margin-bottom: .5rem;
+            padding: 0;
+        }
+        .notes-resume {
+            margin-right: 0 !important;
+            padding-top: 2px;
+        }
+        .notes-types .custom-control {
+            display: flex;
+            margin-bottom: 6px;
+        }
+        .notes-types .custom-control-label {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+        }
+        .notes-types .custom-control-label .text-muted {
+            font-size: 13px;
+        }
+        .notes-annees a {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .notes-annees a:hover, .notes-annees a:focus {
+            background-color: rgba(0, 123, 255, .1);
+            text-decoration: none;
+        }
+        .notes-annees a .text-muted {
+            font-size: 13px;
+        }
+        .notes-annee-titre {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0 16px 0;
+            scroll-margin-top: 10px;
+        }
+        .notes-annee:first-child .notes-annee-titre {
+            margin-top: 0;
+        }
+        .notes-annee-titre h3 {
+            font-size: 22px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 0;
+        }
+        .notes-annee-titre .notes-annee-trait {
+            flex: 1;
+            height: 2px;
+            background-color: rgba(0, 123, 255, .2);
+        }
+        .notes-version + .notes-version {
+            border-top: 1px solid #dee2e6;
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+        .notes-version-titre {
+            margin-bottom: 8px;
+        }
+        .notes-version-titre strong {
+            font-size: 16px;
+        }
+        .notes-changement {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+        .notes-changement .badge {
+            min-width: 95px;
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+    </style>
+{% endblock styles %}
 
 {% block contenu_page %}
 
-    {% embed 'core/box.html' %}
+    <div class="row">
 
-        {% block box_theme %}card-outline card-lightblue{% endblock %}
-        {% block box_titre %}{{ box_titre }}{% endblock %}
-        {% block box_introduction %}{{ box_introduction|safe }}{% endblock %}
-        {% block box_contenu %}
-            <p>
-                <textarea id="id_changelog" name="changelog" rows="30" class="textarea form-control" readonly>{{ changelog }}</textarea>
-            </p>
-        {% endblock %}
+        {# Filtres #}
+        <div class="col-lg-3">
+            <div class="notes-panneau">
 
-    {% endembed %}
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa fa-filter margin-r-5" aria-hidden="true"></i> Filtres</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="notes_recherche">Rechercher</label>
+                            <input type="search" id="notes_recherche" class="form-control" placeholder="Ex. : facturation, portail..." autocomplete="off">
+                        </div>
+                        <fieldset class="notes-types form-group mb-0">
+                            <legend>Type de changement</legend>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="notes_type_tous" name="notes_type" value="" class="custom-control-input" checked>
+                                <label class="custom-control-label" for="notes_type_tous"><span>Tous</span><span class="text-muted">{{ nbre_changements }}</span></label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="notes_type_nouveaute" name="notes_type" value="nouveaute" class="custom-control-input">
+                                <label class="custom-control-label" for="notes_type_nouveaute"><span>Nouveautés</span><span class="text-muted">{{ totaux.nouveaute }}</span></label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="notes_type_amelioration" name="notes_type" value="amelioration" class="custom-control-input">
+                                <label class="custom-control-label" for="notes_type_amelioration"><span>Améliorations</span><span class="text-muted">{{ totaux.amelioration }}</span></label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="notes_type_correction" name="notes_type" value="correction" class="custom-control-input">
+                                <label class="custom-control-label" for="notes_type_correction"><span>Corrections</span><span class="text-muted">{{ totaux.correction }}</span></label>
+                            </div>
+                        </fieldset>
+                        <button type="button" id="notes_effacer" class="btn btn-link btn-sm p-0 mt-2"><i class="fa fa-undo margin-r-5" aria-hidden="true"></i>Effacer les filtres</button>
+                    </div>
+                </div>
+
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa fa-calendar margin-r-5" aria-hidden="true"></i> Aller à l'année</h2>
+                    </div>
+                    <div class="card-body p-2">
+                        <nav class="notes-annees" aria-label="Années">
+                            {% for dict_annee in liste_annees %}
+                                <a href="#annee_{{ dict_annee.annee }}" data-annee="{{ dict_annee.annee }}"><span>{{ dict_annee.annee }}</span><span class="text-muted">{{ dict_annee.versions|length }} version{{ dict_annee.versions|length|pluralize }}</span></a>
+                            {% endfor %}
+                        </nav>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {# Historique des versions #}
+        <div class="col-lg-9">
+            <div class="card card-outline card-lightblue">
+                <div class="card-header">
+                    <h2 class="card-title">Historique des versions</h2>
+                    <div class="card-tools notes-resume text-muted small" id="notes_resume" aria-live="polite">{{ nbre_versions }} versions, du {{ date_premiere_version }} au {{ date_derniere_version }}</div>
+                </div>
+                <div class="card-body">
+                    {% for dict_annee in liste_annees %}
+                        <section class="notes-annee" aria-labelledby="annee_{{ dict_annee.annee }}">
+                            <div class="notes-annee-titre">
+                                <h3 id="annee_{{ dict_annee.annee }}">{{ dict_annee.annee }}</h3>
+                                <span class="notes-annee-trait" aria-hidden="true"></span>
+                                <span class="text-muted small">{{ dict_annee.versions|length }} version{{ dict_annee.versions|length|pluralize }}</span>
+                            </div>
+                            {% for dict_version in dict_annee.versions %}
+                                <div class="notes-version">
+                                    <div class="notes-version-titre">
+                                        <strong>Version {{ dict_version.version }}</strong>
+                                        {% if dict_version.date %}<span class="text-muted small ml-2">{{ dict_version.date }}</span>{% endif %}
+                                        {% if forloop.first and forloop.parentloop.first %}<span class="badge badge-pill badge-success ml-2">Version installée</span>{% endif %}
+                                    </div>
+                                    {% for changement in dict_version.changements %}
+                                        <div class="notes-changement" data-categorie="{{ changement.categorie }}">
+                                            {% if changement.categorie == "nouveaute" %}<span class="badge badge-primary">Nouveauté</span>
+                                            {% elif changement.categorie == "amelioration" %}<span class="badge badge-success">Amélioration</span>
+                                            {% elif changement.categorie == "correction" %}<span class="badge badge-warning">Correction</span>
+                                            {% else %}<span class="badge badge-secondary">Autre</span>{% endif %}
+                                            <span>{% if changement.module %}<strong>{{ changement.module }}</strong> : {% endif %}{{ changement.texte }}</span>
+                                        </div>
+                                    {% empty %}
+                                        <p class="text-muted mb-0">Aucun détail pour cette version.</p>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </section>
+                    {% endfor %}
+                    <p id="notes_aucun_resultat" class="text-muted text-center my-4" style="display: none;">Aucun changement ne correspond à votre recherche.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        (function() {
+            var champ_recherche = document.getElementById("notes_recherche");
+            var resume = document.getElementById("notes_resume");
+            var texte_resume = resume.textContent;
+            var lignes = Array.prototype.slice.call(document.querySelectorAll(".notes-changement"));
+
+            function normaliser(texte) {
+                return (texte || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+            }
+
+            // Mémorise le texte de chaque ligne (avec le numéro de version) pour accélérer la recherche
+            lignes.forEach(function(ligne) {
+                var version = ligne.closest(".notes-version").querySelector(".notes-version-titre strong").textContent;
+                ligne.dataset.recherche = normaliser(version + " " + ligne.textContent);
+            });
+
+            function filtrer() {
+                var mots = normaliser(champ_recherche.value).split(/\s+/).filter(Boolean);
+                var type = document.querySelector("input[name='notes_type']:checked").value;
+                var filtre_actif = mots.length > 0 || type !== "";
+                var nbre_lignes = 0, nbre_versions = 0;
+
+                document.querySelectorAll(".notes-annee").forEach(function(bloc_annee) {
+                    var versions_visibles = 0;
+                    bloc_annee.querySelectorAll(".notes-version").forEach(function(bloc_version) {
+                        var lignes_visibles = 0;
+                        bloc_version.querySelectorAll(".notes-changement").forEach(function(ligne) {
+                            var visible = (!type || ligne.dataset.categorie === type) && mots.every(function(mot) {return ligne.dataset.recherche.indexOf(mot) !== -1;});
+                            ligne.style.display = visible ? "" : "none";
+                            if (visible) {lignes_visibles++;}
+                        });
+                        var version_visible = !filtre_actif || lignes_visibles > 0;
+                        bloc_version.style.display = version_visible ? "" : "none";
+                        if (version_visible) {versions_visibles++; nbre_versions++;}
+                        nbre_lignes += lignes_visibles;
+                    });
+                    bloc_annee.style.display = versions_visibles ? "" : "none";
+                    var lien = document.querySelector(".notes-annees a[data-annee='" + bloc_annee.querySelector("h3").textContent + "']");
+                    if (lien) {lien.style.display = versions_visibles ? "" : "none";}
+                });
+
+                document.getElementById("notes_aucun_resultat").style.display = (filtre_actif && nbre_lignes === 0) ? "" : "none";
+                resume.textContent = filtre_actif ? nbre_lignes + " changement" + (nbre_lignes > 1 ? "s" : "") + " dans " + nbre_versions + " version" + (nbre_versions > 1 ? "s" : "") : texte_resume;
+            }
+
+            var minuteur = null;
+            champ_recherche.addEventListener("input", function() {
+                clearTimeout(minuteur);
+                minuteur = setTimeout(filtrer, 200);
+            });
+            document.querySelectorAll("input[name='notes_type']").forEach(function(radio) {
+                radio.addEventListener("change", filtrer);
+            });
+            document.getElementById("notes_effacer").addEventListener("click", function() {
+                champ_recherche.value = "";
+                document.getElementById("notes_type_tous").checked = true;
+                filtrer();
+            });
+        })();
+    </script>
 
 {% endblock %}
-
-

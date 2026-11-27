@@ -1,44 +1,256 @@
 {% extends "core/page.html" %}
-{% load crispy_forms_tags %}
 {% load static %}
-{% load embed %}
 
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .update-versions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .update-versions .update-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: #6c757d;
+        }
+        .update-versions .update-numero {
+            font-size: 26px;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+        .update-totaux {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .update-totaux .badge {
+            font-size: 13px;
+            padding: 5px 10px;
+        }
+        .update-info {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .update-info-icone {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background-color: rgba(0, 123, 255, .15);
+            color: #0056b3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 13px;
+        }
+        .dark-mode .update-info-icone {
+            color: #8fc3ff;
+        }
+        .update-info-texte {
+            padding-top: 2px;
+        }
+        .update-filtres {
+            margin-right: 0 !important;
+        }
+        .update-filtres .btn {
+            border-radius: 20px;
+            margin: 2px 0 2px 3px;
+            padding: 0 6px;
+            font-size: 9px;
+            line-height: 1.4;
+        }
+        .update-version + .update-version {
+            border-top: 1px solid #dee2e6;
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+        .update-version-titre {
+            margin-bottom: 8px;
+        }
+        .update-version-titre strong {
+            font-size: 16px;
+        }
+        .update-changement {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+        .update-changement .badge {
+            min-width: 95px;
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+    </style>
+{% endblock styles %}
 
 {% block contenu_page %}
 
-    {% embed 'core/box.html' %}
+    <div class="row">
 
-        {% block box_theme %}box-{% if not version_disponible %}success{% else %}warning{% endif %} box-solid{% endblock %}
-        {% block box_titre %}Mise à jour de l'application{% endblock %}
-        {% block box_contenu %}
+        {# Etat de la mise à jour #}
+        <div class="col-lg-4">
 
-            {% if not version_disponible %}
-                <i class='fa fa-check text-green'></i> &nbsp;Vous disposez de la dernière version.
+            {% if erreur_recherche %}
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa fa-exclamation-triangle margin-r-5" aria-hidden="true"></i> Vérification impossible</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>La liste des versions n'a pas pu être téléchargée depuis GitHub. Vérifiez la connexion Internet du serveur puis réessayez.</p>
+                        <p class="mb-0">Version installée : <strong>{{ version_installee }}</strong></p>
+                    </div>
+                </div>
+
+            {% elif version_disponible %}
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa fa-download margin-r-5" aria-hidden="true"></i> Nouvelle version disponible</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="update-versions">
+                            <div class="text-center">
+                                <div class="update-label">Installée</div>
+                                <div class="update-numero text-muted">{{ version_installee }}</div>
+                            </div>
+                            <i class="fa fa-arrow-right fa-lg text-muted" aria-hidden="true"></i>
+                            <div class="text-center">
+                                <div class="update-label">Disponible</div>
+                                <div class="update-numero text-success">{{ version_disponible }}</div>
+                            </div>
+                        </div>
+                        {% if liste_versions|length > 1 %}
+                            <p class="text-center text-muted">{{ liste_versions|length }} versions depuis votre installation</p>
+                        {% endif %}
+                        <div class="update-totaux">
+                            {% if totaux.nouveaute %}<span class="badge badge-pill badge-primary">{{ totaux.nouveaute }} nouveauté{{ totaux.nouveaute|pluralize }}</span>{% endif %}
+                            {% if totaux.amelioration %}<span class="badge badge-pill badge-success">{{ totaux.amelioration }} amélioration{{ totaux.amelioration|pluralize }}</span>{% endif %}
+                            {% if totaux.correction %}<span class="badge badge-pill badge-warning">{{ totaux.correction }} correction{{ totaux.correction|pluralize }}</span>{% endif %}
+                            {% if totaux.autre %}<span class="badge badge-pill badge-secondary">{{ totaux.autre }} autre{{ totaux.autre|pluralize }}</span>{% endif %}
+                        </div>
+                        <form id="id_form_update" method="post">
+                            {% csrf_token %}
+                            <div id="id_bouton_update">
+                                <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fa fa-download margin-r-5" aria-hidden="true"></i> Mettre à jour maintenant</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h2 class="card-title">Bon à savoir</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="update-info">
+                            <span class="update-info-icone"><i class="fa fa-clock-o" aria-hidden="true"></i></span>
+                            <span class="update-info-texte">La mise à jour prendra environ 30 secondes.</span>
+                        </div>
+                        <div class="update-info">
+                            <span class="update-info-icone"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+                            <span class="update-info-texte">Évitez de lancer l'installation pendant une saisie importante (facturation, pointage).</span>
+                        </div>
+                        <div class="text-muted small">Vérification effectuée le {{ date_verification|date:"d/m/Y à H:i" }} · <a href="{% url 'update' %}">Vérifier à nouveau</a></div>
+                    </div>
+                </div>
 
             {% else %}
-                <p>La version {{ version_disponible }} est disponible.</p>
-                <p>
-                    <form id="id_form_update" method="post">
-                        {% csrf_token %}
-                        <div id="id_bouton_update">
-                            <button type="submit" class="btn btn-warning"><i class="fa fa-download"></i> &nbsp;&nbsp;Mettre à jour maintenant</button>
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa fa-check margin-r-5" aria-hidden="true"></i> Application à jour</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="update-versions">
+                            <div class="text-center">
+                                <div class="update-label">Version installée</div>
+                                <div class="update-numero text-success">{{ version_installee }}</div>
+                            </div>
                         </div>
-                    </form>
-                </p>
-                <p>
-                    <textarea id="id_changelog" name="changelog" rows="20" class="textarea form-control" readonly>{{ changelog }}</textarea>
-                </p>
+                        <p class="text-center">Vous disposez de la dernière version de Noethysweb.</p>
+                        <div class="text-muted small text-center">Vérification effectuée le {{ date_verification|date:"d/m/Y à H:i" }} · <a href="{% url 'update' %}">Vérifier à nouveau</a></div>
+                    </div>
+                </div>
             {% endif %}
 
-        {% endblock %}
+        </div>
 
-    {% endembed %}
+        {# Changements #}
+        {% if liste_versions %}
+            <div class="col-lg-8">
+                <div class="card card-outline card-lightblue">
+                    <div class="card-header">
+                        <h2 class="card-title">{% if version_disponible %}Nouveautés depuis votre version{% else %}Nouveautés de votre version{% endif %}</h2>
+                        <div class="card-tools update-filtres" role="group" aria-label="Filtrer les changements">
+                            <button type="button" class="btn btn-sm btn-primary" data-filtre="" aria-pressed="true">Tout</button>
+                            {% if totaux.nouveaute %}<button type="button" class="btn btn-sm btn-outline-secondary" data-filtre="nouveaute" aria-pressed="false">Nouveautés</button>{% endif %}
+                            {% if totaux.amelioration %}<button type="button" class="btn btn-sm btn-outline-secondary" data-filtre="amelioration" aria-pressed="false">Améliorations</button>{% endif %}
+                            {% if totaux.correction %}<button type="button" class="btn btn-sm btn-outline-secondary" data-filtre="correction" aria-pressed="false">Corrections</button>{% endif %}
+                            {% if totaux.autre %}<button type="button" class="btn btn-sm btn-outline-secondary" data-filtre="autre" aria-pressed="false">Autres</button>{% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% for dict_version in liste_versions %}
+                            <div class="update-version">
+                                <div class="update-version-titre">
+                                    <strong>Version {{ dict_version.version }}</strong>
+                                    {% if dict_version.date %}<span class="text-muted small ml-2">{{ dict_version.date }}</span>{% endif %}
+                                </div>
+                                {% for changement in dict_version.changements %}
+                                    <div class="update-changement" data-categorie="{{ changement.categorie }}">
+                                        {% if changement.categorie == "nouveaute" %}<span class="badge badge-primary">Nouveauté</span>
+                                        {% elif changement.categorie == "amelioration" %}<span class="badge badge-success">Amélioration</span>
+                                        {% elif changement.categorie == "correction" %}<span class="badge badge-warning">Correction</span>
+                                        {% else %}<span class="badge badge-secondary">Autre</span>{% endif %}
+                                        <span>{% if changement.module %}<strong>{{ changement.module }}</strong> : {% endif %}{{ changement.texte }}</span>
+                                    </div>
+                                {% empty %}
+                                    <p class="text-muted mb-0">Aucun détail pour cette version.</p>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
 
     <script type="text/javascript">
+        // Filtres des changements
+        document.querySelectorAll(".update-filtres [data-filtre]").forEach(function(bouton) {
+            bouton.addEventListener("click", function() {
+                var filtre = bouton.dataset.filtre;
+                document.querySelectorAll(".update-filtres [data-filtre]").forEach(function(autre) {
+                    var actif = (autre === bouton);
+                    autre.classList.toggle("btn-primary", actif);
+                    autre.classList.toggle("btn-outline-secondary", !actif);
+                    autre.setAttribute("aria-pressed", actif ? "true" : "false");
+                });
+                document.querySelectorAll(".update-version").forEach(function(bloc) {
+                    var nbre_visibles = 0;
+                    bloc.querySelectorAll(".update-changement").forEach(function(ligne) {
+                        var visible = !filtre || ligne.dataset.categorie === filtre;
+                        ligne.style.display = visible ? "" : "none";
+                        if (visible) {nbre_visibles++;}
+                    });
+                    bloc.style.display = (nbre_visibles || !filtre) ? "" : "none";
+                });
+            });
+        });
+
+        // Lancement de la mise à jour
         $('#id_form_update').submit(function() {
-            $("#id_bouton_update").html("<p class='text-yellow'><i class='fa fa-refresh fa-spin'></i> <strong>&nbsp;&nbsp;Installation en cours...</strong><p/>");
+            $("#id_bouton_update").html("<p class='text-warning text-center mb-0'><i class='fa fa-refresh fa-spin' aria-hidden='true'></i> <strong>&nbsp;&nbsp;Installation en cours...</strong></p>");
             bootbox.dialog({
-                message: "<p class='text-center mb-0'><h4><i class='fa fa-spin fa-cog'></i> Installation en cours</h4><br>Veuillez patienter quelques instants...</p>",
+                message: "<p class='text-center mb-0'><h4><i class='fa fa-spin fa-cog' aria-hidden='true'></i> Installation en cours</h4><br>Veuillez patienter environ 30 secondes...</p>",
                 closeButton: false
             });
             return true;
@@ -46,5 +258,3 @@
     </script>
 
 {% endblock %}
-
-
