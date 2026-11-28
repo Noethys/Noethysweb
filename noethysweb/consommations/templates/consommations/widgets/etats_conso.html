@@ -1,0 +1,21 @@
+<style>
+    .etats_conso {display: flex; flex-wrap: wrap; gap: 6px;}
+    .etats_conso input {position: absolute; opacity: 0; width: 1px; height: 1px;}
+    .etats_conso label {display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 4px 11px; border-radius: 999px; font-size: 13px; font-weight: 400;
+        border: 1px dashed #ced4da; background: transparent; color: #6c757d; cursor: pointer; user-select: none;}
+    .etats_conso label .pastille {width: 10px; height: 10px; border-radius: 50%; background: var(--couleur-etat); opacity: .55;}
+    .etats_conso label .fa-check {display: none; font-size: 11px;}
+    {# Etat coché : fond de la couleur de la grille des consommations, texte foncé lisible sur toutes ces couleurs #}
+    .etats_conso input:checked + label {border-style: solid; border-color: var(--couleur-etat); background: var(--couleur-etat); color: #1f2937; font-weight: 600;}
+    .etats_conso input:checked + label .pastille {display: none;}
+    .etats_conso input:checked + label .fa-check {display: inline-block;}
+    .etats_conso input:focus-visible + label {outline: 2px solid var(--couleur-principale, #3c8dbc); outline-offset: 2px;}
+    .dark-mode .etats_conso label {border-color: rgba(255,255,255,.25); color: #adb5bd;}
+</style>
+
+<div class="etats_conso" id="{{ id }}" role="group" aria-label="États des consommations">
+    {% for option in options %}
+        <input type="checkbox" name="{{ name }}" value="{{ option.valeur }}" id="{{ id }}_{{ forloop.counter0 }}" {% if option.coche %}checked{% endif %}>
+        <label for="{{ id }}_{{ forloop.counter0 }}" style="--couleur-etat: {{ option.couleur }};" data-infobulle title="{{ option.aide }} · cliquez pour {% if option.coche %}exclure{% else %}inclure{% endif %}"><span class="pastille" aria-hidden="true"></span><i class="fa fa-check" aria-hidden="true"></i>{{ option.label }}</label>
+    {% endfor %}
+</div>

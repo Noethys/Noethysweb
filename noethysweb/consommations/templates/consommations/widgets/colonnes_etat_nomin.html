@@ -1,31 +1,120 @@
 {% load static %}
-{% load crispy_forms_tags %}
 {% load embed %}
+
+<style>
+    .cen_entete {display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; margin-bottom: 10px;}
+    .cen_entete .cen_titre {font-weight: 700; font-size: 1.05rem;}
+    .cen_entete .cen_titre small {font-weight: 400; color: #6c757d;}
+    .cen_liste {display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0;}
+    .cen_liste li {display: inline-flex; align-items: center; gap: 7px; padding: 5px 6px 5px 8px; border: 1px solid #dbe1e8; border-radius: 8px; background: #fbfcfd; font-size: 13px;}
+    .cen_liste li .handle {cursor: grab; color: #9aa3af; letter-spacing: -2px;}
+    .cen_liste li .cen_nom {cursor: pointer;}
+    .cen_liste li .cen_nom:hover {text-decoration: underline;}
+    .cen_liste li button {border: 0; background: transparent; color: #9aa3af; padding: 0 4px; line-height: 1;}
+    .cen_liste li button:hover {color: #c82333;}
+    .cen_liste .sort-highlight {width: 120px; border: 1px dashed #9aa3af; background: transparent;}
+    .cen_tag {font-size: 10.5px; font-weight: 700; border-radius: 4px; padding: 1px 5px; background: #eef1f5; color: #374151;}
+    .cen_tag.famille {background: #efeafd; color: #5b21b6;}
+    .cen_tag.scolarite {background: #e7f6ec; color: #166534;}
+    .cen_tag.consommations {background: #e8f0fb; color: #123f78;}
+    .cen_tag.questionnaires {background: #fdf2e9; color: #8a3a06;}
+    .cen_tag.personnalisees {background: #fde8ef; color: #9d174d;}
+    .cen_tag.contact {background: #e0f2fe; color: #075985;}
+    .cen_tag.inscription {background: #fef9c3; color: #854d0e;}
+    .cen_tag.facturation {background: #dcfce7; color: #166534;}
+    .cen_tag.sante {background: #fee2e2; color: #991b1b;}
+    .cen_jours {display: flex; gap: 4px;}
+    .cen_jours button {width: 32px; height: 32px; border: 1px solid #ced4da; border-radius: 50%; background: #fff; font-size: 12px; padding: 0;}
+    .cen_jours button.active {border-color: var(--couleur-principale, #3c8dbc); background: #e8f0fb; color: #123f78; font-weight: 700;}
+    .dark-mode .cen_jours button {background: #3a4047; border-color: rgba(255,255,255,.12); color: #e9ecef;}
+    .cen_formule {font-family: SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;}
+    .cen_inserer {display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 6px; font-size: 12px;}
+    .cen_inserer > span {color: #6c757d; margin-right: 2px;}
+    .cen_inserer button {border: 1px solid #ced4da; border-radius: 4px; padding: 1px 7px; background: #fff; font-size: 12px;}
+    .cen_inserer button.fonction {font-family: SFMono-Regular, Menlo, Consolas, monospace; color: #9d174d;}
+    .cen_inserer button:hover {border-color: var(--couleur-principale, #3c8dbc);}
+    .cen_badge {font-size: 11px; border-radius: 4px; padding: 0 5px; background: #fff4ea; color: #8a3a06; font-weight: 600;}
+    .cen_vide .cen_modeles {display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin: 12px 0;}
+    .cen_modele {display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 2px; padding: 12px 14px; border: 1px solid #dbe1e8; border-radius: 10px; background: #fff; width: 100%;}
+    .cen_modele:hover, .cen_modele:focus {border-color: var(--couleur-principale, #3c8dbc); background: #f3f7fd;}
+    .cen_modele .cen_modele_nom {font-weight: 700;}
+    .cen_modele .cen_modele_desc {font-size: 12.5px; color: #6c757d;}
+    .cen_modele .cen_modele_cols {display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;}
+    .cen_modele .cen_modele_cols span {background: #eef1f5; border-radius: 4px; padding: 1px 6px; font-size: 11.5px; color: #374151;}
+
+    /* Modal de sélection */
+    .cen_modal_corps {display: flex; height: 60vh; min-height: 380px;}
+    .cen_categories {width: 200px; border-right: 1px solid #eef1f5; padding: 10px 8px; background: #fafbfc; overflow-y: auto;}
+    .cen_categories button {display: flex; justify-content: space-between; width: 100%; border: 0; border-radius: 6px; padding: 8px 10px; background: transparent; text-align: left;}
+    .cen_categories button.active {background: #e8f0fb; color: #123f78; font-weight: 700;}
+    .cen_categories button > span:last-child {color: #6c757d; font-weight: 400;}
+    .cen_champs {flex: 1; padding: 12px 16px; overflow-y: auto;}
+    .cen_champs .cen_groupe {font-size: 12px; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: .04em; margin: 4px 0 8px 0;}
+    .cen_champ {display: flex; gap: 12px; align-items: center; padding: 8px 12px; margin-bottom: 6px; border: 1px solid #eef1f5; border-radius: 8px; cursor: pointer; font-weight: 400; width: 100%;}
+    .cen_champ.coche {background: #f3f7fd; border-color: #bcd3f2;}
+    .cen_champ.focus {box-shadow: 0 0 0 2px var(--couleur-principale, #3c8dbc);}
+    .cen_champ input {width: 17px; height: 17px; flex-shrink: 0;}
+    .cen_champ .cen_champ_desc {display: block; font-size: 12px; color: #6c757d;}
+    .cen_reglages {width: 320px; border-left: 1px solid #eef1f5; padding: 14px 16px; overflow-y: auto; background: #fcfdfe;}
+    .cen_reglages .cen_groupe {font-size: 12px; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 12px;}
+    .cen_segment {display: flex; border: 1px solid #ced4da; border-radius: 6px; overflow: hidden;}
+    .cen_segment button {flex: 1; border: 0; padding: 6px 4px; background: #fff; font-size: 13px;}
+    .cen_segment button.active {background: var(--couleur-principale, #3c8dbc); color: #fff; font-weight: 700;}
+    .cen_unites {display: flex; flex-wrap: wrap; gap: 6px;}
+    .cen_unites button {border: 1px solid #ced4da; border-radius: 999px; padding: 3px 10px; background: #fff; font-size: 13px;}
+    .cen_unites button.active {border-color: var(--couleur-principale, #3c8dbc); background: #e8f0fb; color: #123f78; font-weight: 600;}
+    .cen_apercu {border: 1px dashed #ced4da; border-radius: 8px; padding: 8px 12px; background: #fff; margin-top: 16px;}
+    .cen_pied {display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-top: 1px solid #eef1f5;}
+
+    .dark-mode .cen_liste li, .dark-mode .cen_modele, .dark-mode .cen_apercu, .dark-mode .cen_segment button, .dark-mode .cen_unites button {background: #3a4047; border-color: rgba(255,255,255,.12); color: #e9ecef;}
+    .dark-mode .cen_categories, .dark-mode .cen_reglages {background: #343a40; border-color: rgba(255,255,255,.08);}
+    .dark-mode .cen_champ {border-color: rgba(255,255,255,.08);}
+    .dark-mode .cen_champ.coche, .dark-mode .cen_categories button.active {background: rgba(60,141,188,.25); color: #e9ecef;}
+</style>
 
 <input id="{{ id }}" type="hidden" name="{{ name }}" value="{{ value }}">
 
-<div id="div_{{ id }}">
-    <ul id="ul_{{ id }}" class="todo-list">
-    </ul>
+<div class="cen_entete">
+    <div class="cen_titre">Colonnes <small id="cen_aide_{{ id }}">· glissez les pastilles pour modifier l'ordre</small></div>
+    <div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-infobulle title="Remplacer les colonnes par celles d'un modèle prêt à l'emploi"><i class="fa fa-magic margin-r-5"></i>Modèles</button>
+            <div class="dropdown-menu dropdown-menu-right" id="cen_menu_modeles_{{ id }}"></div>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" id="cen_ajouter_{{ id }}" data-infobulle title="Choisir des données dans le catalogue ou créer une colonne calculée"><i class="fa fa-plus margin-r-5"></i>Ajouter des colonnes</button>
+    </div>
 </div>
 
-<br>
-<span class="text-gray"><i class="fa fa-info-circle margin-r-5"></i> Cliquez sur <i class="fa fa-ellipsis-v"></i> <i class="fa fa-ellipsis-v"></i> pour modifier l'ordre des colonnes.</span>
-<button type="button" class="btn btn-success pull-right" title="Ajouter une colonne" onclick="ajouter_colonne()"><i class="fa fa-plus margin-r-5"></i> Ajouter une colonne</button>
+<ul class="cen_liste" id="ul_{{ id }}"></ul>
+
+<div class="cen_vide" id="cen_vide_{{ id }}" style="display: none;">
+    <div class="font-weight-bold">Aucune colonne pour l'instant</div>
+    <div class="text-muted">Partez d'un modèle prêt à l'emploi : vous pourrez ensuite ajouter, retirer ou réordonner les colonnes.</div>
+    <div class="cen_modeles" id="cen_modeles_{{ id }}"></div>
+    <a href="#" id="cen_composer_{{ id }}">Ou composer mes colonnes moi-même</a>
+</div>
 
 
-{# Modal Saisir une colonne #}
+{# Modal de sélection des colonnes #}
 {% embed 'core/modal.html' %}
-    {% block modal_id %}modal_saisir_colonne{% endblock %}
-    {% block modal_titre %}Saisir une colonne{% endblock %}
+    {% block modal_id %}cen_modal_{{ id }}{% endblock %}
+    {% block modal_classe %}modal-xl{% endblock %}
+    {% block modal_titre %}<span id="cen_modal_titre_{{ id }}">Ajouter des colonnes</span>{% endblock %}
+    {% block modal_body_classe %}p-0{% endblock %}
     {% block modal_body %}
-        <div id="modal_erreurs" class="text-red"></div>
-        <input type="hidden" id="id_colonne_id" value="">
-        {{ form|crispy }}
-        <div class="buttonHolder">
-            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
-                <button type="button" class="btn btn-primary" id="bouton_valider_colonne"/><i class="fa fa-check margin-r-5"></i>Valider</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+        <div class="p-2 border-bottom">
+            <input type="search" class="form-control" id="cen_recherche_{{ id }}" placeholder="Rechercher une donnée (ex. « QF », « école »)…" aria-label="Rechercher une donnée" autocomplete="off">
+        </div>
+        <div class="cen_modal_corps">
+            <div class="cen_categories" id="cen_categories_{{ id }}"></div>
+            <div class="cen_champs" id="cen_champs_{{ id }}"></div>
+            <div class="cen_reglages" id="cen_reglages_{{ id }}"></div>
+        </div>
+        <div class="cen_pied">
+            <span class="text-muted" id="cen_compteur_{{ id }}"></span>
+            <div>
+                <button type="button" class="btn btn-primary" id="cen_valider_{{ id }}"><i class="fa fa-check margin-r-5"></i><span>Ajouter</span></button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
             </div>
         </div>
     {% endblock %}
@@ -33,147 +122,459 @@
 
 
 <script>
+$(function () {
+    var $input = $("#{{ id }}");
+    var catalogue = JSON.parse('{{ catalogue|escapejs }}');
+    var modeles = JSON.parse('{{ modeles|escapejs }}');
+    var unites = JSON.parse('{{ unites|escapejs }}');
+    var profils_etat_global = JSON.parse('{{ profils_etat_global|escapejs }}');
+    var JOURS = [["L", "lundi"], ["M", "mardi"], ["M", "mercredi"], ["J", "jeudi"], ["V", "vendredi"], ["S", "samedi"], ["D", "dimanche"]];
+    var PERIODES = {toutes: "Toute la période", vacances: "Vacances", hors_vacances: "Hors vacances"};
+    var SUFFIXES = {toutes: "", vacances: " – vacances", hors_vacances: " – hors vacances"};
+    var TAGS = {individu: "IND", famille: "FAM", scolarite: "SCO", consommations: "CONSO", questionnaires: "QUEST", personnalisees: "CALC",
+                contact: "CONT", inscription: "INSC", facturation: "FACT", sante: "SANTÉ"};
+    var AIDES_PERIODES = {toutes: "Compter sur toute la période sélectionnée", vacances: "Compter uniquement pendant les vacances scolaires", hors_vacances: "Compter uniquement en dehors des vacances scolaires"};
+    var FORMATS_CALCUL = {nombre: "Nombre", duree: "Durée", montant: "Montant", pourcentage: "%"};
+    var AIDES_FORMATS = {nombre: "Résultat affiché comme un nombre (2 décimales au plus)", duree: "Résultat en heures affiché comme une durée (7.5 = 7h30)", montant: "Résultat affiché en euros", pourcentage: "Résultat affiché avec le signe % (ex : 82,5 %)"};
+    var TOTAUX_CALCUL = {somme: "Somme", moyenne: "Moyenne", aucun: "Aucun"};
+    var FONCTIONS = [
+        ["SI(condition, alors, sinon)", "SI", "Valeur selon une condition. Ex : SI([Âge] < 6, 1, 0)"],
+        ["MIN(a, b)", "MIN", "La plus petite des valeurs"],
+        ["MAX(a, b)", "MAX", "La plus grande des valeurs"],
+        ["ARRONDI(valeur, 1)", "ARRONDI", "Arrondit au nombre de décimales indiqué"],
+    ];
+    var REGEX_REFERENCES = /\[([^\[\]]+)\]/g;
 
-    function ajouter_colonne() {
-        $("#id_colonne_id").val("");
-        $("#id_nom").val("");
-        $("#id_donnee").val("aucun");
-        $("#id_filtre_unites").val("TOUTES");
-        $("#id_unites").val("");
-        $("#modal_saisir_colonne").modal('show');
-        On_change_donnee();
-    }
+    var champs = {};
+    catalogue.forEach(function (categorie) {
+        categorie.champs.forEach(function (champ) {
+            champ.categorie = categorie.code;
+            champs[champ.code] = champ;
+        });
+    });
 
-    function modifier_colonne(id) {
-        $("#id_colonne_id").val(id);
-        var liste_items = $("#ul_{{ id }}").sortable("toArray");
-        var index = jQuery.inArray("colonne_" + id, liste_items);
-        var liste_colonnes = JSON.parse($("#{{ id }}").val());
-        $("#id_nom").val(liste_colonnes[index].nom);
-        $("#id_donnee").val(liste_colonnes[index].code);
-        if (liste_colonnes[index].unites) {
-            $("#id_filtre_unites").val("SELECTION");
-            $("#id_unites").val(liste_colonnes[index].unites);
-        } else {
-            $("#id_filtre_unites").val("TOUTES");
-            $("#id_unites").val("");
-        }
-        $("#modal_saisir_colonne").modal('show');
-        On_change_donnee();
-    }
+    function esc(texte) {return $("<div>").text(texte === null || texte === undefined ? "" : texte).html().replace(/'/g, "&#39;").replace(/"/g, "&quot;")};
+    function get_colonnes() {try {return JSON.parse($input.val() || "[]")} catch (e) {return []}};
+    function set_colonnes(colonnes) {$input.val(JSON.stringify(colonnes)).trigger("change"); afficher_colonnes()};
 
-    function supprimer_colonne(id) {
-        var liste_items = $("#ul_{{ id }}").sortable("toArray");
-        var index = jQuery.inArray("colonne_" + id, liste_items);
-        var liste_colonnes = JSON.parse($("#{{ id }}").val());
-        liste_colonnes.splice(index, 1);
-        $("#{{ id }}").val(JSON.stringify(liste_colonnes));
-        afficher_colonnes();
-    }
+    // ---------------- Liste des colonnes ----------------
 
     function afficher_colonnes() {
-        var liste_colonnes = JSON.parse($("#{{ id }}").val());
+        var colonnes = get_colonnes();
         var html = "";
-        var id = 0;
-        liste_colonnes.forEach(function (item) {
-            html += "<li id='colonne_" + id + "' data-nom='" + item.nom + "' data-code='" + item.code + "'>";
-            html += "<span class='handle'> <i class='fa fa-ellipsis-v'></i> <i class='fa fa-ellipsis-v'></i></span>";
-            html += "<span class='text'>" + item.nom + "</span>";
-            html += "<div class='tools'> <i class='fa fa-edit' title='Modifier' onclick='modifier_colonne(" + id + ")'></i> <i class='fa fa-trash-o' title='Supprimer' onclick='supprimer_colonne(" + id + ")'></i></div>";
+        colonnes.forEach(function (colonne, index) {
+            var champ = champs[colonne.code] || {label: colonne.code, categorie: ""};
+            var details = [];
+            if (colonne.unites && colonne.unites.length) {details.push("Unités : " + colonne.unites.join(", "))};
+            if (colonne.code === "calcul") {details.push("Formule : " + (colonne.formule || "à saisir"))};
+            if (colonne.periode && colonne.periode !== "toutes") {details.push(PERIODES[colonne.periode])};
+            if (colonne.jours && colonne.jours.length) {details.push("Jours : " + colonne.jours.map(function (jour) {return JOURS[jour][1]}).join(", "))};
+            if (colonne.code === "*heures_etat_global") {details.push("Profil : " + (get_nom_profil(colonne.profil) || "à choisir"))};
+            html += "<li data-index='" + index + "'>";
+            html += "<span class='handle' aria-hidden='true' data-infobulle title='Glisser pour déplacer la colonne'>⋮⋮</span>";
+            html += "<span class='cen_tag " + esc(champ.categorie) + "'>" + esc(TAGS[champ.categorie] || "?") + "</span>";
+            html += "<span class='cen_nom' data-action='modifier' role='button' tabindex='0' data-infobulle title='" + esc(champ.label + (details.length ? " · " + details.join(" · ") : "") + " · cliquez pour modifier") + "'>" + esc(colonne.nom || champ.label) + "</span>";
+            if (colonne.periode && colonne.periode !== "toutes") {html += "<span class='cen_badge'>" + (colonne.periode === "vacances" ? "vac." : "hors vac.") + "</span>"};
+            if (colonne.unites && colonne.unites.length) {html += "<i class='fa fa-filter text-muted' aria-label='Unités filtrées'></i>"};
+            html += "<button type='button' data-action='supprimer' aria-label='Retirer la colonne' data-infobulle title='Retirer la colonne'>×</button>";
             html += "</li>";
-            id +=1;
         });
-        $("#ul_{{ id }}").html(html);
-    }
+        $("#ul_{{ id }}").html(html).toggle(colonnes.length > 0);
+        $("#cen_aide_{{ id }}").toggle(colonnes.length > 1);
+        $("#cen_vide_{{ id }}").toggle(colonnes.length === 0);
+    };
 
-    function create_value_{{ id }}() {
-        var liste_resultats = [];
-        $("#ul_{{ id }} li").each(function (item) {
-            liste_resultats.push({"nom": this.dataset.nom, "code": this.dataset.code});
-        });
-        $("#{{ id }}").val(JSON.stringify(liste_resultats));
-    }
-
-    $(function () {
-
-        // Initialisation jQuery UI sortable
-        $("#div_{{ id }} .todo-list").sortable({
-            placeholder: "sort-highlight",
-            handle: ".handle",
-            forcePlaceholderSize: true,
-            zIndex: 999998,
-            stop: function(event, ui) {
-                create_value_{{ id }}();
-            }
-        });
-
-        $("#bouton_valider_colonne").on('click', function(e) {
-            e.preventDefault();
-
-            // Vérification de la saisie
-            var id = $("#id_colonne_id").val();
-            var nom = $("#id_nom").val();
-            var donnee = $("#id_donnee").val();
-            var filtre_unites = $("#id_filtre_unites").val();
-            var unites = $("#id_unites").val();
-            if (filtre_unites === "TOUTES") {
-                unites = "";
-            }
-            var liste_colonnes = JSON.parse($("#{{ id }}").val());
-
-            if (nom === "") {
-                toastr.error(("Vous devez saisir un nom pour cette colonne"));
-                return false;
-            }
-            if ((filtre_unites === "SELECTION") & (unites === "")) {
-                toastr.error(("Vous devez saisir un filtre d'unités"));
-                return false;
-            }
-
-            if (id) {
-                // Modifie la colonne
-                var liste_items = $("#ul_{{ id }}").sortable("toArray");
-                var index = jQuery.inArray("colonne_" + id, liste_items);
-                liste_colonnes[index] = {"nom": nom, "code": donnee, "unites": unites};
-            } else {
-                // Ajoute la colonne
-                liste_colonnes.push({"nom": nom, "code": donnee, "unites": unites});
-            };
-
-            // MAJ de la liste des colonnes
-            $("#{{ id }}").val(JSON.stringify(liste_colonnes));
-            afficher_colonnes();
-            $("#modal_saisir_colonne").modal('hide');
-        });
-
-        // Dessine les colonnes
-        afficher_colonnes();
-
-    });
-
-    function On_change_donnee() {
-        $('#div_id_filtre_unites').hide();
-        $('#div_id_unites').hide();
-        if ($("#id_donnee").val().indexOf("*") >= 0) {
-            $('#div_id_filtre_unites').show();
-            $('#div_id_unites').show();
+    $("#ul_{{ id }}").sortable({
+        placeholder: "sort-highlight",
+        handle: ".handle",
+        forcePlaceholderSize: true,
+        zIndex: 999998,
+        stop: function () {
+            var colonnes = get_colonnes();
+            set_colonnes($("#ul_{{ id }} li").map(function () {return colonnes[$(this).data("index")]}).get());
         }
-        On_change_unites();
-    }
-    $(document).ready(function() {
-        $('#id_donnee').on('change', On_change_donnee);
-        On_change_donnee.call($('#id_donnee').get(0));
     });
 
-    function On_change_unites() {
-        $('#div_id_unites').hide();
-        if ($("#id_filtre_unites").val() == 'SELECTION') {
-            $('#div_id_unites').show();
+    $("#ul_{{ id }}").on("click keydown", "[data-action]", function (event) {
+        if (event.type === "keydown" && event.key !== "Enter") {return};
+        var index = $(this).closest("li").data("index");
+        if ($(this).data("action") === "supprimer") {
+            var colonnes = get_colonnes();
+            var titre = (colonnes[index].nom || "").toLowerCase();
+            var utilisatrices = colonnes.filter(function (colonne, i) {return i !== index && colonne.code === "calcul" && get_references(colonne.formule).indexOf(titre) !== -1});
+            if (utilisatrices.length && !confirm("Cette colonne est utilisée dans la formule de : " + utilisatrices.map(function (c) {return c.nom}).join(", ") + ". La retirer quand même ?")) {return};
+            $(".tooltip").remove();
+            colonnes.splice(index, 1);
+            set_colonnes(colonnes);
+        } else {
+            ouvrir_modal(index);
         }
-    }
-    $(document).ready(function() {
-        $('#id_filtre_unites').on('change', On_change_unites);
-        On_change_unites.call($('#id_filtre_unites').get(0));
     });
 
+    // ---------------- Modèles ----------------
+
+    function html_modele(modele, index) {
+        return "<button type='button' class='cen_modele' data-modele='" + index + "'><span class='cen_modele_nom'>" + esc(modele.nom) + "</span>" +
+            "<span class='cen_modele_desc'>" + esc(modele.description) + "</span><span class='cen_modele_cols'>" +
+            modele.colonnes.map(function (colonne) {return "<span>" + esc(colonne.nom) + "</span>"}).join("") + "</span></button>";
+    };
+    $("#cen_modeles_{{ id }}").html(modeles.map(html_modele).join(""));
+    $("#cen_menu_modeles_{{ id }}").html(modeles.map(function (modele, index) {
+        return "<a class='dropdown-item' href='#' data-modele='" + index + "'>" + esc(modele.nom) + "<br><small class='text-muted'>" + esc(modele.description) + "</small></a>";
+    }).join(""));
+
+    $("#cen_modeles_{{ id }}, #cen_menu_modeles_{{ id }}").on("click", "[data-modele]", function (event) {
+        event.preventDefault();
+        var modele = modeles[$(this).data("modele")];
+        if (get_colonnes().length && !confirm("Remplacer les colonnes actuelles par celles du modèle « " + modele.nom + " » ?")) {return};
+        set_colonnes(JSON.parse(JSON.stringify(modele.colonnes)));
+    });
+
+    // ---------------- Modal de sélection ----------------
+
+    var etat = {selection: [], focus: null, categorie: catalogue.length ? catalogue[0].code : null, index_modif: null};
+
+    function get_unites_disponibles() {
+        var choix = $("input[name=choix_activites]:checked").val();
+        var ids = [];
+        if (choix === "activites") {ids = $("input[name=liste_activites]:checked").map(function () {return parseInt(this.value)}).get()};
+        if (choix === "groupes_activites") {ids = $("input[name=liste_groupes_activites]:checked").map(function () {return parseInt(this.value)}).get()};
+        if (!ids.length) {return unites};
+        var cle = choix === "activites" ? "activites" : "groupes_activites";
+        return unites.filter(function (unite) {return unite[cle].some(function (id) {return ids.indexOf(id) !== -1})});
+    };
+
+    function get_selection(code) {
+        return etat.selection.find(function (item) {return item.code === code});
+    };
+
+    function titre_auto(item) {
+        var champ = champs[item.code];
+        var suffixe_jours = (champ.mesure && item.jours && item.jours.length === 1) ? " – " + JOURS[item.jours[0]][1] + "s" : "";
+        return champ.label + (champ.mesure ? SUFFIXES[item.periode] : "") + suffixe_jours;
+    };
+
+    function get_nom_profil(id) {
+        var profil = profils_etat_global.find(function (p) {return p.id === id});
+        return profil ? profil.nom : "";
+    };
+
+    function get_references(formule) {
+        var references = [], correspondance;
+        REGEX_REFERENCES.lastIndex = 0;
+        while ((correspondance = REGEX_REFERENCES.exec(formule || "")) !== null) {references.push(correspondance[1].trim().toLowerCase())};
+        return references;
+    };
+
+    function get_titres_disponibles(item_exclu) {
+        {# Titres des colonnes utilisables dans une formule : colonnes existantes et données en cours d'ajout #}
+        var titres = [];
+        get_colonnes().forEach(function (colonne, index) {
+            if (index !== etat.index_modif) {titres.push(colonne.nom || (champs[colonne.code] || {}).label)};
+        });
+        etat.selection.forEach(function (item) {if (item !== item_exclu) {titres.push(item.nom || champs[item.code].label)}});
+        return titres.filter(function (titre, position) {return titre && titres.indexOf(titre) === position});
+    };
+
+    function get_erreur_formule(item) {
+        if (!(item.formule || "").trim()) {return "Saisissez une formule."};
+        var titres = get_titres_disponibles(item).map(function (titre) {return titre.toLowerCase()});
+        var inconnues = get_references(item.formule).filter(function (reference) {return titres.indexOf(reference) === -1});
+        if (inconnues.length) {return "Colonne introuvable : [" + inconnues[0] + "]. Utilisez les boutons ci-dessous pour insérer une colonne."};
+        if ((item.formule.match(/\(/g) || []).length !== (item.formule.match(/\)/g) || []).length) {return "Les parenthèses ne sont pas équilibrées."};
+        return "";
+    };
+
+    function nouvel_item(code) {
+        var item = {code: code, periode: "toutes", unites: [], jours: [], titre_auto: true};
+        if (code === "*heures_etat_global") {item.profil = profils_etat_global.length === 1 ? profils_etat_global[0].id : null};
+        if (champs[code].calcul) {$.extend(item, {formule: "", format: "nombre", total: "somme"})};
+        item.nom = titre_auto(item);
+        return item;
+    };
+
+    function ouvrir_modal(index_modif) {
+        etat.index_modif = (index_modif === undefined) ? null : index_modif;
+        etat.selection = [];
+        etat.focus = null;
+        if (etat.index_modif !== null) {
+            var colonne = JSON.parse(JSON.stringify(get_colonnes()[etat.index_modif]));
+            if (champs[colonne.code]) {
+                colonne.titre_auto = (colonne.nom === titre_auto(colonne));
+                etat.selection = [colonne];
+                etat.focus = colonne.code;
+                etat.categorie = champs[colonne.code].categorie;
+            }
+        }
+        $("#cen_modal_titre_{{ id }}").text(etat.index_modif === null ? "Ajouter des colonnes" : "Modifier la colonne");
+        $("#cen_recherche_{{ id }}").val("");
+        afficher_modal();
+        $("#cen_modal_{{ id }}").modal("show");
+    };
+
+    $("#cen_ajouter_{{ id }}, #cen_composer_{{ id }}").on("click", function (event) {
+        event.preventDefault();
+        ouvrir_modal();
+    });
+
+    function afficher_modal() {
+        var recherche = $("#cen_recherche_{{ id }}").val().trim().toLowerCase();
+
+        // Catégories
+        $("#cen_categories_{{ id }}").html(catalogue.map(function (categorie) {
+            var nbre_coches = etat.selection.filter(function (item) {return champs[item.code].categorie === categorie.code}).length;
+            return "<button type='button' data-categorie='" + categorie.code + "' class='" + (!recherche && categorie.code === etat.categorie ? "active" : "") + "'>" +
+                "<span>" + esc(categorie.label) + (nbre_coches ? " <span class='badge badge-primary'>" + nbre_coches + "</span>" : "") + "</span><span>" + categorie.champs.length + "</span></button>";
+        }).join(""));
+
+        // Champs
+        var html = "";
+        catalogue.forEach(function (categorie) {
+            var liste = categorie.champs.filter(function (champ) {
+                if (recherche) {return (champ.label + " " + champ.description).toLowerCase().indexOf(recherche) !== -1};
+                return categorie.code === etat.categorie;
+            });
+            if (!liste.length) {return};
+            html += "<div class='cen_groupe'>" + esc(categorie.label) + "</div>";
+            liste.forEach(function (champ) {
+                var coche = !!get_selection(champ.code);
+                html += "<label class='cen_champ" + (coche ? " coche" : "") + (etat.focus === champ.code ? " focus" : "") + "' data-code='" + esc(champ.code) + "'>" +
+                    "<input type='" + (etat.index_modif === null ? "checkbox" : "radio") + "' name='cen_champ_{{ id }}' " + (coche ? "checked" : "") + ">" +
+                    "<span><span class='font-weight-bold'>" + esc(champ.label) + "</span>" + (champ.description ? "<span class='cen_champ_desc'>" + esc(champ.description) + "</span>" : "") + "</span></label>";
+            });
+        });
+        $("#cen_champs_{{ id }}").html(html || "<div class='text-muted p-3'>Aucune donnée ne correspond à la recherche.</div>");
+
+        afficher_reglages();
+
+        // Pied
+        var nbre = etat.selection.length;
+        $("#cen_compteur_{{ id }}").text(etat.index_modif !== null ? "" : nbre + " colonne" + (nbre > 1 ? "s" : "") + " sélectionnée" + (nbre > 1 ? "s" : "") + " · ajoutée" + (nbre > 1 ? "s" : "") + " à la fin de la liste");
+        $("#cen_valider_{{ id }} span").text(etat.index_modif !== null ? "Valider" : "Ajouter " + nbre + " colonne" + (nbre > 1 ? "s" : ""));
+        maj_validation();
+    };
+
+    function maj_validation() {
+        var invalides = etat.selection.filter(function (item) {return (champs[item.code].calcul && get_erreur_formule(item)) || (item.code === "*heures_etat_global" && !item.profil)});
+        $("#cen_valider_{{ id }}").prop("disabled", etat.selection.length === 0 || invalides.length > 0)
+            .attr("title", invalides.length ? "Complétez le réglage de « " + (invalides[0].nom || champs[invalides[0].code].label) + " »" : "");
+    };
+
+    function afficher_reglages() {
+        var item = get_selection(etat.focus);
+        var $reglages = $("#cen_reglages_{{ id }}");
+        if (!item) {
+            $reglages.html("<div class='text-muted'>Cochez une donnée pour régler son titre" + " et, pour les consommations, la période et les unités.</div>");
+            return;
+        }
+        var champ = champs[item.code];
+        var html = "<div class='cen_groupe'>Réglage : " + esc(champ.label) + "</div>";
+        html += "<div class='form-group'><label for='cen_titre_{{ id }}'>Titre de la colonne</label><input type='text' class='form-control' id='cen_titre_{{ id }}' value='" + esc(item.nom) + "'></div>";
+        if (champ.mesure) {
+            html += "<div class='form-group'><label>Période de calcul</label><div class='cen_segment'>";
+            $.each(PERIODES, function (code, label) {
+                html += "<button type='button' data-periode='" + code + "' class='" + (item.periode === code ? "active" : "") + "' data-infobulle title='" + esc(AIDES_PERIODES[code]) + "'>" + label + "</button>";
+            });
+            html += "</div></div>";
+            item.jours = item.jours || [];
+            html += "<div class='form-group'><label>Jours de la semaine</label><div class='cen_jours'>";
+            JOURS.forEach(function (jour, numero) {
+                var actif = item.jours.indexOf(numero) !== -1;
+                html += "<button type='button' data-jour='" + numero + "' class='" + (actif ? "active" : "") + "' aria-pressed='" + actif + "' aria-label='" + jour[1] + "' data-infobulle title='" + (actif ? "Ne plus filtrer sur le " : "Ne compter que le ") + jour[1] + "'>" + jour[0] + "</button>";
+            });
+            html += "</div><small class='form-text text-muted'>Aucun jour coché = tous les jours. Ex : cochez M (mercredi) pour compter les mercredis.</small></div>";
+            if (item.code === "*heures_etat_global") {
+                html += "<div class='form-group'><label for='cen_profil_{{ id }}'>Profil de l'état global</label>";
+                if (profils_etat_global.length) {
+                    html += "<select class='form-control' id='cen_profil_{{ id }}'><option value=''>— Choisissez un profil —</option>" + profils_etat_global.map(function (profil) {
+                        return "<option value='" + profil.id + "'" + (item.profil === profil.id ? " selected" : "") + ">" + esc(profil.nom) + "</option>";
+                    }).join("") + "</select><small class='form-text text-muted'>Les règles de calcul par unité de ce profil sont appliquées (temps réel, arrondis, plafonds, formules…).</small>";
+                } else {
+                    html += "<div class='text-danger small'>Aucun profil enregistré : créez d'abord un profil dans l'état global.</div>";
+                }
+                html += "</div>";
+            }
+            var disponibles = get_unites_disponibles().map(function (unite) {return unite.nom});
+            item.unites.forEach(function (nom) {if (disponibles.indexOf(nom) === -1) {disponibles.push(nom)}});
+            html += "<div class='form-group'><label>Unités de consommation</label><div class='cen_unites'>";
+            disponibles.forEach(function (nom) {
+                html += "<button type='button' data-unite='" + esc(nom) + "' class='" + (item.unites.indexOf(nom) !== -1 ? "active" : "") + "' data-infobulle title='" + (item.unites.indexOf(nom) !== -1 ? "Cliquez pour ne plus filtrer sur cette unité" : "Ne compter que cette unité (plusieurs choix possibles)") + "'>" + esc(nom) + "</button>";
+            });
+            html += "</div><small class='form-text text-muted'>" + (disponibles.length ? "Aucune unité cochée = toutes les unités." : "Aucune unité trouvée pour les activités sélectionnées.") + "</small></div>";
+        }
+        if (champ.calcul) {
+            html += "<div class='form-group mb-2'><label for='cen_formule_{{ id }}'>Formule</label>";
+            html += "<textarea class='form-control cen_formule' id='cen_formule_{{ id }}' rows='3' spellcheck='false' placeholder='Ex : [Jours de présence] / ([Jours de présence] + [Nombre d&#39;absences]) * 100'>" + esc(item.formule) + "</textarea>";
+            html += "<div class='small text-danger mt-1' id='cen_formule_erreur_{{ id }}' role='alert'></div>";
+            var titres = get_titres_disponibles(item);
+            html += "<div class='cen_inserer'><span>Colonnes :</span>" + (titres.length ? titres.map(function (titre) {
+                return "<button type='button' data-inserer='" + esc("[" + titre + "]") + "' data-infobulle title='Insérer cette colonne dans la formule'>" + esc(titre) + "</button>";
+            }).join("") : "<em class='text-muted'>ajoutez d'abord des colonnes</em>") + "</div>";
+            html += "<div class='cen_inserer'><span>Fonctions :</span>" + FONCTIONS.map(function (fonction) {
+                return "<button type='button' class='fonction' data-inserer='" + esc(fonction[0]) + "' data-infobulle title='" + esc(fonction[2]) + "'>" + fonction[1] + "</button>";
+            }).join("") + "</div>";
+            html += "<small class='form-text text-muted'>Opérateurs : + − * / et comparaisons (= &lt; &gt;), ET, OU. Les durées valent des heures (7h30 = 7.5). Utilisez le point pour les décimales.</small></div>";
+            html += "<div class='form-group mb-2'><label>Format du résultat</label><div class='cen_segment'>";
+            $.each(FORMATS_CALCUL, function (code, label) {
+                html += "<button type='button' data-format-calcul='" + code + "' class='" + (item.format === code ? "active" : "") + "' data-infobulle title='" + esc(AIDES_FORMATS[code]) + "'>" + label + "</button>";
+            });
+            html += "</div></div><div class='form-group mb-2'><label>Ligne de total</label><div class='cen_segment'>";
+            $.each(TOTAUX_CALCUL, function (code, label) {
+                html += "<button type='button' data-total-calcul='" + code + "' class='" + (item.total === code ? "active" : "") + "'>" + label + "</button>";
+            });
+            html += "</div><small class='form-text text-muted'>Pour un taux ou une moyenne, préférez « Moyenne » ou « Aucun ».</small></div>";
+        }
+        html += "<div class='cen_apercu'><div class='small text-muted'>Aperçu de l'en-tête</div><div class='font-weight-bold' id='cen_apercu_{{ id }}'></div></div>";
+        $(".tooltip").remove();
+        $reglages.html(html);
+        if (champ.calcul) {maj_erreur_formule(item)};
+        maj_apercu(item);
+    };
+
+    function maj_erreur_formule(item) {
+        $("#cen_formule_erreur_{{ id }}").text(item.formule ? get_erreur_formule(item) : "");
+        maj_validation();
+    };
+
+    function maj_apercu(item) {
+        var texte = item.nom || champs[item.code].label;
+        if (item.unites && item.unites.length) {texte += " (" + item.unites.join(", ") + ")"};
+        $("#cen_apercu_{{ id }}").text(texte);
+    };
+
+    $("#cen_recherche_{{ id }}").on("input", afficher_modal);
+
+    $("#cen_categories_{{ id }}").on("click", "button", function () {
+        etat.categorie = $(this).data("categorie");
+        $("#cen_recherche_{{ id }}").val("");
+        afficher_modal();
+    });
+
+    $("#cen_champs_{{ id }}").on("click", ".cen_champ", function (event) {
+        event.preventDefault();
+        var code = $(this).data("code");
+        var item = get_selection(code);
+        if (etat.index_modif !== null) {
+            // Modification : une seule donnée possible
+            if (!item) {
+                var ancien = etat.selection[0] || {};
+                item = nouvel_item(code);
+                if (champs[code].mesure && ancien.code && champs[ancien.code] && champs[ancien.code].mesure) {
+                    item.periode = ancien.periode;
+                    item.unites = ancien.unites;
+                    item.jours = ancien.jours || [];
+                }
+                item.nom = titre_auto(item);
+                etat.selection = [item];
+            }
+            etat.focus = code;
+        } else if (item && etat.focus === code) {
+            etat.selection.splice(etat.selection.indexOf(item), 1);
+            etat.focus = etat.selection.length ? etat.selection[etat.selection.length - 1].code : null;
+        } else if (item) {
+            etat.focus = code;
+        } else {
+            item = nouvel_item(code);
+            etat.selection.push(item);
+            etat.focus = code;
+        }
+        afficher_modal();
+    });
+
+    $("#cen_reglages_{{ id }}").on("input", "#cen_titre_{{ id }}", function () {
+        var item = get_selection(etat.focus);
+        item.nom = $(this).val();
+        item.titre_auto = false;
+        maj_apercu(item);
+    });
+
+    $("#cen_reglages_{{ id }}").on("input", "#cen_formule_{{ id }}", function () {
+        var item = get_selection(etat.focus);
+        item.formule = $(this).val();
+        maj_erreur_formule(item);
+    });
+
+    $("#cen_reglages_{{ id }}").on("click", "[data-inserer]", function () {
+        {# Insère le texte à la position du curseur #}
+        var item = get_selection(etat.focus);
+        var zone = document.getElementById("cen_formule_{{ id }}");
+        var texte = $(this).attr("data-inserer");
+        var debut = zone.selectionStart || 0, fin = zone.selectionEnd || 0;
+        zone.value = zone.value.substring(0, debut) + texte + zone.value.substring(fin);
+        zone.focus();
+        zone.selectionStart = zone.selectionEnd = debut + texte.length;
+        item.formule = zone.value;
+        maj_erreur_formule(item);
+    });
+
+    $("#cen_reglages_{{ id }}").on("click", "[data-format-calcul]", function () {
+        var item = get_selection(etat.focus);
+        item.format = $(this).data("format-calcul");
+        if (item.format === "pourcentage" && item.total === "somme") {item.total = "moyenne"};
+        afficher_reglages();
+    });
+
+    $("#cen_reglages_{{ id }}").on("click", "[data-total-calcul]", function () {
+        get_selection(etat.focus).total = $(this).data("total-calcul");
+        afficher_reglages();
+    });
+
+    $("#cen_reglages_{{ id }}").on("click", "[data-jour]", function () {
+        var item = get_selection(etat.focus);
+        var numero = parseInt($(this).attr("data-jour"));
+        var position = item.jours.indexOf(numero);
+        if (position === -1) {item.jours.push(numero)} else {item.jours.splice(position, 1)};
+        item.jours.sort();
+        if (item.titre_auto) {item.nom = titre_auto(item)};
+        afficher_reglages();
+    });
+
+    $("#cen_reglages_{{ id }}").on("change", "#cen_profil_{{ id }}", function () {
+        get_selection(etat.focus).profil = $(this).val() ? parseInt($(this).val()) : null;
+        maj_validation();
+    });
+
+    $("#cen_reglages_{{ id }}").on("click", "[data-periode]", function () {
+        var item = get_selection(etat.focus);
+        item.periode = $(this).data("periode");
+        if (item.titre_auto) {item.nom = titre_auto(item)};
+        afficher_reglages();
+    });
+
+    $("#cen_reglages_{{ id }}").on("click", "[data-unite]", function () {
+        var item = get_selection(etat.focus);
+        var nom = $(this).attr("data-unite");
+        var position = item.unites.indexOf(nom);
+        if (position === -1) {item.unites.push(nom)} else {item.unites.splice(position, 1)};
+        afficher_reglages();
+    });
+
+    $("#cen_valider_{{ id }}").on("click", function () {
+        var nouvelles = etat.selection.map(function (item) {
+            var colonne = {nom: (item.nom || champs[item.code].label).replace(/[\[\]]/g, ""), code: item.code, periode: champs[item.code].mesure ? item.periode : "toutes", unites: champs[item.code].mesure ? item.unites : []};
+            if (champs[item.code].calcul) {$.extend(colonne, {formule: item.formule, format: item.format, total: item.total})};
+            if (champs[item.code].mesure) {colonne.jours = item.jours || []};
+            if (item.code === "*heures_etat_global") {colonne.profil = item.profil};
+            return colonne;
+        });
+        var colonnes = get_colonnes();
+        if (etat.index_modif !== null) {
+            // Si le titre change, les formules qui utilisent cette colonne sont mises à jour
+            var ancien_titre = colonnes[etat.index_modif].nom || "", nouveau_titre = nouvelles[0].nom;
+            if (ancien_titre && ancien_titre !== nouveau_titre) {
+                var regex = new RegExp("\\[\\s*" + ancien_titre.replace(/[.*+?^${}()|\\]/g, "\\$&") + "\\s*\\]", "gi");
+                colonnes.forEach(function (colonne) {
+                    if (colonne.code === "calcul") {colonne.formule = (colonne.formule || "").replace(regex, "[" + nouveau_titre + "]")};
+                });
+            }
+            colonnes[etat.index_modif] = nouvelles[0];
+        } else {
+            colonnes = colonnes.concat(nouvelles);
+        }
+        set_colonnes(colonnes);
+        $("#cen_modal_{{ id }}").modal("hide");
+    });
+
+    afficher_colonnes();
+});
 </script>

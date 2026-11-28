@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.forms.widgets import Widget
 from django.template import loader
 from django.utils.safestring import mark_safe
-from core.models import Activite, Groupe, Unite, UniteRemplissage, Evenement, Ecole, Classe, NiveauScolaire
+from core.models import Activite, Groupe, Unite, UniteRemplissage, Evenement, Ecole, Classe, NiveauScolaire, Parametre
 from core.utils import utils_dates
 
 
@@ -290,23 +290,69 @@ class SelectionNiveauxWidget(Widget):
 
 class ColonnesEtatNominWidget(Widget):
     template_name = 'consommations/widgets/colonnes_etat_nomin.html'
+    request = None
 
     def get_context(self, name, value, attrs=None):
+        from consommations.utils import utils_etat_nomin
         context = dict(self.attrs.items())
         if attrs is not None:
             context.update(attrs)
         context['name'] = name
-        if value is not None:
-            context['value'] = value
-        else:
-            context['value'] = "[]"
 
-        # Importation du form de saisie d'une colonne
-        from consommations.forms.colonne_etat_nomin import Formulaire
-        context['form'] = Formulaire()
+        # Conversion des colonnes de l'ancien format
+        try:
+            colonnes = utils_etat_nomin.Normaliser_colonnes(json.loads(value or "[]"))
+        except (ValueError, TypeError, AttributeError):
+            colonnes = []
+        context['value'] = json.dumps(colonnes)
+        utilisateur = self.request.user if self.request else None
+        context['catalogue'] = json.dumps(utils_etat_nomin.Get_catalogue(utilisateur))
 
+        # Profils de l'état global (colonne « Heures selon les règles de l'état global »)
+        profils = []
+        if self.request:
+            conditions_profils = Q(categorie="profil_etat_global") & (Q(utilisateur=self.request.user) | Q(utilisateur__isnull=True)) & (Q(structure__in=self.request.user.structures.all()) | Q(structure__isnull=True))
+            profils = [{"id": profil.pk, "nom": profil.nom} for profil in Parametre.objects.filter(conditions_profils).order_by("nom")]
+        context['profils_etat_global'] = json.dumps(profils)
+        context['modeles'] = json.dumps(utils_etat_nomin.Get_modeles())
+
+        # Noms des unités par activité (regroupés par nom, comme pour le filtrage)
+        conditions = Q(activite__structure__in=self.request.user.structures.all()) if self.request else Q()
+        dict_groupes_activites = {}
+        for activite in Activite.objects.filter(Q(structure__in=self.request.user.structures.all()) if self.request else Q()).prefetch_related("groupes_activites"):
+            dict_groupes_activites[activite.pk] = [groupe.pk for groupe in activite.groupes_activites.all()]
+        dict_unites = {}
+        for unite in Unite.objects.filter(conditions).order_by("ordre"):
+            item = dict_unites.setdefault(unite.nom.lower().strip(), {"nom": unite.nom.strip(), "activites": [], "groupes_activites": []})
+            item["activites"].append(unite.activite_id)
+            item["groupes_activites"].extend(dict_groupes_activites.get(unite.activite_id, []))
+        context['unites'] = json.dumps(list(dict_unites.values()))
         return context
 
     def render(self, name, value, attrs=None, renderer=None):
         context = self.get_context(name, value, attrs)
         return mark_safe(loader.render_to_string(self.template_name, context))
+
+
+class EtatsConsoWidget(Widget):
+    """ Sélection des états de consommations sous forme de pastilles """
+    template_name = 'consommations/widgets/etats_conso.html'
+    allow_multiple_selected = True
+    # Mêmes couleurs que la grille des consommations (consommations/static/consommations/grille.css)
+    couleurs = {"reservation": "#FF9E1E", "present": "#aadd33", "attente": "#abcbff", "absentj": "#e83e8c", "absenti": "#a371ff"}
+    aides = {"reservation": "Consommations réservées, pas encore pointées", "present": "Consommations pointées comme présentes",
+             "attente": "Consommations sur liste d'attente", "absentj": "Absences justifiées", "absenti": "Absences non justifiées"}
+
+    def render(self, name, value, attrs=None, renderer=None):
+        if isinstance(value, str):
+            value = [value]
+        selection = [str(v) for v in (value or [])]
+        context = {"name": name, "id": (attrs or {}).get("id", "id_%s" % name),
+                   "options": [{"valeur": valeur, "label": label, "couleur": self.couleurs.get(valeur, "#6b7280"), "coche": valeur in selection, "aide": self.aides.get(valeur, "")} for valeur, label in self.choices]}
+        return mark_safe(loader.render_to_string(self.template_name, context))
+
+    def value_from_datadict(self, data, files, name):
+        return data.getlist(name) if hasattr(data, "getlist") else data.get(name)
+
+    def value_omitted_from_data(self, data, files, name):
+        return False
