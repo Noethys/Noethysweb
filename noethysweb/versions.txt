@@ -1,3 +1,27 @@
+Version 1.3.7.3 (28/11/2026) :
+
+Nouveautés
+- Consommations > État nominatif : nouvelle présentation avec paramètres en accordéon et ajout des colonnes par recherche dans un catalogue de données
+- Consommations > État nominatif : colonnes calculées par formule à partir des autres colonnes (taux de présence, MIN, MAX, ARRONDI...)
+- Consommations > État nominatif : colonnes d'heures calculées avec les règles par unité d'un profil de l'état global
+- Consommations > État nominatif : regroupement des résultats par activité, école, ville ou caisse
+- Consommations > État nominatif : modèles de colonnes prêts à l'emploi (fréquentation CAF, contrôle avant facturation, effectifs par école...)
+- Consommations > État nominatif : nouvelles données disponibles (âge au début de la période, tranche d'âge, secteur, école, classe...)
+- Profils de configuration : choix d'un profil chargé par défaut à l'ouverture de la page
+- Profils de configuration : renommage et partage d'un profil (moi seul, ma structure ou tous les utilisateurs)
+- Page d'accueil : nouvel encart de mise à jour disponible avec le nombre de nouveautés, d'améliorations et de corrections
+Améliorations
+- Consommations > Traitement par lot : nouvelle présentation avec paramètres à gauche, liste des individus à droite et résumé de la sélection
+- Consommations > Traitement par lot : bilan des consommations ajoutées, supprimées et conservées après le traitement
+- Consommations > Traitement par lot : les consommations associées à un forfait ne sont plus supprimées, comme celles déjà pointées ou facturées
+- Profils de configuration : nouvelle fenêtre de sélection avec recherche, classement par visibilité et signalement des modifications non enregistrées
+- Outils > Mise à jour : nouvelle présentation
+- Outils > Notes de version : nouvelle présentation avec regroupement par année, recherche et filtre par type de changement
+Corrections
+- Profils de configuration : seuls les profils de l'utilisateur, de ses structures ou partagés avec tous sont proposés et modifiables
+- Consommations > État nominatif : chargement d'un profil vide sans perte des paramètres en cours
+- Page d'accueil : l'alerte de mise à jour n'est plus affichée aux utilisateurs non autorisés à lancer la mise à jour
+
 Version 1.3.7.2 (26/11/2026) :
 
 Nouveautés
