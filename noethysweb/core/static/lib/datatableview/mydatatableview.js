@@ -628,6 +628,29 @@ function nw_marquer_colonne_actions(api) {
     });
 }
 
+function nw_placer_chargement(api) {
+    // Place l'indicateur de chargement juste sous les en-têtes (et non au milieu du conteneur,
+    // ce qui le faisait chevaucher les en-têtes sur les listes vides ou courtes).
+    // Sur une longue liste défilée, il reste dans la partie visible de l'écran.
+    var conteneur = api.table().container();
+    var indicateur = conteneur ? conteneur.querySelector("div.dataTables_processing") : null;
+    var entete = api.table().header();
+    var corps = api.table().body();
+    if (!indicateur || !entete || !corps) {return};
+    // Sorti du cadre à défilement horizontal (.col-sm-12, overflow-x: auto) qui le rognait sur les listes vides
+    if (indicateur.parentNode !== conteneur) {conteneur.appendChild(indicateur)};
+    // Indicateur masqué (aucun chargement en cours) ou liste cachée (onglet, fenêtre) : rien à calculer
+    if (indicateur.offsetParent === null) {return};
+    var $parent = $(indicateur).offsetParent();
+    var bas_entete = $(entete).offset().top + $(entete).outerHeight();
+    var flottant = document.querySelector(".dtfh-floatingparenthead");
+    var haut_visible = $(window).scrollTop() + ($(".main-header").outerHeight() || 0) + (flottant ? $(flottant).outerHeight() : 0);
+    var bas_corps = $(corps).offset().top + $(corps).outerHeight();
+    var position = Math.max(bas_entete, haut_visible) + 10;
+    position = Math.min(position, Math.max(bas_entete + 10, bas_corps - 40));
+    indicateur.style.top = Math.round(position - $parent.offset().top) + "px";
+}
+
 function nw_preparer_liste(api) {
     var conteneur = api.table().container();
     if (!conteneur || conteneur.getAttribute("data-nw-prepare")) {return};
@@ -638,6 +661,8 @@ function nw_preparer_liste(api) {
     nw_activer_clic_lignes(api);
     api.on("preXhr.dt", function (e, settings, data) {nw_requete_ordre_origine(api, data)});
     api.on("xhr.dt", function (e, settings, json) {nw_reponse_ordre_affiche(api, json)});
+    api.on("processing.dt", function (e, settings, en_cours) {if (en_cours) {nw_placer_chargement(api)}});
+    nw_placer_chargement(api);
     if (api.settings()[0]._bInitComplete) {
         nw_activer_deplacement_colonnes(api);
     } else {

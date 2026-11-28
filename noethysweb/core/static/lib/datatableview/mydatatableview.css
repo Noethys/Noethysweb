@@ -635,17 +635,47 @@ table.dataTable tbody th.select-checkbox:before, table.dataTable tbody th.select
     background: transparent;
 }
 
-/* Indicateur de chargement */
-.nw-dt div.dataTables_processing {
-    border: 0;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(16, 24, 40, 0.15);
+/* Indicateur de chargement : pastille centrée juste sous les en-têtes (top calculé par nw_placer_chargement).
+   Sélecteur renforcé pour primer sur « div.dataTables_wrapper div.dataTables_processing » de dataTables.bootstrap4.css. */
+div.dataTables_wrapper.nw-dt div.dataTables_processing {
+    top: 48px;
+    left: 50%;
+    width: auto;
+    margin: 0;
+    padding: 5px 16px 5px 36px;
+    transform: translateX(-50%);
+    z-index: 20;
+    border: 1px solid var(--nw-bordure);
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.10);
     background: var(--nw-fond);
-    color: var(--nw-texte);
-    font-weight: 600;
+    color: var(--nw-texte-doux);
+    font-size: 0.85rem;
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: nowrap;
 }
-.nw-dt div.dataTables_processing > div:last-child {
+div.dataTables_wrapper.nw-dt div.dataTables_processing::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    border: 2px solid var(--nw-ligne);
+    border-top-color: var(--nw-accent);
+    border-radius: 50%;
+    animation: nw-dt-rotation 0.8s linear infinite;
+}
+div.dataTables_wrapper.nw-dt div.dataTables_processing > div:last-child {
     display: none;
+}
+@keyframes nw-dt-rotation {
+    to {transform: rotate(360deg)}
+}
+@media (prefers-reduced-motion: reduce) {
+    div.dataTables_wrapper.nw-dt div.dataTables_processing::before {animation-duration: 2.4s}
 }
 
 /* ---------- Menu flottant ---------- */
