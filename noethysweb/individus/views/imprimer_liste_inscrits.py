@@ -7,6 +7,7 @@ import json
 from django.views.generic import TemplateView
 from django.http import JsonResponse, QueryDict
 from core.models import Parametre, Groupe
+from core.views import profil_configuration
 from core.views.base import CustomView
 from individus.forms.imprimer_liste_inscrits import Formulaire
 
@@ -80,8 +81,8 @@ class View(CustomView, TemplateView):
         initial_data = None
 
         # Sélection du profil de configuration
-        if request_post.get("profil"):
-            profil = Parametre.objects.filter(idparametre=int(request_post.get("profil"))).first()
+        profil = profil_configuration.Get_profil(self.request, "imprimer_liste_inscrits", request_post.get("profil")) if request_post.get("profil") else None
+        if profil:
             initial_data = json.loads(profil.parametre or "{}")
             initial_data["profil"] = profil.pk
             initial_data["colonnes_perso"] = json.dumps(initial_data.get("colonnes_perso", "[]"))

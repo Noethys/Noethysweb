@@ -109,10 +109,9 @@ class Formulaire(FormulaireBase, forms.Form):
                             HTML("""<button type="submit" form="form_parametres" class="btn btn-primary btn-block btn-lg" name="type_submit" data-infobulle title="Calcule le tableau avec les paramètres et les colonnes choisis"><i class="fa fa-refresh margin-r-5"></i>Actualiser les résultats</button>
                                     <div id="parametres_modifies" class="text-muted small text-center mt-1" style="display:none;">Les paramètres ont changé depuis le dernier calcul</div>
                                     <div class="mt-3"></div>"""),
+                            Field("profil"),
                             Accordeon(
                                 Section("Généralités",
-                                    HTML("""<label class="mb-1">Profil de configuration</label>"""),
-                                    Field("profil"),
                                     Field("periode"),
                                     Field("activites"),
                                     Field("etats"),
@@ -180,9 +179,6 @@ EXTRA_CSS = """
     .kpi_etat_nomin .kpi_label {font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:#6c757d;}
     .kpi_etat_nomin .kpi_valeur {font-size:26px; font-weight:700; line-height:1.2;}
     .kpi_etat_nomin .kpi_detail {font-size:12px; color:#6c757d;}
-    #form_parametres #div_id_profil .input-group-prepend {display:none;}
-    #form_parametres #div_id_profil .input-group {flex-wrap:nowrap;}
-    #form_parametres #div_id_profil select {min-width:0;}
     .dark-mode .case_regroupement {background-color:#3a4047;}
 </style>
 """

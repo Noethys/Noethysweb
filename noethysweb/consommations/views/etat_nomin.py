@@ -5,6 +5,7 @@
 
 import json, datetime, decimal
 from django.http import JsonResponse, QueryDict
+from django.contrib import messages
 from django.views.generic import TemplateView
 from django.db.models import Q
 from core.views.base import CustomView
@@ -16,6 +17,7 @@ from core.models import Consommation, Vacance, Parametre, Quotient, Scolarite, F
 from consommations.utils import utils_frequentation_caf
 from core.utils import utils_questionnaires
 from consommations.forms.etat_nomin import Formulaire
+from core.views import profil_configuration
 from consommations.utils import utils_etat_nomin
 
 
@@ -34,7 +36,7 @@ def get_data_profil(donnees=None, request=None):
 
     # Suppression des données inutiles
     data = form.cleaned_data
-    [data.pop(key) for key in ["profil",]]
+    [data.pop(key, None) for key in ["profil", "periode"]]
     return data
 
 
@@ -51,11 +53,19 @@ class View(CustomView, TemplateView):
             context['form_parametres'] = Formulaire(request=self.request)
 
         # Application du profil de configuration
-        profil = Parametre.objects.filter(idparametre=int(self.request.POST.get("profil"))).first() if self.request.POST.get("profil") else False
+        profil = profil_configuration.Get_profil(self.request, "etat_nomin", self.request.POST.get("profil")) if self.request.POST.get("profil") else None
         if profil and self.request.POST.get("application_profil"):
             request_post = self.request.POST.copy()
             request_post["profil"] = profil.pk
-            initial_data = json.loads(profil.parametre)
+            try:
+                initial_data = json.loads(profil.parametre or "{}")
+            except ValueError:
+                initial_data = {}
+            if not isinstance(initial_data, dict) or not initial_data:
+                # Profil vide (par exemple créé alors que l'enregistrement des paramètres avait échoué) : les paramètres actuels sont conservés
+                initial_data = {}
+                messages.add_message(self.request, messages.WARNING, "Le profil « %s » ne contient aucun paramètre enregistré. Réglez les paramètres puis choisissez « Enregistrer les modifications » dans le menu du profil." % profil.nom)
+            initial_data.pop("periode", None) # La période n'est pas mémorisée dans le profil (anciens profils compris)
             [request_post.pop(key) for key in initial_data.keys() if key in request_post]
             request_post.update(initial_data)
             context['form_parametres'] = Formulaire(initial=request_post, request=self.request)

@@ -37,7 +37,9 @@ class Form_profil_configuration(FormulaireBase, forms.Form):
         self.helper.form_method = 'post'
         self.helper.form_show_labels = False
         self.fields["profil"].widget.request = self.request
-        self.fields['profil'].queryset = Parametre.objects.filter(categorie="profil_etat_global").order_by("nom")
+        # Uniquement les profils de l'utilisateur, de ses structures et ceux partagés avec tous
+        from core.views.profil_configuration import Get_conditions_acces
+        self.fields['profil'].queryset = Parametre.objects.filter(Get_conditions_acces(self.request, "profil_etat_global")).order_by("nom")
         self.helper.layout = Layout(
             Field('profil'),
         )

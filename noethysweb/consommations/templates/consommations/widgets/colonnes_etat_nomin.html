@@ -154,6 +154,12 @@ $(function () {
     });
 
     function esc(texte) {return $("<div>").text(texte === null || texte === undefined ? "" : texte).html().replace(/'/g, "&#39;").replace(/"/g, "&quot;")};
+    function nettoyer_infobulles(selecteur) {
+        {# Une infobulle dont l'élément est redessiné resterait affichée en haut à gauche de la page #}
+        $(selecteur).find("[data-infobulle]").tooltip("dispose");
+        $("body > .tooltip").remove();
+    };
+
     function get_colonnes() {try {return JSON.parse($input.val() || "[]")} catch (e) {return []}};
     function set_colonnes(colonnes) {$input.val(JSON.stringify(colonnes)).trigger("change"); afficher_colonnes()};
 
@@ -179,6 +185,7 @@ $(function () {
             html += "<button type='button' data-action='supprimer' aria-label='Retirer la colonne' data-infobulle title='Retirer la colonne'>×</button>";
             html += "</li>";
         });
+        nettoyer_infobulles("#ul_{{ id }}");
         $("#ul_{{ id }}").html(html).toggle(colonnes.length > 0);
         $("#cen_aide_{{ id }}").toggle(colonnes.length > 1);
         $("#cen_vide_{{ id }}").toggle(colonnes.length === 0);
@@ -189,6 +196,7 @@ $(function () {
         handle: ".handle",
         forcePlaceholderSize: true,
         zIndex: 999998,
+        start: function () {nettoyer_infobulles("#ul_{{ id }}")},
         stop: function () {
             var colonnes = get_colonnes();
             set_colonnes($("#ul_{{ id }} li").map(function () {return colonnes[$(this).data("index")]}).get());
@@ -203,7 +211,6 @@ $(function () {
             var titre = (colonnes[index].nom || "").toLowerCase();
             var utilisatrices = colonnes.filter(function (colonne, i) {return i !== index && colonne.code === "calcul" && get_references(colonne.formule).indexOf(titre) !== -1});
             if (utilisatrices.length && !confirm("Cette colonne est utilisée dans la formule de : " + utilisatrices.map(function (c) {return c.nom}).join(", ") + ". La retirer quand même ?")) {return};
-            $(".tooltip").remove();
             colonnes.splice(index, 1);
             set_colonnes(colonnes);
         } else {
@@ -320,6 +327,8 @@ $(function () {
     function afficher_modal() {
         var recherche = $("#cen_recherche_{{ id }}").val().trim().toLowerCase();
 
+        nettoyer_infobulles("#cen_modal_{{ id }}");
+
         // Catégories
         $("#cen_categories_{{ id }}").html(catalogue.map(function (categorie) {
             var nbre_coches = etat.selection.filter(function (item) {return champs[item.code].categorie === categorie.code}).length;
@@ -425,7 +434,7 @@ $(function () {
             html += "</div><small class='form-text text-muted'>Pour un taux ou une moyenne, préférez « Moyenne » ou « Aucun ».</small></div>";
         }
         html += "<div class='cen_apercu'><div class='small text-muted'>Aperçu de l'en-tête</div><div class='font-weight-bold' id='cen_apercu_{{ id }}'></div></div>";
-        $(".tooltip").remove();
+        nettoyer_infobulles("#cen_reglages_{{ id }}");
         $reglages.html(html);
         if (champ.calcul) {maj_erreur_formule(item)};
         maj_apercu(item);
@@ -441,6 +450,8 @@ $(function () {
         if (item.unites && item.unites.length) {texte += " (" + item.unites.join(", ") + ")"};
         $("#cen_apercu_{{ id }}").text(texte);
     };
+
+    $("#cen_modal_{{ id }}").on("hidden.bs.modal", function () {nettoyer_infobulles("#cen_modal_{{ id }}")});
 
     $("#cen_recherche_{{ id }}").on("input", afficher_modal);
 

@@ -18,7 +18,7 @@ from individus.widgets import ColonnesInscritsWidget
 
 
 class Formulaire(FormulaireBase, forms.Form):
-    profil = forms.ModelChoiceField(label="Profil", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "imprimer_liste_inscrits", "module": "individus.views.imprimer_liste_inscrits"}), required=False)
+    profil = forms.ModelChoiceField(label="Profil", queryset=Parametre.objects.none(), widget=Profil_configuration({"categorie": "imprimer_liste_inscrits", "module": "individus.views.imprimer_liste_inscrits", "masquer_libelle": True}), required=False)
     activite = forms.ModelChoiceField(label="Activité", widget=Select_activite(), queryset=Activite.objects.all(), required=True)
     groupes = forms.ModelMultipleChoiceField(label="Groupes", widget=Select2MultipleWidget({"lang": "fr", "data-width": "100%", "data-placeholder": "Tous les groupes"}), queryset=Groupe.objects.none(), required=False,
                                              help_text="Laissez vide pour inclure tous les groupes de l'activité.")

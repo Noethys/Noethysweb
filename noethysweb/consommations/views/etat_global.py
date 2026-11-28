@@ -13,6 +13,7 @@ from django.utils.safestring import mark_safe
 from core.views.base import CustomView
 from core.utils import utils_dates
 from core.models import Unite, Parametre
+from core.views import profil_configuration
 from consommations.forms.etat_global import Form_selection_periode, Form_selection_options, Form_selection_activites, Form_profil_configuration
 
 
@@ -115,14 +116,20 @@ class View(CustomView, TemplateView):
         context['page_titre'] = "Etat global des consommations"
 
         # Application du profil de configuration
+        initial_data_options = None
         if self.request.POST.get("params_profil"):
-            profil = Parametre.objects.filter(idparametre=int(json.loads(self.request.POST.get("params_profil"))["profil"])).first()
-            initial_data_options = json.loads(profil.parametre)["options"]
-            initial_data_parametres = json.loads(profil.parametre)["parametres"]
-            context["dict_parametres"] = json.dumps(initial_data_parametres)
+            try:
+                idprofil = json.loads(self.request.POST.get("params_profil")).get("profil")
+            except (ValueError, AttributeError):
+                idprofil = None
+            profil = profil_configuration.Get_profil(self.request, "profil_etat_global", idprofil)
+            if profil and profil.parametre:
+                initial_data_options = json.loads(profil.parametre)["options"]
+                initial_data_parametres = json.loads(profil.parametre)["parametres"]
+                context["dict_parametres"] = json.dumps(initial_data_parametres)
 
         # Intégration des formulaires
-        context["form_selection_options"] = Form_selection_options(initial=initial_data_options if "params_profil" in self.request.POST else None, request=self.request)
+        context["form_selection_options"] = Form_selection_options(initial=initial_data_options, request=self.request)
         context["form_selection_profil"] = Form_profil_configuration(data=json.loads(self.request.POST.get("params_profil")) if "params_profil" in self.request.POST else None, request=self.request)
         context["form_selection_periode"] = Form_selection_periode(data=json.loads(self.request.POST.get("params_periode")) if "params_periode" in self.request.POST else None, request=self.request)
         context["form_selection_activites"] = Form_selection_activites(data=json.loads(self.request.POST.get("params_activites")) if "params_activites" in self.request.POST else None, request=self.request)

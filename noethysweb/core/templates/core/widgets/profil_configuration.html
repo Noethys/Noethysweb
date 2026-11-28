@@ -1,213 +1,437 @@
 {% load static %}
 {% load embed %}
-{% load crispy_forms_tags %}
 
-<div class="input-group">
-    <div class="input-group-prepend">
-        <span class="input-group-text">Profil de configuration</span>
+<style>
+    .pc_champ {display: flex; gap: 6px; align-items: stretch;}
+    .pc_champ .dropdown {flex: 1; min-width: 0;}
+    .pc_declencheur {display: flex; align-items: center; gap: 8px; width: 100%; height: calc(2.25rem + 2px); padding: 0 10px; text-align: left;
+        border: 1px solid #ced4da; border-radius: 4px; background: #fff; color: #495057;}
+    .pc_declencheur:focus-visible {outline: 2px solid var(--couleur-principale, #3c8dbc); outline-offset: 1px;}
+    .pc_declencheur .pc_prefixe {color: #6c757d; white-space: nowrap;}
+    .pc_declencheur .pc_nom {flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+    .pc_declencheur.pc_charge {border-color: var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 6%, #fff);}
+    .pc_declencheur.pc_charge .pc_nom {font-weight: 700; color: #1f4e6e;}
+    .pc_declencheur.pc_modifie {border-color: #e0a800; background: #fffbea;}
+    .pc_badge_modifie {display: none; font-size: 11px; font-weight: 700; color: #7a5600; background: #ffe9a6; border-radius: 4px; padding: 1px 6px;}
+    .pc_declencheur.pc_modifie .pc_badge_modifie {display: inline-block;}
+    .pc_enregistrer_rapide {display: none; width: calc(2.25rem + 2px); flex-shrink: 0; padding: 0;}
+    .pc_menu {width: 100%; min-width: 280px; max-width: 460px; padding: 0; overflow: hidden;}
+    .pc_menu .pc_recherche {padding: 8px;}
+    .pc_menu .pc_liste {max-height: 320px; overflow-y: auto; padding-bottom: 4px;}
+    .pc_menu .pc_groupe {padding: 8px 12px 2px 12px; font-size: 11px; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: .04em;}
+    .pc_menu .pc_profil {display: flex; align-items: center; gap: 8px; padding: 7px 12px; white-space: normal;}
+    .pc_menu .pc_profil .pc_coche {width: 14px; flex-shrink: 0; color: var(--couleur-principale, #3c8dbc); font-weight: 700;}
+    .pc_menu .pc_profil .pc_info {margin-left: auto; padding-left: 8px; font-size: 12px; color: #6c757d; white-space: nowrap;}
+    .pc_menu .pc_profil.active, .pc_menu .pc_profil:active {background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 12%, #fff); color: inherit; font-weight: 700;}
+    .pc_menu .pc_vide {padding: 10px 12px; color: #6c757d; font-style: italic;}
+    .pc_menu .pc_actions {border-top: 1px solid #e9ecef; padding: 4px 0;}
+    .pc_menu .pc_actions .dropdown-item {display: flex; align-items: center; gap: 8px; padding: 7px 12px; white-space: normal;}
+    .pc_menu .pc_actions .dropdown-item .fa {width: 16px; text-align: center; color: #6c757d;}
+    .pc_menu .pc_actions .dropdown-item.pc_danger, .pc_menu .pc_actions .dropdown-item.pc_danger .fa {color: #c82333;}
+    .pc_menu .pc_actions .dropdown-item.pc_fort {font-weight: 700;}
+    .pc_portees {display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;}
+    .pc_portees button {display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 10px 12px; border: 1px solid #dbe1e8; border-radius: 8px; background: #fff;}
+    .pc_portees button small {color: #6c757d;}
+    .pc_portees button.active {border: 2px solid var(--couleur-principale, #3c8dbc); background: color-mix(in srgb, var(--couleur-principale, #3c8dbc) 6%, #fff);}
+    .dark-mode .pc_declencheur, .dark-mode .pc_portees button {background: #343a40; border-color: #6c757d; color: #e9ecef;}
+    .dark-mode .pc_declencheur.pc_charge .pc_nom {color: #e9ecef;}
+    .dark-mode .pc_declencheur.pc_charge, .dark-mode .pc_portees button.active {background: #24435a;}
+    .dark-mode .pc_declencheur.pc_modifie {background: #4a3f12; border-color: #e0a800;}
+    .dark-mode .pc_menu .pc_profil.active {background: #24435a;}
+    @media (max-width: 575px) {.pc_portees {grid-template-columns: 1fr;}}
+</style>
+
+<input type="hidden" id="{{ id }}" name="{{ name }}" value="{{ value|default_if_none:'' }}">
+<input type="hidden" id="{{ id }}_application_profil" name="application_profil" value="">
+
+<div class="pc_champ">
+    <div class="dropdown">
+        <button type="button" class="pc_declencheur" id="{{ id }}_declencheur" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="Profil de configuration">
+            <i class="fa fa-floppy-o text-muted" aria-hidden="true"></i>
+            {% if not masquer_libelle %}<span class="pc_prefixe">Profil :</span>{% endif %}
+            <span class="pc_nom" id="{{ id }}_nom"></span>
+            <i class="fa fa-users text-muted" id="{{ id }}_icone_partage" aria-hidden="true" style="display: none;"></i>
+            <span class="pc_badge_modifie">modifié</span>
+            <i class="fa fa-caret-down text-muted" aria-hidden="true"></i>
+        </button>
+        <div class="dropdown-menu pc_menu" aria-labelledby="{{ id }}_declencheur">
+            <div class="pc_recherche" id="{{ id }}_zone_recherche" style="display: none;">
+                <input type="search" class="form-control form-control-sm" id="{{ id }}_recherche" placeholder="Rechercher un profil…" aria-label="Rechercher un profil" autocomplete="off">
+            </div>
+            <div class="pc_liste" id="{{ id }}_liste"></div>
+            <div class="pc_actions" id="{{ id }}_actions"></div>
+        </div>
     </div>
-
-    <input type="hidden" id="{{ id }}_application_profil" name="application_profil" value="">
-
-    <select id="{{ id }}" name="{{ name }}" class="form-control">
-        {% for choix in choices %}
-            <option value="{{ choix.0 }}" {% if value == choix.0 %}selected{% endif %}>{{ choix.1 }}</option>
-        {% endfor %}
-    </select>
-
-    <div class="input-group-append">
-        <button id="{{ id }}_appliquer_profil" title="Appliquer" class="btn btn-default" type="button">Appliquer</button>
-        <button title="Menu" data-toggle="dropdown" class="btn btn-default" type="button"><i class="fa fa-ellipsis-v"></i></button>
-        <ul class="dropdown-menu">
-            <li class="dropdown-item"><a href="#" id="{{ id }}_ajouter_profil"><i class="fa fa-plus mr-1"></i> Créer un nouveau profil</a></li>
-            <li class="dropdown-divider"></li>
-            <li class="dropdown-item"><a href="#" id="{{ id }}_enregistrer_profil"><i class="fa fa-save mr-1"></i> Enregistrer le profil sélectionné</a></li>
-            <li class="dropdown-divider"></li>
-            <li class="dropdown-item"><a href="#" id="{{ id }}_modifier_profil"><i class="fa fa-pencil mr-1"></i> Modifier le profil sélectionné</a></li>
-            <li class="dropdown-item"><a href="#" id="{{ id }}_supprimer_profil"><i class="fa fa-trash mr-1"></i> Supprimer le profil sélectionné</a></li>
-        </ul>
-    </div>
-
+    <button type="button" class="btn btn-primary pc_enregistrer_rapide" id="{{ id }}_enregistrer_rapide" aria-label="Enregistrer les modifications dans le profil">
+        <i class="fa fa-floppy-o" aria-hidden="true"></i>
+    </button>
 </div>
 
 
-{# Modal de modification d'un profil #}
+{# Fenêtre : enregistrer comme nouveau profil / renommer ou partager #}
 {% embed 'core/modal.html' %}
     {% block modal_id %}{{ id }}_modal_modification{% endblock %}
     {% block modal_titre %}{% endblock %}
     {% block modal_body %}
-        <div id="modal_erreurs" class="text-red"></div>
-        <input type="hidden" id="profil_id" value=""/>
-
-        {% crispy form_profil %}
-
-        <div class="buttonHolder">
-            <div class="modal-footer" style="padding-bottom:0px;padding-right:0px;padding-left:0px;">
-                <button type="submit" class='btn btn-primary' value="Valider" id="{{ id }}_bouton_valider"><i class="fa fa-check margin-r-5"></i>Valider</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class='fa fa-ban margin-r-5'></i>Annuler</button>
+        <div class="form-group">
+            <label for="{{ id }}_saisie_nom">Nom du profil</label>
+            <input type="text" class="form-control" id="{{ id }}_saisie_nom" maxlength="200" placeholder="Ex : Bilan CAF trimestriel, Liste cantine…">
+        </div>
+        <div class="form-group">
+            <label>Qui pourra l'utiliser ?</label>
+            <div class="pc_portees" id="{{ id }}_portees" role="radiogroup" aria-label="Qui pourra utiliser ce profil">
+                <button type="button" data-portee="moi" role="radio"><b>Moi seul</b><small>Visible uniquement par vous</small></button>
+                <button type="button" data-portee="structure" role="radio"><b>Ma structure</b><small>Utilisateurs d'une structure</small></button>
+                <button type="button" data-portee="tous" role="radio"><b>Tous</b><small>Tous les utilisateurs</small></button>
             </div>
         </div>
+        <div class="form-group" id="{{ id }}_zone_structure" style="display: none;">
+            <label for="{{ id }}_saisie_structure">Structure</label>
+            <select class="form-control" id="{{ id }}_saisie_structure"></select>
+        </div>
+        <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="{{ id }}_saisie_defaut">
+            <label class="form-check-label" for="{{ id }}_saisie_defaut">Charger ce profil par défaut à l'ouverture de la page <small class="text-muted">(pour vous uniquement)</small></label>
+        </div>
+        <div class="modal-footer px-0 pb-0">
+            <button type="button" class="btn btn-primary" id="{{ id }}_bouton_valider"><i class="fa fa-check margin-r-5"></i>Enregistrer</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-ban margin-r-5"></i>Annuler</button>
+        </div>
+    {% endblock %}
+{% endembed %}
 
+{# Fenêtre : confirmation de suppression #}
+{% embed 'core/modal.html' %}
+    {% block modal_id %}{{ id }}_modal_suppression{% endblock %}
+    {% block modal_titre %}Supprimer le profil ?{% endblock %}
+    {% block modal_body %}
+        <p id="{{ id }}_texte_suppression"></p>
+        <div class="alert alert-warning py-2" id="{{ id }}_alerte_partage" style="display: none;"></div>
+        <div class="modal-footer px-0 pb-0">
+            <button type="button" class="btn btn-danger" id="{{ id }}_bouton_supprimer"><i class="fa fa-trash margin-r-5"></i>Supprimer</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+        </div>
     {% endblock %}
 {% endembed %}
 
 <script>
+$(function () {
+    var ID = "{{ id }}";
+    var $valeur = $("#" + ID);
+    var profils = JSON.parse('{{ profils|escapejs }}');
+    var structures = JSON.parse('{{ structures|escapejs }}');
+    var id_defaut = JSON.parse('{{ id_defaut|escapejs }}');
+    var charger_defaut = JSON.parse('{{ charger_defaut|escapejs }}');
+    var IGNORES = JSON.parse('{{ ignorer|escapejs }}');
+    var profil_applique = JSON.parse('{{ profil_applique|escapejs }}');
+    var CLE_MEMOIRE = "profil_configuration_{{ categorie }}";
+    var LABELS_GROUPES = {moi: "Mes profils", structure: "Partagés avec ma structure", tous: "Tous les utilisateurs"};
+    var reference = null, interaction = false, modifie = false, attente_application = false;
+    var edition = {mode: "ajouter", portee: "moi"};
 
-    $(document).ready(function() {
+    // CSRF pour les appels Ajax
+    var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+    $.ajaxSetup({beforeSend: function (xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type) && !this.crossDomain) {xhr.setRequestHeader("X-CSRFToken", csrftoken)}
+    }});
 
-        // using jQuery
-        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+    function esc(texte) {return $("<div>").text(texte === null || texte === undefined ? "" : texte).html().replace(/'/g, "&#39;").replace(/"/g, "&quot;")};
+    function get_id() {return parseInt($valeur.val()) || null};
+    function get_profil(id) {return profils.find(function (profil) {return profil.id === id}) || null};
+    function get_parametres() {
+        try {
+            var parametres = typeof get_parametres_profil === "function" ? get_parametres_profil() : null;
+            return (parametres === null || typeof parametres === "string") ? parametres : JSON.stringify(parametres);
+        } catch (e) {return null}
+    };
 
-        function csrfSafeMethod(method) {
-            // these HTTP methods do not require CSRF protection
-            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    // ---------------- Affichage ----------------
+
+    function afficher() {
+        var profil = get_profil(get_id());
+        $("#" + ID + "_nom").text(profil ? profil.nom : (profils.length ? "Aucun profil chargé" : "Aucun profil enregistré"));
+        $("#" + ID + "_declencheur").toggleClass("pc_charge", !!profil).toggleClass("pc_modifie", !!profil && modifie)
+            .attr("title", profil ? "Profil « " + profil.nom + " »" + (modifie ? " : paramètres modifiés depuis le chargement" : "") : "Choisir un profil de configuration");
+        $("#" + ID + "_icone_partage").toggle(!!profil && profil.portee !== "moi" && !modifie).attr("title", profil && profil.portee === "structure" ? "Partagé avec la structure " + profil.structure : "Partagé avec tous les utilisateurs");
+        $("#" + ID + "_enregistrer_rapide").toggle(!!profil && modifie).attr("title", profil ? "Enregistrer les modifications dans « " + profil.nom + " »" : "");
+        afficher_liste();
+        afficher_actions(profil);
+    };
+
+    function afficher_liste() {
+        var recherche = ($("#" + ID + "_recherche").val() || "").trim().toLowerCase();
+        $("#" + ID + "_zone_recherche").toggle(profils.length > 8);
+        var html = "";
+        $.each(LABELS_GROUPES, function (portee, label) {
+            var liste = profils.filter(function (profil) {return profil.portee === portee && (!recherche || profil.nom.toLowerCase().indexOf(recherche) !== -1)});
+            liste.sort(function (a, b) {return a.nom.localeCompare(b.nom)});
+            if (!liste.length) {return};
+            html += "<div class='pc_groupe'>" + label + "</div>";
+            liste.forEach(function (profil) {
+                var actif = profil.id === get_id();
+                var info = profil.id === id_defaut ? "<i class='fa fa-star text-warning' aria-hidden='true'></i> par défaut" : (profil.portee === "structure" ? esc(profil.structure) : "");
+                html += "<a href='#' class='dropdown-item pc_profil" + (actif ? " active" : "") + "' data-id='" + profil.id + "'" + (actif ? " aria-current='true'" : "") + ">" +
+                    "<span class='pc_coche' aria-hidden='true'>" + (actif ? "✓" : "") + "</span><span>" + esc(profil.nom) + "</span><span class='pc_info'>" + info + "</span></a>";
+            });
+        });
+        if (!html) {html = "<div class='pc_vide'>" + (profils.length ? "Aucun profil ne correspond à la recherche." : "Aucun profil enregistré pour cette page.") + "</div>"};
+        $("#" + ID + "_liste").html(html);
+    };
+
+    function afficher_actions(profil) {
+        var html = "";
+        if (profil) {
+            html += "<a href='#' class='dropdown-item" + (modifie ? " pc_fort" : "") + "' data-action='enregistrer'><i class='fa fa-floppy-o' aria-hidden='true'></i>Enregistrer les modifications dans « " + esc(profil.nom) + " »</a>";
         }
-        // set csrf header
-        $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
-                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                }
+        html += "<a href='#' class='dropdown-item' data-action='ajouter'><i class='fa fa-plus' aria-hidden='true'></i>Enregistrer comme nouveau profil…</a>";
+        if (profil) {
+            html += "<a href='#' class='dropdown-item' data-action='modifier'><i class='fa fa-pencil' aria-hidden='true'></i>Renommer ou partager…</a>";
+            if (modifie) {html += "<a href='#' class='dropdown-item' data-action='revenir'><i class='fa fa-undo' aria-hidden='true'></i>Revenir aux paramètres du profil</a>"};
+            html += profil.id === id_defaut ?
+                "<a href='#' class='dropdown-item' data-action='retirer_defaut'><i class='fa fa-star-o' aria-hidden='true'></i>Ne plus charger ce profil par défaut</a>" :
+                "<a href='#' class='dropdown-item' data-action='defaut'><i class='fa fa-star' aria-hidden='true'></i>Charger ce profil par défaut à l'ouverture</a>";
+            html += "<a href='#' class='dropdown-item pc_danger' data-action='supprimer'><i class='fa fa-trash' aria-hidden='true'></i>Supprimer…</a>";
+        }
+        $("#" + ID + "_actions").html(html);
+    };
+
+    // ---------------- Détection des modifications ----------------
+    // Tant que l'utilisateur n'a pas interagi avec la page, la référence suit les paramètres (chargements asynchrones des pages)
+
+    function get_parametres_comparables() {
+        {# Les dates et périodes ne font pas partie du profil : elles sont ignorées pour savoir s'il a été modifié #}
+        var texte = get_parametres();
+        if (texte === null) {return null};
+        try {
+            var objet = JSON.parse(texte);
+            if (objet && typeof objet === "object" && !Array.isArray(objet)) {
+                IGNORES.forEach(function (nom) {delete objet[nom]});
+                // Listes au format serializeArray() : [{name: ..., value: ...}, ...]
+                $.each(objet, function (cle, valeur) {
+                    if (Array.isArray(valeur)) {
+                        objet[cle] = valeur.filter(function (element) {return !(element && typeof element === "object" && IGNORES.indexOf(element.name) !== -1)});
+                    }
+                });
+                return JSON.stringify(objet);
             }
-        });
+        } catch (e) {}
+        return String(texte).split("&").filter(function (paire) {
+            var nom = paire.split("=")[0];
+            try {nom = decodeURIComponent(nom.replace(/\+/g, " "))} catch (e) {}
+            return IGNORES.indexOf(nom) === -1;
+        }).join("&");
+    };
 
-        $('#{{ id }}_modal_modification').on('shown.bs.modal', function () {
-            $("#id_profil_nom").focus();
-        });
+    function maj_reference() {reference = get_parametres_comparables(); modifie = false; afficher()};
 
-        $('#{{ id }}_modal_modification').on('keypress', function(e) {
-            if (e.keyCode === 13) {
-                e.preventDefault();
-                $('#{{ id }}_bouton_valider').click();
-            };
-        });
+    function verifier_modifications() {
+        if (!get_id()) {return};
+        var actuels = get_parametres_comparables();
+        if (actuels === null) {return};
+        if (!interaction || reference === null || attente_application) {reference = actuels; return};
+        var etat = actuels !== reference;
+        if (etat !== modifie) {modifie = etat; afficher()};
+    };
 
-        // Ajouter un profil
-        $("#{{ id }}_ajouter_profil").on("click",function(event){
-            $('#id_profil_nom').val("");
-            $('#id_profil_utilisateurs').val("moi");
-            $("#id_profil_utilisateurs").trigger('change');
-            $('#profil_id').val("");
-            $('#{{ id }}_modal_modification .modal-title').html("Ajouter un profil");
-            $('#{{ id }}_modal_modification').modal('show');
-        });
-
-        // Modifier un profil
-        $("#{{ id }}_modifier_profil").on("click",function(event){
-            var selection = $('#{{ id }}').find('option:selected');
-            if (selection.val() === '') {
-                toastr.error("Vous n'avez sélectionné aucun profil à modifier");
-                return false;
-            }
-            $('#profil_id').val(selection.val());
-            $('#{{ id }}_modal_modification .modal-title').html("Modifier un profil");
-            appel_ajax("ouvrir", selection.val(), null);
-        });
-
-        // Supprimer un profil
-        $("#{{ id }}_supprimer_profil").on("click",function(event){
-            var selection = $('#{{ id }}').find('option:selected');
-            if (selection.val() === '') {
-                toastr.error("Vous n'avez sélectionné aucun profil à supprimer");
-                return false;
-            }
-            appel_ajax("supprimer", selection.val(), null);
-        });
-
-        // Enregistrer le profil
-        $("#{{ id }}_enregistrer_profil").on("click",function(event){
-            var selection = $('#{{ id }}').find('option:selected');
-            if (selection.val() === '') {
-                toastr.error("Vous devez d'abord sélectionner un profil dans la liste ou en créer un nouveau");
-                return false;
-            }
-            appel_ajax("enregistrer", selection.val(), null);
-        });
-
-        // Appliquer le profil
-        $("#{{ id }}_appliquer_profil").on("click",function(event){
-            var selection = $('#{{ id }}').find('option:selected');
-            if (selection.val() === '') {
-                toastr.error("Vous devez d'abord sélectionner le profil à appliquer dans la liste");
-                return false;
-            }
-            $("#{{ id }}_application_profil").val("oui");
-            appliquer_profil(selection.val());
-        });
-
-        // Modal : Validation
-        $("#{{ id }}_bouton_valider").on('click', function(e) {
-            e.preventDefault();
-            var action = null;
-            id = $('#profil_id').val();
-            if ($('#id_profil_nom').val() === '') {
-                toastr.error("Veuillez saisir un nom valide");
-                return false;
-            }
-            if (($('#id_profil_utilisateurs').val() === 'structure' && ($('#id_profil_structure').val() === ''))) {
-                toastr.error("Veuillez sélectionner une structure dans la liste proposée");
-                return false;
-            }
-            if (id === '') {
-                action = "ajouter";
-            } else {
-                action = "modifier";
-            }
-            appel_ajax(action, id);
-        });
-
-        function appel_ajax(action="ajouter", id=null) {
-            var donnees_profil = {
-                profil_nom: $('#id_profil_nom').val(),
-                profil_utilisateurs: $('#id_profil_utilisateurs').val(),
-                profil_structure: $('#id_profil_structure').val(),
-            };
-            var donnees = get_parametres_profil();
-            $.ajax({
-                type: "POST",
-                url: "{% url "ajax_modifier_profil_configuration" %}",
-                data: {
-                    action: action,
-                    categorie: '{{ categorie }}',
-                    module: '{{ module }}',
-                    id: id,
-                    donnees_profil: JSON.stringify(donnees_profil),
-                    donnees: donnees,
-                },
-                datatype: "json",
-                success:function(data){
-                    if (data.action === "ouvrir") {
-                        $('#id_profil_nom').val(data.profil_nom);
-                        $('#id_profil_utilisateurs').val(data.profil_utilisateurs);
-                        $("#id_profil_utilisateurs").trigger('change');
-                        $('#id_profil_structure').val(data.profil_structure);
-                        $('#{{ id }}_modal_modification').modal('show');
-                    };
-                    if (data.action === "ajouter") {
-                        $("#{{ id }}").append("<option value='" + data.id + "'>" + data.profil_nom + "</option>");
-                        $("#{{ id }}").val(data.id);
-                        toastr.success("Le nouveau profil a bien été créé")
-                    };
-                    if (data.action === "modifier") {
-                        $('#{{ id }}').find('option:selected').text(data.profil_nom);
-                        $("#{{ id }}").trigger('change');
-                        toastr.success("Le profil a bien été modifié")
-                    };
-                    if (data.action === "supprimer") {
-                        toastr.success("Le profil a bien été supprimé")
-                        $("#{{ id }} option[value='" + data.id + "']").remove();
-                    };
-                    if (data.action === "enregistrer") {
-                        toastr.success("Les paramètres associés au profil ont bien été enregistrés")
-                    };
-                    $('#{{ id }}_modal_modification').modal('hide');
-                },
-                error: function(data) {
-                    toastr.error(data.responseJSON.erreur);
-                }
-            })
-        };
-
+    $(document).on("mousedown keydown", function (event) {
+        if (!$(event.target).closest("#" + ID + "_declencheur, .pc_menu, .pc_enregistrer_rapide").length) {interaction = true};
+    });
+    $(document).on("change input", function () {setTimeout(verifier_modifications, 50)});
+    setInterval(verifier_modifications, 1500);
+    $(document).ajaxStop(function () {
+        // Pages qui appliquent le profil en Ajax (sans recharger) : nouvelle référence une fois les paramètres chargés
+        if (attente_application) {setTimeout(function () {attente_application = false; interaction = false; maj_reference()}, 300)};
     });
 
+    // ---------------- Chargement d'un profil ----------------
+
+    // ---------------- Mémorisation de l'état « modifié » entre deux rechargements ----------------
+    // Ex : changement de date ou actualisation des résultats avec des paramètres modifiés mais non enregistrés
+
+    function memoriser_etat() {
+        try {
+            if (get_id() && modifie && reference !== null) {
+                sessionStorage.setItem(CLE_MEMOIRE, JSON.stringify({id: get_id(), reference: reference}));
+            } else {
+                sessionStorage.removeItem(CLE_MEMOIRE);
+            }
+        } catch (e) {}
+    };
+
+    function restaurer_etat() {
+        try {
+            var memoire = JSON.parse(sessionStorage.getItem(CLE_MEMOIRE) || "null");
+            sessionStorage.removeItem(CLE_MEMOIRE);
+            if (!memoire || profil_applique || memoire.id !== get_id()) {return false};
+            reference = memoire.reference;
+            interaction = true;
+            verifier_modifications();
+            return true;
+        } catch (e) {return false}
+    };
+
+    $(window).on("beforeunload", memoriser_etat);
+    $(document).on("submit", "form", memoriser_etat);
+
+    // Indique aux pages si le profil chargé a été modifié (ex : réappliquer le profil lors d'un changement de date)
+    window.Profil_configuration_est_modifie = function () {return modifie};
+
+    function charger(id, sans_confirmation) {
+        if (modifie && !sans_confirmation && !confirm("Les modifications non enregistrées seront perdues. Charger le profil quand même ?")) {return};
+        $valeur.val(id);
+        $("#" + ID + "_application_profil").val("oui");
+        attente_application = true;
+        modifie = false;
+        afficher();
+        if (typeof appliquer_profil === "function") {appliquer_profil(id)};
+    };
+
+    $("#" + ID + "_liste").on("click", ".pc_profil", function (event) {
+        event.preventDefault();
+        charger(parseInt($(this).data("id")));
+    });
+
+    $("#" + ID + "_recherche").on("input", afficher_liste).on("click", function (event) {event.stopPropagation()});
+    $("#" + ID + "_declencheur").parent().on("shown.bs.dropdown", function () {
+        if (profils.length > 8) {$("#" + ID + "_recherche").val("").focus(); afficher_liste()};
+    });
+
+    // ---------------- Actions ----------------
+
+    $("#" + ID + "_actions").on("click", "[data-action]", function (event) {
+        event.preventDefault();
+        var action = $(this).data("action"), profil = get_profil(get_id());
+        if (action === "enregistrer") {appel_ajax("enregistrer", profil.id)};
+        if (action === "ajouter") {ouvrir_edition("ajouter")};
+        if (action === "modifier") {appel_ajax("ouvrir", profil.id)};
+        if (action === "revenir") {charger(profil.id, true)};
+        if (action === "defaut") {appel_ajax("defaut", profil.id)};
+        if (action === "retirer_defaut") {appel_ajax("defaut", null)};
+        if (action === "supprimer") {
+            $("#" + ID + "_texte_suppression").html("Le profil <b>« " + esc(profil.nom) + " »</b> sera supprimé définitivement.");
+            $("#" + ID + "_alerte_partage").toggle(profil.portee !== "moi").text(profil.portee === "structure" ?
+                "Il est partagé avec la structure " + profil.structure + " : les autres utilisateurs ne pourront plus l'utiliser." :
+                "Il est partagé avec tous les utilisateurs : ils ne pourront plus l'utiliser.");
+            $("#" + ID + "_modal_suppression").modal("show");
+        }
+    });
+
+    $("#" + ID + "_enregistrer_rapide").on("click", function () {appel_ajax("enregistrer", get_id())});
+    $("#" + ID + "_bouton_supprimer").on("click", function () {appel_ajax("supprimer", get_id())});
+
+    // ---------------- Fenêtre d'enregistrement ----------------
+
+    $("#" + ID + "_saisie_structure").html(structures.map(function (structure) {return "<option value='" + structure.id + "'>" + esc(structure.nom) + "</option>"}).join(""));
+
+    function choisir_portee(portee) {
+        edition.portee = portee;
+        $("#" + ID + "_portees button").each(function () {
+            var actif = $(this).data("portee") === portee;
+            $(this).toggleClass("active", actif).attr("aria-checked", actif);
+        });
+        $("#" + ID + "_zone_structure").toggle(portee === "structure" && structures.length > 1);
+    };
+
+    $("#" + ID + "_portees").on("click", "button", function () {choisir_portee($(this).data("portee"))});
+
+    function ouvrir_edition(mode, donnees) {
+        edition.mode = mode;
+        donnees = donnees || {};
+        $("#" + ID + "_modal_modification .modal-title").text(mode === "ajouter" ? "Enregistrer comme nouveau profil" : "Renommer ou partager le profil");
+        $("#" + ID + "_saisie_nom").val(donnees.profil_nom || "");
+        choisir_portee(donnees.profil_utilisateurs || "moi");
+        if (donnees.profil_structure) {$("#" + ID + "_saisie_structure").val(donnees.profil_structure)};
+        $("#" + ID + "_saisie_defaut").prop("checked", !!donnees.defaut);
+        $("#" + ID + "_modal_modification").modal("show");
+    };
+
+    $("#" + ID + "_modal_modification").on("shown.bs.modal", function () {$("#" + ID + "_saisie_nom").focus()});
+    $("#" + ID + "_modal_modification").on("keypress", function (event) {
+        if (event.keyCode === 13) {event.preventDefault(); $("#" + ID + "_bouton_valider").click()};
+    });
+
+    $("#" + ID + "_bouton_valider").on("click", function (event) {
+        event.preventDefault();
+        if (!$("#" + ID + "_saisie_nom").val().trim()) {
+            toastr.error("Veuillez saisir un nom pour ce profil");
+            return;
+        }
+        appel_ajax(edition.mode, edition.mode === "ajouter" ? null : get_id());
+    });
+
+    // ---------------- Échanges avec le serveur ----------------
+
+    function appel_ajax(action, id) {
+        var donnees_profil = {
+            profil_nom: $("#" + ID + "_saisie_nom").val(),
+            profil_utilisateurs: edition.portee,
+            profil_structure: structures.length === 1 ? structures[0].id : $("#" + ID + "_saisie_structure").val(),
+            defaut: $("#" + ID + "_saisie_defaut").prop("checked"),
+        };
+        $.ajax({
+            type: "POST",
+            url: "{% url 'ajax_modifier_profil_configuration' %}",
+            data: {action: action, categorie: "{{ categorie }}", module: "{{ module }}", id: id, donnees_profil: JSON.stringify(donnees_profil),
+                   donnees: (action === "ajouter" || action === "enregistrer") ? get_parametres() : null},
+            datatype: "json",
+            success: function (data) {
+                if (data.action === "ouvrir") {ouvrir_edition("modifier", data); return};
+                if (data.action === "ajouter") {
+                    profils.push({id: data.id, nom: data.profil_nom, portee: data.portee, structure: Get_nom_structure(donnees_profil), auteur: true});
+                    $valeur.val(data.id);
+                    if (donnees_profil.defaut) {id_defaut = data.id};
+                    maj_reference();
+                    toastr.success("Le profil « " + data.profil_nom + " » a été créé");
+                }
+                if (data.action === "modifier") {
+                    var profil = get_profil(data.id);
+                    $.extend(profil, {nom: data.profil_nom, portee: data.portee, structure: Get_nom_structure(donnees_profil)});
+                    if (donnees_profil.defaut) {id_defaut = data.id} else if (id_defaut === data.id) {id_defaut = null};
+                    afficher();
+                    toastr.success("Le profil a été modifié");
+                }
+                if (data.action === "supprimer") {
+                    profils = profils.filter(function (profil) {return profil.id !== data.id});
+                    if (id_defaut === data.id) {id_defaut = null};
+                    $valeur.val("");
+                    modifie = false;
+                    afficher();
+                    $("#" + ID + "_modal_suppression").modal("hide");
+                    toastr.success("Le profil a été supprimé");
+                }
+                if (data.action === "enregistrer") {
+                    maj_reference();
+                    toastr.success("Les paramètres ont été enregistrés dans le profil");
+                }
+                if (data.action === "defaut") {
+                    id_defaut = data.id;
+                    afficher();
+                    toastr.success(data.id ? "Ce profil sera chargé à l'ouverture de la page" : "Plus aucun profil ne sera chargé par défaut");
+                }
+                $("#" + ID + "_modal_modification").modal("hide");
+            },
+            error: function (data) {
+                toastr.error(data.responseJSON && data.responseJSON.erreur ? data.responseJSON.erreur : "Une erreur est survenue");
+            }
+        });
+    };
+
+    function Get_nom_structure(donnees_profil) {
+        if (donnees_profil.profil_utilisateurs !== "structure") {return ""};
+        var structure = structures.find(function (s) {return String(s.id) === String(donnees_profil.profil_structure)});
+        return structure ? structure.nom : "";
+    };
+
+    // ---------------- Initialisation ----------------
+
+    afficher();
+    setTimeout(function () {
+        if (!restaurer_etat()) {maj_reference()};
+    }, 600);
+
+    // Profil par défaut : chargé automatiquement à l'ouverture de la page
+    if (charger_defaut && get_profil(id_defaut)) {
+        setTimeout(function () {charger(id_defaut, true)}, 300);
+    }
+});
 </script>

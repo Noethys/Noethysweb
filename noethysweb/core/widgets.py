@@ -611,20 +611,47 @@ class Profil_configuration(Widget):
     template_name = 'core/widgets/profil_configuration.html'
     request = None
 
+    def __init__(self, attrs=None):
+        super(Profil_configuration, self).__init__(attrs)
+        # Déclare le couple catégorie / module : seuls les modules déclarés peuvent enregistrer un profil
+        from core.views.profil_configuration import MODULES_AUTORISES
+        if attrs and attrs.get("categorie") and attrs.get("module"):
+            MODULES_AUTORISES.add((attrs["categorie"], attrs["module"]))
+
     def get_context(self, name, value, attrs=None):
+        from core.views import profil_configuration
         context = dict(self.attrs.items())
-        context['choices'] = self.choices
         if attrs is not None:
             context.update(attrs)
         context['name'] = name
-        if value:
-            context['value'] = int(value)
-        if "donnees_extra" not in context:
-            context['donnees_extra'] = {}
-        context['donnees_extra'] = json.dumps(context['donnees_extra'])
-        context['structures'] = self.request.user.structures.all().order_by("nom")
-        from core.forms.profil_configuration import Formulaire as Form_profil
-        context['form_profil'] = Form_profil(request=self.request)
+        try:
+            context['value'] = int(str(value)) if value not in (None, "") else None
+        except (TypeError, ValueError):
+            context['value'] = None
+
+        # Liste des profils avec leur visibilité
+        queryset = getattr(self.choices, "queryset", None)
+        profils = []
+        if queryset is not None:
+            for parametre in queryset.select_related("structure", "utilisateur"):
+                portee = profil_configuration.Get_portee(parametre)
+                profils.append({"id": parametre.pk, "nom": parametre.nom, "portee": portee, "structure": parametre.structure.nom if parametre.structure else "",
+                                "auteur": parametre.utilisateur_id == self.request.user.pk if self.request else False})
+        context['profils'] = json.dumps(profils)
+        context['structures'] = json.dumps([{"id": structure.pk, "nom": structure.nom} for structure in self.request.user.structures.all().order_by("nom")]) if self.request else "[]"
+
+        # Profil par défaut : chargé automatiquement à l'ouverture de la page (requête GET sans profil sélectionné)
+        id_defaut = profil_configuration.Get_id_profil_defaut(self.request, context.get("categorie")) if self.request else None
+        context['id_defaut'] = json.dumps(id_defaut)
+        context['charger_defaut'] = json.dumps(bool(id_defaut and not context['value'] and self.request.method == "GET"))
+
+        # Le profil vient-il d'être appliqué par le serveur (ouverture de la page ou application explicite) ?
+        context['profil_applique'] = json.dumps(bool(self.request and (self.request.method == "GET" or self.request.POST.get("application_profil"))))
+
+        # Paramètres qui ne font pas partie du profil (ignorés pour détecter les modifications)
+        # Les champs propres au widget (profil sélectionné, demande d'application) et le jeton CSRF ne sont jamais des paramètres du profil
+        ignorer = list(context.get("ignorer", ["periode", "date", "dates", "date_debut", "date_fin", "date_situation"]))
+        context['ignorer'] = json.dumps(ignorer + [name, "application_profil", "csrfmiddlewaretoken"])
         return context
 
     def render(self, name, value, attrs=None, renderer=None):

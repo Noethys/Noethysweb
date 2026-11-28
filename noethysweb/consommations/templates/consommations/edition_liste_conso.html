@@ -17,7 +17,7 @@
                     <div class="card-header">
                         <h3 class="card-title"><i class="fa fa-calendar margin-r-5"></i> Date</h3>
                         <div class="card-tools">
-                            <button class="btn btn-default btn-xs" style="margin : -5px 10px -4px 0px;" onclick="$('#form_date').submit();" title="Appliquer les paramètres sélectionnés">Appliquer</button>
+                            <button class="btn btn-default btn-xs" style="margin : -5px 10px -4px 0px;" onclick="preparer_changement_date(); $('#form_date').submit();" title="Appliquer les paramètres sélectionnés">Appliquer</button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -48,6 +48,14 @@
     {% include 'core/modal_pdf.html' %}
 
     <script>
+
+        // Changement de date : si un profil est chargé et non modifié, il est réappliqué pour la nouvelle date
+        // (les groupes, unités et évènements proposés dépendent des activités ouvertes à cette date)
+        function preparer_changement_date() {
+            if ($("#id_profil").val() && typeof Profil_configuration_est_modifie === "function" && !Profil_configuration_est_modifie()) {
+                $("#id_profil_application_profil").val("oui");
+            }
+        };
 
         // Générer le PDF
         function generer_pdf(telechargement=false) {

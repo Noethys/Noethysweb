@@ -244,7 +244,8 @@
         function get_parametres_profil() {
             var donnees = {
                 parametres: get_parametres(),
-                options: $("#form_selection_options").serializeArray(),
+                // « liste_parametres » est un champ technique rempli au moment de générer le PDF : il ne fait pas partie du profil
+                options: $("#form_selection_options").serializeArray().filter(function (option) {return option.name !== "liste_parametres"}),
             }
             return JSON.stringify(donnees);
         };

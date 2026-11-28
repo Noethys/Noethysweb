@@ -99,7 +99,7 @@ class View(CustomView, TemplateView):
 
         # Sélection du profil de configuration
         if request_post.get("profil"):
-            profil = Parametre.objects.filter(idparametre=int(request_post.get("profil"))).first()
+            profil = profil_configuration.Get_profil(self.request, "edition_liste_conso", request_post.get("profil"))
         else:
             profil = profil_configuration.Get_profil_defaut(request=self.request, categorie="edition_liste_conso")
             request_post["application_profil"] = True
